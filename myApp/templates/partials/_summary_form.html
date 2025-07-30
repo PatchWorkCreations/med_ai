@@ -383,6 +383,7 @@ function formatAIResponse(text, keywords = []) {
 
   return html;
 }
+
 function startDictation() {
   const micBtn = document.getElementById("micBtn");
 
@@ -392,7 +393,7 @@ function startDictation() {
   }
 
   const recognition = new webkitSpeechRecognition();
-  recognition.continuous = false;
+  recognition.continuous = true; // 👈 Keeps listening as user composes thoughts
   recognition.interimResults = false;
   recognition.lang = 'en-US';
 
@@ -404,7 +405,6 @@ function startDictation() {
   recognition.onerror = (event) => {
     micBtn.classList.remove("mic-listening");
     micBtn.title = "Speak your message";
-    console.error("Speech error:", event.error);
     alert("⚠️ Speech recognition error: " + event.error);
   };
 
@@ -414,9 +414,13 @@ function startDictation() {
   };
 
   recognition.onresult = (event) => {
-    const transcript = event.results[0][0].transcript;
-    document.getElementById("chatInput").value = transcript;
-    sendChat(); // Automatically send after dictation
+    let fullTranscript = "";
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      fullTranscript += event.results[i][0].transcript + " ";
+    }
+
+    document.getElementById("chatInput").value = fullTranscript.trim();
+    // Optional: You can auto-send if you prefer by calling sendChat();
   };
 
   recognition.start();
