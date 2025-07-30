@@ -52,7 +52,6 @@ def extract_text_from_docx(file):
     return "\n".join(p.text for p in doc.paragraphs if p.text.strip())
 
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 PROMPT_TEMPLATES = {
     "Plain": (
