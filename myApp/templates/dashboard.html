@@ -1,0 +1,198 @@
+{% load static %}
+{% load widget_tweaks %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard – NeuroMed AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body class="bg-sky-50 min-h-screen text-gray-800 font-sans">
+
+  <!-- Header -->
+  {% include "partials/header.html" %}
+  <!-- Main -->
+  <main class="max-w-3xl mx-auto px-4 py-10 space-y-10">
+    <!-- Upload and Summary UI -->
+    {% include "partials/_summary_form.html" %}
+
+    <!-- Summary History -->
+    <!-- Toggleable Summary History -->
+    <section x-data="{ open: true }" class="bg-white rounded-xl shadow-sm border">
+      <div class="flex items-center justify-between px-6 py-4 border-b">
+        <h2 class="text-lg font-bold text-teal-700">📜 My Summaries</h2>
+        <button
+          @click="open = !open"
+          class="text-sm text-teal-600 hover:underline"
+        >
+          <span x-text="open ? 'Hide' : 'Show'"></span>
+        </button>
+      </div>
+
+      <div x-show="open" x-transition class="p-6">
+        {% if summaries %}
+          <ul class="space-y-4">
+            {% for item in summaries %}
+              <li class="border border-gray-200 rounded-md p-4">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <p class="text-sm text-gray-500">{{ item.created_at|date:"M d, Y – H:i" }} · {{ item.tone }}</p>
+                    <p class="font-semibold text-gray-700 mt-1">{{ item.uploaded_filename }}</p>
+                    <p class="text-sm text-gray-600 mt-2 line-clamp-3">{{ item.summary|truncatewords:50 }}</p>
+                  </div>
+                  <button 
+                    class="text-sm text-teal-600 hover:underline open-summary-modal"
+                    data-summary="{{ item.summary|escapejs }}"
+                  >
+                    View
+                  </button>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-sm text-gray-500 italic">No summaries yet.</p>
+        {% endif %}
+      </div>
+    </section>
+
+  </main>
+
+
+
+  <footer class="text-center py-6 text-sm text-gray-500">
+    <p>Powered by NeuroMed AI — Healing with Intelligence + Heart</p>
+  </footer>
+
+
+
+
+  <script>
+
+document.addEventListener("DOMContentLoaded", function () {
+  if (sessionStorage.getItem("summaryIntent") === "true" && isAuthenticated) {
+    sessionStorage.removeItem("summaryIntent");
+    const button = document.querySelector("button[onclick='generateSummary()']");
+    if (button) setTimeout(() => button.click(), 400);
+  }
+});
+
+
+const isAuthenticated = {{ request.user.is_authenticated|yesno:"true,false" }};
+
+document.addEventListener("DOMContentLoaded", function () {
+    const buttons = document.querySelectorAll(".open-summary-modal");
+
+    buttons.forEach(btn => {
+      btn.addEventListener("click", function () {
+        let raw = this.dataset.summary;
+
+       
+        const text = JSON.parse('"' + raw.replace(/"/g, '\\"') + '"');
+        const formatted = text
+          .split(/\n{2,}/g)
+          .map(p => `<p>${p.trim()}</p>`)
+          .join('');
+
+        document.getElementById("modalContent").innerHTML = formatted;
+        document.getElementById("summaryModal").classList.remove("hidden");
+      });
+    });
+  });
+
+  function closeModal() {
+    document.getElementById("summaryModal").classList.add("hidden");
+  }
+
+
+    function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+        cookie = cookie.trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+        }
+        }
+    }
+    return cookieValue;
+    }
+
+  
+    async function generateSummary() {
+      if (!isAuthenticated) {
+        showModal();
+        return;
+      }
+  
+      const textarea = document.getElementById("summaryOutput");
+      const fileInput = document.querySelector('input[type="file"]');
+      const tone = document.querySelector('input[name="tone"]:checked')?.value || "Plain";
+      const button = document.querySelector("button[onclick='generateSummary()']");
+  
+      textarea.value = "⏳ Generating summary...";
+      button.disabled = true;
+      button.classList.add("opacity-50", "cursor-not-allowed");
+  
+      if (!fileInput.files.length) {
+        textarea.value = "❗ Please upload a document.";
+        button.disabled = false;
+        button.classList.remove("opacity-50", "cursor-not-allowed");
+        return;
+      }
+  
+      const formData = new FormData();
+      formData.append("file", fileInput.files[0]);
+      formData.append("tone", tone);
+  
+      try {
+        const response = await fetch("/api/summarize/", {
+        method: "POST",
+        body: formData,
+        headers: {
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        credentials: "same-origin"  // ← ADD THIS LINE
+        });
+
+  
+        const data = await response.json();
+  
+        if (response.ok) {
+          textarea.value = data.summary;
+        } else {
+          textarea.value = "⚠️ " + (data.error || "Something went wrong.");
+        }
+      } catch (error) {
+        textarea.value = "❌ Server error. Please try again.";
+      } finally {
+        button.disabled = false;
+        button.classList.remove("opacity-50", "cursor-not-allowed");
+      }
+    }
+  </script>
+
+</body>
+
+<div id="summaryModal" class="fixed inset-0 bg-black bg-opacity-40 hidden z-50 flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl relative p-8 ring-1 ring-gray-200">
+      <button onclick="closeModal()" class="absolute top-3 right-4 text-gray-400 hover:text-gray-800 text-2xl">&times;</button>
+      <div class="mb-4">
+        <h2 class="text-xl font-bold text-teal-700 flex items-center gap-2">
+          <span>🧠</span> Full Summary
+        </h2>
+        <p class="text-sm text-gray-500">Here's the complete AI-generated explanation for the uploaded medical record.</p>
+      </div>
+      <div id="modalContent" class="text-gray-800 text-sm leading-relaxed space-y-4 max-h-[60vh] overflow-y-auto prose prose-sm">
+        <!-- Summary will be injected here -->
+      </div>
+    </div>
+  </div>
+  
+</html>

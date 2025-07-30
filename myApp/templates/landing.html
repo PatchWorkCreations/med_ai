@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>NeuroMed AI – Summarize Medical Records</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+
+</head>
+<body class="bg-sky-50 min-h-screen font-sans text-gray-800" onload="{% if not request.user.is_authenticated %}showModal(){% endif %}">
+
+  <!-- 🔐 Auth Modal -->
+  <div id="authModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="relative bg-white w-full max-w-md p-8 rounded-2xl shadow-xl border border-gray-200 space-y-6">
+      
+      <!-- Close Button -->
+      <button onclick="clearSummaryIntent(); closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl leading-none">
+        &times;
+      </button>
+  
+      <!-- Header -->
+      <div class="text-center">
+        <h2 class="text-2xl font-bold text-teal-600">Welcome to <span class="text-gray-800">NeuroMed AI</span></h2>
+        <p class="text-sm text-gray-500 mt-1">To continue, please sign in or create an account.</p>
+      </div>
+  
+      <!-- Actions -->
+      <div class="flex flex-col gap-3">
+        <a href="{% url 'login' %}?next={{ request.path }}"
+           onclick="setSummaryIntent()"
+           class="w-full py-2 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-center font-semibold text-sm transition">
+          Sign In
+        </a>
+  
+        <a href="{% url 'signup' %}?next={{ request.path }}"
+           onclick="setSummaryIntent()"
+           class="w-full py-2 rounded-lg border border-teal-600 text-teal-600 hover:bg-teal-50 text-center font-semibold text-sm transition">
+          Create Account
+        </a>
+      </div>
+  
+      <!-- Guest Mode -->
+      <div class="pt-2 text-center">
+        <button onclick="clearSummaryIntent(); closeModal()"
+                class="text-xs text-gray-400 hover:text-teal-500 hover:underline transition">
+          Continue as Guest
+        </button>
+      </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- ✅ Header -->
+  {% include "partials/header.html" %}
+
+  <!-- ✅ Main -->
+  <main class="max-w-2xl mx-auto px-4 py-10">
+    <div class="text-center mb-8">
+      <h2 class="text-3xl font-bold">Summarize Medical Records</h2>
+      <p class="text-sm text-gray-500">Upload or paste notes to receive a friendly and clear summary.</p>
+    </div>
+
+    <!-- 📄 Upload Section -->
+    <section class="bg-white p-6 rounded-xl border shadow-sm space-y-6">
+
+    
+    
+      <!-- Upload -->
+      <p class="text-xs text-gray-400 pl-0">Supports PDF, DOCX, TXT formats</p>
+      <div class="flex items-center justify-between border border-gray-300 rounded-md p-4">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-file-medical text-xl text-teal-600"></i>
+          <span class="text-sm font-medium text-gray-600">Upload Medical Record</span>
+        </div>
+        <input type="file" class="text-sm text-gray-500" accept=".pdf,.docx,.txt" />
+
+      </div>
+      
+    
+      <!-- Summary Mode -->
+      <div x-data="{ tone: 'Plain' }">
+        <label class="block text-sm font-semibold text-gray-700 mb-2">Summary Mode</label>
+        <div class="flex flex-wrap gap-4 text-sm text-gray-700">
+          <label class="flex items-center gap-1">
+            <input type="radio" name="tone" value="Plain" x-model="tone"> Plain
+          </label>
+          <label class="flex items-center gap-1">
+            <input type="radio" name="tone" value="Caregiver" x-model="tone"> Caregiver
+          </label>
+          <label class="flex items-center gap-1">
+            <input type="radio" name="tone" value="Faith" x-model="tone"> Faith
+          </label>
+          <label class="flex items-center gap-1">
+            <input type="radio" name="tone" value="Clinical" x-model="tone"> Clinical
+          </label>
+          <label class="flex items-center gap-1">
+            <input type="radio" name="tone" value="Bilingual" x-model="tone"> Bilingual
+          </label>
+        </div>
+      
+        <!-- Descriptions -->
+        <div class="mt-3 text-sm text-gray-500">
+          <template x-if="tone === 'Plain'">
+            <p>Just the facts — clear and easy to follow.</p>
+          </template>
+          <template x-if="tone === 'Caregiver'">
+            <p>Gentle explanation for when you're overwhelmed.</p>
+          </template>
+          <template x-if="tone === 'Faith'">
+            <p>Hopeful and spiritual — includes a verse to lift your heart.</p>
+          </template>
+          <template x-if="tone === 'Clinical'">
+            <p>Professional tone — ideal for nurses or medical teams.</p>
+          </template>
+          <template x-if="tone === 'Bilingual'">
+            <p>Taglish summary for easier understanding in Filipino + English.</p>
+          </template>
+        </div>
+      </div>
+      
+      <div class="text-center">
+        <button
+  onclick="generateSummary()"
+  class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-md shadow"
+>
+  Generate Summary
+</button>
+
+      </div>
+    
+      <!-- Summary Output -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-2">Summary</label>
+        <div class="relative">
+          <textarea
+  id="summaryOutput"
+  readonly
+  rows="5"
+  class="w-full border border-gray-300 rounded-md p-3 text-sm bg-white text-gray-800 leading-relaxed"
+  placeholder="Your summary will appear here...">
+</textarea>
+
+          <div class="absolute bottom-2 right-3 flex gap-3 text-gray-400">
+            <button id="copyBtn" title="Copy to clipboard">
+              <i class="fa-solid fa-copy"></i>
+            </button>
+            <button id="downloadBtn" title="Download as text">
+              <i class="fa-solid fa-download"></i>
+            </button>
+            <button id="audioBtn" title="Play Audio">
+              <i class="fa-solid fa-volume-up"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    
+      <!-- CTA Button -->
+      
+    </section>
+    
+  </main>
+
+  <!-- ✅ Footer -->
+  <footer class="text-center py-6 text-sm text-gray-500">
+    <p>Powered by <span class="text-teal-600 font-medium">NeuroMed AI</span> — Healing with Intelligence + Heart</p>
+    <p class="italic mt-1">“Grace meets knowledge here.”</p>
+  </footer>
+
+
+  <script>
+    const isAuthenticated = {{ request.user.is_authenticated|yesno:"true,false" }};
+  
+    function showModal() {
+      document.getElementById('authModal')?.classList.remove('hidden');
+    }
+  
+    function closeModal() {
+      document.getElementById('authModal')?.classList.add('hidden');
+    }
+  
+    function setSummaryIntent() {
+      sessionStorage.setItem("summaryIntent", "true");
+    }
+  
+    function clearSummaryIntent() {
+      sessionStorage.removeItem("summaryIntent");
+    }
+  
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+          cookie = cookie.trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+  
+    async function generateSummary() {
+  if (!isAuthenticated) {
+    setSummaryIntent();
+    showModal();
+    return;
+  }
+
+  // 🚨 If on landing page, redirect to dashboard and trigger summary there
+  const currentPath = window.location.pathname;
+  if (currentPath === "/") {
+    setSummaryIntent();
+    window.location.href = "/dashboard/";
+    return;
+  }
+
+  const textarea = document.getElementById("summaryOutput");
+  const fileInput = document.querySelector('input[type="file"]');
+  const tone = document.querySelector('input[name="tone"]:checked')?.value || "Plain";
+  const button = document.querySelector("button[onclick='generateSummary()']");
+
+  textarea.value = "⏳ Generating summary...";
+  button.disabled = true;
+  button.classList.add("opacity-50", "cursor-not-allowed");
+
+  if (!fileInput.files.length) {
+    textarea.value = "❗ Please upload a document.";
+    button.disabled = false;
+    button.classList.remove("opacity-50", "cursor-not-allowed");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", fileInput.files[0]);
+  formData.append("tone", tone);
+
+  try {
+    const response = await fetch("/api/summarize/", {
+      method: "POST",
+      body: formData,
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken")
+      },
+      credentials: "same-origin"
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      textarea.value = data.summary;
+    } else {
+      textarea.value = "⚠️ " + (data.error || "Something went wrong.");
+    }
+  } catch (error) {
+    textarea.value = "❌ Server error. Please try again.";
+  } finally {
+    button.disabled = false;
+    button.classList.remove("opacity-50", "cursor-not-allowed");
+  }
+}
+
+  
+    // Auto-trigger summary if user logged in after being prompted
+    document.addEventListener("DOMContentLoaded", function () {
+      if (sessionStorage.getItem("summaryIntent") === "true" && isAuthenticated) {
+        sessionStorage.removeItem("summaryIntent");
+        const button = document.querySelector("button[onclick='generateSummary()']");
+        if (button) setTimeout(() => button.click(), 400);
+      }
+    });
+  </script>
+  
+  
+  
+</body>
+</html>

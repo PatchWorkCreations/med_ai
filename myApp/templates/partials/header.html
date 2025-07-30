@@ -1,0 +1,44 @@
+<header class="bg-white border-b shadow-md sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+      
+      <!-- Brand -->
+      <a href="/" class="text-2xl font-extrabold text-teal-600 tracking-tight hover:drop-shadow-sm transition">
+        NeuroMed<span class="text-gray-700"> AI</span>
+      </a>
+  
+      <!-- Navigation -->
+      {% if request.user.is_authenticated %}
+      <div class="flex items-center gap-6 text-sm text-gray-700">
+  
+        <!-- Nav Links -->
+        <nav class="space-x-5">
+          <a href="/dashboard/" class="hover:text-teal-600 hover:underline underline-offset-4 transition">Dashboard</a>
+          
+        </nav>
+  
+        <!-- Welcome + Logout -->
+        <div class="flex items-center gap-4">
+          <span class="font-medium text-gray-600">👋 Welcome, {{ request.user.first_name|default:request.user.username }}</span>
+          <form method="POST" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button
+              type="submit"
+              class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-1.5 rounded-md text-sm font-medium transition shadow"
+            >
+              Logout
+            </button>
+          </form>
+        </div>
+      </div>
+  
+      {% else %}
+      <!-- Guest Links -->
+      <nav class="flex items-center gap-4 text-sm text-gray-700">
+        <a href="{% url 'about' %}" class="hover:text-teal-600 transition">About</a>
+        <a href="{% url 'login' %}" class="px-3 py-1.5 bg-white border border-teal-600 text-teal-700 rounded-md hover:bg-teal-50 transition">Login</a>
+        <a href="{% url 'signup' %}" class="px-3 py-1.5 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition">Signup</a>
+      </nav>
+      {% endif %}
+    </div>
+  </header>
+  

@@ -1,0 +1,467 @@
+<style>
+    #chatWindow {
+        font-family: 'Inter', sans-serif;
+        font-size: 0.875rem;
+        padding-right: 4px;
+        padding-bottom: 8px;
+        line-height: 1.6;
+        background-color: #fff;
+        }
+
+        #chatWindow span {
+        word-wrap: break-word;
+        display: inline-block;
+        border-radius: 1rem;
+        }
+
+        #chatPopup input[type="text"] {
+        font-family: 'Inter', sans-serif;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        border: 1px solid #e5e7eb;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+
+    @keyframes fadeInUp {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+    }
+
+    #chatWindow p {
+  margin-bottom: 0.75rem;
+  white-space: normal;
+}
+
+#chatWindow ul, #chatWindow ol {
+  margin: 0.75rem 0 0.75rem 1rem;
+  padding-left: 1rem;
+  list-style-position: inside;
+}
+
+#chatWindow li {
+  margin-bottom: 0.25rem;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-bounce {
+  animation: bounce 0.6s infinite;
+}
+
+#chatPopup input[type="text"] {
+  flex: 1;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.4); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(13, 148, 136, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(13, 148, 136, 0); }
+}
+
+.mic-listening {
+  animation: pulse 1.5s infinite;
+  background-color: #ccfbf1; /* light teal */
+  border: 1px solid #14b8a6; /* teal */
+  color: #0f766e; /* darker teal */
+}
+
+</style>
+
+<section class="bg-white p-6 rounded-xl border shadow-sm space-y-6">
+    <!-- Upload -->
+    <p class="text-xs text-gray-400 pl-0">Supports PDF, DOCX, TXT formats</p>
+    <div class="flex items-center justify-between border border-gray-300 rounded-md p-4">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-file-medical text-xl text-teal-600"></i>
+        <span class="text-sm font-medium text-gray-600">Upload Medical Record</span>
+      </div>
+      <input type="file" class="text-sm text-gray-500" accept=".pdf,.docx,.txt" />
+    </div>
+  
+    <!-- Summary Mode -->
+    <div x-data="{ tone: 'Plain' }">
+      <label class="block text-sm font-semibold text-gray-700 mb-2">Summary Mode</label>
+      <div class="flex flex-wrap gap-4 text-sm text-gray-700">
+        <label class="flex items-center gap-1"><input type="radio" name="tone" value="Plain" x-model="tone"> Plain</label>
+        <label class="flex items-center gap-1"><input type="radio" name="tone" value="Caregiver" x-model="tone"> Caregiver</label>
+        <label class="flex items-center gap-1"><input type="radio" name="tone" value="Faith" x-model="tone"> Faith</label>
+        <label class="flex items-center gap-1"><input type="radio" name="tone" value="Clinical" x-model="tone"> Clinical</label>
+        <label class="flex items-center gap-1"><input type="radio" name="tone" value="Bilingual" x-model="tone"> Bilingual</label>
+      </div>
+      <div class="mt-3 text-sm text-gray-500">
+        <template x-if="tone === 'Plain'"><p>Just the facts — clear and easy to follow.</p></template>
+        <template x-if="tone === 'Caregiver'"><p>Gentle explanation for when you're overwhelmed.</p></template>
+        <template x-if="tone === 'Faith'"><p>Hopeful and spiritual — includes a verse to lift your heart.</p></template>
+        <template x-if="tone === 'Clinical'"><p>Professional tone — ideal for nurses or medical teams.</p></template>
+        <template x-if="tone === 'Bilingual'"><p>Taglish summary for easier understanding in Filipino + English.</p></template>
+      </div>
+    </div>
+  
+    <!-- Generate Button -->
+    <div class="text-center">
+      <button onclick="generateSummary()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-md shadow">
+        Generate Summary
+      </button>
+    </div>
+  
+    <!-- Summary Output -->
+<div class="relative bg-blue-50 border border-blue-200 rounded-md p-4 space-y-3">
+    <p class="text-sm text-gray-700 font-semibold">
+  <i class="fa-solid fa-wand-magic-sparkles text-teal-600 mr-1"></i>
+  Here’s what we found:
+</p>  
+    <!-- Scrollable Summary -->
+    <div class="bg-white rounded-md border border-gray-100 p-3 max-h-48 overflow-y-auto">
+      <textarea
+        id="summaryOutput"
+        readonly
+        rows="6"
+        class="w-full resize-none border-none bg-transparent text-sm text-gray-800 font-medium leading-relaxed focus:outline-none"
+      ></textarea>
+    </div>
+  
+    <!-- Action Buttons -->
+    <div class="flex flex-wrap justify-between items-center gap-3 text-sm pt-1">
+      <div class="text-xs text-gray-500">Need help understanding this better?</div>
+      <div class="flex items-center gap-3 text-gray-400">
+        <button id="copyBtn" title="Copy to clipboard">
+          <i class="fa-solid fa-copy"></i>
+        </button>
+        <button id="downloadBtn" title="Download as text">
+          <i class="fa-solid fa-download"></i>
+        </button>
+        <button id="audioBtn" title="Play Audio">
+          <i class="fa-solid fa-volume-up"></i>
+        </button>
+        <button onclick="toggleSuggestions()" class="text-xs text-blue-600 hover:underline ml-2">
+          <i class="fa-solid fa-comments"></i> Ask follow-up questions
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Smart Suggestions Panel -->
+  <div
+    id="aiSuggestions"
+    class="mt-4 bg-white border border-gray-200 rounded-md p-4 shadow-sm space-y-3 hidden transition-opacity duration-300 ease-in-out"
+  >
+    <p class="text-sm text-gray-600 font-medium">
+  <i class="fa-solid fa-question-circle text-teal-600 mr-1"></i>
+  Maybe you’re wondering:
+</p>    <div id="suggestionCards">
+      <!-- Injected questions appear here -->
+    </div>
+    <button onclick="regenerateSuggestions()" class="text-xs text-blue-600 hover:underline">
+      <i class="fa-solid fa-rotate-right"></i> Show me more ideas
+    </button>
+  </div>
+  
+  </section>
+  
+  <!-- Floating Chat Modal -->
+  <div id="chatPopup" class="fixed bottom-6 right-6 w-80 bg-white rounded-xl shadow-xl border p-4 z-50 hidden">
+    <div class="flex justify-between items-center">
+      <h3 class="text-sm font-bold text-gray-700">AI Chat Companion</h3>
+      <button onclick="toggleChat()" class="text-gray-500 hover:text-gray-800">✖</button>
+    </div>
+  
+    <!-- Chat Window -->
+    <div id="chatWindow" class="mt-3 h-64 overflow-y-auto text-sm text-gray-700 space-y-2"></div>
+  
+    <!-- Input + Send + Dictation -->
+    <div class="flex mt-2 gap-2 items-center">
+      
+      <input
+        type="text"
+        id="chatInput"
+        class="w-full text-sm border rounded-md p-2"
+        placeholder="Type your question..."
+        onkeydown="if(event.key==='Enter') sendChat()"
+      />
+      <button
+        id="micBtn"
+        onclick="startDictation()"
+        title="Speak your message"
+        class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-md shadow text-sm transition-all duration-200"
+      >
+        <i class="fa-solid fa-microphone"></i>
+      </button>
+
+      <button
+        id="sendBtn"
+        onclick="sendChat()"
+        class="bg-blue-600 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-700 shadow"
+        title="Send"
+      >
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+  
+  
+  <script>
+function getCSRFToken() {
+  const cookieValue = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
+  return cookieValue ? cookieValue.pop() : '';
+}
+
+function toggleSuggestions() {
+  const panel = document.getElementById("aiSuggestions");
+  panel.classList.toggle("hidden");
+
+  if (!panel.classList.contains("hidden")) {
+    regenerateSuggestions(); // Call this only when opening the panel
+  }
+}
+
+
+function toggleChat() {
+  document.getElementById("chatPopup").classList.toggle("hidden");
+}
+
+function appendBubble(message, isUser = true) {
+  const chatWindow = document.getElementById("chatWindow");
+  const bubble = document.createElement("div");
+
+  bubble.className = "mb-3 flex items-start gap-2";
+  const content = isUser
+    ? `<div class="bg-blue-100 text-blue-800 ml-auto px-4 py-2 rounded-2xl text-sm leading-relaxed shadow-sm max-w-[85%]">${message}</div>`
+    : `<div class="bg-gray-100 text-gray-700 px-4 py-2 rounded-2xl text-sm leading-relaxed shadow-sm max-w-[85%]">${formatAIResponse(message)}</div>`;
+
+  bubble.innerHTML = content;
+  chatWindow.appendChild(bubble);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+
+
+async function sendChat() {
+  const input = document.getElementById("chatInput");
+  const chatWindow = document.getElementById("chatWindow");
+  const userMessage = input.value.trim();
+  if (!userMessage) return;
+
+  appendBubble(userMessage, true);
+  input.value = "";
+
+  // Typing bubble with animation
+  const typingBubble = document.createElement("div");
+  typingBubble.className = "mb-2";
+  typingBubble.innerHTML = `
+    <div class="flex gap-1 items-center px-3 py-1 rounded-xl bg-gray-100 w-fit">
+      <span class="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style="animation-delay: 0s;"></span>
+      <span class="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style="animation-delay: 0.1s;"></span>
+      <span class="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style="animation-delay: 0.2s;"></span>
+    </div>
+  `;
+  chatWindow.appendChild(typingBubble);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+
+  try {
+    const response = await fetch("/api/send-chat/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCSRFToken(),
+      },
+      body: JSON.stringify({
+        message: userMessage,
+        summary: document.getElementById("summaryOutput")?.value || "",
+        tone: document.querySelector('input[name="tone"]:checked')?.value || "Plain"
+      })
+    });
+
+    const data = await response.json();
+    typingBubble.innerHTML = `
+      <div class="bg-gray-100 text-gray-700 px-4 py-2 rounded-2xl text-sm leading-relaxed shadow-sm max-w-[85%]">
+        ${formatAIResponse(data.reply)}
+      </div>
+    `;
+  } catch (err) {
+    typingBubble.innerHTML = `
+      <span class="inline-block bg-red-100 text-red-800 px-3 py-1 rounded-xl">
+        ⚠️ Failed to reply. Try again later.
+      </span>
+    `;
+  }
+}
+
+
+function openChatWith(initialMessage) {
+  toggleChat();
+  const input = document.getElementById("chatInput");
+  input.value = initialMessage;
+
+  setTimeout(() => {
+    document.getElementById("sendBtn")?.click() || sendChat(); // Trigger send
+  }, 100);
+}
+
+async function regenerateSuggestions() {
+  const summary = document.getElementById("summaryOutput")?.value || "";
+  const container = document.getElementById("suggestionCards");
+  const tone = document.querySelector('input[name="tone"]:checked')?.value || "Plain";
+
+  container.innerHTML = `<p class="text-sm text-gray-400">Thinking of ways to help you feel better… 🧠💭</p>`;
+
+  try {
+    const res = await fetch("/api/smart-suggestions/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCSRFToken(),
+      },
+      body: JSON.stringify({ summary, tone })
+    });
+
+    const data = await res.json();
+    container.innerHTML = "";
+
+    data.suggestions.forEach(item => {
+      const block = document.createElement("div");
+      block.className = "bg-white p-3 rounded-md border border-gray-200 shadow-sm";
+      block.innerHTML = `
+        <p class="text-gray-700 font-medium mb-1">❓ ${item.question}</p>
+        <button onclick="openChatWith(\`${item.question}\`)" class="text-xs text-blue-500 hover:underline mt-2">💬 Chat about this</button>
+      `;
+      container.appendChild(block);
+    });
+  } catch {
+    container.innerHTML = `<p class="text-red-500 text-sm">⚠️ Sorry, di ako naka-connect ngayon. Try ulit later.</p>`;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const summaryOutput = document.getElementById("summaryOutput");
+
+  document.getElementById("copyBtn")?.addEventListener("click", () => {
+    navigator.clipboard.writeText(summaryOutput.value)
+      .then(() => alert("✅ Summary copied to clipboard"))
+      .catch(() => alert("❌ Failed to copy"));
+  });
+
+  document.getElementById("downloadBtn")?.addEventListener("click", () => {
+    const blob = new Blob([summaryOutput.value], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "neura_summary.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+});
+
+
+function formatAIResponse(text, keywords = []) {
+  text = text.trim().replace(/\r\n|\r/g, '\n');
+
+  // Convert double newlines to paragraphs
+  const paragraphs = text.split(/\n{2,}/).map(p => p.trim());
+
+  let html = paragraphs.map(p => {
+    // Handle bullet points and numbered lists
+    if (/^[-•*‒]\s+/.test(p)) {
+      const items = p.split(/\n/).map(item => `<li>${item.replace(/^[-•*‒]\s+/, '')}</li>`).join('');
+      return `<ul>${items}</ul>`;
+    } else if (/^\d+\.\s+/.test(p)) {
+      const items = p.split(/\n/).map(item => `<li>${item.replace(/^\d+\.\s+/, '')}</li>`).join('');
+      return `<ol>${items}</ol>`;
+    } else {
+      return `<p>${p}</p>`;
+    }
+  }).join('');
+
+  // Highlight keywords
+  keywords.forEach(keyword => {
+    const regex = new RegExp(`\\b(${keyword})\\b`, 'gi');
+    html = html.replace(regex, '<strong>$1</strong>');
+  });
+
+  return html;
+}
+function startDictation() {
+  const micBtn = document.getElementById("micBtn");
+
+  if (!('webkitSpeechRecognition' in window)) {
+    alert("Your browser doesn't support speech recognition. Try Chrome.");
+    return;
+  }
+
+  const recognition = new webkitSpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = 'en-US';
+
+  recognition.onstart = () => {
+    micBtn.classList.add("mic-listening");
+    micBtn.title = "Listening...";
+  };
+
+  recognition.onerror = (event) => {
+    micBtn.classList.remove("mic-listening");
+    micBtn.title = "Speak your message";
+    console.error("Speech error:", event.error);
+    alert("⚠️ Speech recognition error: " + event.error);
+  };
+
+  recognition.onend = () => {
+    micBtn.classList.remove("mic-listening");
+    micBtn.title = "Speak your message";
+  };
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    document.getElementById("chatInput").value = transcript;
+    sendChat(); // Automatically send after dictation
+  };
+
+  recognition.start();
+}
+
+
+const synth = window.speechSynthesis;
+let currentUtterance = null;
+
+document.getElementById("audioBtn")?.addEventListener("click", () => {
+  const summaryText = document.getElementById("summaryOutput")?.value;
+
+  if (!summaryText) {
+    alert("❗There's no summary to read.");
+    return;
+  }
+
+  if (synth.speaking) {
+    synth.cancel(); // Stop reading
+    return;
+  }
+
+  currentUtterance = new SpeechSynthesisUtterance(summaryText);
+  currentUtterance.lang = "en-US";
+  currentUtterance.pitch = 1;
+  currentUtterance.rate = 1;
+  currentUtterance.volume = 1;
+
+  synth.speak(currentUtterance);
+});
+
+const audioIcon = document.querySelector("#audioBtn i");
+
+currentUtterance.onstart = () => {
+  audioIcon.classList.remove("fa-volume-up");
+  audioIcon.classList.add("fa-stop");
+};
+
+currentUtterance.onend = () => {
+  audioIcon.classList.remove("fa-stop");
+  audioIcon.classList.add("fa-volume-up");
+};
+
+
+
+
+  </script>
+  
