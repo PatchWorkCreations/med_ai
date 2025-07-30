@@ -15,6 +15,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://medai-production-21ae.up.railway.app",  # Replace with your real domain
+]
+
 import os
 from dotenv import load_dotenv
 
