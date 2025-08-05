@@ -47,7 +47,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 ROOT_URLCONF = 'myProject.urls'
 
@@ -117,9 +120,12 @@ USE_TZ = True
 
 
 
-STATIC_URL = '/static/'
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+# Optional if you're collecting from multiple apps:
 STATICFILES_DIRS = [
-    BASE_DIR / "static", 
+    os.path.join(BASE_DIR, "static"),
 ]
 
 
