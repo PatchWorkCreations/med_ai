@@ -28,4 +28,6 @@ urlpatterns = [
     path("api/send-chat/", views.send_chat, name="send_chat"),
 
      path('about/', views.about_page, name='about'),
+
+     path('speak/', views.speaking_view, name='speaking-page'),
 ]

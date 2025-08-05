@@ -1,3 +1,6 @@
+{% load static %}
+
+
 <style>
     #chatWindow {
         font-family: 'Inter', sans-serif;
@@ -73,13 +76,15 @@
 
 <section class="bg-white p-6 rounded-xl border shadow-sm space-y-6">
     <!-- Upload -->
-    <p class="text-xs text-gray-400 pl-0">Supports PDF, DOCX, TXT formats</p>
+    <p class="text-xs text-gray-400 pl-0">
+      Supports PDF, DOCX, TXT, and common image formats (JPG, PNG)
+    </p>
     <div class="flex items-center justify-between border border-gray-300 rounded-md p-4">
       <div class="flex items-center gap-2">
         <i class="fa-solid fa-file-medical text-xl text-teal-600"></i>
         <span class="text-sm font-medium text-gray-600">Upload Medical Record</span>
       </div>
-      <input type="file" class="text-sm text-gray-500" accept=".pdf,.docx,.txt" />
+      <input type="file" class="text-sm text-gray-500" accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic,.bmp,.tiff,.gif" />
     </div>
   
     <!-- Summary Mode -->
@@ -201,6 +206,14 @@
       </button>
     </div>
   </div>
+
+  <!-- Floating Avatar Button -->
+<button id="chatToggleBtn"
+onclick="toggleChat()"
+class="fixed bottom-6 right-6 w-16 h-16 rounded-full shadow-lg z-50 animate-pulse focus:outline-none border-4 border-white"
+style="background: url('/static/avatar.png') no-repeat center center / cover;">
+</button>
+
   
   
   <script>
@@ -218,10 +231,20 @@ function toggleSuggestions() {
   }
 }
 
-
 function toggleChat() {
-  document.getElementById("chatPopup").classList.toggle("hidden");
+  const popup = document.getElementById("chatPopup");
+  const toggleBtn = document.getElementById("chatToggleBtn");
+
+  popup.classList.toggle("hidden");
+
+  // Optionally hide the floating button when chat is open
+  if (!popup.classList.contains("hidden")) {
+    toggleBtn.classList.add("hidden");
+  } else {
+    toggleBtn.classList.remove("hidden");
+  }
 }
+
 
 function appendBubble(message, isUser = true) {
   const chatWindow = document.getElementById("chatWindow");

@@ -80,7 +80,33 @@ PROMPT_TEMPLATES = {
     ),
 }
 
-from .models import MedicalSummary
+
+import base64
+from openai import OpenAI
+import tempfile
+
+
+def extract_text_from_image(file_path: str) -> str:
+    client = OpenAI()
+    
+    with open(file_path, "rb") as image_file:
+        image_data = base64.b64encode(image_file.read()).decode()
+
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "user", "content": [
+                {"type": "text", "text": "Extract all visible text from this image. Only return the text."},
+                {"type": "image_url", "image_url": {
+                    "url": f"data:image/png;base64,{image_data}"
+                }}
+            ]}
+        ]
+    )
+
+    return response.choices[0].message.content.strip()
+
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -92,19 +118,38 @@ def summarize_medical_record(request):
     if not uploaded_file:
         return Response({"error": "No file provided."}, status=400)
 
-    # Extract text based on type
-    if uploaded_file.name.endswith(".pdf"):
-        text = extract_text_from_pdf(uploaded_file)
-    elif uploaded_file.name.endswith(".docx"):
-        text = extract_text_from_docx(uploaded_file)
-    elif uploaded_file.name.endswith(".txt"):
-        text = uploaded_file.read().decode("utf-8")
-    else:
-        return Response({"error": "Unsupported file format."}, status=400)
+    file_name = uploaded_file.name.lower()
+    text = ""
+
+    # 🔍 Extract text based on file type
+    try:
+        if file_name.endswith(".pdf"):
+            text = extract_text_from_pdf(uploaded_file)
+
+        elif file_name.endswith(".docx"):
+            text = extract_text_from_docx(uploaded_file)
+
+        elif file_name.endswith(".txt"):
+            text = uploaded_file.read().decode("utf-8")
+
+        elif file_name.endswith((".jpg", ".jpeg", ".png", ".heic", ".webp")):
+            with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file_name)[1]) as tmp:
+                for chunk in uploaded_file.chunks():
+                    tmp.write(chunk)
+                tmp_path = tmp.name
+            text = extract_text_from_image(tmp_path)
+            os.remove(tmp_path)
+
+        else:
+            return Response({"error": "Unsupported file format."}, status=400)
+
+    except Exception as e:
+        return Response({"error": f"Failed to process file: {str(e)}"}, status=400)
 
     if not text.strip():
         return Response({"error": "Document is empty or unreadable."}, status=400)
 
+    # 🎯 Prepare prompt
     system_prompt = PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])
 
     try:
@@ -118,7 +163,7 @@ def summarize_medical_record(request):
         )
         result = completion.choices[0].message.content.strip()
 
-        # ✅ Save summary
+        # 📝 Save summary
         MedicalSummary.objects.create(
             user=request.user,
             summary=result,
@@ -335,3 +380,9 @@ def reset_chat_session(request):
 
 def about_page(request):
     return render(request, "about.html")
+
+
+from django.shortcuts import render
+
+def speaking_view(request):
+    return render(request, 'talking_ai/speaking.html')

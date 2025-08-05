@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeuraMed AI Voice Call</title>
+  <style>
+    body {
+      margin: 0;
+      background: #1a1a1a;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #fff;
+    }
+    .call-container {
+      background: #2b2b2b;
+      border-radius: 2rem;
+      padding: 2rem;
+      width: 320px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .call-header {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+    }
+    .subtext {
+      font-size: 0.9rem;
+      color: #aaa;
+      margin-bottom: 1rem;
+    }
+    .pulsating-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: url('/static/avatar.png') center/cover no-repeat;
+      animation: pulse 1.5s infinite;
+      margin-bottom: 1.5rem;
+      animation-play-state: paused;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 105, 180, 0.7); }
+      70% { box-shadow: 0 0 0 20px rgba(255, 105, 180, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 105, 180, 0); }
+    }
+    .controls {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+    .button {
+      background: #3a3a3a;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      cursor: pointer;
+      color: white;
+    }
+    .button.end {
+      background: #e63946;
+    }
+  </style>
+</head>
+<body>
+  <div class="call-container">
+    <div class="pulsating-avatar" id="avatar"></div>
+    <div class="call-header">NeuraMed AI</div>
+    <div class="subtext">Live Voice Assistant</div>
+    <div id="responseText" style="font-size: 0.9rem; color: #ccc; margin-top: 1rem;"></div>
+    <div class="controls">
+      <button class="button" onclick="toggleMute()">🔇</button>
+      <button class="button end" onclick="endCall()">❌</button>
+    </div>
+    <audio id="audioPlayer" autoplay style="display: none;"></audio>
+  </div>
+  <script>
+    let muted = false;
+    let mediaRecorder;
+    let audioChunks = [];
+    let isSpeaking = false;
+    let silenceCounter = 0;
+  
+    const silenceThreshold = 5; // 5 x 200ms = 1s pause
+    const analyserFFTSize = 2048;
+    const socket = new WebSocket("ws://" + window.location.host + "/ws/voice/");
+  
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    let analyser;
+  
+    let audioQueue = [];
+let isPlaying = false;
+
+socket.onmessage = function(event) {
+  const data = JSON.parse(event.data);
+  document.getElementById("responseText").innerText = data.reply;
+
+  if (data.audio && !data.audio.startsWith("TTS")) {
+    audioQueue.push(data.audio);
+    processAudioQueue();
+  }
+};
+function processAudioQueue() {
+  if (isPlaying || audioQueue.length === 0) return;
+
+  const base64Audio = audioQueue.shift();
+  const audioBlob = base64ToBlob(base64Audio, "audio/mpeg");
+  const audioUrl = URL.createObjectURL(audioBlob);
+  const audio = new Audio(audioUrl);  // ⬅️ NEW audio tag for every chunk
+
+  isPlaying = true;
+
+  document.getElementById("avatar").style.animationPlayState = 'running';
+
+  audio.onended = () => {
+    isPlaying = false;
+    document.getElementById("avatar").style.animationPlayState = 'paused';
+    processAudioQueue(); // 🎯 Play next chunk
+  };
+
+  audio.onerror = (e) => {
+    console.warn("🔇 Audio playback error", e);
+    isPlaying = false;
+    processAudioQueue();
+  };
+
+  audio.play().catch(err => {
+    console.warn("⛔ Could not auto-play audio:", err);
+    isPlaying = false;
+    processAudioQueue();
+  });
+}
+
+
+  
+    function base64ToBlob(base64, mime) {
+      const byteChars = atob(base64);
+      const byteNumbers = Array.from(byteChars).map(char => char.charCodeAt(0));
+      const byteArray = new Uint8Array(byteNumbers);
+      return new Blob([byteArray], { type: mime });
+    }
+  
+    function toggleMute() {
+      muted = !muted;
+      alert(muted ? "Muted (simulated)" : "Unmuted (simulated)");
+    }
+  
+    function endCall() {
+      socket.close();
+      alert("Call ended.");
+    }
+  
+    function startCall() {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          setupRecording(stream);
+          setupPauseDetection(stream);
+        })
+        .catch(err => {
+          console.error("Microphone access error:", err);
+          alert("Microphone access is required.");
+        });
+    }
+  
+    function setupRecording(stream) {
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = event => {
+        if (event.data.size > 0) audioChunks.push(event.data);
+      };
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64Audio = reader.result.split(',')[1];
+          if (!muted && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({ audio_input: base64Audio }));
+          }
+          audioChunks = [];
+        };
+        reader.readAsDataURL(blob);
+      };
+      mediaRecorder.start();
+  
+      setInterval(() => {
+        if (mediaRecorder.state === "recording") {
+          mediaRecorder.stop();
+          mediaRecorder.start();
+        }
+      }, 5000); // Still keep 5s flushes
+    }
+  
+    function setupPauseDetection(stream) {
+      const source = audioContext.createMediaStreamSource(stream);
+      analyser = audioContext.createAnalyser();
+      analyser.fftSize = analyserFFTSize;
+      source.connect(analyser);
+  
+      const dataArray = new Uint8Array(analyser.fftSize);
+  
+      function detectPause() {
+        analyser.getByteTimeDomainData(dataArray);
+        const avg = dataArray.reduce((a, b) => a + b) / dataArray.length;
+  
+        if (avg > 128 + 2 || avg < 128 - 2) {
+          // User is speaking
+          silenceCounter = 0;
+          isSpeaking = true;
+        } else {
+          silenceCounter++;
+          if (silenceCounter >= silenceThreshold && isSpeaking) {
+            console.log("🛑 Pause detected — sending chunk early");
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+              mediaRecorder.stop(); // This triggers audio send
+            }
+            isSpeaking = false;
+          }
+        }
+        requestAnimationFrame(detectPause);
+      }
+  
+      detectPause();
+    }
+  
+    // Auto-start the call when page loads (optional: tie to a button)
+    window.onload = startCall;
+  </script>
+  
+</body>
+</html>
