@@ -301,7 +301,6 @@ A:"""
     except Exception as e:
         traceback.print_exc()
         return JsonResponse({"answer": "⚠️ Sorry, I couldn’t fetch that answer right now."})
-
 @csrf_exempt
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -312,24 +311,28 @@ def send_chat(request):
 
     session = request.session
 
-    # Get or initialize chat history
+    # Improved system prompt for tone and graceful boundaries
     messages = session.get("chat_history", [
         {
             "role": "system",
             "content": (
-                "You are a helpful medical assistant. Answer in a clear, compassionate way. "
-                "Explain things simply, like you're talking to a smart friend who isn’t a doctor."
+                "You are a kind, knowledgeable, and encouraging medical assistant. "
+                "Answer questions in a simple, helpful way—as if you're speaking to a smart friend. "
+                "Avoid sounding robotic. If something is serious or outside your scope, don’t say 'I can’t help' — "
+                "instead, gently guide the person with empathy. Offer hopeful and helpful next steps. "
+                "NEVER say 'consult a healthcare provider' without also giving something encouraging or useful. "
+                "No long disclaimers. Be compassionate, brief, warm, and clear. Use soft language. "
+                "When unsure, explain it in a way that's supportive and practical. Be their friendly guide."
             )
         }
     ])
 
-    # Append user input
     messages.append({"role": "user", "content": user_input})
 
     try:
         client = OpenAI()
 
-        # Step 1: Get the raw answer
+        # Step 1: Raw full response
         raw_response = client.chat.completions.create(
             model="gpt-4",
             messages=messages,
@@ -337,11 +340,11 @@ def send_chat(request):
         )
         full_answer = raw_response.choices[0].message.content.strip()
 
-        # Step 2: Ask GPT to rewrite it in a friendly, short format
+        # Step 2: Friendly rewrite
         summary_prompt = f"""
 Rewrite the following answer into a short, friendly explanation (under 150 words).
-Keep it simple, slightly casual, and warm — like you're helping a friend understand.
-Avoid clinical tone, avoid long paragraphs. Use light bullets if helpful.
+Make it sound warm and helpful—like you're talking to a kind friend who isn’t a doctor.
+Avoid sounding robotic or clinical. If there’s a need to be cautious, be gentle and human about it.
 
 Original:
 \"\"\"{full_answer}\"\"\"
@@ -350,7 +353,7 @@ Original:
         summary_response = client.chat.completions.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "You are a health explainer who makes things short, friendly, and helpful."},
+                {"role": "system", "content": "You are a caring and clear medical explainer. Keep it short, friendly, and human."},
                 {"role": "user", "content": summary_prompt}
             ],
             temperature=0.6,
@@ -358,13 +361,13 @@ Original:
 
         trimmed_reply = summary_response.choices[0].message.content.strip()
 
-        # Save reply and history
+        # Save only last few messages
         messages.append({"role": "assistant", "content": trimmed_reply})
         session["chat_history"] = messages[-10:]
 
         return JsonResponse({"reply": trimmed_reply})
     except Exception as e:
-        return JsonResponse({"reply": "⚠️ Something went wrong. Please try again later."})
+        return JsonResponse({"reply": "⚠️ Something went wrong. Please try again in a bit."})
 
 
 @csrf_exempt

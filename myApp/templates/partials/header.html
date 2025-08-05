@@ -1,44 +1,78 @@
-<header class="bg-white border-b shadow-md sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-      
-      <!-- Brand -->
-      <a href="/" class="text-2xl font-extrabold text-teal-600 tracking-tight hover:drop-shadow-sm transition">
-        NeuroMed<span class="text-gray-700"> AI</span>
-      </a>
-  
-      <!-- Navigation -->
+<!-- Include Alpine.js for toggle behavior -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<header class="bg-white border-b shadow-md sticky top-0 z-50" x-data="{ open: false }">
+  <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+
+    <!-- Brand -->
+    <a href="/" class="text-2xl font-extrabold text-teal-600 tracking-tight hover:drop-shadow-sm transition">
+      NeuroMed<span class="text-gray-700"> AI</span>
+    </a>
+
+    <!-- Hamburger button (shown on mobile) -->
+    <button
+      @click="open = !open"
+      class="lg:hidden text-gray-700 focus:outline-none"
+      aria-label="Toggle navigation"
+    >
+      <svg x-show="!open" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+        viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+      <svg x-show="open" x-cloak class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+        viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+
+    <!-- Desktop Nav -->
+    <div class="hidden lg:flex items-center gap-6 text-sm text-gray-700">
       {% if request.user.is_authenticated %}
-      <div class="flex items-center gap-6 text-sm text-gray-700">
-  
-        <!-- Nav Links -->
-        <nav class="space-x-5">
-          <a href="/dashboard/" class="hover:text-teal-600 hover:underline underline-offset-4 transition">Dashboard</a>
-          
-        </nav>
-  
-        <!-- Welcome + Logout -->
-        <div class="flex items-center gap-4">
-          <span class="font-medium text-gray-600">👋 Welcome, {{ request.user.first_name|default:request.user.username }}</span>
-          <form method="POST" action="{% url 'logout' %}">
-            {% csrf_token %}
-            <button
-              type="submit"
-              class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-1.5 rounded-md text-sm font-medium transition shadow"
-            >
-              Logout
-            </button>
-          </form>
-        </div>
+      <nav class="space-x-5">
+        <a href="/dashboard/" class="hover:text-teal-600 hover:underline underline-offset-4 transition">Dashboard</a>
+      </nav>
+      <div class="flex items-center gap-4">
+        <span class="font-medium text-gray-600">👋 Welcome, {{ request.user.first_name|default:request.user.username }}</span>
+        <form method="POST" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button
+            type="submit"
+            class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-1.5 rounded-md text-sm font-medium transition shadow"
+          >
+            Logout
+          </button>
+        </form>
       </div>
-  
       {% else %}
-      <!-- Guest Links -->
-      <nav class="flex items-center gap-4 text-sm text-gray-700">
+      <nav class="flex items-center gap-4">
         <a href="{% url 'about' %}" class="hover:text-teal-600 transition">About</a>
         <a href="{% url 'login' %}" class="px-3 py-1.5 bg-white border border-teal-600 text-teal-700 rounded-md hover:bg-teal-50 transition">Login</a>
         <a href="{% url 'signup' %}" class="px-3 py-1.5 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition">Signup</a>
       </nav>
       {% endif %}
     </div>
-  </header>
-  
+  </div>
+
+  <!-- Mobile Nav -->
+  <div x-show="open" x-cloak class="lg:hidden px-4 pb-4 space-y-4 text-sm text-gray-700">
+    {% if request.user.is_authenticated %}
+    <a href="/dashboard/" class="block hover:text-teal-600 transition">Dashboard</a>
+    <div class="border-t pt-2">
+      <span class="block font-medium text-gray-600">👋 Welcome, {{ request.user.first_name|default:request.user.username }}</span>
+      <form method="POST" action="{% url 'logout' %}" class="mt-2">
+        {% csrf_token %}
+        <button
+          type="submit"
+          class="w-full bg-teal-600 hover:bg-teal-700 text-white py-2 rounded-md text-sm font-medium transition shadow"
+        >
+          Logout
+        </button>
+      </form>
+    </div>
+    {% else %}
+    <a href="{% url 'about' %}" class="block hover:text-teal-600 transition">About</a>
+    <a href="{% url 'login' %}" class="block px-3 py-2 bg-white border border-teal-600 text-teal-700 rounded-md hover:bg-teal-50 transition">Login</a>
+    <a href="{% url 'signup' %}" class="block px-3 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition">Signup</a>
+    {% endif %}
+  </div>
+</header>

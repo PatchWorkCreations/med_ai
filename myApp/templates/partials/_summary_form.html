@@ -72,6 +72,35 @@
   color: #0f766e; /* darker teal */
 }
 
+/* Add this near your existing styles */
+#chatPopup::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.4);
+  z-index: -1;
+  border-radius: inherit;
+  transition: all 0.3s ease-in-out;
+}
+
+#chatPopup {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s ease-in-out;
+  pointer-events: none;
+}
+
+#chatPopup.open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+
 </style>
 
 <section class="bg-white p-6 rounded-xl border shadow-sm space-y-6">
@@ -231,19 +260,35 @@ function toggleSuggestions() {
   }
 }
 
-function toggleChat() {
+function toggleChat(forceClose = false) {
   const popup = document.getElementById("chatPopup");
   const toggleBtn = document.getElementById("chatToggleBtn");
 
-  popup.classList.toggle("hidden");
+  const isOpen = popup.classList.contains("open");
 
-  // Optionally hide the floating button when chat is open
-  if (!popup.classList.contains("hidden")) {
-    toggleBtn.classList.add("hidden");
-  } else {
+  if (forceClose || isOpen) {
+    popup.classList.remove("open");
+    setTimeout(() => popup.classList.add("hidden"), 300);
     toggleBtn.classList.remove("hidden");
+  } else {
+    popup.classList.remove("hidden");
+    setTimeout(() => popup.classList.add("open"), 10); // Slight delay for transition
+    toggleBtn.classList.add("hidden");
   }
 }
+
+document.addEventListener("click", function (event) {
+  const popup = document.getElementById("chatPopup");
+  const toggleBtn = document.getElementById("chatToggleBtn");
+
+  if (!popup.contains(event.target) && !toggleBtn.contains(event.target)) {
+    if (popup.classList.contains("open")) {
+      toggleChat(true);
+    }
+  }
+});
+
+
 
 
 function appendBubble(message, isUser = true) {
