@@ -1,102 +1,203 @@
-{% load static %}
-{% load widget_tweaks %}
-<!DOCTYPE html>
-<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>NeuroMed AI Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-</head>
-<style>
-  .chat-bubble {
-    border-radius: 18px;
-    padding: 10px 16px;
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <style>
+    body {
+      background: linear-gradient(to right, #f5f7fa, #e4ebf5);
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .chat-bubble {
+    border-radius: 1.25rem; /* 20px */
+    padding: 12px 18px;
+    line-height: 1.6;
+    font-size: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     max-width: 75%;
-    word-wrap: break-word;
-    line-height: 1.5;
-    font-size: 0.875rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    white-space: pre-wrap;
+    word-break: break-word;
+    animation: fadeInUp 0.25s ease;
   }
 
   .chat-user {
-    background-color: #000;
-    color: #fff;
-    border-bottom-right-radius: 4px !important;
+    background-color: #111827;
+    color: #ffffff;
+    border-bottom-right-radius: 6px !important;
+    margin-left: auto;
   }
 
   .chat-ai {
-    background-color: #f3f4f6;
+    background-color: #f0fdf4;
     color: #1f2937;
-    border-bottom-left-radius: 4px !important;
+    border-bottom-left-radius: 6px !important;
+    margin-right: auto;
   }
 
-  .ai-message {
-  max-width: 70%;               /* Keep bubbles readable */
-  background-color: #f0fdf4;    /* Soft greenish background for AI */
-  border-radius: 1rem;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1rem;
-  word-wrap: break-word;
-  white-space: pre-wrap;
-  line-height: 1.6;
-  font-size: 0.95rem;
-  animation: fadeInUp 0.3s ease;
+
+
+  
+
+    .sidebar-link:hover {
+      background-color: #f0f0f0;
+      transition: all 0.2s;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulseFade {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.1); }
+    }
+
+    #loadingOverlay i {
+      animation: pulseFade 1.2s infinite ease-in-out;
+    }
+
+    .tone-label input:checked + span {
+      background-color: #0f766e;
+      color: white;
+      font-weight: 600;
+    }
+
+    .tone-label span {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      transition: background-color 0.2s ease;
+      cursor: pointer;
+    }
+
+    /* Remove extra space from first message if hardcoded */
+#chatWindow > div:first-child {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 
-@keyframes pulseFade {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.1); }
-}
+  </style>
+</head>
 
-#loadingOverlay i {
-  animation: pulseFade 1.2s infinite ease-in-out;
-}
-
-
-</style>
 <body class="bg-white font-sans text-gray-800">
 
 <div class="w-full h-screen flex overflow-hidden">
   <!-- Sidebar -->
-  <aside class="w-[280px] bg-gray-50 border-r p-4 overflow-y-auto">
-    <h2 class="text-lg font-semibold mb-4">📝 Summary History</h2>
-    {% if summaries %}
-    <ul class="space-y-4">
-      {% for item in summaries %}
-      <li class="bg-white border rounded-lg p-3 text-sm shadow-sm">
-        <p class="text-gray-400">{{ item.created_at|date:"M d, Y – H:i" }} · {{ item.tone }}</p>
-        <p class="text-gray-700 font-medium mt-1">{{ item.uploaded_filename }}</p>
-        <p class="text-xs text-gray-600 mt-2 line-clamp-3">{{ item.summary|truncatewords:20 }}</p>
-        <button class="mt-2 text-teal-600 text-xs hover:underline open-summary-modal"
-                data-summary="{{ item.summary|escapejs }}">
-          View
+  <aside id="sidebar" class="w-[280px] glass border-r p-6 overflow-y-auto fixed inset-y-0 left-0 z-40 transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:z-auto md:flex flex-col shadow-xl">
+
+    <!-- Top Header with Clickable Profile Icon -->
+    <div class="flex items-center justify-between mb-6 border-b border-gray-200 pb-2">
+      <h2 class="text-2xl font-semibold text-gray-800 flex items-center gap-3">
+        <i class="fa-solid fa-clock-rotate-left text-teal-600 text-2xl"></i>
+        <span class="tracking-tight">Summary History</span>
+      </h2>
+  
+      <!-- Settings Toggle Button -->
+      <div class="relative">
+        <button onclick="toggleSettingsMenu()" class="text-gray-600 hover:text-teal-600 focus:outline-none">
+          <i class="fa-solid fa-user-circle text-2xl"></i>
         </button>
-      </li>
-      {% endfor %}
-    </ul>
+  
+        <!-- Dropdown Menu (hidden by default) -->
+        <div id="settingsDropdown" class="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg hidden z-50 text-base">
+          <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">
+            <i class="fa-solid fa-user mr-2 text-gray-400"></i> Profile
+          </a>
+          <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">
+            <i class="fa-solid fa-pen-to-square mr-2 text-gray-400"></i> Change Name
+          </a>
+          <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">
+            <i class="fa-solid fa-right-from-bracket mr-2 text-gray-400"></i> Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  
+    <!-- New Chat Button -->
+    <button class="mb-4 w-full bg-teal-600 text-white text-base py-2 rounded-lg hover:bg-teal-700 transition">
+      <i class="fa-solid fa-plus mr-2"></i>New Chat
+    </button>
+  
+    <!-- Search Bar -->
+    <div class="mb-4 relative">
+      <input type="text" placeholder="Search summaries..." class="w-full px-3 py-2 text-base rounded-md bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500" />
+      <i class="fa-solid fa-magnifying-glass absolute right-3 top-2.5 text-gray-400 text-base"></i>
+    </div>
+  
+    <!-- Summary List -->
+    {% if summaries %}
+      <ul class="space-y-4">
+        {% for item in summaries %}
+          <li class="bg-white border rounded-xl p-4 text-base shadow-sm hover:shadow-md transition sidebar-link">
+            <p class="text-gray-400 text-base">{{ item.created_at|date:"M d, Y – H:i" }} · {{ item.tone }}</p>
+            <p class="text-gray-800 font-medium mt-1 truncate">{{ item.uploaded_filename }}</p>
+            <p class="text-base text-gray-600 mt-1 line-clamp-3">{{ item.summary|truncatewords:20 }}</p>
+            <button class="mt-2 text-teal-600 text-base hover:underline open-summary-modal"
+                    data-summary="{{ item.summary|escapejs }}">
+              View Full Summary
+            </button>
+          </li>
+        {% endfor %}
+      </ul>
     {% else %}
-    <p class="text-sm italic text-gray-400">No summaries yet.</p>
+      <p class="text-base italic text-gray-400">No summaries yet.</p>
     {% endif %}
+  
   </aside>
+  
+  
+  
 
   <!-- Main Panel -->
   <section class="flex-1 flex flex-col relative">
     <!-- Header -->
-    <header class="flex items-center justify-between px-6 py-4 border-b">
-      <div class="flex items-center gap-2">
-        <i class="fa-solid fa-notes-medical text-teal-600 text-xl"></i>
-        <h1 class="text-xl font-bold text-gray-800">NeuroMed <span class="text-teal-600">AI</span></h1>
+    <header class="flex items-center justify-between px-6 py-4 border-b relative">
+      <div class="flex items-center gap-2 relative group">
+        <i class="fa-solid fa-notes-medical text-teal-600 text-2xl"></i>
+    
+        <h1 class="text-2xl font-bold text-gray-800 cursor-help">
+          NeuroMed <span class="text-teal-600">AI</span>
+        </h1>
+    
+        <!-- Real Tooltip -->
+        <div class="absolute -bottom-12 left-0 z-10 w-max max-w-xs px-3 py-2 text-base text-white bg-gray-800 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none shadow-md">
+          NeuroMed AI simplifies complex medical records into compassionate, easy-to-understand summaries.
+        </div>
       </div>
+    
+      <button onclick="toggleSidebar()" class="md:hidden text-gray-600 text-2xl focus:outline-none">
+        <i class="fa-solid fa-bars"></i>
+      </button>
     </header>
+    
+    
+
+    <!-- Hamburger menu for mobile -->
+
+<div id="overlay" class="fixed inset-0 bg-black bg-opacity-40 z-30 hidden md:hidden" onclick="toggleSidebar()"></div>
+
 
     <!-- Chat Window -->
-    <div id="chatWindow" class="flex-1 p-4 overflow-y-auto text-sm space-y-3"></div>
-
+    <div id="chatWindow" class="flex-1 px-6 py-4 overflow-y-auto text-base bg-gradient-to-br from-white to-gray-50 rounded-xl">      <!-- Chat bubbles injected here -->
+    </div>
+    
     <!-- Tone Selector -->
     <!-- Tone Selector -->
-<div class="px-4 pb-2 pt-1 bg-[#fefaf7] text-xs text-gray-600">
+<div class="px-4 pb-2 pt-1 bg-[#fefaf7] text-base text-gray-600">
   <span class="font-semibold">Summary Tone:</span>
   <label class="ml-2"><input type="radio" name="tone" value="Plain" checked> Plain</label>
   <label class="ml-2"><input type="radio" name="tone" value="Caregiver"> Caregiver</label>
@@ -107,27 +208,28 @@
 
 
     <!-- Upload & Chat Input -->
-    <div class="flex items-center gap-2 border-t p-3 bg-[#fefaf7]">
+    <div class="flex items-center gap-2 border-t p-4 bg-white shadow-inner">
       <button onclick="document.getElementById('fileInput').click()"
-              class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center text-lg">
+              class="w-10 h-10 rounded-full bg-teal-600 hover:bg-teal-700 text-white flex items-center justify-center text-2xl shadow-md">
         <i class="fa-solid fa-plus"></i>
       </button>
-      <input type="file" id="fileInput" class="hidden" accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic,.bmp,.tiff,.gif" />
-
+      <input type="file" id="fileInput" class="hidden" accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic" />
+    
       <input type="text" id="chatInput"
-             class="flex-1 px-4 py-2 text-sm border rounded-xl focus:outline-none"
+             class="flex-1 px-4 py-2 text-base border rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
              placeholder="Type your question..." onkeydown="if(event.key==='Enter') sendChat()" />
-
+    
       <button onclick="startDictation()"
-              class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
+              class="w-10 h-10 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center hover:bg-gray-300">
         <i class="fa-solid fa-microphone"></i>
       </button>
-
+    
       <button onclick="sendChat()"
-              class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
+              class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shadow-md hover:bg-gray-900">
         <i class="fa-solid fa-paper-plane"></i>
       </button>
     </div>
+    
   </section>
 </div>
 
@@ -137,12 +239,12 @@
     <button onclick="closeModal()"
             class="absolute top-3 right-4 text-gray-400 hover:text-gray-800 text-2xl">&times;</button>
     <div class="mb-4">
-      <h2 class="text-xl font-bold text-teal-700 flex items-center gap-2">
-        <span>🧠</span> Full Summary
+      <h2 class="text-2xl font-bold text-teal-700 flex items-center gap-2">
+        <i class="fa-solid fa-brain text-teal-600 text-2xl"></i> Full Summary
       </h2>
-      <p class="text-sm text-gray-500">Here’s the complete AI-generated explanation.</p>
+      <p class="text-base text-gray-500">Here’s the complete AI-generated explanation.</p>
     </div>
-    <div id="modalContent" class="text-gray-800 text-sm leading-relaxed max-h-[60vh] overflow-y-auto space-y-4 prose prose-sm"></div>
+    <div id="modalContent" class="text-gray-800 text-base leading-relaxed max-h-[60vh] overflow-y-auto space-y-4 prose prose-sm"></div>
   </div>
 </div>
 
@@ -151,8 +253,8 @@
   <div class="animate-spin mb-4 text-teal-600 text-4xl">
     <i class="fa-solid fa-brain"></i>
   </div>
-  <p class="text-lg font-semibold text-gray-700">NeuroMed is summarizing your file…</p>
-  <p class="text-sm text-gray-500 mt-2 italic">🧠 Thinking deep thoughts… please hold the coffee ☕</p>
+  <p class="text-2xl font-semibold text-gray-700">NeuroMed is summarizing your file…</p>
+  <p class="text-base text-gray-500 mt-2 italic"><i class="fa-solid fa-brain text-teal-600 text-2xl"></i> Thinking deep thoughts… please hold the coffee ☕</p>
 </div>
 
 
@@ -220,26 +322,19 @@ document.addEventListener("DOMContentLoaded", function () {
 function appendBubble(message, isUser = false) {
   const chatWindow = document.getElementById("chatWindow");
 
+  // Create wrapper for alignment
   const wrapper = document.createElement("div");
-  wrapper.className = `w-full flex mb-3 ${isUser ? 'justify-end' : 'justify-start'}`;
+  wrapper.className = "w-full flex mb-3"; // margin for spacing
 
   const bubble = document.createElement("div");
-  bubble.className = `
-    px-4 py-2 
-    rounded-2xl 
-    text-sm leading-relaxed 
-    whitespace-pre-wrap 
-    break-words 
-    shadow 
-    max-w-[75%]
-    ${isUser ? 'bg-black text-white rounded-br-sm' : 'bg-gray-100 text-gray-800 rounded-bl-sm'}
-  `;
+  bubble.className = `chat-bubble ${isUser ? 'chat-user' : 'chat-ai'}`;
   bubble.innerText = message;
 
   wrapper.appendChild(bubble);
   chatWindow.appendChild(wrapper);
   chatWindow.scrollTop = chatWindow.scrollHeight;
 }
+
 
 
 async function sendChat() {
@@ -254,13 +349,14 @@ async function sendChat() {
   const tone = document.querySelector('input[name="tone"]:checked')?.value || "Plain";
   const lastSummary = document.querySelector(".open-summary-modal:last-of-type")?.dataset.summary || "";
 
-  // AI "Typing..." bubble
   const typingBubble = document.createElement("div");
-  typingBubble.classList.add("flex", "justify-start", "mb-2");
-  typingBubble.innerHTML = `
-    <div class="inline-block px-4 py-2 rounded-2xl bg-gray-100 text-gray-500 text-sm max-w-[80%] break-words whitespace-pre-line">
-      Typing...
-    </div>`;
+  typingBubble.className = "w-full flex mb-2";
+
+  const typingContent = document.createElement("div");
+  typingContent.className = "chat-bubble chat-ai text-gray-500 italic";
+  typingContent.innerText = "Typing...";
+
+  typingBubble.appendChild(typingContent);
   document.getElementById("chatWindow").appendChild(typingBubble);
 
   try {
@@ -279,17 +375,17 @@ async function sendChat() {
 
     const data = await res.json();
 
-    // Replace "Typing..." with the actual AI reply, same styling
-    typingBubble.innerHTML = `
-      <div class="inline-block px-4 py-2 rounded-2xl bg-gray-100 text-gray-800 text-sm max-w-[80%] break-words whitespace-pre-line">
-        ${data.reply}
-      </div>`;
+    // Clean up typing bubble
+    typingContent.classList.remove("italic", "text-gray-500");
+    typingContent.classList.add("text-gray-800");
+    typingContent.innerText = data.reply;
+
   } catch (err) {
-    typingBubble.innerHTML = `
-      <div class="inline-block px-4 py-2 rounded-2xl bg-red-100 text-red-700 text-sm max-w-[80%] break-words whitespace-pre-line">
-        ⚠️ Failed to respond.
-      </div>`;
+    typingContent.classList.remove("italic", "text-gray-500");
+    typingContent.classList.add("text-red-700", "bg-red-100");
+    typingContent.innerText = "⚠️ Failed to respond.";
   }
+
 }
 
 
@@ -303,6 +399,63 @@ function startDictation() {
   };
   recognition.start();
 }
+
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("overlay");
+  const isOpen = sidebar.classList.contains("translate-x-0");
+
+  if (isOpen) {
+    sidebar.classList.remove("translate-x-0");
+    sidebar.classList.add("-translate-x-full");
+    overlay.classList.add("hidden");
+  } else {
+    sidebar.classList.remove("-translate-x-full");
+    sidebar.classList.add("translate-x-0");
+    overlay.classList.remove("hidden");
+  }
+}
+
+function toggleSettingsMenu() {
+    const menu = document.getElementById("settingsDropdown");
+    menu.classList.toggle("hidden");
+    menu.classList.toggle("block");
+  }
+
+  // Optional: Hide menu when clicking outside
+  document.addEventListener("click", function (event) {
+    const dropdown = document.getElementById("settingsDropdown");
+    const button = event.target.closest("button[onclick='toggleSettingsMenu()']");
+    if (!button && !dropdown.contains(event.target)) {
+      dropdown.classList.add("hidden");
+      dropdown.classList.remove("block");
+    }
+  });
+
+
+  document.addEventListener("DOMContentLoaded", function () {
+  // New Chat Button Functionality
+  document.querySelector('.bg-teal-600').addEventListener('click', function () {
+    const chatWindow = document.getElementById("chatWindow");
+    chatWindow.innerHTML = ''; // clear all bubbles
+    appendBubble("Hi there! How can I help you today?", false);
+  });
+
+  // Search Input Functionality
+  const searchInput = document.querySelector('input[placeholder="Search summaries..."]');
+  searchInput.addEventListener('input', function () {
+    const searchTerm = this.value.toLowerCase();
+    const summaries = document.querySelectorAll('.sidebar-link');
+
+    summaries.forEach(item => {
+      const filename = item.querySelector('p.text-gray-800')?.innerText.toLowerCase() || '';
+      const summaryText = item.querySelector('p.text-base')?.innerText.toLowerCase() || '';
+      const matches = filename.includes(searchTerm) || summaryText.includes(searchTerm);
+      item.style.display = matches ? 'block' : 'none';
+    });
+  });
+});
+
 </script>
 </body>
 </html>
