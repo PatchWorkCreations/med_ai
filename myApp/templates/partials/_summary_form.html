@@ -102,146 +102,52 @@
 
 
 </style>
+<div class="max-w-md mx-auto border border-gray-300 rounded-2xl overflow-hidden shadow-md bg-white flex flex-col h-[600px]">
 
-<section class="bg-white p-6 rounded-xl border shadow-sm space-y-6">
-    <!-- Upload -->
-    <p class="text-xs text-gray-400 pl-0">
-      Supports PDF, DOCX, TXT, and common image formats (JPG, PNG)
-    </p>
-    <div class="flex items-center justify-between border border-gray-300 rounded-md p-4">
-      <div class="flex items-center gap-2">
-        <i class="fa-solid fa-file-medical text-xl text-teal-600"></i>
-        <span class="text-sm font-medium text-gray-600">Upload Medical Record</span>
-      </div>
-      <input type="file" class="text-sm text-gray-500" accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic,.bmp,.tiff,.gif" />
+  <!-- Header -->
+  <div class="flex items-center justify-between px-4 py-3 border-b bg-white">
+    <div class="flex items-center gap-2">
+      <i class="fa-solid fa-notes-medical text-teal-600 text-xl"></i>
+      <h1 class="text-lg font-bold text-gray-800">NeuroMed <span class="text-teal-600">AI</span></h1>
     </div>
-  
-    <!-- Summary Mode -->
-    <div x-data="{ tone: 'Plain' }">
-      <label class="block text-sm font-semibold text-gray-700 mb-2">Summary Mode</label>
-      <div class="flex flex-wrap gap-4 text-sm text-gray-700">
-        <label class="flex items-center gap-1"><input type="radio" name="tone" value="Plain" x-model="tone"> Plain</label>
-        <label class="flex items-center gap-1"><input type="radio" name="tone" value="Caregiver" x-model="tone"> Caregiver</label>
-        <label class="flex items-center gap-1"><input type="radio" name="tone" value="Faith" x-model="tone"> Faith</label>
-        <label class="flex items-center gap-1"><input type="radio" name="tone" value="Clinical" x-model="tone"> Clinical</label>
-        <label class="flex items-center gap-1"><input type="radio" name="tone" value="Bilingual" x-model="tone"> Bilingual</label>
-      </div>
-      <div class="mt-3 text-sm text-gray-500">
-        <template x-if="tone === 'Plain'"><p>Just the facts — clear and easy to follow.</p></template>
-        <template x-if="tone === 'Caregiver'"><p>Gentle explanation for when you're overwhelmed.</p></template>
-        <template x-if="tone === 'Faith'"><p>Hopeful and spiritual — includes a verse to lift your heart.</p></template>
-        <template x-if="tone === 'Clinical'"><p>Professional tone — ideal for nurses or medical teams.</p></template>
-        <template x-if="tone === 'Bilingual'"><p>Taglish summary for easier understanding in Filipino + English.</p></template>
-      </div>
-    </div>
-  
-    <!-- Generate Button -->
-    <div class="text-center">
-      <button onclick="generateSummary()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-md shadow">
-        Generate Summary
-      </button>
-    </div>
-  
-    <!-- Summary Output -->
-<div class="relative bg-blue-50 border border-blue-200 rounded-md p-4 space-y-3">
-    <p class="text-sm text-gray-700 font-semibold">
-  <i class="fa-solid fa-wand-magic-sparkles text-teal-600 mr-1"></i>
-  Here’s what we found:
-</p>  
-    <!-- Scrollable Summary -->
-    <div class="bg-white rounded-md border border-gray-100 p-3 max-h-48 overflow-y-auto">
-      <textarea
-        id="summaryOutput"
-        readonly
-        rows="6"
-        class="w-full resize-none border-none bg-transparent text-sm text-gray-800 font-medium leading-relaxed focus:outline-none"
-      ></textarea>
-    </div>
-  
-    <!-- Action Buttons -->
-    <div class="flex flex-wrap justify-between items-center gap-3 text-sm pt-1">
-      <div class="text-xs text-gray-500">Need help understanding this better?</div>
-      <div class="flex items-center gap-3 text-gray-400">
-        <button id="copyBtn" title="Copy to clipboard">
-          <i class="fa-solid fa-copy"></i>
-        </button>
-        <button id="downloadBtn" title="Download as text">
-          <i class="fa-solid fa-download"></i>
-        </button>
-        <button id="audioBtn" title="Play Audio">
-          <i class="fa-solid fa-volume-up"></i>
-        </button>
-        <button onclick="toggleSuggestions()" class="text-xs text-blue-600 hover:underline ml-2">
-          <i class="fa-solid fa-comments"></i> Ask follow-up questions
-        </button>
-      </div>
-    </div>
+    <i class="fa-solid fa-lightbulb text-teal-600 text-lg cursor-pointer" title="Tips / Suggestions"></i>
   </div>
-  
-  <!-- Smart Suggestions Panel -->
-  <div
-    id="aiSuggestions"
-    class="mt-4 bg-white border border-gray-200 rounded-md p-4 shadow-sm space-y-3 hidden transition-opacity duration-300 ease-in-out"
-  >
-    <p class="text-sm text-gray-600 font-medium">
-  <i class="fa-solid fa-question-circle text-teal-600 mr-1"></i>
-  Maybe you’re wondering:
-</p>    <div id="suggestionCards">
-      <!-- Injected questions appear here -->
-    </div>
-    <button onclick="regenerateSuggestions()" class="text-xs text-blue-600 hover:underline">
-      <i class="fa-solid fa-rotate-right"></i> Show me more ideas
+
+  <!-- Chat Window -->
+  <div id="chatWindow" class="flex-1 overflow-y-auto p-4 space-y-3 text-sm text-gray-800 bg-white">
+    <!-- Chat bubbles will be appended here -->
+  </div>
+
+  <!-- Input Area -->
+  <div class="border-t p-3 flex items-center gap-2 bg-[#fefaf7]">
+
+    <!-- Upload Button -->
+    <button onclick="document.getElementById('fileInput').click()" class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center text-lg">
+      <i class="fa-solid fa-plus"></i>
+    </button>
+    <input type="file" id="fileInput" class="hidden" accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic,.bmp,.tiff,.gif" />
+
+    <!-- Text Input -->
+    <input
+      type="text"
+      id="chatInput"
+      class="flex-1 px-4 py-2 text-sm border rounded-xl focus:outline-none"
+      placeholder="Type your question..."
+      onkeydown="if(event.key==='Enter') sendChat()"
+    />
+
+    <!-- Mic Button -->
+    <button id="micBtn" onclick="startDictation()" class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
+      <i class="fa-solid fa-microphone"></i>
+    </button>
+
+    <!-- Send Button -->
+    <button id="sendBtn" onclick="sendChat()" class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
+      <i class="fa-solid fa-paper-plane"></i>
     </button>
   </div>
-  
-  </section>
-  
-  <!-- Floating Chat Modal -->
-  <div id="chatPopup" class="fixed bottom-6 right-6 w-80 bg-white rounded-xl shadow-xl border p-4 z-50 hidden">
-    <div class="flex justify-between items-center">
-      <h3 class="text-sm font-bold text-gray-700">AI Chat Companion</h3>
-      <button onclick="toggleChat()" class="text-gray-500 hover:text-gray-800">✖</button>
-    </div>
-  
-    <!-- Chat Window -->
-    <div id="chatWindow" class="mt-3 h-64 overflow-y-auto text-sm text-gray-700 space-y-2"></div>
-  
-    <!-- Input + Send + Dictation -->
-    <div class="flex mt-2 gap-2 items-center">
-      
-      <input
-        type="text"
-        id="chatInput"
-        class="w-full text-sm border rounded-md p-2"
-        placeholder="Type your question..."
-        onkeydown="if(event.key==='Enter') sendChat()"
-      />
-      <button
-        id="micBtn"
-        onclick="startDictation()"
-        title="Speak your message"
-        class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-md shadow text-sm transition-all duration-200"
-      >
-        <i class="fa-solid fa-microphone"></i>
-      </button>
+</div>
 
-      <button
-        id="sendBtn"
-        onclick="sendChat()"
-        class="bg-blue-600 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-700 shadow"
-        title="Send"
-      >
-        <i class="fa-solid fa-paper-plane"></i>
-      </button>
-    </div>
-  </div>
-
-  <!-- Floating Avatar Button -->
-<button id="chatToggleBtn"
-onclick="toggleChat()"
-class="fixed bottom-6 right-6 w-16 h-16 rounded-full shadow-lg z-50 animate-pulse focus:outline-none border-4 border-white"
-style="background: url('/static/avatar.png') no-repeat center center / cover;">
-</button>
 
   
   

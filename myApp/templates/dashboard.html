@@ -5,194 +5,304 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard – NeuroMed AI</title>
+  <title>NeuroMed AI Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-
-  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
-<body class="bg-sky-50 min-h-screen text-gray-800 font-sans">
-
-  <!-- Header -->
-  {% include "partials/header.html" %}
-  <!-- Main -->
-  <main class="max-w-3xl mx-auto px-4 py-10 space-y-10">
-    <!-- Upload and Summary UI -->
-    {% include "partials/_summary_form.html" %}
-
-    <!-- Summary History -->
-    <!-- Toggleable Summary History -->
-    <section x-data="{ open: true }" class="bg-white rounded-xl shadow-sm border">
-      <div class="flex items-center justify-between px-6 py-4 border-b">
-        <h2 class="text-lg font-bold text-teal-700">📜 My Summaries</h2>
-        <button
-          @click="open = !open"
-          class="text-sm text-teal-600 hover:underline"
-        >
-          <span x-text="open ? 'Hide' : 'Show'"></span>
-        </button>
-      </div>
-
-      <div x-show="open" x-transition class="p-6">
-        {% if summaries %}
-          <ul class="space-y-4">
-            {% for item in summaries %}
-              <li class="border border-gray-200 rounded-md p-4">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <p class="text-sm text-gray-500">{{ item.created_at|date:"M d, Y – H:i" }} · {{ item.tone }}</p>
-                    <p class="font-semibold text-gray-700 mt-1">{{ item.uploaded_filename }}</p>
-                    <p class="text-sm text-gray-600 mt-2 line-clamp-3">{{ item.summary|truncatewords:50 }}</p>
-                  </div>
-                  <button 
-                    class="text-sm text-teal-600 hover:underline open-summary-modal"
-                    data-summary="{{ item.summary|escapejs }}"
-                  >
-                    View
-                  </button>
-                </div>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="text-sm text-gray-500 italic">No summaries yet.</p>
-        {% endif %}
-      </div>
-    </section>
-
-  </main>
-
-
-
-  <footer class="text-center py-6 text-sm text-gray-500">
-    <p>Powered by NeuroMed AI — Healing with Intelligence + Heart</p>
-  </footer>
-
-
-
-
-  <script>
-
-document.addEventListener("DOMContentLoaded", function () {
-  if (sessionStorage.getItem("summaryIntent") === "true" && isAuthenticated) {
-    sessionStorage.removeItem("summaryIntent");
-    const button = document.querySelector("button[onclick='generateSummary()']");
-    if (button) setTimeout(() => button.click(), 400);
+<style>
+  .chat-bubble {
+    border-radius: 18px;
+    padding: 10px 16px;
+    max-width: 75%;
+    word-wrap: break-word;
+    line-height: 1.5;
+    font-size: 0.875rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
   }
-});
+
+  .chat-user {
+    background-color: #000;
+    color: #fff;
+    border-bottom-right-radius: 4px !important;
+  }
+
+  .chat-ai {
+    background-color: #f3f4f6;
+    color: #1f2937;
+    border-bottom-left-radius: 4px !important;
+  }
+
+  .ai-message {
+  max-width: 70%;               /* Keep bubbles readable */
+  background-color: #f0fdf4;    /* Soft greenish background for AI */
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  animation: fadeInUp 0.3s ease;
+}
+
+@keyframes pulseFade {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+#loadingOverlay i {
+  animation: pulseFade 1.2s infinite ease-in-out;
+}
 
 
-const isAuthenticated = {{ request.user.is_authenticated|yesno:"true,false" }};
+</style>
+<body class="bg-white font-sans text-gray-800">
+
+<div class="w-full h-screen flex overflow-hidden">
+  <!-- Sidebar -->
+  <aside class="w-[280px] bg-gray-50 border-r p-4 overflow-y-auto">
+    <h2 class="text-lg font-semibold mb-4">📝 Summary History</h2>
+    {% if summaries %}
+    <ul class="space-y-4">
+      {% for item in summaries %}
+      <li class="bg-white border rounded-lg p-3 text-sm shadow-sm">
+        <p class="text-gray-400">{{ item.created_at|date:"M d, Y – H:i" }} · {{ item.tone }}</p>
+        <p class="text-gray-700 font-medium mt-1">{{ item.uploaded_filename }}</p>
+        <p class="text-xs text-gray-600 mt-2 line-clamp-3">{{ item.summary|truncatewords:20 }}</p>
+        <button class="mt-2 text-teal-600 text-xs hover:underline open-summary-modal"
+                data-summary="{{ item.summary|escapejs }}">
+          View
+        </button>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-sm italic text-gray-400">No summaries yet.</p>
+    {% endif %}
+  </aside>
+
+  <!-- Main Panel -->
+  <section class="flex-1 flex flex-col relative">
+    <!-- Header -->
+    <header class="flex items-center justify-between px-6 py-4 border-b">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-notes-medical text-teal-600 text-xl"></i>
+        <h1 class="text-xl font-bold text-gray-800">NeuroMed <span class="text-teal-600">AI</span></h1>
+      </div>
+    </header>
+
+    <!-- Chat Window -->
+    <div id="chatWindow" class="flex-1 p-4 overflow-y-auto text-sm space-y-3"></div>
+
+    <!-- Tone Selector -->
+    <!-- Tone Selector -->
+<div class="px-4 pb-2 pt-1 bg-[#fefaf7] text-xs text-gray-600">
+  <span class="font-semibold">Summary Tone:</span>
+  <label class="ml-2"><input type="radio" name="tone" value="Plain" checked> Plain</label>
+  <label class="ml-2"><input type="radio" name="tone" value="Caregiver"> Caregiver</label>
+  <label class="ml-2"><input type="radio" name="tone" value="Faith"> Faith</label>
+  <label class="ml-2"><input type="radio" name="tone" value="Clinical"> Clinical</label>
+  <label class="ml-2"><input type="radio" name="tone" value="Bilingual"> Bilingual</label>
+</div>
+
+
+    <!-- Upload & Chat Input -->
+    <div class="flex items-center gap-2 border-t p-3 bg-[#fefaf7]">
+      <button onclick="document.getElementById('fileInput').click()"
+              class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center text-lg">
+        <i class="fa-solid fa-plus"></i>
+      </button>
+      <input type="file" id="fileInput" class="hidden" accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic,.bmp,.tiff,.gif" />
+
+      <input type="text" id="chatInput"
+             class="flex-1 px-4 py-2 text-sm border rounded-xl focus:outline-none"
+             placeholder="Type your question..." onkeydown="if(event.key==='Enter') sendChat()" />
+
+      <button onclick="startDictation()"
+              class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
+        <i class="fa-solid fa-microphone"></i>
+      </button>
+
+      <button onclick="sendChat()"
+              class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
+    </div>
+  </section>
+</div>
+
+<!-- Modal -->
+<div id="summaryModal" class="fixed inset-0 bg-black bg-opacity-40 hidden z-50 flex items-center justify-center">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl relative p-8 ring-1 ring-gray-200">
+    <button onclick="closeModal()"
+            class="absolute top-3 right-4 text-gray-400 hover:text-gray-800 text-2xl">&times;</button>
+    <div class="mb-4">
+      <h2 class="text-xl font-bold text-teal-700 flex items-center gap-2">
+        <span>🧠</span> Full Summary
+      </h2>
+      <p class="text-sm text-gray-500">Here’s the complete AI-generated explanation.</p>
+    </div>
+    <div id="modalContent" class="text-gray-800 text-sm leading-relaxed max-h-[60vh] overflow-y-auto space-y-4 prose prose-sm"></div>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="fixed inset-0 bg-white bg-opacity-90 z-50 flex flex-col items-center justify-center text-center hidden">
+  <div class="animate-spin mb-4 text-teal-600 text-4xl">
+    <i class="fa-solid fa-brain"></i>
+  </div>
+  <p class="text-lg font-semibold text-gray-700">NeuroMed is summarizing your file…</p>
+  <p class="text-sm text-gray-500 mt-2 italic">🧠 Thinking deep thoughts… please hold the coffee ☕</p>
+</div>
+
+
+<script>
+function getCSRFToken() {
+  const cookieValue = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
+  return cookieValue ? cookieValue.pop() : '';
+}
+
+function closeModal() {
+  document.getElementById("summaryModal").classList.add("hidden");
+}
 
 document.addEventListener("DOMContentLoaded", function () {
-    const buttons = document.querySelectorAll(".open-summary-modal");
-
-    buttons.forEach(btn => {
-      btn.addEventListener("click", function () {
-        let raw = this.dataset.summary;
-
-       
-        const text = JSON.parse('"' + raw.replace(/"/g, '\\"') + '"');
-        const formatted = text
-          .split(/\n{2,}/g)
-          .map(p => `<p>${p.trim()}</p>`)
-          .join('');
-
-        document.getElementById("modalContent").innerHTML = formatted;
-        document.getElementById("summaryModal").classList.remove("hidden");
-      });
+  document.querySelectorAll(".open-summary-modal").forEach(btn => {
+    btn.addEventListener("click", function () {
+      const raw = this.dataset.summary;
+      const text = JSON.parse('"' + raw.replace(/"/g, '\\"') + '"');
+      const formatted = text.split(/\n{2,}/g).map(p => `<p>${p.trim()}</p>`).join('');
+      document.getElementById("modalContent").innerHTML = formatted;
+      document.getElementById("summaryModal").classList.remove("hidden");
     });
   });
 
-  function closeModal() {
-    document.getElementById("summaryModal").classList.add("hidden");
+  document.getElementById("fileInput").addEventListener("change", async function () {
+  const file = this.files[0];
+  if (!file) return;
+
+  // Show the loading overlay
+  document.getElementById("loadingOverlay").classList.remove("hidden");
+
+  const tone = document.querySelector('input[name="tone"]:checked')?.value || "Plain";
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("tone", tone);
+
+  try {
+    const res = await fetch("/api/summarize/", {
+      method: "POST",
+      headers: { "X-CSRFToken": getCSRFToken() },
+      body: formData
+    });
+    const data = await res.json();
+
+    // Hide the overlay
+    document.getElementById("loadingOverlay").classList.add("hidden");
+
+    if (data.summary) {
+      appendBubble(`📝 ${file.name} summary ready.`, false);
+      appendBubble(data.summary, false);
+    } else {
+      appendBubble("⚠️ No summary returned.", false);
+    }
+  } catch (err) {
+    document.getElementById("loadingOverlay").classList.add("hidden");
+    appendBubble("❌ Failed to upload or summarize.", false);
   }
+});
+
+});
 
 
-    function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-        cookie = cookie.trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
-        }
-        }
-    }
-    return cookieValue;
-    }
 
-  
-    async function generateSummary() {
-      if (!isAuthenticated) {
-        showModal();
-        return;
-      }
-  
-      const textarea = document.getElementById("summaryOutput");
-      const fileInput = document.querySelector('input[type="file"]');
-      const tone = document.querySelector('input[name="tone"]:checked')?.value || "Plain";
-      const button = document.querySelector("button[onclick='generateSummary()']");
-  
-      textarea.value = "⏳ Generating summary...";
-      button.disabled = true;
-      button.classList.add("opacity-50", "cursor-not-allowed");
-  
-      if (!fileInput.files.length) {
-        textarea.value = "❗ Please upload a document.";
-        button.disabled = false;
-        button.classList.remove("opacity-50", "cursor-not-allowed");
-        return;
-      }
-  
-      const formData = new FormData();
-      formData.append("file", fileInput.files[0]);
-      formData.append("tone", tone);
-  
-      try {
-        const response = await fetch("/api/summarize/", {
-        method: "POST",
-        body: formData,
-        headers: {
-            "X-CSRFToken": getCookie("csrftoken")
-        },
-        credentials: "same-origin"  // ← ADD THIS LINE
-        });
 
-  
-        const data = await response.json();
-  
-        if (response.ok) {
-          textarea.value = data.summary;
-        } else {
-          textarea.value = "⚠️ " + (data.error || "Something went wrong.");
-        }
-      } catch (error) {
-        textarea.value = "❌ Server error. Please try again.";
-      } finally {
-        button.disabled = false;
-        button.classList.remove("opacity-50", "cursor-not-allowed");
-      }
-    }
-  </script>
+function appendBubble(message, isUser = false) {
+  const chatWindow = document.getElementById("chatWindow");
 
+  const wrapper = document.createElement("div");
+  wrapper.className = `w-full flex mb-3 ${isUser ? 'justify-end' : 'justify-start'}`;
+
+  const bubble = document.createElement("div");
+  bubble.className = `
+    px-4 py-2 
+    rounded-2xl 
+    text-sm leading-relaxed 
+    whitespace-pre-wrap 
+    break-words 
+    shadow 
+    max-w-[75%]
+    ${isUser ? 'bg-black text-white rounded-br-sm' : 'bg-gray-100 text-gray-800 rounded-bl-sm'}
+  `;
+  bubble.innerText = message;
+
+  wrapper.appendChild(bubble);
+  chatWindow.appendChild(wrapper);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+
+async function sendChat() {
+  const input = document.getElementById("chatInput");
+  const userMessage = input.value.trim();
+  if (!userMessage) return;
+
+  // User message bubble
+  appendBubble(userMessage, true);
+  input.value = "";
+
+  const tone = document.querySelector('input[name="tone"]:checked')?.value || "Plain";
+  const lastSummary = document.querySelector(".open-summary-modal:last-of-type")?.dataset.summary || "";
+
+  // AI "Typing..." bubble
+  const typingBubble = document.createElement("div");
+  typingBubble.classList.add("flex", "justify-start", "mb-2");
+  typingBubble.innerHTML = `
+    <div class="inline-block px-4 py-2 rounded-2xl bg-gray-100 text-gray-500 text-sm max-w-[80%] break-words whitespace-pre-line">
+      Typing...
+    </div>`;
+  document.getElementById("chatWindow").appendChild(typingBubble);
+
+  try {
+    const res = await fetch("/api/send-chat/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCSRFToken()
+      },
+      body: JSON.stringify({
+        message: userMessage,
+        summary: lastSummary,
+        tone: tone
+      })
+    });
+
+    const data = await res.json();
+
+    // Replace "Typing..." with the actual AI reply, same styling
+    typingBubble.innerHTML = `
+      <div class="inline-block px-4 py-2 rounded-2xl bg-gray-100 text-gray-800 text-sm max-w-[80%] break-words whitespace-pre-line">
+        ${data.reply}
+      </div>`;
+  } catch (err) {
+    typingBubble.innerHTML = `
+      <div class="inline-block px-4 py-2 rounded-2xl bg-red-100 text-red-700 text-sm max-w-[80%] break-words whitespace-pre-line">
+        ⚠️ Failed to respond.
+      </div>`;
+  }
+}
+
+
+function startDictation() {
+  if (!('webkitSpeechRecognition' in window)) return alert("Speech recognition only works in Chrome.");
+  const recognition = new webkitSpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.onresult = function(event) {
+    const transcript = event.results[0][0].transcript;
+    document.getElementById("chatInput").value = transcript;
+  };
+  recognition.start();
+}
+</script>
 </body>
-
-<div id="summaryModal" class="fixed inset-0 bg-black bg-opacity-40 hidden z-50 flex items-center justify-center">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl relative p-8 ring-1 ring-gray-200">
-      <button onclick="closeModal()" class="absolute top-3 right-4 text-gray-400 hover:text-gray-800 text-2xl">&times;</button>
-      <div class="mb-4">
-        <h2 class="text-xl font-bold text-teal-700 flex items-center gap-2">
-          <span>🧠</span> Full Summary
-        </h2>
-        <p class="text-sm text-gray-500">Here's the complete AI-generated explanation for the uploaded medical record.</p>
-      </div>
-      <div id="modalContent" class="text-gray-800 text-sm leading-relaxed space-y-4 max-h-[60vh] overflow-y-auto prose prose-sm">
-        <!-- Summary will be injected here -->
-      </div>
-    </div>
-  </div>
-  
 </html>

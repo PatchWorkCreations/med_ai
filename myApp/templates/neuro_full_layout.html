@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NeuroMed AI Chat Interface</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body class="bg-gray-50 min-h-screen text-gray-800 font-sans">
+
+<div class="flex max-w-6xl h-[600px] mx-auto border border-gray-300 rounded-xl overflow-hidden shadow bg-white mt-10">
+
+  <!-- LEFT SIDEBAR (History/Summaries) -->
+  <aside class="w-1/4 bg-gray-100 border-r p-4">
+    <h2 class="text-md font-semibold text-gray-700 mb-4">History/Summaries</h2>
+    <ul id="summaryList" class="space-y-2 text-sm text-gray-600 overflow-y-auto h-full">
+      <li class="cursor-pointer hover:text-teal-600">Summary 1</li>
+      <li class="cursor-pointer hover:text-teal-600">Summary 2</li>
+    </ul>
+  </aside>
+
+  <!-- RIGHT CHAT AREA -->
+  <div class="flex flex-col w-3/4">
+
+    <!-- HEADER -->
+    <header class="flex items-center justify-between px-4 py-3 border-b">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-notes-medical text-teal-600 text-xl"></i>
+        <h1 class="text-lg font-bold text-gray-800">NeuroMed <span class="text-teal-600">AI</span></h1>
+      </div>
+      <i class="fa-solid fa-lightbulb text-teal-600 text-lg cursor-pointer" title="Smart tips & tools"></i>
+    </header>
+
+    <!-- CHAT MESSAGES -->
+    <div id="chatWindow" class="flex-1 overflow-y-auto p-4 space-y-3 text-sm text-gray-800 bg-white">
+    </div>
+
+    <!-- INPUT + CONTROLS -->
+    <footer class="border-t p-3 flex items-center gap-2 bg-[#fefaf7]">
+
+      <button onclick="document.getElementById('fileInput').click()" class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center text-lg">
+        <i class="fa-solid fa-plus"></i>
+      </button>
+      <input type="file" id="fileInput" class="hidden" accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic,.bmp,.tiff,.gif" />
+
+      <input
+        type="text"
+        id="chatInput"
+        class="flex-1 px-4 py-2 text-sm border rounded-xl focus:outline-none"
+        placeholder="Type your question..."
+        onkeydown="if(event.key==='Enter') sendChat()"
+      />
+
+      <button id="micBtn" onclick="startDictation()" class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center" title="Voice input">
+        <i class="fa-solid fa-microphone"></i>
+      </button>
+
+      <button id="sendBtn" onclick="sendChat()" class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center" title="Send message">
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
+
+    </footer>
+  </div>
+</div>
+
+<script>
+function appendBubble(message, isUser = true) {
+  const chatWindow = document.getElementById("chatWindow");
+  const bubble = document.createElement("div");
+  bubble.className = "mb-3 flex items-start gap-2";
+  const content = isUser
+    ? `<div class="bg-blue-100 text-blue-800 ml-auto px-4 py-2 rounded-2xl text-sm leading-relaxed shadow-sm max-w-[85%]">${message}</div>`
+    : `<div class="bg-gray-100 text-gray-700 px-4 py-2 rounded-2xl text-sm leading-relaxed shadow-sm max-w-[85%]">${message}</div>`;
+  bubble.innerHTML = content;
+  chatWindow.appendChild(bubble);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+async function sendChat() {
+  const input = document.getElementById("chatInput");
+  const userMessage = input.value.trim();
+  if (!userMessage) return;
+
+  appendBubble(userMessage, true);
+  input.value = "";
+
+  appendBubble("Thinking... 🤖", false);
+
+  setTimeout(() => {
+    appendBubble("This is a mock response from NeuroMed AI.", false);
+  }, 1000);
+}
+
+function startDictation() {
+  const micBtn = document.getElementById("micBtn");
+
+  if (!('webkitSpeechRecognition' in window)) {
+    alert("Your browser doesn't support speech recognition. Try Chrome.");
+    return;
+  }
+
+  const recognition = new webkitSpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = false;
+  recognition.lang = 'en-US';
+
+  recognition.onstart = () => {
+    micBtn.classList.add("ring", "ring-teal-500");
+    micBtn.title = "Listening...";
+  };
+
+  recognition.onerror = (event) => {
+    micBtn.classList.remove("ring", "ring-teal-500");
+    micBtn.title = "Speak your message";
+    alert("Speech recognition error: " + event.error);
+  };
+
+  recognition.onend = () => {
+    micBtn.classList.remove("ring", "ring-teal-500");
+    micBtn.title = "Speak your message";
+  };
+
+  recognition.onresult = (event) => {
+    let fullTranscript = "";
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      fullTranscript += event.results[i][0].transcript + " ";
+    }
+    document.getElementById("chatInput").value = fullTranscript.trim();
+  };
+
+  recognition.start();
+}
+</script>
+
+</body>
+</html>

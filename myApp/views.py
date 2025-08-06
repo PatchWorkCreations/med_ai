@@ -55,28 +55,25 @@ def extract_text_from_docx(file):
 
 PROMPT_TEMPLATES = {
     "Plain": (
-        "You are a helpful, respectful AI assistant. Your job is to break down medical "
-        "language into plain, human language—like you’re explaining it to a smart friend who’s not a doctor. "
-        "Use simple words, clear sentences, and just enough wit to keep things from feeling like a textbook. "
-        "No medical advice. Just clarity and calm, please."
+        "You are NeuroMed, a compassionate and intelligent medical assistant. "
+        "Break down complex health info like you're speaking to a smart friend—clear, calm, a bit witty, but never robotic. "
+        "Offer real insight. Don't hide behind disclaimers unless it's truly necessary."
     ),
     "Caregiver": (
-        "You are a gentle, friendly AI who explains medical information like a wise nurse who also happens to be "
-        "everyone’s favorite aunt. Be warm, clear, and kind. Use gentle metaphors, soft humor, and phrases that reassure. "
-        "This person is tired and maybe scared. No diagnosis. Just kindness and truth."
+        "You are NeuroMed, a warm and kind medical expert, like a favorite nurse who explains everything gently. "
+        "Use metaphors, Taglish warmth, and calm assurance. Speak like someone who truly cares, especially if the user is tired or worried."
     ),
     "Faith": (
-        "You are a spiritually grounded AI assistant. Summarize the medical information gently and clearly. "
-        "Add a light, uplifting message at the end—maybe a touch of humor, maybe a verse, maybe both. "
-        "Make it feel like hope just walked in the room. No medical advice. Just heart and truth."
+        "You are NeuroMed, a wise medical guide with a heart full of hope and faith. Explain medical concepts clearly, gently, and lovingly. "
+        "End with a comforting blessing or Bible verse when appropriate. Bring light even in uncertainty."
     ),
     "Clinical": (
-        "You are a medical AI assistant summarizing clinical notes for healthcare professionals. "
-        "Use concise, accurate, and medically appropriate language. Avoid over-explaining or humor."
+        "You are NeuroMed, a precise and knowledgeable assistant for clinicians. Use medical terminology and concise summaries. "
+        "No unnecessary pleasantries—just clean, professional delivery for healthcare teams."
     ),
     "Bilingual": (
-        "You are an AI explaining a medical summary in both English and Tagalog (Taglish). "
-        "Break things down simply, as if you’re talking to a Filipino family that needs clarity and comfort."
+        "You are NeuroMed, a friendly medical expert who explains in Taglish. Speak clearly and kindly, as if talking to a Filipino family member who needs comfort and understanding. "
+        "Use Tagalog-English naturally to make things easy to understand."
     ),
 }
 
@@ -87,8 +84,6 @@ import tempfile
 
 
 def extract_text_from_image(file_path: str) -> str:
-    client = OpenAI()
-    
     with open(file_path, "rb") as image_file:
         image_data = base64.b64encode(image_file.read()).decode()
 
@@ -107,7 +102,6 @@ def extract_text_from_image(file_path: str) -> str:
     return response.choices[0].message.content.strip()
 
 
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser, FormParser])
@@ -121,17 +115,13 @@ def summarize_medical_record(request):
     file_name = uploaded_file.name.lower()
     text = ""
 
-    # 🔍 Extract text based on file type
     try:
         if file_name.endswith(".pdf"):
             text = extract_text_from_pdf(uploaded_file)
-
         elif file_name.endswith(".docx"):
             text = extract_text_from_docx(uploaded_file)
-
         elif file_name.endswith(".txt"):
             text = uploaded_file.read().decode("utf-8")
-
         elif file_name.endswith((".jpg", ".jpeg", ".png", ".heic", ".webp")):
             with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file_name)[1]) as tmp:
                 for chunk in uploaded_file.chunks():
@@ -139,17 +129,14 @@ def summarize_medical_record(request):
                 tmp_path = tmp.name
             text = extract_text_from_image(tmp_path)
             os.remove(tmp_path)
-
         else:
             return Response({"error": "Unsupported file format."}, status=400)
-
     except Exception as e:
         return Response({"error": f"Failed to process file: {str(e)}"}, status=400)
 
     if not text.strip():
         return Response({"error": "Document is empty or unreadable."}, status=400)
 
-    # 🎯 Prepare prompt
     system_prompt = PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])
 
     try:
@@ -163,7 +150,6 @@ def summarize_medical_record(request):
         )
         result = completion.choices[0].message.content.strip()
 
-        # 📝 Save summary
         MedicalSummary.objects.create(
             user=request.user,
             summary=result,
@@ -171,9 +157,13 @@ def summarize_medical_record(request):
             uploaded_filename=uploaded_file.name
         )
 
+        request.session["latest_summary"] = result
+        request.session.modified = True
+
         return Response({"summary": result})
     except Exception as e:
         return Response({"error": str(e)}, status=500)
+
 
     
 
@@ -209,37 +199,24 @@ client = OpenAI()
 @permission_classes([AllowAny])
 def smart_suggestions(request):
     try:
-        data = request.data
-        summary = data.get("summary", "")
-        tone = data.get("tone", "Plain")
+        summary = request.data.get("summary", "")
+        tone = request.data.get("tone", "Plain")
 
         if not summary.strip():
             return JsonResponse({"suggestions": []})
 
-        tone_map = {
-            "Plain": "Use calm, plain English like you’re explaining to a smart friend.",
-            "Caregiver": "Be soft, warm, and reassuring — like a kind nurse or tita helping out.",
-            "Faith": "Be hopeful, gentle, and lightly spiritual. You may include an uplifting verse or blessing.",
-            "Clinical": "Be formal and to-the-point — ideal for medical teams.",
-            "Bilingual": "Use Taglish and explain things simply as if to a Filipino family."
-        }
-
-        system_prompt = tone_map.get(tone, tone_map["Plain"])
-
         prompt = f"""
-You are a warm and friendly AI health companion. You just read this summary:
+You just read this summary:
 
 \"\"\"{summary}\"\"\"
 
-Now suggest 3 thoughtful follow-up questions a user might ask next — especially things they may not think to ask but probably should.
-
-Only list the 3 questions. Don’t answer them yet.
+List 3 thoughtful follow-up questions the user might want to ask next (things they may not think to ask, but should). Just list the questions.
 """
 
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": system_prompt},
+                {"role": "system", "content": PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.6
@@ -247,6 +224,7 @@ Only list the 3 questions. Don’t answer them yet.
 
         output = response.choices[0].message.content
         questions = [q.strip("- ").strip() for q in output.split("\n") if q.strip()]
+
         return JsonResponse({"suggestions": [{"question": q} for q in questions]})
 
     except Exception as e:
@@ -254,6 +232,7 @@ Only list the 3 questions. Don’t answer them yet.
         return JsonResponse({"error": str(e)}, status=500)
 
 
+# 🔹 Answering a Specific Question
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes([AllowAny])
@@ -266,41 +245,42 @@ def answer_question(request):
         if not question:
             return JsonResponse({"answer": "I didn’t receive a question to answer."})
 
-        tone_map = {
-            "Plain": "Use calm, plain English like you're explaining to a smart friend.",
-            "Caregiver": "Be soft, warm, and reassuring — like a kind nurse or tita helping out.",
-            "Faith": "Be hopeful, gentle, and lightly spiritual. You may include an uplifting verse or blessing.",
-            "Clinical": "Be formal and to-the-point — ideal for medical teams.",
-            "Bilingual": "Use Taglish and explain things simply as if to a Filipino family."
-        }
-
-        system_prompt = tone_map.get(tone, tone_map["Plain"])
-
-        prompt = f"""You are a friendly medical explainer.
-
+        prompt = f"""
+You're NeuroMed, a wise and compassionate medical expert with deep knowledge in clinical and holistic care.
 Here’s the context:
 \"\"\"{summary}\"\"\"
 
-Now answer the question below in a way that matches this tone:
-\"\"\"{system_prompt}\"\"\"
-
+Now answer this question clearly and gently:
 Q: {question}
-A:"""
+"""
 
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": system_prompt},
+                {"role": "system", "content": PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.6
+            temperature=0.6,
         )
 
-        return JsonResponse({"answer": response.choices[0].message.content})
+        return JsonResponse({"answer": response.choices[0].message.content.strip()})
 
     except Exception as e:
         traceback.print_exc()
-        return JsonResponse({"answer": "⚠️ Sorry, I couldn’t fetch that answer right now."})
+        return JsonResponse({"answer": "⚠️ Sorry, something went wrong. Try again in a bit."})
+
+
+# 🔹 Session Reset
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def reset_chat_session(request):
+    request.session["chat_history"] = [
+        {"role": "system", "content": "You are NeuroMed, a friendly, kind, and wise health companion."}
+    ]
+    return JsonResponse({"message": "Session reset."})
+
+    
 @csrf_exempt
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -310,29 +290,29 @@ def send_chat(request):
         return JsonResponse({"reply": "Hmm... I didn’t catch that. Can you try again?"})
 
     session = request.session
+    summary_context = session.get("latest_summary", "")
 
-    # Improved system prompt for tone and graceful boundaries
     messages = session.get("chat_history", [
         {
             "role": "system",
             "content": (
-                "You are a kind, knowledgeable, and encouraging medical assistant. "
-                "Answer questions in a simple, helpful way—as if you're speaking to a smart friend. "
-                "Avoid sounding robotic. If something is serious or outside your scope, don’t say 'I can’t help' — "
-                "instead, gently guide the person with empathy. Offer hopeful and helpful next steps. "
-                "NEVER say 'consult a healthcare provider' without also giving something encouraging or useful. "
-                "No long disclaimers. Be compassionate, brief, warm, and clear. Use soft language. "
-                "When unsure, explain it in a way that's supportive and practical. Be their friendly guide."
+                "You are NeuroMed, a compassionate and highly intelligent medical expert. "
+                "You speak kindly and clearly—like a trusted doctor explaining something to a friend. "
+                "Avoid phrases like 'I am just an AI' unless absolutely needed. Never be cold. "
+                "Be encouraging, helpful, and calm. If you don’t know something, still guide the person with care."
             )
         }
     ])
 
+    if summary_context:
+        messages.append({
+            "role": "user",
+            "content": f"(Here’s the medical context from a file):\n{summary_context}"
+        })
+
     messages.append({"role": "user", "content": user_input})
 
     try:
-        client = OpenAI()
-
-        # Step 1: Raw full response
         raw_response = client.chat.completions.create(
             model="gpt-4",
             messages=messages,
@@ -340,20 +320,17 @@ def send_chat(request):
         )
         full_answer = raw_response.choices[0].message.content.strip()
 
-        # Step 2: Friendly rewrite
+        # Token-efficient light rewrite
         summary_prompt = f"""
-Rewrite the following answer into a short, friendly explanation (under 150 words).
-Make it sound warm and helpful—like you're talking to a kind friend who isn’t a doctor.
-Avoid sounding robotic or clinical. If there’s a need to be cautious, be gentle and human about it.
+Shorten the following into a warm, human response. No disclaimers. Keep the tone like a caring doctor helping a friend. Max 180 words.
 
-Original:
 \"\"\"{full_answer}\"\"\"
 """
 
         summary_response = client.chat.completions.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "You are a caring and clear medical explainer. Keep it short, friendly, and human."},
+                {"role": "system", "content": "You are a medical writer who sounds kind, clear, and confident."},
                 {"role": "user", "content": summary_prompt}
             ],
             temperature=0.6,
@@ -361,13 +338,18 @@ Original:
 
         trimmed_reply = summary_response.choices[0].message.content.strip()
 
-        # Save only last few messages
         messages.append({"role": "assistant", "content": trimmed_reply})
         session["chat_history"] = messages[-10:]
+        session.modified = True
 
         return JsonResponse({"reply": trimmed_reply})
+
     except Exception as e:
-        return JsonResponse({"reply": "⚠️ Something went wrong. Please try again in a bit."})
+        return JsonResponse({
+            "reply": "I'm having trouble responding right now, but hang in there. Try again in a bit, or upload another file—I’m right here with you."
+        })
+    
+
 
 
 @csrf_exempt
