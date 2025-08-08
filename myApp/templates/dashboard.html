@@ -90,6 +90,22 @@
   margin-bottom: 0 !important;
 }
 
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.35s ease-out;
+}
+
+
   </style>
 </head>
 
@@ -108,9 +124,13 @@
   
       <!-- Settings Toggle Button -->
       <div class="relative">
-        <button onclick="toggleSettingsMenu()" class="text-gray-600 hover:text-teal-600 focus:outline-none">
-          <i class="fa-solid fa-user-circle text-2xl"></i>
-        </button>
+        <!-- Settings Toggle Button -->
+        <div class="relative">
+          <button onclick="openSettingsModal()" class="text-gray-600 hover:text-teal-600 focus:outline-none">
+            <i class="fa-solid fa-user-circle text-2xl"></i>
+          </button>
+        </div>
+
   
         <!-- Dropdown Menu (hidden by default) -->
         <div id="settingsDropdown" class="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg hidden z-50 text-base">
@@ -209,26 +229,32 @@
 
     <!-- Upload & Chat Input -->
     <div class="flex items-center gap-2 border-t p-4 bg-white shadow-inner">
+      <!-- Upload button -->
       <button onclick="document.getElementById('fileInput').click()"
               class="w-10 h-10 rounded-full bg-teal-600 hover:bg-teal-700 text-white flex items-center justify-center text-2xl shadow-md">
         <i class="fa-solid fa-plus"></i>
       </button>
-      <input type="file" id="fileInput" class="hidden" accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic" />
+      <input type="file" id="fileInput" class="hidden" 
+             accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic" />
     
+      <!-- Text input -->
       <input type="text" id="chatInput"
              class="flex-1 px-4 py-2 text-base border rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
              placeholder="Type your question..." onkeydown="if(event.key==='Enter') sendChat()" />
     
+      <!-- Mic button -->
       <button onclick="startDictation()"
               class="w-10 h-10 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center hover:bg-gray-300">
         <i class="fa-solid fa-microphone"></i>
       </button>
     
+      <!-- Send button -->
       <button onclick="sendChat()"
               class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shadow-md hover:bg-gray-900">
         <i class="fa-solid fa-paper-plane"></i>
       </button>
     </div>
+    
     
   </section>
 </div>
@@ -257,6 +283,54 @@
   <p class="text-base text-gray-500 mt-2 italic"><i class="fa-solid fa-brain text-teal-600 text-2xl"></i> Thinking deep thoughts… please hold the coffee ☕</p>
 </div>
 
+<!-- Settings Modal -->
+<div id="settingsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity duration-300">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8 relative ring-1 ring-gray-200 animate-fadeInUp">
+
+    <!-- Close Button -->
+    <button onclick="closeSettingsModal()" class="absolute top-5 right-6 text-gray-400 hover:text-gray-600 text-2xl transition">
+      &times;
+    </button>
+
+    <!-- Header -->
+    <div class="mb-6 flex items-center gap-3">
+      <i class="fa-solid fa-sliders text-2xl text-teal-600"></i>
+      <h2 class="text-3xl font-bold text-gray-800 tracking-tight">Settings</h2>
+    </div>
+
+    <!-- Display Name -->
+    <div class="mb-5">
+      <label for="displayName" class="block text-sm font-semibold text-gray-700 mb-1">Display Name</label>
+      <input type="text" id="displayName" placeholder="e.g. Maria Gregory" 
+             class="w-full px-4 py-3 border rounded-lg shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 bg-gray-50 transition" />
+    </div>
+
+    <!-- Profession -->
+    <div class="mb-5">
+      <label for="profession" class="block text-sm font-semibold text-gray-700 mb-1">Profession</label>
+      <input type="text" id="profession" placeholder="e.g. Healthcare Advocate, Tech Founder"
+             class="w-full px-4 py-3 border rounded-lg shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 bg-gray-50 transition" />
+    </div>
+
+    <!-- Profile Picture (placeholder) -->
+    <div class="mb-6 text-sm text-gray-500 italic">
+      <i class="fa-solid fa-image-portrait mr-2 text-gray-400"></i>
+      Profile photo upload coming soon...
+    </div>
+
+    <!-- Actions -->
+    <div class="flex justify-between items-center mt-6">
+      <button onclick="saveSettings()" class="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-2.5 rounded-full shadow-md transition flex items-center gap-2">
+        <i class="fa-solid fa-check-circle text-white text-lg"></i> Save Changes
+      </button>
+      
+      <button onclick="logoutUser()" class="text-sm text-red-600 hover:underline">
+        Logout
+      </button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 function getCSRFToken() {
@@ -264,11 +338,12 @@ function getCSRFToken() {
   return cookieValue ? cookieValue.pop() : '';
 }
 
+
 function closeModal() {
   document.getElementById("summaryModal").classList.add("hidden");
 }
-
 document.addEventListener("DOMContentLoaded", function () {
+  // Summary Modal Handler
   document.querySelectorAll(".open-summary-modal").forEach(btn => {
     btn.addEventListener("click", function () {
       const raw = this.dataset.summary;
@@ -279,41 +354,61 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+  // File Upload Handler
   document.getElementById("fileInput").addEventListener("change", async function () {
-  const file = this.files[0];
-  if (!file) return;
+    const file = this.files[0];
+    if (!file) return;
 
-  // Show the loading overlay
-  document.getElementById("loadingOverlay").classList.remove("hidden");
+    // 👀 FILE PREVIEW
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "w-full flex justify-end mb-3";
 
-  const tone = document.querySelector('input[name="tone"]:checked')?.value || "Plain";
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("tone", tone);
+        const bubble = document.createElement("div");
+        bubble.className = "chat-bubble chat-user bg-black text-white max-w-xs p-2 rounded-lg shadow";
+        bubble.innerHTML = `<img src="${e.target.result}" alt="Uploaded Image" class="rounded-md max-w-full h-auto" />`;
 
-  try {
-    const res = await fetch("/api/summarize/", {
-      method: "POST",
-      headers: { "X-CSRFToken": getCSRFToken() },
-      body: formData
-    });
-    const data = await res.json();
-
-    // Hide the overlay
-    document.getElementById("loadingOverlay").classList.add("hidden");
-
-    if (data.summary) {
-      appendBubble(`📝 ${file.name} summary ready.`, false);
-      appendBubble(data.summary, false);
+        wrapper.appendChild(bubble);
+        document.getElementById("chatWindow").appendChild(wrapper);
+        document.getElementById("chatWindow").scrollTop = document.getElementById("chatWindow").scrollHeight;
+      };
+      reader.readAsDataURL(file);
     } else {
-      appendBubble("⚠️ No summary returned.", false);
+      appendBubble(`📎 You uploaded: ${file.name}`, true);
     }
-  } catch (err) {
-    document.getElementById("loadingOverlay").classList.add("hidden");
-    appendBubble("❌ Failed to upload or summarize.", false);
-  }
-});
 
+    // Show the loading overlay
+    document.getElementById("loadingOverlay").classList.remove("hidden");
+
+    const tone = document.querySelector('input[name="tone"]:checked')?.value || "Plain";
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("tone", tone);
+
+    try {
+      const res = await fetch("/api/summarize/", {
+        method: "POST",
+        headers: { "X-CSRFToken": getCSRFToken() },
+        body: formData
+      });
+      const data = await res.json();
+
+      // Hide the overlay
+      document.getElementById("loadingOverlay").classList.add("hidden");
+      console.log("SUMMARY RESPONSE:", data);
+      if (data.summary) {
+        appendBubble(`📝 ${file.name} summary ready.`, false);
+        appendBubble(data.summary, false);
+      } else {
+        appendBubble("⚠️ No summary returned.", false);
+      }
+    } catch (err) {
+      document.getElementById("loadingOverlay").classList.add("hidden");
+      appendBubble("❌ Failed to upload or summarize.", false);
+    }
+  });
 });
 
 
@@ -336,57 +431,79 @@ function appendBubble(message, isUser = false) {
 }
 
 
-
-async function sendChat() {
-  const input = document.getElementById("chatInput");
-  const userMessage = input.value.trim();
-  if (!userMessage) return;
-
-  // User message bubble
-  appendBubble(userMessage, true);
-  input.value = "";
-
-  const tone = document.querySelector('input[name="tone"]:checked')?.value || "Plain";
-  const lastSummary = document.querySelector(".open-summary-modal:last-of-type")?.dataset.summary || "";
-
-  const typingBubble = document.createElement("div");
-  typingBubble.className = "w-full flex mb-2";
-
-  const typingContent = document.createElement("div");
-  typingContent.className = "chat-bubble chat-ai text-gray-500 italic";
-  typingContent.innerText = "Typing...";
-
-  typingBubble.appendChild(typingContent);
-  document.getElementById("chatWindow").appendChild(typingBubble);
+async function greetUser() {
+  const chatWindow = document.getElementById("chatWindow");
+  if (chatWindow.innerHTML.trim() !== '') return;
 
   try {
-    const res = await fetch("/api/send-chat/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": getCSRFToken()
-      },
-      body: JSON.stringify({
-        message: userMessage,
-        summary: lastSummary,
-        tone: tone
-      })
-    });
-
+    const res = await fetch("/api/user/settings/");
     const data = await res.json();
+    const name = data.display_name || "there";
 
-    // Clean up typing bubble
-    typingContent.classList.remove("italic", "text-gray-500");
-    typingContent.classList.add("text-gray-800");
-    typingContent.innerText = data.reply;
+    const greetings = [
+      `Hello ${name}, how can I assist you today?`,
+      `Welcome back, ${name}. Let’s take care of your health data together.`,
+      `Hi ${name}, ready to review or summarize something?`,
+      `Good to see you, ${name}. I'm here to simplify your records.`
+    ];
 
-  } catch (err) {
-    typingContent.classList.remove("italic", "text-gray-500");
-    typingContent.classList.add("text-red-700", "bg-red-100");
-    typingContent.innerText = "⚠️ Failed to respond.";
+    const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
+    appendBubble(randomGreeting, false);
+  } catch {
+    appendBubble("Welcome! How can I assist you today?", false);
   }
-
 }
+
+async function sendChat() {
+    const input = document.getElementById("chatInput");
+    const userMessage = input.value.trim();
+    const fileInput = document.getElementById("fileInput");
+    const file = fileInput.files[0];
+    if (!userMessage && !file) return;
+
+    // Add user message bubble
+    if (userMessage) appendBubble(userMessage, true);
+    if (file) appendBubble(`📎 ${file.name}`, true);
+
+    input.value = "";
+    fileInput.value = ""; // reset file picker
+
+    const tone = document.querySelector('input[name="tone"]:checked')?.value || "Plain";
+    const lastSummary = document.querySelector(".open-summary-modal:last-of-type")?.dataset.summary || "";
+
+    const formData = new FormData();
+    if (userMessage) formData.append("message", userMessage);
+    if (file) formData.append("file", file);
+    formData.append("tone", tone);
+    formData.append("summary", lastSummary);
+
+    // Typing indicator
+    const typingBubble = document.createElement("div");
+    typingBubble.className = "w-full flex mb-2";
+    const typingContent = document.createElement("div");
+    typingContent.className = "chat-bubble chat-ai text-gray-500 italic";
+    typingContent.innerText = "Analyzing...";
+    typingBubble.appendChild(typingContent);
+    document.getElementById("chatWindow").appendChild(typingBubble);
+
+    try {
+        const res = await fetch("/api/send-chat/", {
+            method: "POST",
+            headers: { "X-CSRFToken": getCSRFToken() },
+            body: formData
+        });
+        const data = await res.json();
+
+        typingContent.classList.remove("italic", "text-gray-500");
+        typingContent.classList.add("text-gray-800");
+        typingContent.innerText = data.reply || "⚠️ No reply received.";
+    } catch (err) {
+        typingContent.classList.remove("italic", "text-gray-500");
+        typingContent.classList.add("text-red-700", "bg-red-100");
+        typingContent.innerText = "❌ Error getting a response.";
+    }
+}
+
 
 
 function startDictation() {
@@ -399,6 +516,7 @@ function startDictation() {
   };
   recognition.start();
 }
+
 
 function toggleSidebar() {
   const sidebar = document.getElementById("sidebar");
@@ -417,44 +535,210 @@ function toggleSidebar() {
 }
 
 function toggleSettingsMenu() {
-    const menu = document.getElementById("settingsDropdown");
-    menu.classList.toggle("hidden");
-    menu.classList.toggle("block");
+  const menu = document.getElementById("settingsDropdown");
+  menu.classList.toggle("hidden");
+  menu.classList.toggle("block");
+}
+
+// ✅ Hide dropdown if clicked outside
+document.addEventListener("click", function (event) {
+  const dropdown = document.getElementById("settingsDropdown");
+  const button = event.target.closest("button[onclick='toggleSettingsMenu()']");
+  if (!button && dropdown && !dropdown.contains(event.target)) {
+    dropdown.classList.add("hidden");
+    dropdown.classList.remove("block");
+  }
+});
+
+// ✅ Centralized new chat handler
+async function newChat() {
+  const chatWindow = document.getElementById("chatWindow");
+  if (chatWindow) chatWindow.innerHTML = ''; // Clear all bubbles
+
+  try {
+    // 👇 Flush the backend session
+    await fetch("/clear-session/", {
+  method: "POST",
+  headers: {
+    "X-CSRFToken": getCSRFToken(),
+    "Content-Type": "application/json"
+  }
+});
+
+
+    const res = await fetch("/api/user/settings/");
+    const data = await res.json();
+    const name = data.display_name || "there";
+
+    const greetings = [
+      `Hi ${name}, how can I help you today? 🌿`,
+      `Hello ${name}! What can I do for you today? 🤖`,
+      `Hey ${name}, I’m here for you. How are you feeling? 💬`,
+      `${name}, let’s figure things out together. What do you need today? 🧠`
+    ];
+
+    const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
+    appendBubble(randomGreeting, false);
+  } catch (err) {
+    appendBubble("Hi there! How can I help you today?", false);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  // ✅ Attach newChat to the button
+  const newChatBtn = document.querySelector('.bg-teal-600');
+  if (newChatBtn) {
+    newChatBtn.addEventListener('click', newChat);
   }
 
-  // Optional: Hide menu when clicking outside
-  document.addEventListener("click", function (event) {
-    const dropdown = document.getElementById("settingsDropdown");
-    const button = event.target.closest("button[onclick='toggleSettingsMenu()']");
-    if (!button && !dropdown.contains(event.target)) {
-      dropdown.classList.add("hidden");
-      dropdown.classList.remove("block");
+  // 🔍 Search Functionality
+  const searchInput = document.querySelector('input[placeholder="Search summaries..."]');
+  if (searchInput) {
+    searchInput.addEventListener('input', function () {
+      const searchTerm = this.value.toLowerCase();
+      const summaries = document.querySelectorAll('.sidebar-link');
+
+      summaries.forEach(item => {
+        const filename = item.querySelector('p.text-gray-800')?.innerText.toLowerCase() || '';
+        const summaryText = item.querySelector('p.text-base')?.innerText.toLowerCase() || '';
+        const matches = filename.includes(searchTerm) || summaryText.includes(searchTerm);
+        item.style.display = matches ? 'block' : 'none';
+      });
+    });
+  }
+
+  greetUser(); // 👋 Load welcome message if window is empty
+});
+
+
+
+
+
+
+function openSettingsModal() {
+  fetch("/api/user/settings/")
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("displayName").value = data.display_name || "";
+      document.getElementById("profession").value = data.profession || "";
+
+      const modal = document.getElementById("settingsModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    });
+}
+
+function saveSettings() {
+  const name = document.getElementById("displayName").value.trim();
+  const profession = document.getElementById("profession").value.trim();
+
+  fetch("/api/user/settings/update/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCSRFToken(),
+    },
+    body: JSON.stringify({
+      display_name: name,
+      profession: profession,
+    }),
+  })
+    .then(res => res.json())
+    .then(data => {
+      // Optional: replace alert with toast later
+      alert("Settings updated successfully!");
+      closeSettingsModal();
+    });
+}
+
+function closeSettingsModal() {
+  const modal = document.getElementById("settingsModal");
+  modal.classList.remove("flex");
+  modal.classList.add("hidden");
+}
+
+// ✅ Add click-outside-to-close and ESC support
+document.addEventListener("DOMContentLoaded", function () {
+  const settingsModal = document.getElementById("settingsModal");
+
+  // Click outside the modal box to close
+  settingsModal.addEventListener("click", function (e) {
+    if (e.target === settingsModal) {
+      closeSettingsModal();
     }
   });
 
-
-  document.addEventListener("DOMContentLoaded", function () {
-  // New Chat Button Functionality
-  document.querySelector('.bg-teal-600').addEventListener('click', function () {
-    const chatWindow = document.getElementById("chatWindow");
-    chatWindow.innerHTML = ''; // clear all bubbles
-    appendBubble("Hi there! How can I help you today?", false);
-  });
-
-  // Search Input Functionality
-  const searchInput = document.querySelector('input[placeholder="Search summaries..."]');
-  searchInput.addEventListener('input', function () {
-    const searchTerm = this.value.toLowerCase();
-    const summaries = document.querySelectorAll('.sidebar-link');
-
-    summaries.forEach(item => {
-      const filename = item.querySelector('p.text-gray-800')?.innerText.toLowerCase() || '';
-      const summaryText = item.querySelector('p.text-base')?.innerText.toLowerCase() || '';
-      const matches = filename.includes(searchTerm) || summaryText.includes(searchTerm);
-      item.style.display = matches ? 'block' : 'none';
-    });
+  // ESC key to close modal
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      closeSettingsModal();
+    }
   });
 });
+
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const chatWindow = document.getElementById("chatWindow");
+
+  // Only greet the user if the chat window is empty
+  if (chatWindow && chatWindow.innerHTML.trim() === '') {
+    try {
+      const res = await fetch("/api/user/settings/");
+      const data = await res.json();
+      const name = data.display_name || "there";
+
+      const greetings = [
+        `Welcome back, ${name}. Let’s get started.`,
+        `Hello again, ${name}. Ready to review your records?`,
+        `Hi ${name}, your wellness matters—how can I support you today?`,
+        `${name}, I’m here to help make things simpler.`
+      ];
+
+      const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
+      appendBubble(randomGreeting, false);
+    } catch (error) {
+      appendBubble("Welcome back. Let’s take care of what matters most today.", false);
+    }
+  }
+});
+
+
+async function newChat() {
+  const chatWindow = document.getElementById("chatWindow");
+  if (chatWindow) chatWindow.innerHTML = ''; // Clear all chat bubbles
+
+  try {
+    // Flush the session on the backend
+    await fetch("/clear-session/", {
+  method: "POST",
+  headers: {
+    "X-CSRFToken": getCSRFToken(),
+    "Content-Type": "application/json"
+  }
+});
+
+
+    // Get user settings
+    const res = await fetch("/api/user/settings/");
+    const data = await res.json();
+    const name = data.display_name || "there";
+
+    // Greeting choices
+    const greetings = [
+      `Hi ${name}, how can I help you today? 🌿`,
+      `Hello ${name}! What can I do for you today? 🤖`,
+      `Hey ${name}, I’m here for you. How are you feeling? 💬`,
+      `${name}, let’s figure things out together. What do you need today? 🧠`
+    ];
+
+    const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
+    appendBubble(randomGreeting, false);
+  } catch (err) {
+    appendBubble("Hi there! How can I help you today?", false);
+  }
+}
+
+
 
 </script>
 </body>

@@ -1,45 +1,76 @@
+# myApp/views.py
+
 from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm
+from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 
-import openai
-from django.conf import settings
-
-openai.api_key = settings.OPENAI_API_KEY
-
-
-def landing_page(request):
-    return render(request, "landing.html", {"is_authenticated": request.user.is_authenticated})
-
-
-# views.py
-from .forms import CustomSignupForm
-
-def signup_view(request):
-    if request.method == "POST":
-        form = CustomSignupForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("login")
-    else:
-        form = CustomSignupForm()
-    return render(request, "signup.html", {"form": form})
-
-
-
-
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.decorators import api_view, permission_classes, parser_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from openai import OpenAI
-import os
+from rest_framework.parsers import MultiPartParser, FormParser
+
+from django.contrib.auth.forms import UserCreationForm
+
+from .models import MedicalSummary, Profile
+
+# -------- Std libs
+import os, io, json, base64, mimetypes, tempfile, traceback
+
+# -------- Files / parsing
 import fitz  # PyMuPDF
 import docx
-from rest_framework.decorators import parser_classes
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.permissions import IsAuthenticated
+from PIL import Image
 
+# -------- OpenAI
+from openai import OpenAI
+client = OpenAI()
 
+# =============================
+#         PROMPTS
+# =============================
+PROMPT_TEMPLATES = {
+    "Plain": (
+        "You are NeuroMed, a brilliant yet humble medical assistant. "
+        "Speak with clarity, warmth, and intelligence—like a trusted doctor explaining things to a close friend. "
+        "Avoid robotic phrasing and disclaimers. Be accurate but approachable."
+    ),
+    "Caregiver": (
+        "You are NeuroMed, a comforting health companion. "
+        "Speak gently, using Taglish warmth where helpful. "
+        "Explain clearly, reassure kindly, and offer practical next steps."
+    ),
+    "Faith": (
+        "You are NeuroMed, a faith-filled health companion. "
+        "Provide clear medical explanations with hope and peace. "
+        "When appropriate, close with a short Bible verse or brief prayer."
+    ),
+    "Clinical": (
+        "You are NeuroMed, a professional-grade medical assistant for clinicians. "
+        "Be concise, precise, and correct in medical terminology. No fluff."
+    ),
+    "Bilingual": (
+        "You are NeuroMed, a warm Taglish-speaking medical guide. "
+        "Use natural Tagalog-English to make explanations crystal clear."
+    ),
+}
+
+VISION_FORMAT_PROMPT = (
+    "\n\nFormat your findings like this:\n\n"
+    "🧠 **Observed Structures**:\n"
+    "- List key anatomical features and orientation.\n"
+    "- Note symmetry/asymmetry, density patterns, artifacts.\n\n"
+    "🔍 **Possible Findings**:\n"
+    "- Describe abnormalities vs normal; suggest possible causes in a non-diagnostic, educational way.\n\n"
+    "💡 **Explanation**:\n"
+    "Explain warmly what this might mean for a concerned patient/family.\n\n"
+    "🕊 **Next Steps**:\n"
+    "- Suggest reasonable follow-up tests, referrals, or general health tips.\n"
+)
+
+# =============================
+#      FILE TEXT EXTRACTORS
+# =============================
 def extract_text_from_pdf(file):
     pdf = fitz.open(stream=file.read(), filetype="pdf")
     text = ""
@@ -51,323 +82,428 @@ def extract_text_from_docx(file):
     doc = docx.Document(file)
     return "\n".join(p.text for p in doc.paragraphs if p.text.strip())
 
+# =============================
+#      IMAGE PREPROCESSING
+# =============================
+def preprocess_image_for_vision_api(image_path, resize_width=1024):
+    with Image.open(image_path) as img:
+        img = img.convert("L")  # grayscale
+        if img.width > resize_width:
+            w_percent = resize_width / float(img.width)
+            h_size = int(float(img.height) * float(w_percent))
+            img = img.resize((resize_width, h_size), Image.LANCZOS)
+        buffer = io.BytesIO()
+        img.save(buffer, format="PNG", optimize=True)
+        return base64.b64encode(buffer.getvalue()).decode()
 
+# =============================
+#  VISION INTERPRETATION (IMG)
+# =============================
+def extract_contextual_medical_insights_from_image(file_path: str, tone: str = "Plain") -> str:
+    image_b64 = preprocess_image_for_vision_api(file_path)
+    data_uri = f"data:image/png;base64,{image_b64}"
+    system_prompt = PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"]) + VISION_FORMAT_PROMPT
 
-PROMPT_TEMPLATES = {
-    "Plain": (
-        "You are NeuroMed, a compassionate and intelligent medical assistant. "
-        "Break down complex health info like you're speaking to a smart friend—clear, calm, a bit witty, but never robotic. "
-        "Offer real insight. Don't hide behind disclaimers unless it's truly necessary."
-    ),
-    "Caregiver": (
-        "You are NeuroMed, a warm and kind medical expert, like a favorite nurse who explains everything gently. "
-        "Use metaphors, Taglish warmth, and calm assurance. Speak like someone who truly cares, especially if the user is tired or worried."
-    ),
-    "Faith": (
-        "You are NeuroMed, a wise medical guide with a heart full of hope and faith. Explain medical concepts clearly, gently, and lovingly. "
-        "End with a comforting blessing or Bible verse when appropriate. Bring light even in uncertainty."
-    ),
-    "Clinical": (
-        "You are NeuroMed, a precise and knowledgeable assistant for clinicians. Use medical terminology and concise summaries. "
-        "No unnecessary pleasantries—just clean, professional delivery for healthcare teams."
-    ),
-    "Bilingual": (
-        "You are NeuroMed, a friendly medical expert who explains in Taglish. Speak clearly and kindly, as if talking to a Filipino family member who needs comfort and understanding. "
-        "Use Tagalog-English naturally to make things easy to understand."
-    ),
-}
-
-
-import base64
-from openai import OpenAI
-import tempfile
-
-
-def extract_text_from_image(file_path: str) -> str:
-    with open(file_path, "rb") as image_file:
-        image_data = base64.b64encode(image_file.read()).decode()
-
-    response = client.chat.completions.create(
+    # First pass: interpret the actual image
+    resp = client.chat.completions.create(
         model="gpt-4o",
+        temperature=0.4,
         messages=[
-            {"role": "user", "content": [
-                {"type": "text", "text": "Extract all visible text from this image. Only return the text."},
-                {"type": "image_url", "image_url": {
-                    "url": f"data:image/png;base64,{image_data}"
-                }}
-            ]}
-        ]
+            {"role": "system", "content": system_prompt},
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "Please interpret this medical image directly and specifically."},
+                    {"type": "image_url", "image_url": {"url": data_uri}}
+                ]
+            },
+        ],
     )
+    raw = resp.choices[0].message.content.strip()
 
-    return response.choices[0].message.content.strip()
+    # Second pass: humanize/tone polish
+    rewrite = client.chat.completions.create(
+        model="gpt-4o",
+        temperature=0.3,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"Rewrite warmly, clearly, and confidently—keep all details:\n\n{raw}"},
+        ],
+    )
+    return rewrite.choices[0].message.content.strip()
 
-
+# =============================
+#  SUMMARIZE (PDF/DOCX/TXT/IMG)
+# =============================
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser, FormParser])
 def summarize_medical_record(request):
     uploaded_file = request.FILES.get("file")
     tone = request.data.get("tone", "Plain")
-
     if not uploaded_file:
         return Response({"error": "No file provided."}, status=400)
 
     file_name = uploaded_file.name.lower()
-    text = ""
+    system_prompt = PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])
 
     try:
-        if file_name.endswith(".pdf"):
-            text = extract_text_from_pdf(uploaded_file)
-        elif file_name.endswith(".docx"):
-            text = extract_text_from_docx(uploaded_file)
-        elif file_name.endswith(".txt"):
-            text = uploaded_file.read().decode("utf-8")
-        elif file_name.endswith((".jpg", ".jpeg", ".png", ".heic", ".webp")):
+        # ---------- Images
+        if file_name.endswith((".jpg", ".jpeg", ".png", ".heic", ".webp")):
             with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file_name)[1]) as tmp:
                 for chunk in uploaded_file.chunks():
                     tmp.write(chunk)
                 tmp_path = tmp.name
-            text = extract_text_from_image(tmp_path)
-            os.remove(tmp_path)
+
+            try:
+                summary = extract_contextual_medical_insights_from_image(tmp_path, tone=tone)
+            finally:
+                os.remove(tmp_path)
+
+            # Save to DB
+            MedicalSummary.objects.create(
+                user=request.user,
+                uploaded_filename=uploaded_file.name,
+                tone=tone,
+                raw_text="(Image file)",
+                summary=summary,
+            )
+
+            # Persist to session for chat context
+            request.session["latest_summary"] = summary
+            request.session["chat_history"] = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"(Here’s the medical context from an image):\n{summary}"}
+            ]
+            request.session.modified = True
+            return Response({"summary": summary})
+
+        # ---------- Text docs
+        elif file_name.endswith(".pdf"):
+            raw_text = extract_text_from_pdf(uploaded_file)
+        elif file_name.endswith(".docx"):
+            raw_text = extract_text_from_docx(uploaded_file)
+        elif file_name.endswith(".txt"):
+            raw_text = uploaded_file.read().decode("utf-8")
         else:
             return Response({"error": "Unsupported file format."}, status=400)
-    except Exception as e:
-        return Response({"error": f"Failed to process file: {str(e)}"}, status=400)
 
-    if not text.strip():
-        return Response({"error": "Document is empty or unreadable."}, status=400)
+        if not raw_text.strip():
+            return Response({"error": "Document is empty or unreadable."}, status=400)
 
-    system_prompt = PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])
-
-    try:
+        # Summarize text docs
         completion = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o",
+            temperature=0.4,
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": text}
+                {"role": "user", "content": f"Summarize clearly and kindly for a patient/caregiver:\n\n{raw_text}"},
             ],
-            temperature=0.5
         )
-        result = completion.choices[0].message.content.strip()
+        raw_summary = completion.choices[0].message.content.strip()
+
+        polish = client.chat.completions.create(
+            model="gpt-4o",
+            temperature=0.3,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"Polish the tone—warm, clear, confident:\n\n{raw_summary}"},
+            ],
+        )
+        summary = polish.choices[0].message.content.strip()
 
         MedicalSummary.objects.create(
             user=request.user,
-            summary=result,
+            uploaded_filename=uploaded_file.name,
             tone=tone,
-            uploaded_filename=uploaded_file.name
+            raw_text=raw_text,
+            summary=summary,
         )
 
-        request.session["latest_summary"] = result
+        request.session["latest_summary"] = summary
+        request.session["chat_history"] = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"(Here’s the medical context from a file):\n{summary}"}
+        ]
         request.session.modified = True
 
-        return Response({"summary": result})
+        return Response({"summary": summary})
+
     except Exception as e:
-        return Response({"error": str(e)}, status=500)
+        traceback.print_exc()
+        return Response({"error": f"Failed to process file: {str(e)}"}, status=400)
 
+# =============================
+#     CHAT (TEXT + FILES)
+# =============================
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes([AllowAny])
+@parser_classes([MultiPartParser, FormParser])
+def send_chat(request):
+    """
+    Unified chat endpoint:
+    - If an image is attached → vision pipeline (specific interpretation, no generic how-to).
+    - If a document is attached → extract and summarize.
+    - Otherwise → normal text chat, with session context from last summary.
+    """
+    tone = request.data.get("tone", "Plain")
+    system_prompt = PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])
+    summary_context = request.session.get("latest_summary", "")
+    chat_history = request.session.get("chat_history", [{"role": "system", "content": system_prompt}])
 
-    
+    # -------- Handle FILES first (images, PDFs, DOCX, TXT)
+    if "file" in request.FILES:
+        file_obj = request.FILES["file"]
+        fname = file_obj.name.lower()
 
+        # IMAGES
+        if fname.endswith((".jpg", ".jpeg", ".png", ".heic", ".webp")):
+            with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(fname)[1]) as tmp:
+                for chunk in file_obj.chunks():
+                    tmp.write(chunk)
+                tmp_path = tmp.name
+            try:
+                summary = extract_contextual_medical_insights_from_image(tmp_path, tone=tone)
+            finally:
+                os.remove(tmp_path)
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from .models import MedicalSummary
+            # Save to DB only if user is authenticated
+            if request.user.is_authenticated:
+                MedicalSummary.objects.create(
+                    user=request.user,
+                    uploaded_filename=file_obj.name,
+                    tone=tone,
+                    raw_text="(Image file via chat)",
+                    summary=summary,
+                )
 
-@login_required
-def dashboard(request):
-    summaries = request.user.summaries.all()  # via related_name
-    return render(request, "dashboard.html", {"summaries": summaries})
+            # Update session context
+            request.session["latest_summary"] = summary
+            request.session["chat_history"] = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"(Here’s the medical context from an image):\n{summary}"}
+            ]
+            request.session.modified = True
+            return JsonResponse({"reply": summary})
 
+        # DOCS
+        elif fname.endswith(".pdf"):
+            raw_text = extract_text_from_pdf(file_obj)
+        elif fname.endswith(".docx"):
+            raw_text = extract_text_from_docx(file_obj)
+        elif fname.endswith(".txt"):
+            raw_text = file_obj.read().decode("utf-8")
+        else:
+            return JsonResponse({"reply": "Unsupported file format for chat upload."}, status=400)
 
-from django.views.decorators.csrf import csrf_exempt
-import json
-import openai
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+        if not raw_text.strip():
+            return JsonResponse({"reply": "The document appears empty or unreadable."}, status=400)
 
-# Set your OpenAI key securely (or via env)
-openai.api_key = os.getenv("OPENAI_API_KEY")  # or use settings.OPENAI_KEY
-import traceback
+        # Summarize docs in chat
+        completion = client.chat.completions.create(
+            model="gpt-4o",
+            temperature=0.4,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"Summarize clearly and kindly for a patient/caregiver:\n\n{raw_text}"},
+            ],
+        )
+        raw_summary = completion.choices[0].message.content.strip()
 
+        polish = client.chat.completions.create(
+            model="gpt-4o",
+            temperature=0.3,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"Polish the tone—warm, clear, confident:\n\n{raw_summary}"},
+            ],
+        )
+        summary = polish.choices[0].message.content.strip()
 
-from openai import OpenAI
-client = OpenAI()
+        if request.user.is_authenticated:
+            MedicalSummary.objects.create(
+                user=request.user,
+                uploaded_filename=file_obj.name,
+                tone=tone,
+                raw_text=raw_text,
+                summary=summary,
+            )
 
+        request.session["latest_summary"] = summary
+        request.session["chat_history"] = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"(Here’s the medical context from a file):\n{summary}"}
+        ]
+        request.session.modified = True
+        return JsonResponse({"reply": summary})
+
+    # -------- No files → normal text chat
+    user_message = request.data.get("message", "").strip()
+    if not user_message:
+        return JsonResponse({"reply": "Hmm… I didn’t catch that. Can you try again?"})
+
+    # Keep context
+    if summary_context and all("(Here’s the medical context" not in m.get("content", "") for m in chat_history if m.get("role") == "user"):
+        chat_history.append({"role": "user", "content": f"(Here’s the medical context):\n{summary_context}"})
+    chat_history.append({"role": "user", "content": user_message})
+
+    try:
+        raw = client.chat.completions.create(
+            model="gpt-4o",
+            temperature=0.6,
+            messages=chat_history,
+        ).choices[0].message.content.strip()
+
+        # Tone polish
+        reply = client.chat.completions.create(
+            model="gpt-4o",
+            temperature=0.3,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"Rewrite warmly, clearly, and confidently:\n\n{raw}"},
+            ],
+        ).choices[0].message.content.strip()
+
+        chat_history.append({"role": "assistant", "content": reply})
+        request.session["chat_history"] = chat_history[-10:]  # keep recent
+        request.session.modified = True
+
+        return JsonResponse({"reply": reply})
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({"reply": "I’m having trouble responding right now. Let’s try again in a bit."})
+
+# =============================
+#  SMART SUGGESTIONS / Q&A
+# =============================
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def smart_suggestions(request):
-    try:
-        summary = request.data.get("summary", "")
-        tone = request.data.get("tone", "Plain")
+    summary = request.data.get("summary", "") or request.session.get("latest_summary", "")
+    tone = request.data.get("tone", "Plain")
+    if not summary.strip():
+        return JsonResponse({"suggestions": []})
 
-        if not summary.strip():
-            return JsonResponse({"suggestions": []})
+    prompt = (
+        "Based on the medical context below, suggest 3 thoughtful follow-up questions the user might ask next. "
+        "Focus on proactive, useful questions a patient or caregiver might not think to ask.\n\n"
+        f"{summary}"
+    )
 
-        prompt = f"""
-You just read this summary:
+    resp = client.chat.completions.create(
+        model="gpt-4o",
+        temperature=0.6,
+        messages=[
+            {"role": "system", "content": PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])},
+            {"role": "user", "content": prompt},
+        ],
+    )
+    lines = [l.strip("- ").strip() for l in resp.choices[0].message.content.split("\n") if l.strip()]
+    return JsonResponse({"suggestions": [{"question": q} for q in lines[:3]]})
 
-\"\"\"{summary}\"\"\"
-
-List 3 thoughtful follow-up questions the user might want to ask next (things they may not think to ask, but should). Just list the questions.
-"""
-
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.6
-        )
-
-        output = response.choices[0].message.content
-        questions = [q.strip("- ").strip() for q in output.split("\n") if q.strip()]
-
-        return JsonResponse({"suggestions": [{"question": q} for q in questions]})
-
-    except Exception as e:
-        traceback.print_exc()
-        return JsonResponse({"error": str(e)}, status=500)
-
-
-# 🔹 Answering a Specific Question
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def answer_question(request):
-    try:
-        question = request.data.get("question", "")
-        summary = request.data.get("summary", "")
-        tone = request.data.get("tone", "Plain")
+    question = request.data.get("question", "")
+    summary = request.data.get("summary", "") or request.session.get("latest_summary", "")
+    tone = request.data.get("tone", "Plain")
+    if not question:
+        return JsonResponse({"answer": "Could you repeat the question? I want to make sure I understand."})
 
-        if not question:
-            return JsonResponse({"answer": "I didn’t receive a question to answer."})
+    prompt = f"Context:\n{summary}\n\nAnswer clearly, warmly, and confidently:\nQ: {question}"
+    raw = client.chat.completions.create(
+        model="gpt-4o",
+        temperature=0.6,
+        messages=[
+            {"role": "system", "content": PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])},
+            {"role": "user", "content": prompt},
+        ],
+    ).choices[0].message.content.strip()
 
-        prompt = f"""
-You're NeuroMed, a wise and compassionate medical expert with deep knowledge in clinical and holistic care.
-Here’s the context:
-\"\"\"{summary}\"\"\"
+    polish = client.chat.completions.create(
+        model="gpt-4o",
+        temperature=0.3,
+        messages=[
+            {"role": "system", "content": PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])},
+            {"role": "user", "content": f"Rewrite warmly, clearly, and confidently:\n\n{raw}"},
+        ],
+    ).choices[0].message.content.strip()
 
-Now answer this question clearly and gently:
-Q: {question}
-"""
+    return JsonResponse({"answer": polish})
 
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.6,
-        )
-
-        return JsonResponse({"answer": response.choices[0].message.content.strip()})
-
-    except Exception as e:
-        traceback.print_exc()
-        return JsonResponse({"answer": "⚠️ Sorry, something went wrong. Try again in a bit."})
-
-
-# 🔹 Session Reset
-@csrf_exempt
+# =============================
+#      SESSION UTILITIES
+# =============================
 @api_view(["POST"])
-@permission_classes([AllowAny])
-def reset_chat_session(request):
-    request.session["chat_history"] = [
-        {"role": "system", "content": "You are NeuroMed, a friendly, kind, and wise health companion."}
-    ]
-    return JsonResponse({"message": "Session reset."})
-
-    
-@csrf_exempt
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def send_chat(request):
-    user_input = request.data.get("message", "")
-    if not user_input:
-        return JsonResponse({"reply": "Hmm... I didn’t catch that. Can you try again?"})
-
-    session = request.session
-    summary_context = session.get("latest_summary", "")
-
-    messages = session.get("chat_history", [
-        {
-            "role": "system",
-            "content": (
-                "You are NeuroMed, a compassionate and highly intelligent medical expert. "
-                "You speak kindly and clearly—like a trusted doctor explaining something to a friend. "
-                "Avoid phrases like 'I am just an AI' unless absolutely needed. Never be cold. "
-                "Be encouraging, helpful, and calm. If you don’t know something, still guide the person with care."
-            )
-        }
-    ])
-
-    if summary_context:
-        messages.append({
-            "role": "user",
-            "content": f"(Here’s the medical context from a file):\n{summary_context}"
-        })
-
-    messages.append({"role": "user", "content": user_input})
-
-    try:
-        raw_response = client.chat.completions.create(
-            model="gpt-4",
-            messages=messages,
-            temperature=0.6,
-        )
-        full_answer = raw_response.choices[0].message.content.strip()
-
-        # Token-efficient light rewrite
-        summary_prompt = f"""
-Shorten the following into a warm, human response. No disclaimers. Keep the tone like a caring doctor helping a friend. Max 180 words.
-
-\"\"\"{full_answer}\"\"\"
-"""
-
-        summary_response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are a medical writer who sounds kind, clear, and confident."},
-                {"role": "user", "content": summary_prompt}
-            ],
-            temperature=0.6,
-        )
-
-        trimmed_reply = summary_response.choices[0].message.content.strip()
-
-        messages.append({"role": "assistant", "content": trimmed_reply})
-        session["chat_history"] = messages[-10:]
-        session.modified = True
-
-        return JsonResponse({"reply": trimmed_reply})
-
-    except Exception as e:
-        return JsonResponse({
-            "reply": "I'm having trouble responding right now, but hang in there. Try again in a bit, or upload another file—I’m right here with you."
-        })
-    
-
-
+@permission_classes([IsAuthenticated])
+def clear_session(request):
+    tone = request.session.get("tone", "Plain")
+    system_prompt = PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])
+    request.session["chat_history"] = [{"role": "system", "content": system_prompt}]
+    request.session["latest_summary"] = ""
+    request.session.modified = True
+    return Response({"status": "✅ New chat started!", "tone": tone})
 
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def reset_chat_session(request):
-    request.session["chat_history"] = [
-        {"role": "system", "content": "You are a friendly medical guide that explains things in a kind, calming way."}
-    ]
-    return JsonResponse({"message": "Session has been reset."})
+    # mirror of clear_session but AllowAny (if you expose this publicly)
+    tone = request.session.get("tone", "Plain")
+    system_prompt = PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])
+    request.session["chat_history"] = [{"role": "system", "content": system_prompt}]
+    request.session["latest_summary"] = ""
+    request.session.modified = True
+    return JsonResponse({"message": "✅ New chat started fresh.", "tone": tone})
 
-
+# =============================
+#       BASIC PAGES / AUTH
+# =============================
+def landing_page(request):
+    return render(request, "landing_page.html")
 
 def about_page(request):
     return render(request, "about.html")
 
-
-from django.shortcuts import render
-
 def speaking_view(request):
     return render(request, 'talking_ai/speaking.html')
+
+def signup_view(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("dashboard")
+    else:
+        form = UserCreationForm()
+    return render(request, "signup.html", {"form": form})
+
+# =============================
+#       DASHBOARD + SETTINGS
+# =============================
+@login_required
+def dashboard(request):
+    summaries = MedicalSummary.objects.filter(user=request.user).order_by("-created_at")
+    return render(request, "dashboard.html", {"summaries": summaries})
+
+@login_required
+def get_user_settings(request):
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+    return JsonResponse({
+        "display_name": profile.display_name or request.user.first_name or request.user.username,
+        "profession": profile.profession or "",
+    })
+
+@login_required
+def update_user_settings(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        profile, _ = Profile.objects.get_or_create(user=request.user)
+        profile.display_name = data.get("display_name", profile.display_name)
+        profile.profession = data.get("profession", profile.profession)
+        profile.save()
+        return JsonResponse({"status": "success"})
+    return JsonResponse({"error": "Invalid request"}, status=400)

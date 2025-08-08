@@ -30,4 +30,11 @@ urlpatterns = [
      path('about/', views.about_page, name='about'),
 
      path('speak/', views.speaking_view, name='speaking-page'),
+
+
+      path("api/user/settings/", views.get_user_settings, name="get_user_settings"),
+    path("api/user/settings/update/", views.update_user_settings, name="update_user_settings"),
+path("clear-session/", views.clear_session, name="clear-session"),
+
+
 ]
