@@ -243,119 +243,77 @@ def summarize_medical_record(request):
 def send_chat(request):
     """
     Unified chat endpoint:
-    - If an image is attached → vision pipeline (specific interpretation, no generic how-to).
-    - If a document is attached → extract and summarize.
-    - Otherwise → normal text chat, with session context from last summary.
+    - Accepts multiple files via `files[]` (new UI) or a single `file` (backward compatible).
+    - Images → vision interpretation.
+    - PDFs/DOCX/TXT → extract + summarize.
+    - If user sends only files → return combined file summaries.
+    - If user also sends a question → answer using the combined context + session history.
     """
     tone = request.data.get("tone", "Plain")
     system_prompt = PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])
+    user_message = (request.data.get("message") or "").strip()
+
+    # Session context (keep it light)
     summary_context = request.session.get("latest_summary", "")
     chat_history = request.session.get("chat_history", [{"role": "system", "content": system_prompt}])
 
-    # -------- Handle FILES first (images, PDFs, DOCX, TXT)
-    if "file" in request.FILES:
-        file_obj = request.FILES["file"]
-        fname = file_obj.name.lower()
+    # --- Collect files (multi or single for backward-compat)
+    files = request.FILES.getlist("files[]")
+    if not files and "file" in request.FILES:
+        files = [request.FILES["file"]]
 
-        # IMAGES
-        if fname.endswith((".jpg", ".jpeg", ".png", ".heic", ".webp")):
-            with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(fname)[1]) as tmp:
-                for chunk in file_obj.chunks():
-                    tmp.write(chunk)
-                tmp_path = tmp.name
-            try:
-                summary = extract_contextual_medical_insights_from_image(tmp_path, tone=tone)
-            finally:
-                os.remove(tmp_path)
+    combined_sections = []
+    # --- Process each file
+    for f in files:
+        fname, summary = summarize_single_file(f, tone=tone, system_prompt=system_prompt, user=request.user)
+        combined_sections.append(f"### {fname}\n{summary}")
 
-            # Save to DB only if user is authenticated
-            if request.user.is_authenticated:
-                MedicalSummary.objects.create(
-                    user=request.user,
-                    uploaded_filename=file_obj.name,
-                    tone=tone,
-                    raw_text="(Image file via chat)",
-                    summary=summary,
-                )
+    combined_context = "\n\n".join(combined_sections).strip()
 
-            # Update session context
-            request.session["latest_summary"] = summary
-            request.session["chat_history"] = [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"(Here’s the medical context from an image):\n{summary}"}
-            ]
-            request.session.modified = True
-            return JsonResponse({"reply": summary})
-
-        # DOCS
-        elif fname.endswith(".pdf"):
-            raw_text = extract_text_from_pdf(file_obj)
-        elif fname.endswith(".docx"):
-            raw_text = extract_text_from_docx(file_obj)
-        elif fname.endswith(".txt"):
-            raw_text = file_obj.read().decode("utf-8")
-        else:
-            return JsonResponse({"reply": "Unsupported file format for chat upload."}, status=400)
-
-        if not raw_text.strip():
-            return JsonResponse({"reply": "The document appears empty or unreadable."}, status=400)
-
-        # Summarize docs in chat
-        completion = client.chat.completions.create(
-            model="gpt-4o",
-            temperature=0.4,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Summarize clearly and kindly for a patient/caregiver:\n\n{raw_text}"},
-            ],
-        )
-        raw_summary = completion.choices[0].message.content.strip()
-
-        polish = client.chat.completions.create(
-            model="gpt-4o",
-            temperature=0.3,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Polish the tone—warm, clear, confident:\n\n{raw_summary}"},
-            ],
-        )
-        summary = polish.choices[0].message.content.strip()
-
-        if request.user.is_authenticated:
-            MedicalSummary.objects.create(
-                user=request.user,
-                uploaded_filename=file_obj.name,
-                tone=tone,
-                raw_text=raw_text,
-                summary=summary,
-            )
-
-        request.session["latest_summary"] = summary
+    # --- If files were provided and no user message, just return the combined summaries
+    if files and not user_message:
+        # Update session with the combined summaries as the latest context
+        request.session["latest_summary"] = combined_context or summary_context
+        # Keep a small rolling chat history with context planted
         request.session["chat_history"] = [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": f"(Here’s the medical context from a file):\n{summary}"}
+            {"role": "user", "content": f"(Here’s the latest medical context):\n{combined_context or summary_context}"}
         ]
         request.session.modified = True
-        return JsonResponse({"reply": summary})
 
-    # -------- No files → normal text chat
-    user_message = request.data.get("message", "").strip()
-    if not user_message:
+        if combined_context:
+            return JsonResponse({"reply": combined_context})
+        else:
+            return JsonResponse({"reply": "I couldn’t read any useful content from the attachments."}, status=400)
+
+    # --- If no files and no message
+    if not files and not user_message:
         return JsonResponse({"reply": "Hmm… I didn’t catch that. Can you try again?"})
 
-    # Keep context
-    if summary_context and all("(Here’s the medical context" not in m.get("content", "") for m in chat_history if m.get("role") == "user"):
-        chat_history.append({"role": "user", "content": f"(Here’s the medical context):\n{summary_context}"})
+    # --- Prepare context for question/answer
+    # Plant the most recent context if not present
+    if combined_context:
+        # New attachment context takes precedence this turn
+        chat_history = [{"role": "system", "content": system_prompt}]
+        chat_history.append({"role": "user", "content": f"(Here’s the latest medical context):\n{combined_context}"})
+        # Also keep it in session for subsequent turns
+        request.session["latest_summary"] = combined_context
+    else:
+        # If no new files, ensure we have prior context planted at least once
+        if summary_context and all("(Here’s the" not in m.get("content", "") for m in chat_history if m.get("role") == "user"):
+            chat_history.append({"role": "user", "content": f"(Here’s the medical context):\n{summary_context}"})
+
     chat_history.append({"role": "user", "content": user_message})
 
     try:
+        # First pass: grounded answer
         raw = client.chat.completions.create(
             model="gpt-4o",
             temperature=0.6,
             messages=chat_history,
         ).choices[0].message.content.strip()
 
-        # Tone polish
+        # Second pass: tone polish
         reply = client.chat.completions.create(
             model="gpt-4o",
             temperature=0.3,
@@ -365,14 +323,15 @@ def send_chat(request):
             ],
         ).choices[0].message.content.strip()
 
+        # Save trimmed history
         chat_history.append({"role": "assistant", "content": reply})
-        request.session["chat_history"] = chat_history[-10:]  # keep recent
+        request.session["chat_history"] = chat_history[-10:]
         request.session.modified = True
 
         return JsonResponse({"reply": reply})
     except Exception as e:
         traceback.print_exc()
-        return JsonResponse({"reply": "I’m having trouble responding right now. Let’s try again in a bit."})
+        return JsonResponse({"reply": "I’m having trouble responding right now. Let’s try again in a bit."}, status=500)
 
 # =============================
 #  SMART SUGGESTIONS / Q&A
@@ -507,3 +466,83 @@ def update_user_settings(request):
         profile.save()
         return JsonResponse({"status": "success"})
     return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+def summarize_text_block(raw_text: str, system_prompt: str) -> str:
+    """Summarize then tone-polish a text block."""
+    if not raw_text.strip():
+        return "The document appears empty or unreadable."
+    completion = client.chat.completions.create(
+        model="gpt-4o",
+        temperature=0.4,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"Summarize clearly and kindly for a patient/caregiver:\n\n{raw_text}"},
+        ],
+    )
+    raw_summary = completion.choices[0].message.content.strip()
+
+    polish = client.chat.completions.create(
+        model="gpt-4o",
+        temperature=0.3,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"Polish the tone—warm, clear, confident:\n\n{raw_summary}"},
+        ],
+    )
+    return polish.choices[0].message.content.strip()
+
+
+def summarize_single_file(file_obj, tone: str, system_prompt: str, user=None) -> tuple[str, str]:
+    """
+    Returns (filename, summary) for an uploaded file (image or doc).
+    Saves to DB if user is authenticated.
+    """
+    fname = file_obj.name
+    lower = fname.lower()
+
+    # Images → vision
+    if lower.endswith((".jpg", ".jpeg", ".png", ".heic", ".webp")):
+        with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(lower)[1]) as tmp:
+            for chunk in file_obj.chunks():
+                tmp.write(chunk)
+            tmp_path = tmp.name
+        try:
+            summary = extract_contextual_medical_insights_from_image(tmp_path, tone=tone)
+        finally:
+            try:
+                os.remove(tmp_path)
+            except Exception:
+                pass
+
+        if user and user.is_authenticated:
+            MedicalSummary.objects.create(
+                user=user,
+                uploaded_filename=fname,
+                tone=tone,
+                raw_text="(Image file via chat)",
+                summary=summary,
+            )
+        return fname, summary
+
+    # Docs → extract + summarize
+    if lower.endswith(".pdf"):
+        raw_text = extract_text_from_pdf(file_obj)
+    elif lower.endswith(".docx"):
+        raw_text = extract_text_from_docx(file_obj)
+    elif lower.endswith(".txt"):
+        raw_text = file_obj.read().decode("utf-8", errors="ignore")
+    else:
+        return fname, "Unsupported file format."
+
+    summary = summarize_text_block(raw_text, system_prompt)
+
+    if user and user.is_authenticated:
+        MedicalSummary.objects.create(
+            user=user,
+            uploaded_filename=fname,
+            tone=tone,
+            raw_text=raw_text,
+            summary=summary,
+        )
+    return fname, summary

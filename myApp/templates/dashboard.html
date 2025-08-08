@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -5,160 +7,77 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
   <style>
-    body {
-      background: linear-gradient(to right, #f5f7fa, #e4ebf5);
-    }
-
-    .glass {
-      background: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
+    body { background: linear-gradient(to right, #f5f7fa, #e4ebf5); }
+    .glass { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); }
 
     .chat-bubble {
-    border-radius: 1.25rem; /* 20px */
-    padding: 12px 18px;
-    line-height: 1.6;
-    font-size: 1rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    max-width: 75%;
-    white-space: pre-wrap;
-    word-break: break-word;
-    animation: fadeInUp 0.25s ease;
-  }
-
-  .chat-user {
-    background-color: #111827;
-    color: #ffffff;
-    border-bottom-right-radius: 6px !important;
-    margin-left: auto;
-  }
-
-  .chat-ai {
-    background-color: #f0fdf4;
-    color: #1f2937;
-    border-bottom-left-radius: 6px !important;
-    margin-right: auto;
-  }
-
-
-
-  
-
-    .sidebar-link:hover {
-      background-color: #f0f0f0;
-      transition: all 0.2s;
+      border-radius: 1.25rem; padding: 12px 18px; line-height: 1.6; font-size: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,.05); max-width: 75%; white-space: pre-wrap; word-break: break-word;
+      animation: fadeInUp .25s ease;
     }
+    .chat-user { background:#111827; color:#fff; border-bottom-right-radius:6px!important; margin-left:auto; }
+    .chat-ai   { background:#f0fdf4; color:#1f2937; border-bottom-left-radius:6px!important; margin-right:auto; }
 
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .sidebar-link:hover { background:#f0f0f0; transition:all .2s; }
+    @keyframes fadeInUp { from {opacity:0; transform:translateY(20px)} to {opacity:1; transform:translateY(0)} }
+    .animate-fadeInUp { animation: fadeInUp .35s ease-out; }
+    #loadingOverlay i { animation: pulseFade 1.2s infinite ease-in-out; }
+    @keyframes pulseFade { 0%,100%{opacity:.6; transform:scale(1)} 50%{opacity:1; transform:scale(1.1)} }
+    #chatWindow > div:first-child { margin-top:0!important; margin-bottom:0!important; }
+
+    /* Composer */
+    .dropzone {
+      border: 2px dashed rgba(0,0,0,.08);
+      transition: .15s ease;
     }
-
-    @keyframes pulseFade {
-      0%, 100% { opacity: 0.6; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.1); }
+    .dropzone.dragover {
+      border-color: #0f766e;
+      background: rgba(20,184,166,.06);
     }
-
-    #loadingOverlay i {
-      animation: pulseFade 1.2s infinite ease-in-out;
+    .thumb {
+      position: relative;
+      border-radius: .75rem;
+      border: 1px solid rgba(0,0,0,.06);
+      background: #fff;
     }
-
-    .tone-label input:checked + span {
-      background-color: #0f766e;
-      color: white;
-      font-weight: 600;
+    .thumb img { display:block; width:100%; height:100%; object-fit:cover; border-radius:.65rem; }
+    .thumb-remove {
+      position:absolute; top:6px; right:6px; background:#111827; color:#fff; border-radius:9999px; width:22px; height:22px;
+      display:flex; align-items:center; justify-content:center; font-size:.75rem;
     }
-
-    .tone-label span {
-      display: inline-block;
-      padding: 6px 12px;
-      border-radius: 9999px;
-      transition: background-color 0.2s ease;
-      cursor: pointer;
-    }
-
-    /* Remove extra space from first message if hardcoded */
-#chatWindow > div:first-child {
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fadeInUp {
-  animation: fadeInUp 0.35s ease-out;
-}
-
-
   </style>
 </head>
 
 <body class="bg-white font-sans text-gray-800">
-
 <div class="w-full h-screen flex overflow-hidden">
   <!-- Sidebar -->
   <aside id="sidebar" class="w-[280px] glass border-r p-6 overflow-y-auto fixed inset-y-0 left-0 z-40 transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:z-auto md:flex flex-col shadow-xl">
-
-    <!-- Top Header with Clickable Profile Icon -->
     <div class="flex items-center justify-between mb-6 border-b border-gray-200 pb-2">
       <h2 class="text-2xl font-semibold text-gray-800 flex items-center gap-3">
         <i class="fa-solid fa-clock-rotate-left text-teal-600 text-2xl"></i>
         <span class="tracking-tight">Summary History</span>
       </h2>
-  
-      <!-- Settings Toggle Button -->
       <div class="relative">
-        <!-- Settings Toggle Button -->
-        <div class="relative">
-          <button onclick="openSettingsModal()" class="text-gray-600 hover:text-teal-600 focus:outline-none">
-            <i class="fa-solid fa-user-circle text-2xl"></i>
-          </button>
-        </div>
-
-  
-        <!-- Dropdown Menu (hidden by default) -->
+        <button onclick="openSettingsModal()" class="text-gray-600 hover:text-teal-600 focus:outline-none">
+          <i class="fa-solid fa-user-circle text-2xl"></i>
+        </button>
         <div id="settingsDropdown" class="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg hidden z-50 text-base">
-          <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">
-            <i class="fa-solid fa-user mr-2 text-gray-400"></i> Profile
-          </a>
-          <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">
-            <i class="fa-solid fa-pen-to-square mr-2 text-gray-400"></i> Change Name
-          </a>
-          <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700">
-            <i class="fa-solid fa-right-from-bracket mr-2 text-gray-400"></i> Logout
-          </a>
+          <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700"><i class="fa-solid fa-user mr-2 text-gray-400"></i> Profile</a>
+          <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700"><i class="fa-solid fa-pen-to-square mr-2 text-gray-400"></i> Change Name</a>
+          <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700"><i class="fa-solid fa-right-from-bracket mr-2 text-gray-400"></i> Logout</a>
         </div>
       </div>
     </div>
-  
-    <!-- New Chat Button -->
-    <button class="mb-4 w-full bg-teal-600 text-white text-base py-2 rounded-lg hover:bg-teal-700 transition">
+
+    <button class="mb-4 w-full bg-teal-600 text-white text-base py-2 rounded-lg hover:bg-teal-700 transition" id="newChatBtn">
       <i class="fa-solid fa-plus mr-2"></i>New Chat
     </button>
-  
-    <!-- Search Bar -->
+
     <div class="mb-4 relative">
       <input type="text" placeholder="Search summaries..." class="w-full px-3 py-2 text-base rounded-md bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500" />
       <i class="fa-solid fa-magnifying-glass absolute right-3 top-2.5 text-gray-400 text-base"></i>
     </div>
-  
-    <!-- Summary List -->
+
     {% if summaries %}
       <ul class="space-y-4">
         {% for item in summaries %}
@@ -166,8 +85,7 @@
             <p class="text-gray-400 text-base">{{ item.created_at|date:"M d, Y – H:i" }} · {{ item.tone }}</p>
             <p class="text-gray-800 font-medium mt-1 truncate">{{ item.uploaded_filename }}</p>
             <p class="text-base text-gray-600 mt-1 line-clamp-3">{{ item.summary|truncatewords:20 }}</p>
-            <button class="mt-2 text-teal-600 text-base hover:underline open-summary-modal"
-                    data-summary="{{ item.summary|escapejs }}">
+            <button class="mt-2 text-teal-600 text-base hover:underline open-summary-modal" data-summary="{{ item.summary|escapejs }}">
               View Full Summary
             </button>
           </li>
@@ -176,94 +94,84 @@
     {% else %}
       <p class="text-base italic text-gray-400">No summaries yet.</p>
     {% endif %}
-  
   </aside>
-  
-  
-  
 
-  <!-- Main Panel -->
+  <!-- Main -->
   <section class="flex-1 flex flex-col relative">
     <!-- Header -->
     <header class="flex items-center justify-between px-6 py-4 border-b relative">
       <div class="flex items-center gap-2 relative group">
         <i class="fa-solid fa-notes-medical text-teal-600 text-2xl"></i>
-    
-        <h1 class="text-2xl font-bold text-gray-800 cursor-help">
-          NeuroMed <span class="text-teal-600">AI</span>
-        </h1>
-    
-        <!-- Real Tooltip -->
+        <h1 class="text-2xl font-bold text-gray-800 cursor-help">NeuroMed <span class="text-teal-600">AI</span></h1>
         <div class="absolute -bottom-12 left-0 z-10 w-max max-w-xs px-3 py-2 text-base text-white bg-gray-800 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none shadow-md">
           NeuroMed AI simplifies complex medical records into compassionate, easy-to-understand summaries.
         </div>
       </div>
-    
       <button onclick="toggleSidebar()" class="md:hidden text-gray-600 text-2xl focus:outline-none">
         <i class="fa-solid fa-bars"></i>
       </button>
     </header>
-    
-    
 
-    <!-- Hamburger menu for mobile -->
-
-<div id="overlay" class="fixed inset-0 bg-black bg-opacity-40 z-30 hidden md:hidden" onclick="toggleSidebar()"></div>
-
+    <!-- Mobile overlay -->
+    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-40 z-30 hidden md:hidden" onclick="toggleSidebar()"></div>
 
     <!-- Chat Window -->
-    <div id="chatWindow" class="flex-1 px-6 py-4 overflow-y-auto text-base bg-gradient-to-br from-white to-gray-50 rounded-xl">      <!-- Chat bubbles injected here -->
-    </div>
-    
-    <!-- Tone Selector -->
-    <!-- Tone Selector -->
-<div class="px-4 pb-2 pt-1 bg-[#fefaf7] text-base text-gray-600">
-  <span class="font-semibold">Summary Tone:</span>
-  <label class="ml-2"><input type="radio" name="tone" value="Plain" checked> Plain</label>
-  <label class="ml-2"><input type="radio" name="tone" value="Caregiver"> Caregiver</label>
-  <label class="ml-2"><input type="radio" name="tone" value="Faith"> Faith</label>
-  <label class="ml-2"><input type="radio" name="tone" value="Clinical"> Clinical</label>
-  <label class="ml-2"><input type="radio" name="tone" value="Bilingual"> Bilingual</label>
-</div>
+    <div id="chatWindow" class="flex-1 px-6 py-4 overflow-y-auto text-base bg-gradient-to-br from-white to-gray-50 rounded-xl"></div>
 
-
-    <!-- Upload & Chat Input -->
-    <div class="flex items-center gap-2 border-t p-4 bg-white shadow-inner">
-      <!-- Upload button -->
-      <button onclick="document.getElementById('fileInput').click()"
-              class="w-10 h-10 rounded-full bg-teal-600 hover:bg-teal-700 text-white flex items-center justify-center text-2xl shadow-md">
-        <i class="fa-solid fa-plus"></i>
-      </button>
-      <input type="file" id="fileInput" class="hidden" 
-             accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic" />
-    
-      <!-- Text input -->
-      <input type="text" id="chatInput"
-             class="flex-1 px-4 py-2 text-base border rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
-             placeholder="Type your question..." onkeydown="if(event.key==='Enter') sendChat()" />
-    
-      <!-- Mic button -->
-      <button onclick="startDictation()"
-              class="w-10 h-10 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center hover:bg-gray-300">
-        <i class="fa-solid fa-microphone"></i>
-      </button>
-    
-      <!-- Send button -->
-      <button onclick="sendChat()"
-              class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shadow-md hover:bg-gray-900">
-        <i class="fa-solid fa-paper-plane"></i>
-      </button>
+    <!-- Tone Selector -->
+    <div class="px-4 pb-2 pt-1 bg-[#fefaf7] text-base text-gray-600">
+      <span class="font-semibold">Summary Tone:</span>
+      <label class="ml-2"><input type="radio" name="tone" value="Plain" checked> Plain</label>
+      <label class="ml-2"><input type="radio" name="tone" value="Caregiver"> Caregiver</label>
+      <label class="ml-2"><input type="radio" name="tone" value="Faith"> Faith</label>
+      <label class="ml-2"><input type="radio" name="tone" value="Clinical"> Clinical</label>
+      <label class="ml-2"><input type="radio" name="tone" value="Bilingual"> Bilingual</label>
     </div>
-    
-    
+
+    <!-- Composer -->
+    <div id="composer" class="border-t p-4 bg-white shadow-inner">
+      <!-- Pending attachments tray -->
+      <div id="pendingTray" class="hidden mb-3">
+        <div class="flex items-center justify-between mb-2">
+          <div class="text-sm text-gray-600"><i class="fa-solid fa-paperclip mr-2"></i>Pending attachments</div>
+          <button id="clearAllBtn" class="text-xs text-red-600 hover:underline">Clear all</button>
+        </div>
+        <div id="pendingGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3"></div>
+      </div>
+
+      <!-- Input row with dropzone -->
+      <div id="dropzone" class="dropzone rounded-xl p-3 flex items-center gap-2">
+        <!-- Add button -->
+        <button id="addBtn" class="w-10 h-10 rounded-full bg-teal-600 hover:bg-teal-700 text-white flex items-center justify-center text-2xl shadow-md" title="Add files">
+          <i class="fa-solid fa-plus"></i>
+        </button>
+        <input type="file" id="fileInput" class="hidden" multiple
+               accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic" />
+
+        <!-- Text input -->
+        <input type="text" id="chatInput"
+               class="flex-1 px-4 py-2 text-base border rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
+               placeholder="Type your question… (attachments will send with this)" />
+
+        <!-- Mic -->
+        <button id="micBtn" class="w-10 h-10 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center hover:bg-gray-300" title="Dictate">
+          <i class="fa-solid fa-microphone"></i>
+        </button>
+
+        <!-- Send -->
+        <button id="sendBtn" class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shadow-md hover:bg-gray-900" title="Send">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </div>
+      <p class="mt-1 text-xs text-gray-500 pl-12">Tip: Drag & drop files here to stage them. They won’t send until you hit <b>Send</b>.</p>
+    </div>
   </section>
 </div>
 
-<!-- Modal -->
+<!-- Summary Modal -->
 <div id="summaryModal" class="fixed inset-0 bg-black bg-opacity-40 hidden z-50 flex items-center justify-center">
   <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl relative p-8 ring-1 ring-gray-200">
-    <button onclick="closeModal()"
-            class="absolute top-3 right-4 text-gray-400 hover:text-gray-800 text-2xl">&times;</button>
+    <button onclick="closeModal()" class="absolute top-3 right-4 text-gray-400 hover:text-gray-800 text-2xl">&times;</button>
     <div class="mb-4">
       <h2 class="text-2xl font-bold text-teal-700 flex items-center gap-2">
         <i class="fa-solid fa-brain text-teal-600 text-2xl"></i> Full Summary
@@ -276,74 +184,135 @@
 
 <!-- Loading Overlay -->
 <div id="loadingOverlay" class="fixed inset-0 bg-white bg-opacity-90 z-50 flex flex-col items-center justify-center text-center hidden">
-  <div class="animate-spin mb-4 text-teal-600 text-4xl">
-    <i class="fa-solid fa-brain"></i>
-  </div>
-  <p class="text-2xl font-semibold text-gray-700">NeuroMed is summarizing your file…</p>
-  <p class="text-base text-gray-500 mt-2 italic"><i class="fa-solid fa-brain text-teal-600 text-2xl"></i> Thinking deep thoughts… please hold the coffee ☕</p>
+  <div class="animate-spin mb-4 text-teal-600 text-4xl"><i class="fa-solid fa-brain"></i></div>
+  <p class="text-2xl font-semibold text-gray-700">NeuroMed is thinking…</p>
+  <p class="text-base text-gray-500 mt-2 italic"><i class="fa-solid fa-brain text-teal-600 text-2xl"></i> Please hold the coffee ☕</p>
 </div>
 
 <!-- Settings Modal -->
 <div id="settingsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity duration-300">
   <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8 relative ring-1 ring-gray-200 animate-fadeInUp">
-
-    <!-- Close Button -->
-    <button onclick="closeSettingsModal()" class="absolute top-5 right-6 text-gray-400 hover:text-gray-600 text-2xl transition">
-      &times;
-    </button>
-
-    <!-- Header -->
+    <button onclick="closeSettingsModal()" class="absolute top-5 right-6 text-gray-400 hover:text-gray-600 text-2xl transition">&times;</button>
     <div class="mb-6 flex items-center gap-3">
       <i class="fa-solid fa-sliders text-2xl text-teal-600"></i>
       <h2 class="text-3xl font-bold text-gray-800 tracking-tight">Settings</h2>
     </div>
-
-    <!-- Display Name -->
     <div class="mb-5">
       <label for="displayName" class="block text-sm font-semibold text-gray-700 mb-1">Display Name</label>
-      <input type="text" id="displayName" placeholder="e.g. Maria Gregory" 
-             class="w-full px-4 py-3 border rounded-lg shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 bg-gray-50 transition" />
+      <input type="text" id="displayName" placeholder="e.g. Maria Gregory" class="w-full px-4 py-3 border rounded-lg shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 bg-gray-50 transition" />
     </div>
-
-    <!-- Profession -->
     <div class="mb-5">
       <label for="profession" class="block text-sm font-semibold text-gray-700 mb-1">Profession</label>
-      <input type="text" id="profession" placeholder="e.g. Healthcare Advocate, Tech Founder"
-             class="w-full px-4 py-3 border rounded-lg shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 bg-gray-50 transition" />
+      <input type="text" id="profession" placeholder="e.g. Healthcare Advocate, Tech Founder" class="w-full px-4 py-3 border rounded-lg shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 bg-gray-50 transition" />
     </div>
-
-    <!-- Profile Picture (placeholder) -->
     <div class="mb-6 text-sm text-gray-500 italic">
-      <i class="fa-solid fa-image-portrait mr-2 text-gray-400"></i>
-      Profile photo upload coming soon...
+      <i class="fa-solid fa-image-portrait mr-2 text-gray-400"></i> Profile photo upload coming soon...
     </div>
-
-    <!-- Actions -->
     <div class="flex justify-between items-center mt-6">
       <button onclick="saveSettings()" class="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-2.5 rounded-full shadow-md transition flex items-center gap-2">
         <i class="fa-solid fa-check-circle text-white text-lg"></i> Save Changes
       </button>
-      
-      <button onclick="logoutUser()" class="text-sm text-red-600 hover:underline">
-        Logout
-      </button>
+      <button onclick="logoutUser()" class="text-sm text-red-600 hover:underline">Logout</button>
     </div>
   </div>
 </div>
 
-
 <script>
+/* ------------------ UTIL ------------------ */
 function getCSRFToken() {
-  const cookieValue = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
-  return cookieValue ? cookieValue.pop() : '';
+  const m = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
+  return m ? m.pop() : '';
+}
+function closeModal(){ document.getElementById("summaryModal").classList.add("hidden"); }
+function appendBubble(message, isUser=false) {
+  const chatWindow = document.getElementById("chatWindow");
+  const wrap = document.createElement("div");
+  wrap.className = "w-full flex mb-3";
+  const bubble = document.createElement("div");
+  bubble.className = `chat-bubble ${isUser ? 'chat-user' : 'chat-ai'}`;
+  bubble.innerText = message;
+  wrap.appendChild(bubble); chatWindow.appendChild(wrap);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+function appendRichBubble(node, isUser=false) {
+  const chatWindow = document.getElementById("chatWindow");
+  const wrap = document.createElement("div");
+  wrap.className = "w-full flex mb-3";
+  const bubble = document.createElement("div");
+  bubble.className = `chat-bubble ${isUser ? 'chat-user' : 'chat-ai'}`;
+  bubble.appendChild(node);
+  wrap.appendChild(bubble); chatWindow.appendChild(wrap);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
+/* ------------------ STATE: pending attachments ------------------ */
+const pending = []; // {file: File, url?: string, kind: 'image'|'doc'}
+const pendingTray = document.getElementById('pendingTray');
+const pendingGrid = document.getElementById('pendingGrid');
 
-function closeModal() {
-  document.getElementById("summaryModal").classList.add("hidden");
+function renderPending() {
+  pendingGrid.innerHTML = '';
+  if (pending.length === 0) {
+    pendingTray.classList.add('hidden');
+    return;
+  }
+  pendingTray.classList.remove('hidden');
+
+  pending.forEach((item, idx) => {
+    const cell = document.createElement('div');
+    cell.className = 'thumb p-2';
+
+    if (item.kind === 'image') {
+      const imgWrap = document.createElement('div');
+      imgWrap.className = 'w-full h-24';
+      const img = document.createElement('img');
+      img.src = item.url; img.alt = item.file.name;
+      imgWrap.appendChild(img); cell.appendChild(imgWrap);
+    } else {
+      const box = document.createElement('div');
+      box.className = 'h-24 flex items-center justify-center text-gray-600';
+      box.innerHTML = `<div class="text-center px-2">
+          <i class="fa-solid fa-file-lines text-2xl"></i>
+          <div class="text-[11px] mt-1 truncate max-w-[110px]">${item.file.name}</div>
+        </div>`;
+      cell.appendChild(box);
+    }
+
+    const rm = document.createElement('button');
+    rm.className = 'thumb-remove'; rm.title = 'Remove';
+    rm.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+    rm.onclick = () => removePending(idx);
+    cell.appendChild(rm);
+
+    pendingGrid.appendChild(cell);
+  });
 }
-document.addEventListener("DOMContentLoaded", function () {
-  // Summary Modal Handler
+
+function addFiles(files) {
+  [...files].forEach(f => {
+    const isImage = /^image\//.test(f.type);
+    const obj = { file: f, kind: isImage ? 'image' : 'doc' };
+    if (isImage) obj.url = URL.createObjectURL(f);
+    pending.push(obj);
+  });
+  renderPending();
+}
+
+function removePending(index) {
+  const item = pending[index];
+  if (item?.url) URL.revokeObjectURL(item.url);
+  pending.splice(index, 1);
+  renderPending();
+}
+function clearPending() {
+  pending.forEach(p => p.url && URL.revokeObjectURL(p.url));
+  pending.length = 0;
+  renderPending();
+}
+
+/* ------------------ INIT ------------------ */
+document.addEventListener("DOMContentLoaded", () => {
+  // Summary modal
   document.querySelectorAll(".open-summary-modal").forEach(btn => {
     btn.addEventListener("click", function () {
       const raw = this.dataset.summary;
@@ -354,175 +323,178 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // File Upload Handler
-  document.getElementById("fileInput").addEventListener("change", async function () {
-    const file = this.files[0];
-    if (!file) return;
+  // Greeting (only if empty)
+  const chatWindow = document.getElementById("chatWindow");
+  if (chatWindow.innerHTML.trim() === '') greetUser();
 
-    // 👀 FILE PREVIEW
-    if (file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const wrapper = document.createElement("div");
-        wrapper.className = "w-full flex justify-end mb-3";
+  // New Chat
+  document.getElementById('newChatBtn')?.addEventListener('click', newChat);
 
-        const bubble = document.createElement("div");
-        bubble.className = "chat-bubble chat-user bg-black text-white max-w-xs p-2 rounded-lg shadow";
-        bubble.innerHTML = `<img src="${e.target.result}" alt="Uploaded Image" class="rounded-md max-w-full h-auto" />`;
+  // Search
+  const searchInput = document.querySelector('input[placeholder="Search summaries..."]');
+  searchInput?.addEventListener('input', function () {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('.sidebar-link').forEach(item => {
+      const filename = item.querySelector('p.text-gray-800')?.innerText.toLowerCase() || '';
+      const text = item.querySelector('p.text-base')?.innerText.toLowerCase() || '';
+      item.style.display = (filename.includes(q) || text.includes(q)) ? 'block' : 'none';
+    });
+  });
 
-        wrapper.appendChild(bubble);
-        document.getElementById("chatWindow").appendChild(wrapper);
-        document.getElementById("chatWindow").scrollTop = document.getElementById("chatWindow").scrollHeight;
-      };
-      reader.readAsDataURL(file);
-    } else {
-      appendBubble(`📎 You uploaded: ${file.name}`, true);
-    }
+  // Composer controls
+  document.getElementById('addBtn').addEventListener('click', () => document.getElementById('fileInput').click());
+  document.getElementById('fileInput').addEventListener('change', e => {
+    if (e.target.files?.length) addFiles(e.target.files);
+    e.target.value = ''; // allow re-adding the same file
+  });
+  document.getElementById('clearAllBtn').addEventListener('click', clearPending);
+  document.getElementById('micBtn').addEventListener('click', startDictation);
+  document.getElementById('sendBtn').addEventListener('click', sendChat);
 
-    // Show the loading overlay
-    document.getElementById("loadingOverlay").classList.remove("hidden");
+  // Drag & drop
+  const dz = document.getElementById('dropzone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('dragover');
+    if (e.dataTransfer?.files?.length) addFiles(e.dataTransfer.files);
+  });
 
-    const tone = document.querySelector('input[name="tone"]:checked')?.value || "Plain";
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("tone", tone);
-
-    try {
-      const res = await fetch("/api/summarize/", {
-        method: "POST",
-        headers: { "X-CSRFToken": getCSRFToken() },
-        body: formData
-      });
-      const data = await res.json();
-
-      // Hide the overlay
-      document.getElementById("loadingOverlay").classList.add("hidden");
-      console.log("SUMMARY RESPONSE:", data);
-      if (data.summary) {
-        appendBubble(`📝 ${file.name} summary ready.`, false);
-        appendBubble(data.summary, false);
-      } else {
-        appendBubble("⚠️ No summary returned.", false);
-      }
-    } catch (err) {
-      document.getElementById("loadingOverlay").classList.add("hidden");
-      appendBubble("❌ Failed to upload or summarize.", false);
+  // Enter to send
+  document.getElementById('chatInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); sendChat();
     }
   });
 });
 
-
-
-
-function appendBubble(message, isUser = false) {
-  const chatWindow = document.getElementById("chatWindow");
-
-  // Create wrapper for alignment
-  const wrapper = document.createElement("div");
-  wrapper.className = "w-full flex mb-3"; // margin for spacing
-
-  const bubble = document.createElement("div");
-  bubble.className = `chat-bubble ${isUser ? 'chat-user' : 'chat-ai'}`;
-  bubble.innerText = message;
-
-  wrapper.appendChild(bubble);
-  chatWindow.appendChild(wrapper);
-  chatWindow.scrollTop = chatWindow.scrollHeight;
-}
-
-
+/* ------------------ GREETING / NEW CHAT ------------------ */
 async function greetUser() {
-  const chatWindow = document.getElementById("chatWindow");
-  if (chatWindow.innerHTML.trim() !== '') return;
-
   try {
     const res = await fetch("/api/user/settings/");
     const data = await res.json();
     const name = data.display_name || "there";
-
-    const greetings = [
-      `Hello ${name}, how can I assist you today?`,
-      `Welcome back, ${name}. Let’s take care of your health data together.`,
-      `Hi ${name}, ready to review or summarize something?`,
-      `Good to see you, ${name}. I'm here to simplify your records.`
+    const options = [
+      `Welcome back, ${name}. Let’s get started.`,
+      `Hello again, ${name}. Ready to review your records?`,
+      `Hi ${name}, your wellness matters—how can I support you today?`,
+      `${name}, I’m here to help make things simpler.`
     ];
-
-    const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
-    appendBubble(randomGreeting, false);
+    appendBubble(options[Math.floor(Math.random()*options.length)], false);
   } catch {
-    appendBubble("Welcome! How can I assist you today?", false);
+    appendBubble("Welcome back. Let’s take care of what matters most today.", false);
   }
 }
 
-async function sendChat() {
-    const input = document.getElementById("chatInput");
-    const userMessage = input.value.trim();
-    const fileInput = document.getElementById("fileInput");
-    const file = fileInput.files[0];
-    if (!userMessage && !file) return;
-
-    // Add user message bubble
-    if (userMessage) appendBubble(userMessage, true);
-    if (file) appendBubble(`📎 ${file.name}`, true);
-
-    input.value = "";
-    fileInput.value = ""; // reset file picker
-
-    const tone = document.querySelector('input[name="tone"]:checked')?.value || "Plain";
-    const lastSummary = document.querySelector(".open-summary-modal:last-of-type")?.dataset.summary || "";
-
-    const formData = new FormData();
-    if (userMessage) formData.append("message", userMessage);
-    if (file) formData.append("file", file);
-    formData.append("tone", tone);
-    formData.append("summary", lastSummary);
-
-    // Typing indicator
-    const typingBubble = document.createElement("div");
-    typingBubble.className = "w-full flex mb-2";
-    const typingContent = document.createElement("div");
-    typingContent.className = "chat-bubble chat-ai text-gray-500 italic";
-    typingContent.innerText = "Analyzing...";
-    typingBubble.appendChild(typingContent);
-    document.getElementById("chatWindow").appendChild(typingBubble);
-
-    try {
-        const res = await fetch("/api/send-chat/", {
-            method: "POST",
-            headers: { "X-CSRFToken": getCSRFToken() },
-            body: formData
-        });
-        const data = await res.json();
-
-        typingContent.classList.remove("italic", "text-gray-500");
-        typingContent.classList.add("text-gray-800");
-        typingContent.innerText = data.reply || "⚠️ No reply received.";
-    } catch (err) {
-        typingContent.classList.remove("italic", "text-gray-500");
-        typingContent.classList.add("text-red-700", "bg-red-100");
-        typingContent.innerText = "❌ Error getting a response.";
-    }
+async function newChat() {
+  const chatWindow = document.getElementById("chatWindow");
+  chatWindow.innerHTML = '';
+  clearPending();
+  try {
+    await fetch("/clear-session/", { method:"POST", headers:{ "X-CSRFToken": getCSRFToken(), "Content-Type":"application/json" }});
+    const res = await fetch("/api/user/settings/");
+    const data = await res.json();
+    const name = data.display_name || "there";
+    const greetings = [
+      `Hi ${name}, how can I help you today? 🌿`,
+      `Hello ${name}! What can I do for you today? 🤖`,
+      `Hey ${name}, I’m here for you. How are you feeling? 💬`,
+      `${name}, let’s figure things out together. What do you need today? 🧠`
+    ];
+    appendBubble(greetings[Math.floor(Math.random()*greetings.length)], false);
+  } catch {
+    appendBubble("Hi there! How can I help you today?", false);
+  }
 }
 
+/* ------------------ SEND CHAT (bundle text + pending files) ------------------ */
+async function sendChat() {
+  const input = document.getElementById("chatInput");
+  const userMessage = input.value.trim();
+  const tone = document.querySelector('input[name="tone"]:checked')?.value || "Plain";
 
+  if (!userMessage && pending.length === 0) return;
 
+  // 1) Render the user's message bubble (with staged attachments preview)
+  if (userMessage) appendBubble(userMessage, true);
+  if (pending.length) {
+    // Build a compact gallery to show what was sent
+    const gallery = document.createElement('div');
+    gallery.className = 'grid grid-cols-2 sm:grid-cols-3 gap-2';
+    pending.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'border rounded-lg overflow-hidden';
+      if (item.kind === 'image') {
+        const img = document.createElement('img');
+        img.src = item.url; img.alt = item.file.name;
+        img.className = 'block w-full h-28 object-cover';
+        card.appendChild(img);
+      } else {
+        card.className += ' p-3 flex items-center gap-2 text-sm';
+        card.innerHTML = `<i class="fa-solid fa-file-lines"></i><span class="truncate">${item.file.name}</span>`;
+      }
+      gallery.appendChild(card);
+    });
+    appendRichBubble(gallery, true);
+  }
+
+  // 2) Build request payload
+  const formData = new FormData();
+  if (userMessage) formData.append("message", userMessage);
+  formData.append("tone", tone);
+  // Attach files as an array: files[]
+  pending.forEach(p => formData.append("files[]", p.file, p.file.name));
+
+  // 3) Clear composer input + pending tray (they’ve been “sent”)
+  input.value = "";
+  clearPending();
+
+  // 4) Typing indicator
+  const chatWindow = document.getElementById("chatWindow");
+  const typingWrap = document.createElement("div");
+  typingWrap.className = "w-full flex mb-2";
+  const typing = document.createElement("div");
+  typing.className = "chat-bubble chat-ai text-gray-500 italic";
+  typing.innerText = "Analyzing…";
+  typingWrap.appendChild(typing);
+  chatWindow.appendChild(typingWrap);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+
+  // 5) Send to backend
+  try {
+    const res = await fetch("/api/send-chat/", {
+      method: "POST",
+      headers: { "X-CSRFToken": getCSRFToken() },
+      body: formData
+    });
+    const data = await res.json();
+    typing.classList.remove("italic","text-gray-500");
+    typing.classList.add("text-gray-800");
+    typing.innerText = data.reply || "⚠️ No reply received.";
+  } catch (err) {
+    typing.classList.remove("italic","text-gray-500");
+    typing.classList.add("text-red-700","bg-red-100");
+    typing.innerText = "❌ Error getting a response.";
+  }
+}
+
+/* ------------------ Speech ------------------ */
 function startDictation() {
   if (!('webkitSpeechRecognition' in window)) return alert("Speech recognition only works in Chrome.");
-  const recognition = new webkitSpeechRecognition();
-  recognition.lang = "en-US";
-  recognition.onresult = function(event) {
-    const transcript = event.results[0][0].transcript;
-    document.getElementById("chatInput").value = transcript;
+  const rec = new webkitSpeechRecognition();
+  rec.lang = "en-US";
+  rec.onresult = (e) => {
+    const t = e.results[0][0].transcript;
+    document.getElementById("chatInput").value = t;
   };
-  recognition.start();
+  rec.start();
 }
 
-
+/* ------------------ Sidebar / Settings ------------------ */
 function toggleSidebar() {
   const sidebar = document.getElementById("sidebar");
   const overlay = document.getElementById("overlay");
   const isOpen = sidebar.classList.contains("translate-x-0");
-
   if (isOpen) {
     sidebar.classList.remove("translate-x-0");
     sidebar.classList.add("-translate-x-full");
@@ -533,213 +505,36 @@ function toggleSidebar() {
     overlay.classList.remove("hidden");
   }
 }
-
-function toggleSettingsMenu() {
-  const menu = document.getElementById("settingsDropdown");
-  menu.classList.toggle("hidden");
-  menu.classList.toggle("block");
-}
-
-// ✅ Hide dropdown if clicked outside
-document.addEventListener("click", function (event) {
-  const dropdown = document.getElementById("settingsDropdown");
-  const button = event.target.closest("button[onclick='toggleSettingsMenu()']");
-  if (!button && dropdown && !dropdown.contains(event.target)) {
-    dropdown.classList.add("hidden");
-    dropdown.classList.remove("block");
-  }
-});
-
-// ✅ Centralized new chat handler
-async function newChat() {
-  const chatWindow = document.getElementById("chatWindow");
-  if (chatWindow) chatWindow.innerHTML = ''; // Clear all bubbles
-
-  try {
-    // 👇 Flush the backend session
-    await fetch("/clear-session/", {
-  method: "POST",
-  headers: {
-    "X-CSRFToken": getCSRFToken(),
-    "Content-Type": "application/json"
-  }
-});
-
-
-    const res = await fetch("/api/user/settings/");
-    const data = await res.json();
-    const name = data.display_name || "there";
-
-    const greetings = [
-      `Hi ${name}, how can I help you today? 🌿`,
-      `Hello ${name}! What can I do for you today? 🤖`,
-      `Hey ${name}, I’m here for you. How are you feeling? 💬`,
-      `${name}, let’s figure things out together. What do you need today? 🧠`
-    ];
-
-    const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
-    appendBubble(randomGreeting, false);
-  } catch (err) {
-    appendBubble("Hi there! How can I help you today?", false);
-  }
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-  // ✅ Attach newChat to the button
-  const newChatBtn = document.querySelector('.bg-teal-600');
-  if (newChatBtn) {
-    newChatBtn.addEventListener('click', newChat);
-  }
-
-  // 🔍 Search Functionality
-  const searchInput = document.querySelector('input[placeholder="Search summaries..."]');
-  if (searchInput) {
-    searchInput.addEventListener('input', function () {
-      const searchTerm = this.value.toLowerCase();
-      const summaries = document.querySelectorAll('.sidebar-link');
-
-      summaries.forEach(item => {
-        const filename = item.querySelector('p.text-gray-800')?.innerText.toLowerCase() || '';
-        const summaryText = item.querySelector('p.text-base')?.innerText.toLowerCase() || '';
-        const matches = filename.includes(searchTerm) || summaryText.includes(searchTerm);
-        item.style.display = matches ? 'block' : 'none';
-      });
-    });
-  }
-
-  greetUser(); // 👋 Load welcome message if window is empty
-});
-
-
-
-
-
-
 function openSettingsModal() {
-  fetch("/api/user/settings/")
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("displayName").value = data.display_name || "";
-      document.getElementById("profession").value = data.profession || "";
-
-      const modal = document.getElementById("settingsModal");
-      modal.classList.remove("hidden");
-      modal.classList.add("flex");
-    });
+  fetch("/api/user/settings/").then(r=>r.json()).then(data=>{
+    document.getElementById("displayName").value = data.display_name || "";
+    document.getElementById("profession").value  = data.profession || "";
+    const modal = document.getElementById("settingsModal");
+    modal.classList.remove("hidden"); modal.classList.add("flex");
+  });
 }
-
 function saveSettings() {
   const name = document.getElementById("displayName").value.trim();
   const profession = document.getElementById("profession").value.trim();
-
   fetch("/api/user/settings/update/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRFToken": getCSRFToken(),
-    },
-    body: JSON.stringify({
-      display_name: name,
-      profession: profession,
-    }),
-  })
-    .then(res => res.json())
-    .then(data => {
-      // Optional: replace alert with toast later
-      alert("Settings updated successfully!");
-      closeSettingsModal();
-    });
+    method:"POST",
+    headers:{ "Content-Type":"application/json","X-CSRFToken":getCSRFToken() },
+    body: JSON.stringify({ display_name:name, profession })
+  }).then(r=>r.json()).then(()=>{ alert("Settings updated successfully!"); closeSettingsModal(); });
 }
-
-function closeSettingsModal() {
+function closeSettingsModal(){
   const modal = document.getElementById("settingsModal");
-  modal.classList.remove("flex");
-  modal.classList.add("hidden");
+  modal.classList.remove("flex"); modal.classList.add("hidden");
 }
-
-// ✅ Add click-outside-to-close and ESC support
-document.addEventListener("DOMContentLoaded", function () {
-  const settingsModal = document.getElementById("settingsModal");
-
-  // Click outside the modal box to close
-  settingsModal.addEventListener("click", function (e) {
-    if (e.target === settingsModal) {
-      closeSettingsModal();
-    }
-  });
-
-  // ESC key to close modal
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") {
-      closeSettingsModal();
-    }
-  });
+document.addEventListener("click", (e)=>{
+  const dd = document.getElementById("settingsDropdown");
+  const button = e.target.closest("button[onclick='toggleSettingsMenu()']");
+  if (!button && dd && !dd.contains(e.target)) { dd.classList.add("hidden"); dd.classList.remove("block"); }
 });
-
-
-document.addEventListener("DOMContentLoaded", async () => {
-  const chatWindow = document.getElementById("chatWindow");
-
-  // Only greet the user if the chat window is empty
-  if (chatWindow && chatWindow.innerHTML.trim() === '') {
-    try {
-      const res = await fetch("/api/user/settings/");
-      const data = await res.json();
-      const name = data.display_name || "there";
-
-      const greetings = [
-        `Welcome back, ${name}. Let’s get started.`,
-        `Hello again, ${name}. Ready to review your records?`,
-        `Hi ${name}, your wellness matters—how can I support you today?`,
-        `${name}, I’m here to help make things simpler.`
-      ];
-
-      const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
-      appendBubble(randomGreeting, false);
-    } catch (error) {
-      appendBubble("Welcome back. Let’s take care of what matters most today.", false);
-    }
-  }
-});
-
-
-async function newChat() {
-  const chatWindow = document.getElementById("chatWindow");
-  if (chatWindow) chatWindow.innerHTML = ''; // Clear all chat bubbles
-
-  try {
-    // Flush the session on the backend
-    await fetch("/clear-session/", {
-  method: "POST",
-  headers: {
-    "X-CSRFToken": getCSRFToken(),
-    "Content-Type": "application/json"
-  }
-});
-
-
-    // Get user settings
-    const res = await fetch("/api/user/settings/");
-    const data = await res.json();
-    const name = data.display_name || "there";
-
-    // Greeting choices
-    const greetings = [
-      `Hi ${name}, how can I help you today? 🌿`,
-      `Hello ${name}! What can I do for you today? 🤖`,
-      `Hey ${name}, I’m here for you. How are you feeling? 💬`,
-      `${name}, let’s figure things out together. What do you need today? 🧠`
-    ];
-
-    const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
-    appendBubble(randomGreeting, false);
-  } catch (err) {
-    appendBubble("Hi there! How can I help you today?", false);
-  }
+function toggleSettingsMenu(){
+  const menu = document.getElementById("settingsDropdown");
+  menu.classList.toggle("hidden"); menu.classList.toggle("block");
 }
-
-
-
 </script>
 </body>
 </html>
