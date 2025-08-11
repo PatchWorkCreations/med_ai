@@ -248,7 +248,7 @@
 </div>
 
 <button id="feedbackTab"
-  class="hidden sm:flex fixed top-1/2 -translate-y-1/2 z-[9999]
+  class="sm:flex fixed top-1/2 -translate-y-1/2 z-[9999]
          bg-teal-600 hover:bg-teal-700 text-white shadow-lg
          px-3 py-2 rounded-tl-md rounded-tr-md
          transform -rotate-90 origin-bottom-right
@@ -259,18 +259,7 @@
 
 
 
-<!-- (pulls it slightly off-screen so only the tab shows) -->
-
-<!-- Compact FAB for small screens -->
-<button id="feedbackFab"
-  class="sm:hidden fixed z-[60] right-5"
-  style="bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));"
-  title="Send feedback" aria-label="Send feedback">
-  <span class="rounded-full shadow-lg bg-teal-600 hover:bg-teal-700 text-white w-12 h-12 flex items-center justify-center text-xl">
-    <i class="fa-solid fa-comment-dots"></i>
-  </span>
-</button>
-
+ 
 <!-- Slide-over Panel -->
 <div id="feedbackPanel" class="fixed inset-y-0 right-0 w-full sm:w-[520px] z-[70] translate-x-full transition-transform duration-300">
   <div class="h-full bg-white shadow-2xl border-l flex flex-col">
