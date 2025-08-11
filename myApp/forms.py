@@ -1,14 +1,18 @@
-from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
-from .models import Profile
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+from .models import Profile
 
 class CustomSignupForm(UserCreationForm):
-    profession = forms.CharField(max_length=100, required=True)
+    email = forms.EmailField(required=True)
+    first_name = forms.CharField(max_length=150, required=True)
+    last_name = forms.CharField(max_length=150, required=True)
+    # UI says optional → make it optional
+    profession = forms.CharField(max_length=100, required=False)
 
     class Meta:
         model = User
-        fields = ['username', 'password1', 'password2', 'email', 'first_name', 'last_name']
+        fields = ["first_name", "last_name", "email", "username", "password1", "password2", "profession"]
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -19,6 +23,6 @@ class CustomSignupForm(UserCreationForm):
             user.save()
             Profile.objects.create(
                 user=user,
-                profession=self.cleaned_data["profession"]
+                profession=self.cleaned_data.get("profession", "")
             )
         return user

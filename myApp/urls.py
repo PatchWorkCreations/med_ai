@@ -1,6 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
+from django.views.generic import RedirectView
 
 urlpatterns = [
     # Public Pages
@@ -36,5 +37,6 @@ urlpatterns = [
     path("api/user/settings/update/", views.update_user_settings, name="update_user_settings"),
 path("clear-session/", views.clear_session, name="clear-session"),
 
+path('accounts/login/', RedirectView.as_view(url='/login/', permanent=False)),
 
 ]

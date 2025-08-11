@@ -430,20 +430,26 @@ def about_page(request):
 def speaking_view(request):
     return render(request, 'talking_ai/speaking.html')
 
+from django.shortcuts import render, redirect
+from .forms import CustomSignupForm
+
 def signup_view(request):
     if request.method == "POST":
-        form = UserCreationForm(request.POST)
+        form = CustomSignupForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect("dashboard")
     else:
-        form = UserCreationForm()
+        form = CustomSignupForm()
     return render(request, "signup.html", {"form": form})
+
 
 # =============================
 #       DASHBOARD + SETTINGS
 # =============================
-@login_required
+from django.contrib.auth.decorators import login_required
+
+@login_required(login_url='/login/')
 def dashboard(request):
     summaries = MedicalSummary.objects.filter(user=request.user).order_by("-created_at")
     return render(request, "dashboard.html", {"summaries": summaries})
