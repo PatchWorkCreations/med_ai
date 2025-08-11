@@ -35,8 +35,13 @@ urlpatterns = [
 
       path("api/user/settings/", views.get_user_settings, name="get_user_settings"),
     path("api/user/settings/update/", views.update_user_settings, name="update_user_settings"),
-path("clear-session/", views.clear_session, name="clear-session"),
+    path("clear-session/", views.clear_session, name="clear-session"),
 
-path('accounts/login/', RedirectView.as_view(url='/login/', permanent=False)),
+    path('accounts/login/', RedirectView.as_view(url='/login/', permanent=False)),
 
+        path("beta/", views.beta_feedback, name="beta_feedback"),
+    path("beta/thanks/", views.beta_thanks, name="beta_thanks"),
+    # new JSON endpoint:
+    path("beta/api/submit/", views.beta_feedback_api, name="beta_feedback_api"),
+    
 ]

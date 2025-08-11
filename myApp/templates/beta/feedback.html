@@ -1,0 +1,88 @@
+{% extends "beta/base.html" %}
+{% load widget_tweaks %}
+{% block content %}
+<h1 class="text-3xl font-bold mb-3">💜 Welcome, NeuroMed AI Beta Tester!</h1>
+
+<div class="bg-indigo-50 border border-indigo-200 text-indigo-900 p-4 rounded mb-6">
+  <p class="mb-2">
+    Hi! Thank you for joining our <strong>Beta Testing Program</strong>.
+    Your feedback helps us make NeuroMed AI smarter, safer, and kinder.
+  </p>
+  <p class="mb-0">
+    Please use <strong>synthetic or public data</strong> only — no real patient information.
+    This form takes about <strong>3–5 minutes</strong>.
+  </p>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="space-y-5">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+
+  <!-- Consent -->
+  <section class="bg-white p-4 rounded shadow">
+    <h2 class="font-semibold mb-2">Consent</h2>
+    <label class="flex items-start gap-2 text-sm">
+      {{ form.consent }}
+      <span>I agree to share feedback for product improvement and won’t include sensitive personal health information.</span>
+    </label>
+  </section>
+
+  <!-- Profile -->
+  <section class="bg-white p-4 rounded shadow grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div><label class="text-sm">Role</label>{{ form.role|add_class:"w-full border rounded p-2" }}</div>
+    <div><label class="text-sm">Email (optional)</label>{{ form.email|add_class:"w-full border rounded p-2" }}</div>
+    <div><label class="text-sm">Device</label>{{ form.device|add_class:"w-full border rounded p-2" }}</div>
+    <div><label class="text-sm">Browser</label>{{ form.browser|add_class:"w-full border rounded p-2" }}</div>
+  </section>
+
+  <!-- Scenarios (your dashboard features) -->
+  <section class="bg-white p-4 rounded shadow">
+    <h2 class="font-semibold mb-1">What did you test today?</h2>
+    <p class="text-xs text-gray-500 mb-3">Pick all that apply based on the dashboard features you tried.</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      {% for checkbox in form.use_case_multi %}
+        <label class="flex items-start gap-2 text-sm bg-gray-50 border rounded p-2 hover:bg-gray-100 cursor-pointer">
+          {{ checkbox.tag }} <span>{{ checkbox.choice_label }}</span>
+        </label>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Input type -->
+  <section class="bg-white p-4 rounded shadow grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div><label class="text-sm">Input type</label>{{ form.input_type|add_class:"w-full border rounded p-2" }}</div>
+  </section>
+
+  <!-- Ratings -->
+  <section class="bg-white p-4 rounded shadow grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div><label class="text-sm">Ease (1–5)</label>{{ form.ease|add_class:"w-full border rounded p-2" }}</div>
+    <div><label class="text-sm">Speed (1–5)</label>{{ form.speed|add_class:"w-full border rounded p-2" }}</div>
+    <div><label class="text-sm">Accuracy (1–5)</label>{{ form.accuracy|add_class:"w-full border rounded p-2" }}</div>
+    <div><label class="text-sm">Clarity (1–5)</label>{{ form.clarity|add_class:"w-full border rounded p-2" }}</div>
+  </section>
+
+  <!-- NPS + permissions -->
+  <section class="bg-white p-4 rounded shadow grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div><label class="text-sm">NPS (0–10)</label>{{ form.nps|add_class:"w-full border rounded p-2" }}</div>
+    <div class="flex items-center gap-2"><label class="text-sm">OK to contact?</label>{{ form.allow_contact }}</div>
+    <div class="flex items-center gap-2"><label class="text-sm">Store anonymously</label>{{ form.allow_anon }}</div>
+  </section>
+
+  <!-- Open text -->
+  <section class="bg-white p-4 rounded shadow space-y-3">
+    <div><label class="text-sm">What worked well?</label>{{ form.pros|add_class:"w-full border rounded p-2" }}</div>
+    <div><label class="text-sm">What can we improve?</label>{{ form.cons|add_class:"w-full border rounded p-2" }}</div>
+    <div>
+      <label class="text-sm">Bugs or errors (steps)</label>
+      <p class="text-[11px] text-gray-500 -mt-1 mb-1">Example: 1) Upload PDF 2) Click “Send” 3) See 500 error</p>
+      {{ form.bugs|add_class:"w-full border rounded p-2" }}
+    </div>
+    <div><label class="text-sm">Screenshot (optional)</label>{{ form.screenshot }}</div>
+  </section>
+
+  <div class="flex items-center justify-between">
+    <p class="text-xs text-gray-500">By submitting, you confirm no PHI is included.</p>
+    <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded">Submit</button>
+  </div>
+</form>
+{% endblock %}

@@ -45,6 +45,36 @@
       position:absolute; top:6px; right:6px; background:#111827; color:#fff; border-radius:9999px; width:22px; height:22px;
       display:flex; align-items:center; justify-content:center; font-size:.75rem;
     }
+
+    #feedbackTab {
+  position: fixed;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%) rotate(-90deg);
+  transform-origin: bottom right;
+  background-color: #0d9488; /* teal-600 */
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem 0.25rem 0 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 9999;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+#feedbackTab:hover {
+  background-color: #0f766e; /* teal-700 */
+}
+
+#feedbackTab:focus {
+  outline: none;
+}
+
+#feedbackTab,
+#feedbackTab * {
+  pointer-events: auto; /* prevent hover loss */
+}
+
   </style>
 </head>
 
@@ -217,7 +247,348 @@
   </div>
 </div>
 
+<button id="feedbackTab"
+  class="hidden sm:flex fixed top-1/2 -translate-y-1/2 z-[9999]
+         bg-teal-600 hover:bg-teal-700 text-white shadow-lg
+         px-3 py-2 rounded-tl-md rounded-tr-md
+         transform -rotate-90 origin-bottom-right
+         whitespace-nowrap tracking-wide text-sm"
+  style="right: 10px;">
+  <i class="fa-solid fa-comment-dots mr-2 rotate-90"></i> Give feedback
+</button>
+
+
+
+<!-- (pulls it slightly off-screen so only the tab shows) -->
+
+<!-- Compact FAB for small screens -->
+<button id="feedbackFab"
+  class="sm:hidden fixed z-[60] right-5"
+  style="bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));"
+  title="Send feedback" aria-label="Send feedback">
+  <span class="rounded-full shadow-lg bg-teal-600 hover:bg-teal-700 text-white w-12 h-12 flex items-center justify-center text-xl">
+    <i class="fa-solid fa-comment-dots"></i>
+  </span>
+</button>
+
+<!-- Slide-over Panel -->
+<div id="feedbackPanel" class="fixed inset-y-0 right-0 w-full sm:w-[520px] z-[70] translate-x-full transition-transform duration-300">
+  <div class="h-full bg-white shadow-2xl border-l flex flex-col">
+    <!-- Header -->
+    <div class="px-5 py-4 border-b flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-heart text-teal-600 text-xl"></i>
+        <h3 class="text-lg font-semibold">NeuroMed AI — Quick Feedback</h3>
+      </div>
+      <button id="feedbackClose" class="text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
+    </div>
+
+    <!-- Body -->
+    <form id="feedbackForm" class="px-5 py-4 overflow-y-auto space-y-4" enctype="multipart/form-data">
+      <p class="text-sm text-gray-600 -mt-1">
+        Thank you for testing! Please use <b>synthetic/public data</b> only — no PHI.
+      </p>
+
+      <!-- Consent -->
+      <label class="flex items-start gap-2 text-sm bg-gray-50 border rounded p-3">
+        <input type="checkbox" name="consent" required>
+        <span>I agree to share feedback for product improvement and won’t include sensitive personal health information.</span>
+      </label>
+
+      <!-- What you tested (maps to model.use_case as comma-separated) -->
+      <div>
+        <label class="text-sm font-medium">What did you test? (pick any)</label>
+        <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="upload_summarize"> Upload → Summarize</label>
+          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="multi_attachments"> Multiple attachments tray</label>
+          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="tone_selector"> Tone selector</label>
+          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="chat_qna"> Chat Q&A</label>
+          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="summary_modal"> Full Summary modal</label>
+          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="drag_drop"> Drag & drop</label>
+          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="mic_dictation"> Mic dictation</label>
+          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="settings_update"> Settings update</label>
+        </div>
+      </div>
+
+      <!-- Profile -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="text-sm">Role</label>
+          <select name="role" class="mt-1 w-full border rounded p-2" required>
+            <option value="">Select…</option>
+            <option value="caregiver">Caregiver</option>
+            <option value="patient">Patient</option>
+            <option value="clinician">Clinician</option>
+            <option value="student">Student</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm">Email (optional)</label>
+          <input name="email" type="email" class="mt-1 w-full border rounded p-2" placeholder="you@example.com">
+        </div>
+        <div>
+          <label class="text-sm">Input type</label>
+          <select name="input_type" class="mt-1 w-full border rounded p-2" required>
+            <option value="">Select…</option>
+            <option value="dummy">Dummy text I wrote</option>
+            <option value="synthetic">Synthetic sample from app</option>
+            <option value="public">Public doc (no PHI)</option>
+            <option value="other">Other (no PHI)</option>
+          </select>
+        </div>
+        <!-- device/browser auto-filled by JS, but user can override if needed -->
+        <div>
+          <label class="text-sm">Device</label>
+          <input name="device" class="mt-1 w-full border rounded p-2" placeholder="e.g. MacBook, iPhone, Windows PC">
+        </div>
+        <div>
+          <label class="text-sm">Browser</label>
+          <input name="browser" class="mt-1 w-full border rounded p-2" placeholder="e.g. Safari 17, Chrome 126">
+        </div>
+      </div>
+
+      <!-- Ratings -->
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-sm">Ease (1–5)</label><input name="ease" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2"></div>
+        <div><label class="text-sm">Speed (1–5)</label><input name="speed" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2"></div>
+        <div><label class="text-sm">Accuracy (1–5)</label><input name="accuracy" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2"></div>
+        <div><label class="text-sm">Clarity (1–5)</label><input name="clarity" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2"></div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-sm">NPS (0–10)</label><input name="nps" type="number" min="0" max="10" class="mt-1 w-full border rounded p-2" required></div>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="allow_contact"> OK to contact</label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="allow_anon" checked> Store anonymously</label>
+      </div>
+
+      <!-- Open text + screenshot -->
+      <div>
+        <label class="text-sm">What worked well?</label>
+        <textarea name="pros" rows="2" class="w-full border rounded p-2"></textarea>
+      </div>
+      <div>
+        <label class="text-sm">What can we improve?</label>
+        <textarea name="cons" rows="2" class="w-full border rounded p-2"></textarea>
+      </div>
+      <div>
+        <label class="text-sm">Bugs or errors (steps)</label>
+        <textarea name="bugs" rows="2" class="w-full border rounded p-2" placeholder="1) Go to… 2) Click… 3) See error…"></textarea>
+      </div>
+      <div>
+        <label class="text-sm">Screenshot (optional)</label>
+        <input type="file" name="screenshot" accept="image/*">
+      </div>
+
+      <!-- Submit -->
+      <div class="flex items-center justify-between pt-2">
+        <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded">Send feedback</button>
+      </div>
+
+      <div id="fbErrors" class="text-sm text-red-600 hidden"></div>
+    </form>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="fbToast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
+  <div class="bg-green-600 text-white px-4 py-2 rounded shadow">Thanks! Feedback received. 💜</div>
+</div>
+
+
+<!-- Success Modal -->
+<div id="fbSuccess"
+     class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/40 backdrop-blur-[1px]">
+  <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl ring-1 ring-gray-200 p-6 relative">
+    <button id="fbSuccessCloseX" class="absolute top-3 right-4 text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
+
+    <div class="flex items-start gap-3 mb-3">
+      <div class="shrink-0 rounded-full p-2 bg-teal-100 text-teal-700">
+        <i class="fa-solid fa-check"></i>
+      </div>
+      <div>
+        <h3 class="text-xl font-semibold text-gray-800">Thanks for the feedback! 💜</h3>
+        <p id="fbSuccessMsg" class="text-sm text-gray-600 mt-1">
+          We’ve received your submission. Your input helps make NeuroMed AI kinder and sharper.
+        </p>
+      </div>
+    </div>
+
+    <div id="fbSuccessMeta" class="hidden text-xs text-gray-500 mb-4"></div>
+
+    <div class="flex justify-end gap-2 mt-4">
+      <button id="fbSuccessAnother"
+              class="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">
+        Send another
+      </button>
+      <button id="fbSuccessClose"
+              class="px-4 py-2 rounded bg-teal-600 text-white hover:bg-teal-700">
+        Done
+      </button>
+    </div>
+  </div>
+</div>
+
+
 <script>
+// --- Floating panel controls
+const panel   = document.getElementById('feedbackPanel');
+const tabBtn  = document.getElementById('feedbackTab');   // side tab (desktop)
+const fabBtn  = document.getElementById('feedbackFab');   // FAB (mobile)
+const closeBtn= document.getElementById('feedbackClose');
+const form    = document.getElementById('feedbackForm');
+const toast   = document.getElementById('fbToast');
+const errBox  = document.getElementById('fbErrors');
+
+function openFeedback(){ panel.classList.remove('translate-x-full'); }
+function closeFeedback(){ panel.classList.add('translate-x-full'); }
+
+tabBtn?.addEventListener('click', openFeedback);
+fabBtn?.addEventListener('click', openFeedback);
+closeBtn?.addEventListener('click', closeFeedback);
+
+// ESC to close slide-over
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeFeedback(); });
+
+
+// --- Success modal controls
+const fbSuccess         = document.getElementById('fbSuccess');
+const fbSuccessMsg      = document.getElementById('fbSuccessMsg');
+const fbSuccessMeta     = document.getElementById('fbSuccessMeta');
+const fbSuccessClose    = document.getElementById('fbSuccessClose');
+const fbSuccessCloseX   = document.getElementById('fbSuccessCloseX');
+const fbSuccessAnother  = document.getElementById('fbSuccessAnother');
+
+function openFbSuccess(data){
+  if (data && (data.id || data.created_at)) {
+    fbSuccessMeta.classList.remove('hidden');
+    fbSuccessMeta.textContent = `Ref: ${data.id || '—'} • ${data.created_at || ''}`;
+  } else {
+    fbSuccessMeta.classList.add('hidden');
+    fbSuccessMeta.textContent = '';
+  }
+  fbSuccess.classList.remove('hidden');
+  fbSuccess.classList.add('flex');
+  document.body.classList.add('overflow-hidden'); // lock background scroll
+}
+
+function closeFbSuccess(){
+  fbSuccess.classList.add('hidden');
+  fbSuccess.classList.remove('flex');
+  document.body.classList.remove('overflow-hidden');
+}
+
+fbSuccessClose?.addEventListener('click', closeFbSuccess);
+fbSuccessCloseX?.addEventListener('click', closeFbSuccess);
+fbSuccess.addEventListener('click', (e) => {
+  if (e.target === fbSuccess) closeFbSuccess(); // click backdrop to close
+});
+document.addEventListener('keydown', (e) => {
+  if (!fbSuccess.classList.contains('hidden') && e.key === 'Escape') closeFbSuccess();
+});
+
+// "Send another" = reopen the panel so they can submit again quickly
+fbSuccessAnother?.addEventListener('click', () => {
+  closeFbSuccess();
+  openFeedback();
+});
+
+
+// --- Submit with loading state + success modal
+form.addEventListener('submit', async (e) => {
+  e.preventDefault(); // stop any default navigation
+  errBox.classList.add('hidden');
+  errBox.textContent = '';
+
+  // Build form data (include collapsed use_case)
+  const fd = new FormData(form);
+  if (typeof collectUseCase === 'function') {
+    fd.append('use_case', collectUseCase());
+  }
+
+  // Button loading state
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const originalHTML = submitBtn ? submitBtn.innerHTML : '';
+  const setLoading = (on) => {
+    if (!submitBtn) return;
+    if (on) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Sending your feedback… hang tight';
+    } else {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalHTML;
+    }
+  };
+
+  setLoading(true);
+
+  try {
+    const res = await fetch('/beta/api/submit/', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': getCSRFToken() },
+      body: fd
+    });
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      const msg = data?.errors ? JSON.stringify(data.errors) : 'Please check your inputs.';
+      errBox.textContent = msg;
+      errBox.classList.remove('hidden');
+      setLoading(false);
+      return;
+    }
+
+    // success: reset fields, restore button, close panel, show success modal
+    form.reset();
+    if (typeof prefillMeta === 'function') prefillMeta(); // repopulate device/browser if you use it
+    setLoading(false);
+    closeFeedback();
+    openFbSuccess(data);
+  } catch (err) {
+    errBox.textContent = 'Network error. Please try again.';
+    errBox.classList.remove('hidden');
+    setLoading(false);
+  }
+});
+
+function detectBrowserPretty() {
+  const ua = navigator.userAgent || '';
+  // Order matters (Edge before Chrome, Safari after Chrome check, etc.)
+  const rules = [
+    { name: 'Edge',    re: /(Edg|Edge)\/(\d+)/i },
+    { name: 'Chrome',  re: /(Chrome|Chromium)\/(\d+)/i },
+    { name: 'Firefox', re: /Firefox\/(\d+)/i },
+    // Safari last: Version/xx with Safari present
+    { name: 'Safari',  re: /Version\/(\d+).+Safari/i },
+  ];
+  for (const r of rules) {
+    const m = ua.match(r.re);
+    if (m) return `${r.name} ${m[m.length - 1]}`;
+  }
+  return ua ? ua.split(') ').pop() || 'Unknown' : 'Unknown';
+}
+
+function prefillMeta() {
+  const form = document.getElementById('feedbackForm');
+  if (!form) return;
+
+  const dev = (navigator.userAgentData && navigator.userAgentData.platform)
+              || navigator.platform || 'Unknown';
+  const browserPretty = detectBrowserPretty();
+
+  const devInput = form.querySelector('input[name="device"]');
+  const brInput  = form.querySelector('input[name="browser"]');
+
+  // Only fill if user hasn't typed anything yet
+  if (devInput && !devInput.value) devInput.value = dev;
+  if (brInput  && !brInput.value)  brInput.value  = browserPretty;
+}
+
+// Run once when page loads
+document.addEventListener('DOMContentLoaded', prefillMeta);
+
+
+
 /* ------------------ UTIL ------------------ */
 function getCSRFToken() {
   const m = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');

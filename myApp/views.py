@@ -552,3 +552,45 @@ def summarize_single_file(file_obj, tone: str, system_prompt: str, user=None) ->
             summary=summary,
         )
     return fname, summary
+
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import BetaFeedbackForm
+
+def beta_feedback(request):
+    if request.method == "POST":
+        form = BetaFeedbackForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Thanks! Your feedback was submitted.")
+            return redirect("beta_thanks")
+    else:
+        form = BetaFeedbackForm()
+    return render(request, "beta/feedback.html", {"form": form})
+
+def beta_thanks(request):
+    return render(request, "beta/thanks.html")
+
+
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
+from .forms import BetaFeedbackForm
+
+@require_POST
+def beta_feedback_api(request):
+    """
+    Accepts multipart FormData; returns JSON {success, id?, created_at?, errors?}
+    """
+    form = BetaFeedbackForm(request.POST, request.FILES)
+
+    if form.is_valid():
+        obj = form.save()
+        return JsonResponse(
+            {"success": True, "id": str(obj.id), "created_at": obj.created_at.isoformat()},
+            status=201
+        )
+
+    # Flatten errors a bit for nicer toasts
+    errors = {f: [str(e) for e in errs] for f, errs in form.errors.items()}
+    return JsonResponse({"success": False, "errors": errors}, status=400)
