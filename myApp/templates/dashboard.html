@@ -375,10 +375,11 @@ async function greetUser() {
     const data = await res.json();
     const name = data.display_name || "there";
     const options = [
-      `Welcome back, ${name}. Let’s get started.`,
-      `Hello again, ${name}. Ready to review your records?`,
-      `Hi ${name}, your wellness matters—how can I support you today?`,
-      `${name}, I’m here to help make things simpler.`
+      `Welcome, ${name}! Let’s get you started on understanding your records.`,
+`Hi ${name}, ready to make sense of your medical documents?`,
+`Glad you’re here, ${name}. Let’s take the first step together.`,
+`${name}, I’m here to help simplify your health information—let’s begin.`,
+
     ];
     appendBubble(options[Math.floor(Math.random()*options.length)], false);
   } catch {
