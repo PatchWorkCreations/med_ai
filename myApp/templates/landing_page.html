@@ -3,140 +3,159 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>neuromed.ai — Chat</title>
-
-  <!-- Tailwind + Icons -->
+  <title>NeuroMed.ai — Friendlier Chat</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
-
   <style>
-    body { background:#fff; }
-    .chip { border:1px solid rgba(0,0,0,.08); }
-    .chat-bubble{
-      border-radius:18px;padding:12px 16px;line-height:1.6;box-shadow:0 1px 4px rgba(0,0,0,.04);
-      max-width:75%;white-space:pre-wrap;word-break:break-word;font-size:.95rem
+    :root {
+      --brand:#0b3b36;
     }
-    .chat-user{background:#0f172a;color:#fff;border-bottom-right-radius:6px!important;margin-left:auto}
-    .chat-ai{background:#f8fafc;color:#111827;border-bottom-left-radius:6px!important;margin-right:auto}
-    .selector-pill input:checked+label{background:#0b3b36;color:#fff;border-color:#0b3b36}
-    .selector-pill label{transition:all .15s ease}
-    .pulse{animation:pulse 1.1s ease-in-out infinite}
-    @keyframes pulse{0%,100%{opacity:.55}50%{opacity:1}}
+    body { background: #f6f8fb; }
+    .chip { border:1px solid rgba(0,0,0,.08); }
+    .chat-bubble{ border-radius:18px; padding:12px 16px; line-height:1.6; box-shadow:0 1px 4px rgba(0,0,0,.04); max-width:80%; white-space:pre-wrap; word-break:break-word; font-size:.95rem }
+    .chat-user{ background:#0f172a; color:#fff; border-bottom-right-radius:6px!important; margin-left:auto }
+    .chat-ai{ background:#ffffff; color:#111827; border:1px solid rgba(0,0,0,.05); border-bottom-left-radius:6px!important; margin-right:auto }
+    .pulse{ animation:pulse 1.1s ease-in-out infinite }
+    @keyframes pulse{ 0%,100%{ opacity:.55 } 50%{ opacity:1 } }
+    .dotty::after{ content:""; display:inline-block; width:1.2ch; text-align:left; animation: ellipsis 1.2s steps(4,end) infinite }
+    @keyframes ellipsis{ 0%{ content:"" } 25%{ content:"." } 50%{ content:".." } 75%{ content:"..." } 100%{ content:"" } }
+  .mode-badge{display:inline-flex;align-items:center;gap:.5rem;font-size:.75rem;border-radius:999px;padding:.25rem .6rem;border:1px solid rgba(0,0,0,.08);background:#fff}
+    .toast{transform:translateY(-10px);opacity:0;transition:transform .2s ease,opacity .2s ease}
+    .toast.show{transform:translateY(0);opacity:1}
+    .shimmer{position:relative;overflow:hidden}
+    .shimmer::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.7) 50%,rgba(255,255,255,0) 100%);transform:translateX(-100%);animation:shimmer 900ms ease forwards}
+    @keyframes shimmer{to{transform:translateX(100%)}}
   </style>
 </head>
-
 <body class="text-slate-800">
   <!-- Top bar -->
-  <header class="w-full border-b">
+  <header class="w-full border-b bg-white/80 backdrop-blur">
     <div class="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
+      <!-- Logo -->
       <div class="flex items-center gap-3">
-        <i class="fa-solid fa-heart-pulse text-emerald-700 text-xl"></i>
-        <span class="font-semibold tracking-tight">neuromed.ai</span>
+        <i class="fa-solid fa-heart-pulse text-teal-600 text-xl" aria-hidden="true"></i>
+        <span class="font-semibold tracking-tight">NeuroMed.ai</span>
       </div>
-      <div class="flex items-center gap-3">
-        <a href="/signup" class="hidden sm:inline text-sm text-slate-600 hover:text-slate-900">Sign up</a>
-        <a href="/login"  class="text-sm rounded-full px-3 py-1.5 border hover:bg-slate-50">Log in</a>
+  
+      <!-- Links (both visible on mobile + desktop) -->
+      <div class="flex items-center gap-3 text-sm">
+        <span class="hidden md:inline text-slate-500">You can send 1 free message as guest.</span>
+        <a href="/signup" class="text-slate-600 hover:text-slate-900">Sign up</a>
+        <a href="/login" class="rounded-full px-3 py-1.5 border hover:bg-slate-50">Log in</a>
       </div>
     </div>
   </header>
+  
 
-  <!-- Hero + Chat Card -->
-  <main class="max-w-4xl mx-auto px-5 pt-8 pb-16">
-    <h1 class="text-center text-4xl sm:text-5xl font-bold tracking-tight mb-2">
-      LET’S <span class="text-emerald-700">CHAT</span>
-    </h1>
-
-    <!-- Modes -->
-    <div class="text-center text-sm text-slate-600 mb-3">Choose a Mode:</div>
-    <div class="selector-pill flex items-center justify-center gap-2 mb-8">
-      <input id="mode-plain" class="hidden peer" type="radio" name="mode" value="Plain" checked>
-      <label for="mode-plain" class="peer-checked:bg-emerald-800 peer-checked:text-white cursor-pointer text-sm border rounded-full px-4 py-2 bg-white">Plain</label>
-
-      <input id="mode-care" class="hidden peer" type="radio" name="mode" value="Caregiver">
-      <label for="mode-care" class="peer-checked:bg-emerald-800 peer-checked:text-white cursor-pointer text-sm border rounded-full px-4 py-2 bg-white">Caregiver</label>
-
-      <input id="mode-faith" class="hidden peer" type="radio" name="mode" value="Faith">
-      <label for="mode-faith" class="peer-checked:bg-emerald-800 peer-checked:text-white cursor-pointer text-sm border rounded-full px-4 py-2 bg-white">Faith</label>
-
-      <input id="mode-clinical" class="hidden peer" type="radio" name="mode" value="Clinical">
-      <label for="mode-clinical" class="peer-checked:bg-emerald-800 peer-checked:text-white cursor-pointer text-sm border rounded-full px-4 py-2 bg-white">Clinical</label>
-
-      <input id="mode-bilingual" class="hidden peer" type="radio" name="mode" value="Bilingual">
-      <label for="mode-bilingual" class="peer-checked:bg-emerald-800 peer-checked:text-white cursor-pointer text-sm border rounded-full px-4 py-2 bg-white">Bilingual</label>
+  <!-- Main -->
+  <main class="max-w-4xl mx-auto px-4 md:px-5 pt-6 md:pt-10 pb-24">
+    <div class="text-center">
+      <h1 class="text-3xl md:text-5xl font-bold tracking-tight">Let’s <span class="text-emerald-700">chat</span></h1>
+      <p class="mt-2 text-slate-600">Explain results, decode prescriptions, draft questions for your doctor — in plain language.</p>
     </div>
 
-    <!-- Chat Card -->
-    <section class="bg-white border rounded-2xl shadow-sm">
-      <!-- Greeting / AI Intro -->
-      <div class="px-6 pt-6">
-        <div id="intro" class="chat-bubble chat-ai">
-Hi there! 👋 I’m NeuroMed—your medical-summary companion. Ask about results, meds, or next steps—I'll explain with clarity and care.
+    <!-- Mode switcher (segmented) -->
+    <div class="mt-5">
+      <div class="text-center text-sm text-slate-600 mb-2">Choose a mode</div>
+      <div id="modeGroup" class="mx-auto max-w-xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+        <!-- template items; icons help scanning -->
+        <button data-mode="Plain" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 flex items-center justify-center gap-2 text-sm aria-pressed" aria-pressed="true">
+          <i class="fa-regular fa-message" aria-hidden="true"></i><span>Plain</span>
+        </button>
+        <button data-mode="Caregiver" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 flex items-center justify-center gap-2 text-sm" aria-pressed="false">
+          <i class="fa-solid fa-hands-holding-child" aria-hidden="true"></i><span>Caregiver</span>
+        </button>
+        <button data-mode="Faith" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 flex items-center justify-center gap-2 text-sm" aria-pressed="false">
+          <i class="fa-solid fa-hands-praying" aria-hidden="true"></i><span>Faith</span>
+        </button>
+        <button data-mode="Clinical" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 flex items-center justify-center gap-2 text-sm" aria-pressed="false">
+          <i class="fa-solid fa-stethoscope" aria-hidden="true"></i><span>Clinical</span>
+        </button>
+        <button data-mode="Bilingual" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 flex items-center justify-center gap-2 text-sm" aria-pressed="false">
+          <i class="fa-solid fa-language" aria-hidden="true"></i><span>Bilingual</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Card -->
+    <section class="mt-6 bg-white border rounded-2xl shadow-sm overflow-hidden">
+      <!-- Intro + mode badge -->
+      <div class="px-5 md:px-6 pt-5 flex items-start justify-between gap-3">
+        <div id="intro" class="chat-bubble chat-ai flex-1">
+Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, labs, or prescriptions; I’ll translate them into clear action steps you can use.
+        </div>
+        <span id="modeBadge" class="mode-badge text-slate-600" title="Current tone"><i class="fa-regular fa-message"></i><span>Plain</span></span>
+      </div>
+
+      <!-- Chat area -->
+      <div id="chatWindow" class="px-5 md:px-6 pb-3 pt-3 max-h-[55vh] overflow-y-auto scroll-smooth"></div>
+
+      <!-- Suggestions (wrap into a responsive grid; no drag) -->
+      <div class="px-5 md:px-6 pb-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2" role="list">
+          <button class="chip w-full text-left px-3 py-2 rounded-full text-sm hover:bg-slate-50 suggestion" role="listitem"><i class="fa-regular fa-hospital mr-2"></i>Summarize this ER discharge note for a caregiver.</button>
+          <button class="chip w-full text-left px-3 py-2 rounded-full text-sm hover:bg-slate-50 suggestion" role="listitem"><i class="fa-solid fa-vial-circle-check mr-2"></i>Explain these lab results (CBC, CMP) in simple terms.</button>
+          <button class="chip w-full text-left px-3 py-2 rounded-full text-sm hover:bg-slate-50 suggestion" role="listitem"><i class="fa-solid fa-pills mr-2"></i>Turn these prescriptions into a daily medication schedule.</button>
+          <button class="chip w-full text-left px-3 py-2 rounded-full text-sm hover:bg-slate-50 suggestion" role="listitem"><i class="fa-regular fa-clipboard mr-2"></i>Draft questions to ask my doctor about this diagnosis.</button>
+          <button class="chip w-full text-left px-3 py-2 rounded-full text-sm hover:bg-slate-50 suggestion" role="listitem"><i class="fa-solid fa-language mr-2"></i>Translate this summary to Taglish for my lola.</button>
         </div>
       </div>
 
-      <!-- Chat window -->
-      <div id="chatWindow" class="px-6 pb-4 pt-2 max-h-[50vh] overflow-y-auto"></div>
+      <!-- Composer -->
+      <div class="border-t bg-slate-50/50">
+        <div class="px-3 md:px-4 py-3 md:py-4">
+          <div class="rounded-xl border bg-white p-2 md:p-2.5">
+            <div id="dropZone" class="relative flex items-end gap-2">
+              <!-- Upload -->
+              <input id="fileInput" type="file" class="hidden" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" />
+              <button id="uploadBtn" class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-slate-100 hover:bg-slate-200 grid place-items-center" title="Upload a record" aria-label="Upload a medical record">
+                <i class="fa-solid fa-paperclip"></i>
+              </button>
 
-      <!-- Medical suggestion chips -->
-      <div class="px-6 pb-3 flex flex-wrap gap-2">
-        <button class="chip px-3 py-1.5 rounded-full text-sm hover:bg-slate-50 suggestion">
-          Summarize this ER discharge note for a caregiver.
-        </button>
-        <button class="chip px-3 py-1.5 rounded-full text-sm hover:bg-slate-50 suggestion">
-          Explain these lab results (CBC, CMP) in simple terms.
-        </button>
-        <button class="chip px-3 py-1.5 rounded-full text-sm hover:bg-slate-50 suggestion">
-          Turn these prescriptions into a daily medication schedule.
-        </button>
-        <button class="chip px-3 py-1.5 rounded-full text-sm hover:bg-slate-50 suggestion">
-          Draft questions to ask my doctor about this diagnosis.
-        </button>
-        <button class="chip px-3 py-1.5 rounded-full text-sm hover:bg-slate-50 suggestion">
-          Translate this summary to Taglish for my lola.
-        </button>
-      </div>
+              <!-- Textarea (autosizing) -->
+              <div class="flex-1 min-w-0">
+                <textarea id="chatInput" rows="1" class="w-full resize-none px-3 py-2 outline-none placeholder-slate-400" placeholder="Type your question… (Shift+Enter for new line)" aria-label="Message"></textarea>
+                <div class="flex flex-wrap gap-2 mt-1" id="fileChips"></div>
+                
+              </div>
 
-      <!-- Composer (with Upload on the LEFT) -->
-      <div class="px-4 pb-5">
-        <div class="flex items-center gap-2 border rounded-xl px-2 py-2">
-          <!-- Upload button -->
-          <input id="fileInput" type="file" class="hidden" accept=".pdf,.docx,.txt,.jpg,.jpeg,.png"/>
-          <button id="uploadBtn" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center" title="Upload a record">
-            <i class="fa-solid fa-paperclip"></i>
-          </button>
+              <!-- Controls -->
+              <div class="flex items-center gap-2">
+                <button id="micBtn" class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-slate-100 hover:bg-slate-200 grid place-items-center" title="Dictate" aria-label="Dictate">
+                  <i class="fa-solid fa-microphone"></i>
+                </button>
+                <button id="sendBtn" class="w-16 h-9 md:h-10 rounded-xl bg-black text-white hover:bg-slate-900 grid place-items-center disabled:opacity-40 disabled:cursor-not-allowed" title="Send" aria-label="Send" disabled>
+                  <i class="fa-solid fa-paper-plane"></i>
+                </button>
+              </div>
 
-          <!-- Optional selected file pill -->
-          <span id="filePill" class="hidden text-xs bg-slate-100 border rounded-full px-2 py-1 mr-1"></span>
-
-          <!-- Text input -->
-          <input
-            id="chatInput"
-            class="flex-1 px-3 py-2 rounded-md focus:outline-none"
-            placeholder="Type a message..."
-            autocomplete="off"
-          />
-          <button id="micBtn" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center" title="Dictate">
-            <i class="fa-solid fa-microphone"></i>
-          </button>
-          <button id="sendBtn" class="w-16 h-10 rounded-xl bg-black text-white hover:bg-slate-900 flex items-center justify-center" title="Send">
-            <i class="fa-solid fa-paper-plane"></i>
-          </button>
+              <!-- Drop overlay -->
+              <div id="dropHint" class="pointer-events-none hidden absolute inset-0 rounded-xl ring-2 ring-emerald-600/50 bg-emerald-50/50 grid place-items-center text-emerald-900 text-sm font-medium">
+                Drop your file to attach
+              </div>
+            </div>
+          </div>
         </div>
-        <p class="mt-1 text-[11px] text-slate-500">Tip: Attach a medical record (PDF/DOCX/images) to get a richer summary.</p>
       </div>
     </section>
   </main>
 
-  <!-- Sign-up gate modal (shown for guests on first send) -->
+  <!-- Tiny toast for mode changes -->
+  <div id="toast" class="toast fixed top-4 right-4 z-[60] hidden">
+    <div class="bg-white border shadow-lg rounded-xl px-3 py-2 text-sm flex items-center gap-2">
+      <i id="toastIcon" class="fa-regular fa-message text-emerald-700" aria-hidden="true"></i>
+      <span id="toastText" class="text-slate-800">Mode set to Plain</span>
+    </div>
+  </div>
+
+  <!-- Signup gate -->
   <div id="signupGate" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
     <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-xl">
       <div class="flex items-center gap-2 mb-2">
-        <i class="fa-regular fa-circle-question text-emerald-700"></i>
+        <i class="fa-regular fa-circle-question text-emerald-700" aria-hidden="true"></i>
         <h3 class="text-xl font-semibold">Create an account to continue</h3>
       </div>
-      <p class="text-sm text-slate-600 mb-5">
-        You’re chatting as a guest. Please sign up (it’s quick!) to send your first message and save your conversations.
-      </p>
+      <p class="text-sm text-slate-600 mb-4">You just used your free guest message. Sign up to save chats, sync across devices, and unlock history.</p>
       <div class="flex items-center justify-end gap-2">
         <button class="px-4 py-2 rounded-lg border" onclick="hideSignupGate()">Not now</button>
         <a href="/signup" class="px-4 py-2 rounded-lg bg-emerald-700 text-white hover:bg-emerald-800">Sign up</a>
@@ -145,123 +164,221 @@ Hi there! 👋 I’m NeuroMed—your medical-summary companion. Ask about result
   </div>
 
   <script>
-    // ---------- Utilities
-    function getCSRFToken(){
-      const m=document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)'); return m?m.pop():'';
-    }
-    function appendBubble(message,isUser=false){
-      const chatWindow=document.getElementById("chatWindow");
-      const wrap=document.createElement("div"); wrap.className="w-full flex mb-3";
-      const bubble=document.createElement("div"); bubble.className=`chat-bubble ${isUser?'chat-user':'chat-ai'}`;
-      bubble.innerText=message; wrap.appendChild(bubble); chatWindow.appendChild(wrap);
-      chatWindow.scrollTop=chatWindow.scrollHeight;
+    // ---------------- Utilities
+    function getCSRFToken(){ const m=document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)'); return m?m.pop():''; }
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+    function appendBubble({ message, isUser=false, timestamp=new Date() }){
+      const chatWindow = $('#chatWindow');
+      const wrap = document.createElement('div');
+      wrap.className = 'w-full flex mb-3';
+      const bubble = document.createElement('div');
+      bubble.className = `chat-bubble ${isUser?'chat-user':'chat-ai'}`;
+      bubble.innerText = message;
+      const meta = document.createElement('div');
+      meta.className = 'text-[11px] text-slate-400 mt-1 ' + (isUser ? 'text-right ml-auto pr-1' : 'pl-1');
+      meta.innerText = new Intl.DateTimeFormat(undefined,{ hour:'2-digit', minute:'2-digit' }).format(timestamp);
+      const col = document.createElement('div');
+      col.className = 'flex flex-col ' + (isUser ? 'items-end ml-auto' : 'items-start mr-auto');
+      col.appendChild(bubble); col.appendChild(meta);
+      wrap.appendChild(col); chatWindow.appendChild(wrap);
+      chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 
-    // ---------- Simple auth probe
+    function setSendDisabled(disabled){ const btn=$('#sendBtn'); btn.disabled=disabled; }
+
+    // Persist mode to localStorage
+    function loadMode(){ return localStorage.getItem('nm_mode') || 'Plain'; }
+    function saveMode(m){ localStorage.setItem('nm_mode', m); }
+
+    // ---------------- Auth check
     async function isAuthenticated(){
-      try{
-        const r=await fetch("/api/auth/status/",{credentials:"include"});
-        if(!r.ok) return false; const j=await r.json(); return !!j.authenticated;
-      }catch{return false;}
+      try{ const r=await fetch('/api/auth/status/',{ credentials:'include' }); if(!r.ok) return false; const j=await r.json(); return !!j.authenticated; }catch{ return false; }
     }
 
-    // ---------- UI wiring
-    let firstSendAttempted=false;
-    let attachedFile=null;
+    // ---------------- State
+    let firstSendAttempted = false; // allow 1 guest message
+    let files = []; // multiple attachments UX, backend will read first if needed
+    let abortController = null; // stop generating support if you stream later
 
-    document.addEventListener("DOMContentLoaded",()=>{
-      document.querySelectorAll(".suggestion").forEach(btn=>{
-        btn.addEventListener("click",()=>{
-          document.getElementById("chatInput").value=btn.innerText.trim();
-          document.getElementById("chatInput").focus();
-        });
+    // ---------------- Init
+    document.addEventListener('DOMContentLoaded', () => {
+      // Mode buttons
+      const savedMode = loadMode();
+      $$('#modeGroup button').forEach(btn => {
+        const mode = btn.dataset.mode;
+        if(mode === savedMode){ selectMode(btn); }
+        btn.addEventListener('click', () => selectMode(btn));
       });
 
-      document.getElementById("chatInput").addEventListener("keydown",e=>{
-        if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); sendChat(); }
+      // Suggestions -> input
+      $$('.suggestion').forEach(btn => btn.addEventListener('click', () => { $('#chatInput').value = btn.innerText.trim(); autosize(); toggleSend(); $('#chatInput').focus(); }));
+
+      // Input events
+      $('#chatInput').addEventListener('input', () => { autosize(); toggleSend(); });
+      $('#chatInput').addEventListener('keydown', (e) => {
+        if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendChat(); }
       });
-      document.getElementById("micBtn").addEventListener("click", startDictation);
-      document.getElementById("sendBtn").addEventListener("click", sendChat);
+      $('#sendBtn').addEventListener('click', sendChat);
 
       // Upload controls
-      const fileInput=document.getElementById("fileInput");
-      const filePill=document.getElementById("filePill");
-      document.getElementById("uploadBtn").addEventListener("click",()=>fileInput.click());
-      fileInput.addEventListener("change",(e)=>{
-        attachedFile = e.target.files?.[0] || null;
-        if(attachedFile){
-          filePill.textContent = attachedFile.name;
-          filePill.classList.remove("hidden");
-        }else{
-          filePill.classList.add("hidden");
-        }
-      });
+      $('#uploadBtn').addEventListener('click', () => $('#fileInput').click());
+      $('#fileInput').addEventListener('change', (e) => { if(e.target.files?.length){ for(const f of e.target.files){ addFile(f); } e.target.value=''; } });
+
+      // Drag & drop
+      const dz = $('#dropZone');
+      ;['dragenter','dragover'].forEach(evt => dz.addEventListener(evt, (e)=>{ e.preventDefault(); $('#dropHint').classList.remove('hidden'); }));
+      ;['dragleave','drop'].forEach(evt => dz.addEventListener(evt, (e)=>{ e.preventDefault(); if(evt==='drop'){ const dt=e.dataTransfer; if(dt?.files?.length){ for(const f of dt.files){ addFile(f); } } } $('#dropHint').classList.add('hidden'); }));
+
+      // Paste image/file
+      document.addEventListener('paste', (e)=>{ const items=e.clipboardData?.items || []; for(const it of items){ if(it.kind==='file'){ addFile(it.getAsFile()); } } });
+
+      // Mic
+      $('#micBtn').addEventListener('click', startDictation);
+
+      // Initial autosize
+      autosize(); toggleSend();
+
+      // Focus input for faster first type
+      setTimeout(()=>$('#chatInput').focus(), 200);
     });
 
-    // ---------- Send
+    function selectMode(btn){
+      $$('#modeGroup button').forEach(b => { b.setAttribute('aria-pressed','false'); b.classList.remove('ring','ring-emerald-600'); });
+      btn.setAttribute('aria-pressed','true'); btn.classList.add('ring','ring-emerald-600');
+      const mode = btn.dataset.mode;
+      saveMode(mode);
+      applyModeUI(mode);
+    }
+
+    const MODE_META = {
+      'Plain':     { icon:'fa-regular fa-message',      color:'text-emerald-700', intro:"Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, labs, or prescriptions; I’ll translate them into clear action steps you can use." },
+      'Caregiver': { icon:'fa-solid fa-hands-holding-child', color:'text-amber-700', intro:"Caregiver mode on. I’ll keep things gentle and practical — plain-language steps you can follow and watch-outs to keep your loved one safe." },
+      'Faith':     { icon:'fa-solid fa-hands-praying',   color:'text-indigo-700', intro:"Faith mode on. I’ll explain medically, with optional words of encouragement and sensitivity to faith-forward language when asked." },
+      'Clinical':  { icon:'fa-solid fa-stethoscope',     color:'text-slate-800', intro:"Clinical mode on. I’ll use precise medical terms, cite ranges when relevant, and keep recommendations structured and concise." },
+      'Bilingual': { icon:'fa-solid fa-language',        color:'text-teal-700', intro:"Bilingual mode on. I’ll explain in English + Tagalog (Taglish), keeping key terms accurate and easy to pass along to family." }
+    };
+
+    function applyModeUI(mode){
+      const meta = MODE_META[mode] || MODE_META['Plain'];
+      // Badge update
+      const badge = $('#modeBadge');
+      badge.querySelector('i').className = meta.icon + ' ' + meta.color;
+      badge.querySelector('span').textContent = mode;
+      // Intro refresh with shimmer hint
+      const intro = $('#intro');
+      intro.classList.add('shimmer');
+      setTimeout(()=>{ intro.textContent = meta.intro; intro.classList.remove('shimmer'); }, 220);
+      // Tiny toast
+      showToast(`${mode} mode applied` , meta.icon, meta.color);
+    }
+
+    function showToast(text, icon, color){
+      const t = $('#toast'); const ti = $('#toastIcon'); const tt = $('#toastText');
+      ti.className = icon + ' ' + color; tt.textContent = text;
+      t.classList.remove('hidden');
+      // force reflow to restart transition
+      void t.offsetWidth; t.classList.add('show');
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.classList.add('hidden'), 220); }, 1600);
+    }
+
+    function addFile(file){
+      if(!file) return;
+      files.push(file);
+      const chip = document.createElement('span');
+      chip.className = 'text-xs bg-slate-100 border rounded-full px-2 py-1 inline-flex items-center gap-1';
+      chip.innerHTML = `<i class="${iconFor(file.name)}"></i><span class="max-w-[12rem] truncate">${escapeHtml(file.name)}</span>`;
+      const x = document.createElement('button'); x.className='ml-1 text-slate-500 hover:text-slate-800'; x.innerHTML='&times;'; x.setAttribute('aria-label','Remove attachment');
+      x.addEventListener('click', ()=>{ files = files.filter(f=>f!==file); chip.remove(); });
+      chip.appendChild(x);
+      $('#fileChips').appendChild(chip);
+      toggleSend();
+    }
+
+    function iconFor(name){
+      const n = name.toLowerCase();
+      if(n.endsWith('.pdf')) return 'fa-regular fa-file-pdf';
+      if(n.endsWith('.doc')||n.endsWith('.docx')) return 'fa-regular fa-file-word';
+      if(n.endsWith('.jpg')||n.endsWith('.jpeg')||n.endsWith('.png')) return 'fa-regular fa-file-image';
+      return 'fa-regular fa-file';
+    }
+
+    function escapeHtml(str){ return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }
+
+    function autosize(){
+      const ta = $('#chatInput');
+      ta.style.height = 'auto';
+      ta.style.height = Math.min(200, ta.scrollHeight) + 'px';
+    }
+
+    function toggleSend(){
+      const hasText = ( $('#chatInput').value || '' ).trim().length > 0;
+      const hasFile = files.length > 0;
+      setSendDisabled(!(hasText || hasFile));
+    }
+
     async function sendChat(){
-      const input=document.getElementById("chatInput");
-      const msg=(input.value||"").trim();
-      const mode=document.querySelector('input[name="mode"]:checked')?.value || "Plain";
-      if(!msg && !attachedFile) return;
+      const msg = ($('#chatInput').value || '').trim();
+      const mode = loadMode();
+      if(!msg && files.length===0) return;
 
       if(!firstSendAttempted){
-        firstSendAttempted=true;
-        const authed=await isAuthenticated();
-        if(!authed){ showSignupGate(); return; }
+        firstSendAttempted = true; // allow first send even if guest
+        const authed = await isAuthenticated();
+        if(!authed){ // let them send the first message; show gate AFTER response
+          // proceed but mark to show signup later
+          showGateAfterResponse = true;
+        }
       }
 
-      if(msg) appendBubble(msg,true);
-      input.value="";
+      if(msg) appendBubble({ message: msg, isUser:true });
+      $('#chatInput').value=''; autosize(); toggleSend();
 
-      // typing indicator
-      const chatWindow=document.getElementById("chatWindow");
-      const typingWrap=document.createElement("div"); typingWrap.className="w-full flex mb-2";
-      const typing=document.createElement("div"); typing.className="chat-bubble chat-ai text-slate-500 italic";
-      typing.innerHTML='<i class="fa-solid fa-spinner pulse mr-2"></i>Thinking…';
-      typingWrap.appendChild(typing); chatWindow.appendChild(typingWrap);
-      chatWindow.scrollTop=chatWindow.scrollHeight;
+      // Typing indicator
+      const chatWindow = $('#chatWindow');
+      const typingWrap = document.createElement('div'); typingWrap.className='w-full flex mb-2';
+      const typing = document.createElement('div'); typing.className='chat-bubble chat-ai text-slate-600'; typing.innerHTML = '<i class="fa-solid fa-spinner pulse mr-2" aria-hidden="true"></i><span class="dotty">Thinking</span>';
+      const col = document.createElement('div'); col.className='flex flex-col items-start mr-auto'; col.appendChild(typing); typingWrap.appendChild(col); chatWindow.appendChild(typingWrap); chatWindow.scrollTop=chatWindow.scrollHeight;
 
-      // payload
-      const fd=new FormData();
-      if(msg) fd.append("message", msg);
-      fd.append("mode", mode);
-      if(attachedFile) fd.append("file", attachedFile);
+      // Payload
+      const fd = new FormData();
+      if(msg) fd.append('message', msg);
+      fd.append('mode', mode);
+      if(files.length){ fd.append('file', files[0]); } // backend currently supports single; keep UX multi for future
+
+      // Optional: enable streaming cancel
+      abortController = new AbortController();
 
       try{
-        const res=await fetch("/api/send-chat/",{
-          method:"POST",
-          headers:{ "X-CSRFToken": getCSRFToken() },
-          body: fd,
-          credentials:"include"
-        });
-        const data=await res.json();
-        typing.classList.remove("italic","text-slate-500");
-        typing.classList.add("text-slate-800");
-        typing.innerText=data.reply || "⚠️ No reply received.";
+        const res = await fetch('/api/send-chat/', { method:'POST', headers:{ 'X-CSRFToken': getCSRFToken() }, body: fd, credentials:'include', signal: abortController.signal });
+        const data = await res.json();
+        typing.classList.remove('text-slate-600'); typing.classList.add('text-slate-800');
+        typing.innerText = data.reply || '⚠️ No reply received.';
       }catch(e){
-        typing.classList.remove("italic","text-slate-500");
-        typing.classList.add("text-red-700","bg-red-100");
-        typing.innerText="❌ Error getting a response.";
+        typing.classList.remove('text-slate-600'); typing.classList.add('text-red-700','bg-red-100');
+        typing.innerText = '❌ Error getting a response.';
       }finally{
-        // clear selection after send
-        const fileInput=document.getElementById("fileInput");
-        const filePill=document.getElementById("filePill");
-        fileInput.value=""; attachedFile=null; filePill.classList.add("hidden");
+        files = []; $('#fileChips').innerHTML=''; toggleSend();
+        if(showGateAfterResponse){ showSignupGate(); showGateAfterResponse=false; }
       }
     }
 
-    // ---------- Speech
+    let showGateAfterResponse = false;
+
+    // Speech
     function startDictation(){
-      if(!('webkitSpeechRecognition' in window)){ alert("Speech recognition works best in Chrome."); return; }
-      const rec=new webkitSpeechRecognition(); rec.lang="en-US";
-      rec.onresult=(e)=>{ document.getElementById("chatInput").value=e.results[0][0].transcript; };
+      if(!('webkitSpeechRecognition' in window)){ alert('Speech recognition works best in Chrome.'); return; }
+      const rec = new webkitSpeechRecognition(); rec.lang='en-US';
+      rec.onresult = (e)=>{ $('#chatInput').value = e.results[0][0].transcript; autosize(); toggleSend(); };
       rec.start();
     }
 
-    // ---------- Gate modal
-    function showSignupGate(){ const m=document.getElementById("signupGate"); m.classList.remove("hidden"); m.classList.add("flex"); }
-    function hideSignupGate(){ const m=document.getElementById("signupGate"); m.classList.add("hidden"); m.classList.remove("flex"); }
+    // Gate modal
+    function showSignupGate(){ const m=$('#signupGate'); m.classList.remove('hidden'); m.classList.add('flex'); }
+    function hideSignupGate(){ const m=$('#signupGate'); m.classList.add('hidden'); m.classList.remove('flex'); }
+    window.hideSignupGate = hideSignupGate; // expose for button
   </script>
 </body>
 </html>
