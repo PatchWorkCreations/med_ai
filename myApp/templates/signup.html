@@ -111,11 +111,22 @@
 
           <!-- Terms -->
           <div class="md:col-span-2">
-            <label class="inline-flex items-center gap-2 text-sm text-slate-600">
-              <input type="checkbox" required class="rounded border-slate-300 text-teal-600 focus:ring-teal-500">
-              I agree to the <a href="/terms" class="text-teal-700 hover:underline">Terms</a> and <a href="/privacy" class="text-teal-700 hover:underline">Privacy Policy</a>.
+            <label class="flex items-start gap-3 text-sm text-slate-700 cursor-pointer">
+              <!-- Larger, accessible checkbox -->
+              <input 
+                type="checkbox" 
+                required 
+                class="mt-1 h-5 w-5 shrink-0 rounded border-slate-300 text-teal-600 focus:ring-2 focus:ring-teal-500"
+              >
+              <span>
+                I agree to the 
+                <a href="/terms" class="font-medium text-teal-700 hover:underline">Terms of Use</a> 
+                and 
+                <a href="/privacy" class="font-medium text-teal-700 hover:underline">Privacy Policy</a>.
+              </span>
             </label>
           </div>
+          
 
           <!-- Submit -->
           <div class="md:col-span-2">

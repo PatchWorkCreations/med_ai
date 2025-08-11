@@ -2,6 +2,7 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
 from django.views.generic import RedirectView
+from .views import LegalView, terms_redirect, privacy_redirect
 
 urlpatterns = [
     # Public Pages
@@ -44,4 +45,9 @@ urlpatterns = [
     # new JSON endpoint:
     path("beta/api/submit/", views.beta_feedback_api, name="beta_feedback_api"),
     
+
+     path("legal/", LegalView.as_view(), name="legal"),
+    # Optional convenience routes that jump to the correct section
+    path("terms/", terms_redirect, name="terms"),
+    path("privacy/", privacy_redirect, name="privacy"),
 ]

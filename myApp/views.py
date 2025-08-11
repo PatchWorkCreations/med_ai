@@ -594,3 +594,30 @@ def beta_feedback_api(request):
     # Flatten errors a bit for nicer toasts
     errors = {f: [str(e) for e in errs] for f, errs in form.errors.items()}
     return JsonResponse({"success": False, "errors": errors}, status=400)
+
+
+from datetime import date
+from django.shortcuts import redirect
+from django.views.generic import TemplateView
+from django.http import HttpResponseRedirect
+
+class LegalView(TemplateView):
+    """
+    Renders the single-page 'Terms of Use & Privacy Policy' template.
+    """
+    template_name = "legal/terms_privacy.html"
+
+    # Optional: pass an effective date from server-side
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["effective_date"] = date.today()  # or a fixed date, e.g., date(2025, 8, 11)
+        return ctx
+
+
+def terms_redirect(_request):
+    # Django can't append fragments via reverse(), so use a raw redirect.
+    return HttpResponseRedirect("/legal/#terms")
+
+
+def privacy_redirect(_request):
+    return HttpResponseRedirect("/legal/#privacy")

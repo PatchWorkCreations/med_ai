@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NeuroMed.ai — Terms of Use & Privacy Policy</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    :root { --brand:#0b3b36; }
+    body { background:#f7fafc; }
+    .prose h2 { scroll-margin-top: 96px; }
+    .card { background:#fff; border:1px solid rgba(2,6,23,.08); }
+    .chip { border:1px solid rgba(2,6,23,.08); }
+    /* Print */
+    @media print {
+      .no-print { display:none !important; }
+      body { background:#fff; }
+      a[href^="#"]:after { content:""; }
+    }
+  </style>
+</head>
+<body class="text-slate-800">
+  <!-- Header -->
+  <header class="w-full border-b bg-white/80 backdrop-blur">
+    <div class="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-3">
+        <i class="fa-solid fa-heart-pulse text-teal-600 text-xl" aria-hidden="true"></i>
+        <span class="font-semibold tracking-tight">NeuroMed.ai</span>
+      </a>
+      <div class="flex items-center gap-2 no-print">
+        <a href="/signup" class="text-sm text-slate-600 hover:text-slate-900">Sign up</a>
+        <a href="/login" class="text-sm rounded-full px-3 py-1.5 border hover:bg-slate-50">Log in</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="max-w-6xl mx-auto px-5 pt-8 pb-4">
+    <div class="card rounded-2xl p-6 md:p-8">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-bold tracking-tight">Terms of Use & Privacy Policy</h1>
+          <p class="mt-2 text-slate-600">Clear, human-friendly policies for using NeuroMed.ai.</p>
+          <p class="mt-3 text-sm text-slate-500">
+            <span id="effectiveLabel">Effective:</span>
+            <time id="effectiveDate" datetime=""></time>
+          </p>
+        </div>
+        <div class="no-print flex items-center gap-2">
+          <button onclick="window.print()" class="chip px-3 py-2 rounded-xl text-sm hover:bg-slate-50">
+            <i class="fa-solid fa-print mr-2"></i>Print
+          </button>
+          <a href="#contact" class="chip px-3 py-2 rounded-xl text-sm hover:bg-slate-50">
+            <i class="fa-regular fa-envelope mr-2"></i>Contact
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Layout -->
+  <main class="max-w-6xl mx-auto px-5 pb-16 grid grid-cols-1 md:grid-cols-[250px,1fr] gap-6">
+    <!-- Sticky TOC -->
+    <aside class="no-print hidden md:block">
+      <div class="card rounded-2xl p-4 sticky top-20">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On this page</p>
+        <nav class="space-y-2 text-sm">
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="#terms">Terms of Use</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="#privacy">Privacy Policy</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="#contact">Contact</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Content -->
+    <section class="prose max-w-none">
+      <!-- TERMS -->
+      <div id="terms" class="card rounded-2xl p-6 md:p-8 mb-6">
+        <h2 class="text-2xl md:text-3xl font-semibold flex items-center gap-2">
+          <i class="fa-regular fa-file-lines text-emerald-700"></i> Terms of Use
+        </h2>
+        <p class="mt-2 text-slate-600">
+          Welcome to NeuroMed AI. By accessing or using our platform, you agree to be bound by these Terms of Use.
+          Please read them carefully.
+        </p>
+
+        <!-- 1 -->
+        <details class="mt-5 group">
+          <summary class="cursor-pointer select-none flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50">
+            <span class="shrink-0 mt-1 chip w-6 h-6 grid place-items-center rounded-full text-xs">1</span>
+            <div>
+              <p class="font-medium">Informational Use Only</p>
+              <p class="text-sm text-slate-600">AI outputs are not medical advice.</p>
+            </div>
+          </summary>
+          <div class="mt-2 ml-12 text-slate-700">
+            NeuroMed AI is not a licensed healthcare provider. The summaries, explanations, and AI-generated responses are
+            for informational purposes only and should not be interpreted as professional medical advice, diagnosis, or
+            treatment. Always consult a licensed physician or healthcare professional for medical concerns.
+          </div>
+        </details>
+
+        <!-- 2 -->
+        <details class="mt-3 group">
+          <summary class="cursor-pointer select-none flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50">
+            <span class="shrink-0 mt-1 chip w-6 h-6 grid place-items-center rounded-full text-xs">2</span>
+            <div>
+              <p class="font-medium">User Responsibility</p>
+              <p class="text-sm text-slate-600">Stay lawful; you own your content.</p>
+            </div>
+          </summary>
+          <div class="mt-2 ml-12 text-slate-700">
+            You agree not to upload, submit, or share any content that violates applicable laws or regulations.
+            You retain ownership of your content but grant NeuroMed AI a limited, non-exclusive right to process the data
+            strictly to provide you with summaries or responses.
+          </div>
+        </details>
+
+        <!-- 3 -->
+        <details class="mt-3 group">
+          <summary class="cursor-pointer select-none flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50">
+            <span class="shrink-0 mt-1 chip w-6 h-6 grid place-items-center rounded-full text-xs">3</span>
+            <div>
+              <p class="font-medium">Data Accuracy</p>
+              <p class="text-sm text-slate-600">We strive for quality; outcomes may vary.</p>
+            </div>
+          </summary>
+          <div class="mt-2 ml-12 text-slate-700">
+            NeuroMed AI makes no guarantees regarding the accuracy, completeness, or suitability of the information
+            provided. We’re continuously improving, but outcomes may vary depending on context and input quality.
+          </div>
+        </details>
+
+        <!-- 4 -->
+        <details class="mt-3 group">
+          <summary class="cursor-pointer select-none flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50">
+            <span class="shrink-0 mt-1 chip w-6 h-6 grid place-items-center rounded-full text-xs">4</span>
+            <div>
+              <p class="font-medium">Emergency Disclaimer</p>
+              <p class="text-sm text-slate-600">Not for emergencies.</p>
+            </div>
+          </summary>
+          <div class="mt-2 ml-12 text-slate-700">
+            Do not use NeuroMed AI in emergencies. If you or someone else is experiencing a medical emergency,
+            call 911 (or your local emergency number) or seek immediate professional help.
+          </div>
+        </details>
+
+        <!-- 5 -->
+        <details class="mt-3 group">
+          <summary class="cursor-pointer select-none flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50">
+            <span class="shrink-0 mt-1 chip w-6 h-6 grid place-items-center rounded-full text-xs">5</span>
+            <div>
+              <p class="font-medium">Modifications</p>
+              <p class="text-sm text-slate-600">We may update these terms.</p>
+            </div>
+          </summary>
+          <div class="mt-2 ml-12 text-slate-700">
+            We reserve the right to update or modify these Terms of Use at any time. Continued use of the platform
+            constitutes acceptance of the revised terms.
+          </div>
+        </details>
+      </div>
+
+      <!-- PRIVACY -->
+      <div id="privacy" class="card rounded-2xl p-6 md:p-8">
+        <h2 class="text-2xl md:text-3xl font-semibold flex items-center gap-2">
+          <i class="fa-solid fa-shield-heart text-emerald-700"></i> Privacy Policy
+        </h2>
+        <p class="mt-2 text-slate-600">
+          Your privacy is sacred to us. This policy explains how we collect, use, and protect your data.
+        </p>
+
+        <!-- 1 -->
+        <details class="mt-5 group">
+          <summary class="cursor-pointer select-none flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50">
+            <span class="shrink-0 mt-1 chip w-6 h-6 grid place-items-center rounded-full text-xs">1</span>
+            <div>
+              <p class="font-medium">Data We Collect</p>
+              <p class="text-sm text-slate-600">What may be captured when you use NeuroMed.</p>
+            </div>
+          </summary>
+          <div class="mt-2 ml-12 text-slate-700">
+            We may collect the following data when you use our platform:
+            <ul class="list-disc ml-6 mt-2">
+              <li>Uploaded medical files (e.g., PDFs, images, DOCX)</li>
+              <li>Chat inputs and interactions with the AI</li>
+              <li>Optional user preferences (tone modes, language settings)</li>
+            </ul>
+          </div>
+        </details>
+
+        <!-- 2 -->
+        <details class="mt-3 group">
+          <summary class="cursor-pointer select-none flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50">
+            <span class="shrink-0 mt-1 chip w-6 h-6 grid place-items-center rounded-full text-xs">2</span>
+            <div>
+              <p class="font-medium">Data Usage</p>
+              <p class="text-sm text-slate-600">Only to power your session.</p>
+            </div>
+          </summary>
+          <div class="mt-2 ml-12 text-slate-700">
+            Your data is used solely to generate summaries, responses, and support interactions within your session.
+            We do not use your data to train models or for third-party marketing purposes.
+          </div>
+        </details>
+
+        <!-- 3 -->
+        <details class="mt-3 group">
+          <summary class="cursor-pointer select-none flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50">
+            <span class="shrink-0 mt-1 chip w-6 h-6 grid place-items-center rounded-full text-xs">3</span>
+            <div>
+              <p class="font-medium">Data Security</p>
+              <p class="text-sm text-slate-600">Encryption in transit and at rest.</p>
+            </div>
+          </summary>
+          <div class="mt-2 ml-12 text-slate-700">
+            We use secure encryption protocols for data in transit and at rest. Data is retained only as long as needed
+            for your active session unless you choose to save your history. We avoid storing unnecessary personal identifiers.
+          </div>
+        </details>
+
+        <!-- 4 -->
+        <details class="mt-3 group">
+          <summary class="cursor-pointer select-none flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50">
+            <span class="shrink-0 mt-1 chip w-6 h-6 grid place-items-center rounded-full text-xs">4</span>
+            <div>
+              <p class="font-medium">HIPAA Alignment</p>
+              <p class="text-sm text-slate-600">Best practices; enterprise options available.</p>
+            </div>
+          </summary>
+          <div class="mt-2 ml-12 text-slate-700">
+            While not a covered entity under HIPAA, NeuroMed AI aligns with HIPAA best practices. For enterprise or clinical
+            use, we offer HIPAA-compliant infrastructure where applicable.
+          </div>
+        </details>
+
+        <!-- 5 -->
+        <details class="mt-3 group">
+          <summary class="cursor-pointer select-none flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50">
+            <span class="shrink-0 mt-1 chip w-6 h-6 grid place-items-center rounded-full text-xs">5</span>
+            <div>
+              <p class="font-medium">Your Rights</p>
+              <p class="text-sm text-slate-600">Access, delete, or opt out of retention.</p>
+            </div>
+          </summary>
+          <div class="mt-2 ml-12 text-slate-700">
+            You may request deletion of your data or opt out of data-retention features at any time. Questions?
+            Email us at <a href="mailto:hello@iriseup.ai" class="text-emerald-700 underline">hello@iriseup.ai</a>.
+          </div>
+        </details>
+      </div>
+
+      <!-- CONTACT / FOOTER -->
+      <div id="contact" class="mt-6 text-sm text-slate-600">
+        <div class="flex flex-wrap items-center gap-3">
+          <i class="fa-regular fa-envelope"></i>
+          <a href="mailto:hello@iriseup.ai" class="underline">hello@iriseup.ai</a>
+          <span aria-hidden="true">•</span>
+          <span>© <span id="year"></span> NeuroMed.ai</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Effective date (change to your real date or pass from backend)
+    const effective = new Date(); // today; set a fixed ISO string if needed
+    const ef = document.getElementById('effectiveDate');
+    ef.dateTime = effective.toISOString().split('T')[0];
+    ef.textContent = effective.toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' });
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
