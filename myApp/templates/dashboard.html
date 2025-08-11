@@ -15,8 +15,27 @@
       box-shadow: 0 2px 8px rgba(0,0,0,.05); max-width: 75%; white-space: pre-wrap; word-break: break-word;
       animation: fadeInUp .25s ease;
     }
-    .chat-user { background:#111827; color:#fff; border-bottom-right-radius:6px!important; margin-left:auto; }
-    .chat-ai   { background:#f0fdf4; color:#1f2937; border-bottom-left-radius:6px!important; margin-right:auto; }
+    /* Keep bubbles neutral so the wrapper controls side */
+
+
+    .chat-user {
+  background-color: #dbeafe;
+  color: #1f2937;
+  padding: 0.5rem 0.75rem;
+  border-radius: 1rem;
+  max-width: 75%;
+  margin-right: auto;   /* LEFT side */
+}
+
+.chat-ai {
+  background-color: #ecfdf5;
+  color: #1f2937;
+  padding: 0.5rem 0.75rem;
+  border-radius: 1rem;
+  max-width: 75%;
+  margin-left: auto;    /* RIGHT side */
+}
+
 
     .sidebar-link:hover { background:#f0f0f0; transition:all .2s; }
     @keyframes fadeInUp { from {opacity:0; transform:translateY(20px)} to {opacity:1; transform:translateY(0)} }
@@ -592,29 +611,30 @@ function appendRichBubble(content, isUser = false) {
   const chatWindow = document.getElementById("chatWindow");
   if (!chatWindow) return;
 
+  // Wrapper: no justify-* here; margins on the bubble control the side
   const wrap = document.createElement("div");
   wrap.className = "w-full flex mb-3";
 
+  // Bubble picks the side via CSS (.chat-user/.chat-ai)
   const bubble = document.createElement("div");
   bubble.className = `chat-bubble ${isUser ? "chat-user" : "chat-ai"}`;
 
   const rich = document.createElement("div");
   rich.className = "leading-relaxed text-[15px] space-y-2";
+  rich.setAttribute("dir", "auto");
 
   const asNode = content instanceof Node;
-  const text   = asNode ? null : String(content ?? "");
+  const text = asNode ? null : String(content ?? "");
 
   try {
     if (asNode) {
       rich.appendChild(content);
     } else {
-      // Try markdown → HTML; gracefully fallback
+      // Markdown → HTML (fallback to minimal escaping)
       let html = text;
-
-      if (window.marked) {
+      if (window.marked && typeof marked.parse === "function") {
         html = marked.parse(text);
       } else {
-        // Minimal escape if marked not ready yet
         html = text
           .replace(/&/g, "&amp;")
           .replace(/</g, "&lt;")
@@ -622,30 +642,45 @@ function appendRichBubble(content, isUser = false) {
           .replace(/\n/g, "<br>");
       }
 
-      // Sanitize if available; otherwise insert safe-escaped HTML only
+      // Sanitize if available
       rich.innerHTML = window.DOMPurify ? DOMPurify.sanitize(html) : html;
 
-      // Polishing hooks
+      // Light polish
       rich.querySelectorAll("p").forEach(el => el.classList.add("text-gray-800"));
-      rich.querySelectorAll("h1,h2,h3,h4").forEach(el => el.classList.add("font-semibold","tracking-tight","text-gray-900","mt-2"));
+      rich.querySelectorAll("h1,h2,h3,h4").forEach(el =>
+        el.classList.add("font-semibold","tracking-tight","text-gray-900","mt-2")
+      );
       rich.querySelectorAll("h1").forEach(el => el.classList.add("text-xl"));
       rich.querySelectorAll("h2").forEach(el => el.classList.add("text-lg"));
       rich.querySelectorAll("h3,h4").forEach(el => el.classList.add("text-base"));
       rich.querySelectorAll("ul").forEach(el => el.classList.add("list-disc","pl-5","space-y-1"));
       rich.querySelectorAll("ol").forEach(el => el.classList.add("list-decimal","pl-5","space-y-1"));
-      rich.querySelectorAll("blockquote").forEach(el => el.classList.add("border-l-4","border-teal-500","pl-3","italic","text-gray-700","bg-teal-50/40","rounded-r"));
-      rich.querySelectorAll("a").forEach(a => { a.classList.add("text-teal-700","hover:underline","font-medium"); a.target="_blank"; a.rel="noopener noreferrer"; });
-      rich.querySelectorAll("p > code, li > code").forEach(code => code.classList.add("px-1.5","py-0.5","rounded","bg-gray-100","text-gray-900","text-[13px]"));
-      rich.querySelectorAll("pre code").forEach(code => code.parentElement.classList.add("overflow-x-auto","rounded-lg","p-3","bg-gray-900","text-gray-100","text-sm"));
-      rich.querySelectorAll("img").forEach(img => { img.classList.add("rounded-lg","shadow-sm","max-w-full"); img.loading="lazy"; });
+      rich.querySelectorAll("blockquote").forEach(el =>
+        el.classList.add("border-l-4","border-teal-500","pl-3","italic","text-gray-700","bg-teal-50/40","rounded-r")
+      );
+      rich.querySelectorAll("a").forEach(a => {
+        a.classList.add("text-teal-700","hover:underline","font-medium");
+        a.target = "_blank"; a.rel = "noopener noreferrer";
+      });
+      rich.querySelectorAll("p > code, li > code").forEach(code =>
+        code.classList.add("px-1.5","py-0.5","rounded","bg-gray-100","text-gray-900","text-[13px]")
+      );
+      rich.querySelectorAll("pre code").forEach(code =>
+        code.parentElement.classList.add("overflow-x-auto","rounded-lg","p-3","bg-gray-900","text-gray-100","text-sm")
+      );
+      rich.querySelectorAll("img").forEach(img => {
+        img.classList.add("rounded-lg","shadow-sm","max-w-full");
+        img.loading = "lazy";
+      });
 
       if (window.hljs) {
-        rich.querySelectorAll("pre code").forEach(code => { try { hljs.highlightElement(code); } catch {} });
+        rich.querySelectorAll("pre code").forEach(code => {
+          try { hljs.highlightElement(code); } catch {}
+        });
       }
     }
   } catch {
-    // Absolute fallback (never drop the first message)
-    rich.textContent = asNode ? "[Unsupported content]" : text || "";
+    rich.textContent = asNode ? "[Unsupported content]" : (text || "");
   }
 
   bubble.appendChild(rich);
@@ -653,6 +688,7 @@ function appendRichBubble(content, isUser = false) {
   chatWindow.appendChild(wrap);
   chatWindow.scrollTop = chatWindow.scrollHeight;
 }
+
 
 function appendBubble(message, isUser = false) {
   appendRichBubble(message, isUser);
@@ -916,11 +952,19 @@ async function sendChat() {
   clearPending();
 
   // 4) Typing indicator
-  const chatWindow = document.getElementById("chatWindow");
-  const typingWrap = document.createElement("div");
-  typingWrap.className = "w-full flex mb-2";
-  const typing = document.createElement("div");
-  typing.className = "chat-bubble chat-ai text-gray-500 italic";
+
+  // 4) Typing indicator
+const chatWindow = document.getElementById("chatWindow");
+const typingWrap = document.createElement("div");
+// force AI side
+typingWrap.className = "w-full flex mb-2 justify-end";
+const typing = document.createElement("div");
+typing.className = "chat-bubble chat-ai text-gray-500 italic";
+typing.innerText = "Analyzing…";
+typingWrap.appendChild(typing);
+chatWindow.appendChild(typingWrap);
+chatWindow.scrollTop = chatWindow.scrollHeight;
+
   typing.innerText = "Analyzing…";
   typingWrap.appendChild(typing);
   chatWindow.appendChild(typingWrap);
