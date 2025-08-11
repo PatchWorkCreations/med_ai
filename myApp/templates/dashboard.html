@@ -429,6 +429,10 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.3/dist/purify.min.js" defer></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
 
 <script>
 // --- Floating panel controls
@@ -595,26 +599,127 @@ function getCSRFToken() {
   return m ? m.pop() : '';
 }
 function closeModal(){ document.getElementById("summaryModal").classList.add("hidden"); }
-function appendBubble(message, isUser=false) {
+function appendRichBubble(content, isUser = false) {
   const chatWindow = document.getElementById("chatWindow");
+  if (!chatWindow) return;
+
   const wrap = document.createElement("div");
   wrap.className = "w-full flex mb-3";
+
   const bubble = document.createElement("div");
-  bubble.className = `chat-bubble ${isUser ? 'chat-user' : 'chat-ai'}`;
-  bubble.innerText = message;
-  wrap.appendChild(bubble); chatWindow.appendChild(wrap);
+  bubble.className = `chat-bubble ${isUser ? "chat-user" : "chat-ai"}`;
+
+  const rich = document.createElement("div");
+  rich.className = "leading-relaxed text-[15px] space-y-2";
+
+  const asNode = content instanceof Node;
+  const text   = asNode ? null : String(content ?? "");
+
+  try {
+    if (asNode) {
+      rich.appendChild(content);
+    } else {
+      // Try markdown → HTML; gracefully fallback
+      let html = text;
+
+      if (window.marked) {
+        html = marked.parse(text);
+      } else {
+        // Minimal escape if marked not ready yet
+        html = text
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\n/g, "<br>");
+      }
+
+      // Sanitize if available; otherwise insert safe-escaped HTML only
+      rich.innerHTML = window.DOMPurify ? DOMPurify.sanitize(html) : html;
+
+      // Polishing hooks
+      rich.querySelectorAll("p").forEach(el => el.classList.add("text-gray-800"));
+      rich.querySelectorAll("h1,h2,h3,h4").forEach(el => el.classList.add("font-semibold","tracking-tight","text-gray-900","mt-2"));
+      rich.querySelectorAll("h1").forEach(el => el.classList.add("text-xl"));
+      rich.querySelectorAll("h2").forEach(el => el.classList.add("text-lg"));
+      rich.querySelectorAll("h3,h4").forEach(el => el.classList.add("text-base"));
+      rich.querySelectorAll("ul").forEach(el => el.classList.add("list-disc","pl-5","space-y-1"));
+      rich.querySelectorAll("ol").forEach(el => el.classList.add("list-decimal","pl-5","space-y-1"));
+      rich.querySelectorAll("blockquote").forEach(el => el.classList.add("border-l-4","border-teal-500","pl-3","italic","text-gray-700","bg-teal-50/40","rounded-r"));
+      rich.querySelectorAll("a").forEach(a => { a.classList.add("text-teal-700","hover:underline","font-medium"); a.target="_blank"; a.rel="noopener noreferrer"; });
+      rich.querySelectorAll("p > code, li > code").forEach(code => code.classList.add("px-1.5","py-0.5","rounded","bg-gray-100","text-gray-900","text-[13px]"));
+      rich.querySelectorAll("pre code").forEach(code => code.parentElement.classList.add("overflow-x-auto","rounded-lg","p-3","bg-gray-900","text-gray-100","text-sm"));
+      rich.querySelectorAll("img").forEach(img => { img.classList.add("rounded-lg","shadow-sm","max-w-full"); img.loading="lazy"; });
+
+      if (window.hljs) {
+        rich.querySelectorAll("pre code").forEach(code => { try { hljs.highlightElement(code); } catch {} });
+      }
+    }
+  } catch {
+    // Absolute fallback (never drop the first message)
+    rich.textContent = asNode ? "[Unsupported content]" : text || "";
+  }
+
+  bubble.appendChild(rich);
+  wrap.appendChild(bubble);
+  chatWindow.appendChild(wrap);
   chatWindow.scrollTop = chatWindow.scrollHeight;
 }
-function appendRichBubble(node, isUser=false) {
+
+function appendBubble(message, isUser = false) {
+  appendRichBubble(message, isUser);
+}
+
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await ensureReady(); // don’t race the libs on first paint
   const chatWindow = document.getElementById("chatWindow");
-  const wrap = document.createElement("div");
-  wrap.className = "w-full flex mb-3";
-  const bubble = document.createElement("div");
-  bubble.className = `chat-bubble ${isUser ? 'chat-user' : 'chat-ai'}`;
-  bubble.appendChild(node);
-  wrap.appendChild(bubble); chatWindow.appendChild(wrap);
-  chatWindow.scrollTop = chatWindow.scrollHeight;
+  if (chatWindow && chatWindow.innerHTML.trim() === '') {
+    greetUser(); // fire after libs/DOM are ready
+  }
+});
+
+async function greetUser() {
+  try {
+    const res = await fetch("/api/user/settings/");
+    const data = await res.json();
+    const name = data.display_name || "there";
+    const options = [
+      `Welcome, ${name}! Let’s get you started on understanding your records.`,
+      `Hi ${name}, ready to make sense of your medical documents?`,
+      `Glad you’re here, ${name}. Let’s take the first step together.`,
+      `${name}, I’m here to help simplify your health information—let’s begin.`,
+    ];
+    appendBubble(options[Math.floor(Math.random()*options.length)], false);
+  } catch {
+    appendBubble("Welcome back. Let’s take care of what matters most today.", false);
+  }
 }
+
+async function newChat() {
+  const chatWindow = document.getElementById("chatWindow");
+  if (chatWindow) chatWindow.innerHTML = '';
+  try {
+    await fetch("/clear-session/", { method:"POST", headers:{ "X-CSRFToken": getCSRFToken(), "Content-Type":"application/json" }});
+  } catch {}
+
+  await ensureReady();
+
+  try {
+    const res = await fetch("/api/user/settings/");
+    const data = await res.json();
+    const name = data.display_name || "there";
+    const greetings = [
+      `Hi ${name}, how can I help you today? 🌿`,
+      `Hello ${name}! What can I do for you today? 🤖`,
+      `Hey ${name}, I’m here for you. How are you feeling? 💬`,
+      `${name}, let’s figure things out together. What do you need today? 🧠`
+    ];
+    appendBubble(greetings[Math.floor(Math.random()*greetings.length)], false);
+  } catch {
+    appendBubble("Hi there! How can I help you today?", false);
+  }
+}
+
 
 /* ------------------ STATE: pending attachments ------------------ */
 const pending = []; // {file: File, url?: string, kind: 'image'|'doc'}
@@ -706,7 +811,7 @@ document.addEventListener("DOMContentLoaded", () => {
   searchInput?.addEventListener('input', function () {
     const q = this.value.toLowerCase();
     document.querySelectorAll('.sidebar-link').forEach(item => {
-      const filename = item.querySelector('p.text-gray-800')?.innerText.toLowerCase() || '';
+      const filename = item.querySelector('p.text-white-800')?.innerText.toLowerCase() || '';
       const text = item.querySelector('p.text-base')?.innerText.toLowerCase() || '';
       item.style.display = (filename.includes(q) || text.includes(q)) ? 'block' : 'none';
     });
