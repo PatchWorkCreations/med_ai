@@ -50,8 +50,8 @@
   <!-- Main -->
   <main class="max-w-4xl mx-auto px-4 md:px-5 pt-6 md:pt-10 pb-24">
     <div class="text-center">
-      <h1 class="text-3xl md:text-5xl font-bold tracking-tight">Let’s <span class="text-emerald-700">chat</span></h1>
-      <p class="mt-2 text-slate-600">Explain results, decode prescriptions, draft questions for your doctor — in plain language.</p>
+      <h1 class="text-3xl md:text-5xl font-bold tracking-tight">Let’s <span class="text-teal-600">chat</span></h1>
+      <p class="mt-2 text-slate-600">Explain results, decode prescriptions, draft questions for your doctor — in Science language.</p>
     </div>
 
     <!-- Mode switcher (segmented) -->
@@ -60,7 +60,7 @@
       <div id="modeGroup" class="mx-auto max-w-xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
         <!-- template items; icons help scanning -->
         <button data-mode="Plain" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 flex items-center justify-center gap-2 text-sm aria-pressed" aria-pressed="true">
-          <i class="fa-regular fa-message" aria-hidden="true"></i><span>Plain</span>
+          <i class="fa-regular fa-message" aria-hidden="true"></i><span>Science</span>
         </button>
         <button data-mode="Caregiver" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 flex items-center justify-center gap-2 text-sm" aria-pressed="false">
           <i class="fa-solid fa-hands-holding-child" aria-hidden="true"></i><span>Caregiver</span>
@@ -143,8 +143,8 @@ Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, 
   <!-- Tiny toast for mode changes -->
   <div id="toast" class="toast fixed top-4 right-4 z-[60] hidden">
     <div class="bg-white border shadow-lg rounded-xl px-3 py-2 text-sm flex items-center gap-2">
-      <i id="toastIcon" class="fa-regular fa-message text-emerald-700" aria-hidden="true"></i>
-      <span id="toastText" class="text-slate-800">Mode set to Plain</span>
+      <i id="toastIcon" class="fa-regular fa-message text-teal-600" aria-hidden="true"></i>
+      <span id="toastText" class="text-slate-800">Mode set to Science</span>
     </div>
   </div>
 
@@ -152,13 +152,13 @@ Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, 
   <div id="signupGate" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
     <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-xl">
       <div class="flex items-center gap-2 mb-2">
-        <i class="fa-regular fa-circle-question text-emerald-700" aria-hidden="true"></i>
+        <i class="fa-regular fa-circle-question text-teal-600" aria-hidden="true"></i>
         <h3 class="text-xl font-semibold">Create an account to continue</h3>
       </div>
       <p class="text-sm text-slate-600 mb-4">You just used your free guest message. Sign up to save chats, sync across devices, and unlock history.</p>
       <div class="flex items-center justify-end gap-2">
         <button class="px-4 py-2 rounded-lg border" onclick="hideSignupGate()">Not now</button>
-        <a href="/signup" class="px-4 py-2 rounded-lg bg-emerald-700 text-white hover:bg-emerald-800">Sign up</a>
+        <a href="/signup" class="px-4 py-2 rounded-lg bg-teal-600 text-white hover:bg-emerald-800">Sign up</a>
       </div>
     </div>
   </div>
@@ -253,8 +253,8 @@ Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, 
     }
 
     const MODE_META = {
-      'Plain':     { icon:'fa-regular fa-message',      color:'text-emerald-700', intro:"Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, labs, or prescriptions; I’ll translate them into clear action steps you can use." },
-      'Caregiver': { icon:'fa-solid fa-hands-holding-child', color:'text-amber-700', intro:"Caregiver mode on. I’ll keep things gentle and practical — plain-language steps you can follow and watch-outs to keep your loved one safe." },
+      'Plain':     { icon:'fa-regular fa-message',      color:'text-teal-600', intro:"Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, labs, or prescriptions; I’ll translate them into clear action steps you can use." },
+      'Caregiver': { icon:'fa-solid fa-hands-holding-child', color:'text-amber-700', intro:"Caregiver mode on. I’ll keep things gentle and practical — Science-language steps you can follow and watch-outs to keep your loved one safe." },
       'Faith':     { icon:'fa-solid fa-hands-praying',   color:'text-indigo-700', intro:"Faith mode on. I’ll explain medically, with optional words of encouragement and sensitivity to faith-forward language when asked." },
       'Clinical':  { icon:'fa-solid fa-stethoscope',     color:'text-slate-800', intro:"Clinical mode on. I’ll use precise medical terms, cite ranges when relevant, and keep recommendations structured and concise." },
       'Bilingual': { icon:'fa-solid fa-language',        color:'text-teal-700', intro:"Bilingual mode on. I’ll explain in English + Tagalog (Taglish), keeping key terms accurate and easy to pass along to family." }
