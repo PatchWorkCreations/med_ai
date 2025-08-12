@@ -62,11 +62,17 @@
       </button>
     </form>
 
+    <p class="text-center text-sm text-gray-500">
+      <a href="{% url 'password_forgot' %}" class="text-teal-600 hover:underline">Forgot password?</a>
+    </p>
+    
+
     <!-- Divider -->
     <div class="border-t pt-4 text-sm text-center text-gray-500">
       Don’t have an account?
       <a href="{% url 'signup' %}" class="text-teal-600 hover:underline font-medium">Sign up</a>
     </div>
+    
   </div>
 
   <script>

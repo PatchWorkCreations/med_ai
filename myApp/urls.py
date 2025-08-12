@@ -18,8 +18,7 @@ urlpatterns = [
         ),
         name='login'
     ),
-    path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
-
+    path("logout/", views.logout_view, name="logout"),
     # Authenticated Dashboard
     path('dashboard/', views.dashboard, name='dashboard'),
 
@@ -46,8 +45,13 @@ urlpatterns = [
     path("beta/api/submit/", views.beta_feedback_api, name="beta_feedback_api"),
     
 
-     path("legal/", LegalView.as_view(), name="legal"),
+    path("legal/", LegalView.as_view(), name="legal"),
     # Optional convenience routes that jump to the correct section
     path("terms/", terms_redirect, name="terms"),
     path("privacy/", privacy_redirect, name="privacy"),
+
+    path("password/forgot/", views.forgot_password, name="password_forgot"),
+    path("password/otp/", views.verify_otp, name="password_otp"),
+    path("password/otp/resend/", views.resend_otp, name="password_otp_resend"),
+    path("password/reset/", views.reset_password, name="password_reset_otp"),
 ]

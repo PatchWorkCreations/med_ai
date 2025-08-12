@@ -108,3 +108,30 @@ class BetaFeedbackForm(forms.ModelForm):
             obj.save()
             # handle filefields m2m if ever added later
         return obj
+
+
+
+# forms.py
+from django import forms
+from django.contrib.auth.forms import SetPasswordForm
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class ForgotPasswordForm(forms.Form):
+    email = forms.EmailField()
+
+    def clean_email(self):
+        email = self.cleaned_data["email"].lower().strip()
+        if not User.objects.filter(email=email).exists():
+            # Don’t reveal whether email exists: still pretend success
+            pass
+        return email
+
+class OTPForm(forms.Form):
+    email = forms.EmailField()
+    code = forms.CharField(min_length=6, max_length=6)
+
+class OTPSetPasswordForm(SetPasswordForm):
+    # Same fields as SetPasswordForm: new_password1/new_password2
+    pass

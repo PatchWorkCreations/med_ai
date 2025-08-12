@@ -113,7 +113,7 @@
         <div id="settingsDropdown" class="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg hidden z-50 text-base">
           <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700"><i class="fa-solid fa-user mr-2 text-gray-400"></i> Profile</a>
           <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700"><i class="fa-solid fa-pen-to-square mr-2 text-gray-400"></i> Change Name</a>
-          <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700"><i class="fa-solid fa-right-from-bracket mr-2 text-gray-400"></i> Logout</a>
+          <a href="{% url 'logout' %}" class="block px-4 py-2 hover:bg-gray-100 text-gray-700"><i class="fa-solid fa-right-from-bracket mr-2 text-gray-400"></i> Logout</a>
         </div>
       </div>
     </div>
@@ -1044,6 +1044,17 @@ document.addEventListener("click", (e)=>{
 function toggleSettingsMenu(){
   const menu = document.getElementById("settingsDropdown");
   menu.classList.toggle("hidden"); menu.classList.toggle("block");
+}
+
+function logoutUser(){
+  fetch("{% url 'logout' %}", {
+    method: "POST",
+    headers: { "X-CSRFToken": getCSRFToken() }
+  }).then(() => {
+    window.location.href = "{% url 'login' %}";
+  }).catch(() => {
+    window.location.href = "{% url 'login' %}";
+  });
 }
 </script>
 </body>

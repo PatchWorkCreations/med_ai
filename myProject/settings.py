@@ -162,3 +162,51 @@ CHANNEL_LAYERS = {
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
+
+
+# ensure Pillow installed: pip install Pillow
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+
+# settings.py
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "django_cache",   # table name
+        "TIMEOUT": 10 * 60,           # 10 minutes (OTP TTL)
+    }
+}
+
+
+SESSION_COOKIE_SECURE = False      # True only in HTTPS
+CSRF_COOKIE_SECURE = False         # True only in HTTPS
+SESSION_COOKIE_AGE = 15 * 60       # 15 minutes is plenty for reset
+SESSION_SAVE_EVERY_REQUEST = True
+
+
+import os
+import environ
+
+# Initialize django-environ
+env = environ.Env()
+
+# Load environment variables from .env file (if exists)
+environ.Env.read_env()
+
+# Function to fetch environment variables with fallback to os.getenv
+def get_env(var_name, default=None):
+    """
+    Fetch environment variable using django-environ first,
+    then fallback to os.getenv if not found.
+    """
+    return env(var_name, default=os.getenv(var_name, default))
+
+# Email configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = get_env('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = int(get_env('EMAIL_PORT', default=587))
+EMAIL_USE_TLS = get_env('EMAIL_USE_TLS', default=True) in [True, 'True', 'true', 1, '1']
+EMAIL_HOST_USER = get_env('EMAIL_HOST_USER', default='iriseupgroupofcompanies@gmail.com')
+EMAIL_HOST_PASSWORD = get_env('EMAIL_HOST_PASSWORD')  # App password
+DEFAULT_FROM_EMAIL = get_env('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER)

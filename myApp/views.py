@@ -621,3 +621,281 @@ def terms_redirect(_request):
 
 def privacy_redirect(_request):
     return HttpResponseRedirect("/legal/#privacy")
+
+
+
+# views.py
+import random
+import string
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import get_user_model, login
+from django.contrib.auth.forms import SetPasswordForm
+from django.core.cache import cache
+from django.core.mail import send_mail
+from django.shortcuts import redirect, render
+from django.utils import timezone
+from django import forms
+
+User = get_user_model()
+
+# ---------- Config ----------
+OTP_TTL_SECONDS = 10 * 60          # 10 minutes
+OTP_RESEND_SECONDS = 60            # 60s cooldown between resends
+OTP_PREFIX = "pwreset:"
+OTP_ATTEMPTS_PREFIX = "pwreset_attempts:"
+OTP_RESEND_PREFIX = "pwreset_resend:"
+DASHBOARD_URL = "/dashboard"       # change to reverse('dashboard') if you have a named route
+
+def _otp_key(email): return f"{OTP_PREFIX}{email}"
+def _otp_attempts_key(email): return f"{OTP_ATTEMPTS_PREFIX}{email}"
+def _otp_resend_key(email): return f"{OTP_RESEND_PREFIX}{email}"
+
+def _generate_code():
+    return "".join(random.choices(string.digits, k=6))
+
+
+# ---------- Forms (kept here to be drop-in) ----------
+class ForgotPasswordForm(forms.Form):
+    email = forms.EmailField()
+
+    def clean_email(self):
+        # Normalize but don't reveal existence
+        return self.cleaned_data["email"].lower().strip()
+
+
+class OTPForm(forms.Form):
+    email = forms.EmailField()
+    code = forms.CharField(min_length=6, max_length=6)
+
+    def clean_email(self):
+        return self.cleaned_data["email"].lower().strip()
+
+    def clean_code(self):
+        return self.cleaned_data["code"].strip()
+
+
+class OTPSetPasswordForm(SetPasswordForm):
+    """Uses Django's password validators; fields: new_password1/new_password2"""
+    pass
+
+
+# ---------- Views ----------
+# --- updated forgot_password view (drop-in replacement) ---
+from django.utils import timezone
+from django.core.cache import cache
+from django.contrib import messages
+
+def forgot_password(request):
+    """
+    Step 1: Ask for email, generate 6-digit OTP, store in cache, email it.
+    We never reveal whether the email exists.
+    """
+    if request.method == "POST":
+        form = ForgotPasswordForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data["email"]  # already normalized in clean_email()
+            code = _generate_code()
+
+            # Save OTP + attempts in cache
+            cache.set(_otp_key(email), {"code": code, "ts": timezone.now().isoformat()}, OTP_TTL_SECONDS)
+            cache.set(_otp_attempts_key(email), 0, OTP_TTL_SECONDS)
+
+            # Store email (and a masked display version) in session for continuity
+            request.session["pwreset_email"] = email
+            request.session["pwreset_email_masked"] = mask_email(email)
+            request.session.set_expiry(15 * 60)
+            request.session.modified = True
+
+            # Send branded email (HTML + text)
+            send_otp_email(email, code, ttl_minutes=OTP_TTL_SECONDS // 60)
+
+            
+
+            # Always generic to avoid account enumeration
+            messages.success(request, "If the email exists, we’ve sent a 6-digit code. Please check your inbox.")
+            return redirect("password_otp")
+    else:
+        form = ForgotPasswordForm()
+
+    return render(request, "account/password_forgot.html", {"form": form})
+
+
+
+def resend_otp(request):
+    """
+    Resend code with a server-side cooldown to prevent abuse.
+    """
+    if request.method != "POST":
+        return redirect("password_otp")
+
+    email = (request.POST.get("email") or "").lower().strip()
+    if not email:
+        messages.error(request, "Please enter your email to resend the code.")
+        return redirect("password_otp")
+
+    cooldown_key = _otp_resend_key(email)
+    if cache.get(cooldown_key):
+        messages.error(request, "Please wait a moment before requesting another code.")
+        return redirect("password_otp")
+
+    data = cache.get(_otp_key(email))
+    if data is None:
+        # Generate a fresh code if the previous expired
+        code = _generate_code()
+        cache.set(_otp_key(email), {"code": code, "ts": timezone.now().isoformat()}, OTP_TTL_SECONDS)
+        cache.set(_otp_attempts_key(email), 0, OTP_TTL_SECONDS)
+    else:
+        # Reuse active code so user isn’t confused seeing multiple codes
+        code = data["code"]
+
+    subject = "Your NeuroMed AI password reset code"
+    body = f"Your one-time code is: {code}\nThis code expires in 10 minutes."
+    send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=True)
+
+    cache.set(cooldown_key, True, OTP_RESEND_SECONDS)
+    messages.success(request, "We’ve sent another code if the email exists. Please check your inbox.")
+    return redirect("password_otp")
+
+# views.py (replace your verify_otp with this version)
+
+def verify_otp(request):
+    if request.method == "POST":
+        form = OTPForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data["email"]
+            code = form.cleaned_data["code"]
+
+            data = cache.get(_otp_key(email))
+            attempts = cache.get(_otp_attempts_key(email), 0)
+
+            if data is None:
+                messages.error(request, "Code expired or invalid. Please request a new one.")
+                return redirect("password_forgot")
+
+            if attempts >= 5:
+                messages.error(request, "Too many attempts. Please request a new code.")
+                cache.delete(_otp_key(email)); cache.delete(_otp_attempts_key(email))
+                return redirect("password_forgot")
+
+            if code != data.get("code"):
+                cache.set(_otp_attempts_key(email), attempts + 1, OTP_TTL_SECONDS)
+                messages.error(request, "Incorrect code. Please try again.")
+                return render(request, "account/password_otp.html", {"form": form})
+
+            # OTP OK
+            user = User.objects.filter(email__iexact=email).first()
+
+            # Clear OTP now to prevent reuse
+            cache.delete(_otp_key(email)); cache.delete(_otp_attempts_key(email))
+
+            # Always remember the email (nice to prefill / debug)
+            request.session["pwreset_email"] = email
+            request.session.set_expiry(15 * 60)
+            request.session.modified = True
+
+            if user:
+                request.session["pwreset_user_id"] = user.id
+                request.session.set_expiry(15 * 60)
+                request.session.modified = True
+                return redirect("password_reset_otp")
+            else:
+                # Keep them on the OTP page with a generic message.
+                # (Prevents “expired” confusion while avoiding account enumeration.)
+                messages.success(request, "Code verified. If this email is registered, you can now set a new password.")
+                return render(request, "account/password_otp.html", {"form": form})
+
+    else:
+        form = OTPForm()
+
+    return render(request, "account/password_otp.html", {"form": form})
+
+
+def reset_password(request):
+    user_id = request.session.get("pwreset_user_id")
+    user = User.objects.filter(id=user_id).first() if user_id else None
+
+    if request.method == "POST":
+        if not user:
+            messages.error(request, "Your reset session expired (or the email isn’t registered). Please request a new code.")
+            return redirect("password_forgot")
+
+        form = OTPSetPasswordForm(user, request.POST)
+        if form.is_valid():
+            form.save()
+            login(request, user)
+            for k in ("pwreset_user_id", "pwreset_email"):
+                request.session.pop(k, None)
+            messages.success(request, "Password updated successfully.")
+            return redirect(f"{DASHBOARD_URL}?changed=1")
+    else:
+        if not user:
+            messages.error(request, "Your reset session expired (or the email isn’t registered). Please request a new code.")
+            return redirect("password_forgot")
+        form = OTPSetPasswordForm(user)
+
+    return render(request, "account/password_reset_otp.html", {"form": form})
+
+# --- helpers (top of views.py or near your other helpers) ---
+from django.core.mail import EmailMultiAlternatives
+
+def mask_email(addr: str) -> str:
+    try:
+        name, domain = addr.split("@", 1)
+        nm = name[0] + "•" * max(len(name) - 2, 1) + name[-1]
+        d0, *rest = domain.split(".")
+        d0m = d0[0] + "•" * max(len(d0) - 2, 1) + d0[-1]
+        return nm + "@" + ".".join([d0m] + rest)
+    except Exception:
+        return addr
+
+def send_otp_email(email: str, code: str, ttl_minutes: int = 10):
+    subject = "Your NeuroMed AI verification code"
+    from_email = settings.DEFAULT_FROM_EMAIL
+    to = [email]
+
+    text_content = (
+        f"Your NeuroMed AI verification code is: {code}\n"
+        f"This code expires in {ttl_minutes} minutes.\n"
+        "If you didn’t request this, ignore this email. "
+        "For your security, never share this code."
+    )
+
+    html_content = f"""
+    <div style="font-family:Inter,Segoe UI,Arial,sans-serif;max-width:520px;margin:0 auto;padding:24px;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;">
+      <div style="text-align:center;margin-bottom:8px;">
+        <div style="font-size:18px;font-weight:700;color:#0f766e;">NeuroMed AI</div>
+        <div style="font-size:12px;color:#6b7280;">Secure verification</div>
+      </div>
+      <p style="font-size:14px;color:#374151;margin:16px 0;">
+        Here’s your one-time verification code. It expires in {ttl_minutes} minutes.
+      </p>
+      <div style="text-align:center;margin:20px 0;">
+        <div style="display:inline-block;letter-spacing:6px;font-weight:700;font-size:28px;color:#111827;background:#f0fdfa;border:1px solid #99f6e4;border-radius:10px;padding:12px 18px;">
+          {code}
+        </div>
+      </div>
+      <p style="font-size:12px;color:#6b7280;margin:14px 0;">
+        Didn’t request this? You can ignore this email. For your security, never share this code.
+      </p>
+      <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;" />
+      <p style="font-size:11px;color:#9ca3af;margin:0;">
+        You’re receiving this because a password reset was requested on your account.
+      </p>
+    </div>
+    """
+
+    msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+    msg.attach_alternative(html_content, "text/html")
+    msg.send(fail_silently=True)  # don’t blow up the flow if SMTP hiccups
+
+
+# views.py
+from django.contrib.auth import logout
+from django.shortcuts import redirect
+from django.views.decorators.http import require_POST
+
+@require_POST
+def logout_view(request):
+    logout(request)
+    return redirect("login")  # or your LOGOUT_REDIRECT_URL
