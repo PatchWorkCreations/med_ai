@@ -94,62 +94,11 @@
   pointer-events: auto; /* prevent hover loss */
 }
 
-/* ===== Compact mode: <= 330px ===== */
-@media (max-width: 330px) {
-  /* Header: smaller brand so the burger fits */
-  header .text-2xl { font-size: 1.125rem; }    /* ~text-lg */
-  header .fa-notes-medical { font-size: 1.125rem; }
-  header { padding-left: 0.75rem !important; padding-right: 0.5rem !important; }
-
-  /* Tone bar: smaller font & tighter spacing */
-  #toneBar, .px-4.pb-2.pt-1.bg-\[\#fefaf7\] {
-    font-size: 12px; line-height: 1.2;
-    padding-left: 10px !important; padding-right: 10px !important;
-  }
-  #toneBar label, .px-4.pb-2.pt-1.bg-\[\#fefaf7\] label { margin-left: 6px; }
-
-  /* Composer row: tighter gap and smaller controls */
-  #dropzone { gap: 6px !important; padding: 6px !important; }
-  #addBtn, #micBtn, #sendBtn { width: 40px; height: 40px; font-size: 14px; }
-  #addBtn i, #micBtn i, #sendBtn i { font-size: 14px; }
-
-  /* Input: smaller padding & font to free space; ensure it can shrink */
-  #chatInput {
-    padding: 8px 10px !important;
-    font-size: 14px !important;
-    min-width: 0 !important;
-  }
-
-  /* Prevent horizontal overflow anywhere */
-  body, html { overflow-x: hidden; }
-}
-
-/* Slightly small phones but >330px: still slim things a bit */
-@media (min-width: 331px) and (max-width: 380px) {
-  #dropzone { gap: 8px !important; }
-  #addBtn, #micBtn, #sendBtn { width: 42px; height: 42px; }
-  #chatInput { padding: 10px 12px !important; font-size: 15px !important; }
-}
-
-@media (max-width: 420px) {
-  #composer {
-    position: sticky;
-    bottom: env(safe-area-inset-bottom);
-    z-index: 30;
-    background: #fff;
-  }
-  #chatWindow { padding-bottom: 100px; } /* JS below will set the exact value */
-}
-
-@media (max-width: 336px) {
-  #feedbackTab { display: none !important; }
-  #feedbackFab { display: inline-flex !important; }
-}
   </style>
 </head>
 
 <body class="bg-white font-sans text-gray-800">
-<div class="w-full min-h-[100dvh] flex overflow-hidden">
+<div class="w-full h-screen flex overflow-hidden">
   <!-- Sidebar -->
   <aside id="sidebar" class="w-[280px] glass border-r p-6 overflow-y-auto fixed inset-y-0 left-0 z-40 transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:z-auto md:flex flex-col shadow-xl">
     <div class="flex items-center justify-between mb-6 border-b border-gray-200 pb-2">
@@ -250,8 +199,8 @@
 
         <!-- Text input -->
         <input type="text" id="chatInput"
-  class="flex-1 min-w-0 px-4 py-2 text-base border rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
-  placeholder="Type your question… (attachments will send with this)" />
+               class="flex-1 px-4 py-2 text-base border rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
+               placeholder="Type your question… (attachments will send with this)" />
 
         <!-- Mic -->
         <button id="micBtn" class="w-10 h-10 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center hover:bg-gray-300" title="Dictate">
@@ -1110,22 +1059,6 @@ function logoutUser(){
     window.location.href = "{% url 'login' %}";
   });
 }
-
-function updateComposerPadding() {
-    const c = document.getElementById('composer');
-    const w = document.getElementById('chatWindow');
-    if (!c || !w) return;
-    const h = Math.ceil(c.getBoundingClientRect().height || 0);
-    w.style.paddingBottom = `calc(${h}px + 12px)`;
-  }
-  const ro = new ResizeObserver(updateComposerPadding);
-  document.addEventListener('DOMContentLoaded', () => {
-    const c = document.getElementById('composer');
-    if (c) ro.observe(c);
-    updateComposerPadding();
-  });
-  addEventListener('resize', updateComposerPadding);
-  addEventListener('orientationchange', updateComposerPadding);
 </script>
 </body>
 </html>
