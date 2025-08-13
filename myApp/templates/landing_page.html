@@ -7,45 +7,143 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
   <style>
-    :root {
+    /* =========================
+       Root variables
+       ========================= */
+    :root{
       --brand:#0b3b36;
+      --font-scale: 1;
+      --line-scale: 1;
+      --max-ch: 68ch;
+
+      /* Tour overlay tunables */
+      --tour-blur: 6px;                       /* blur strength */
+      --tour-wash: rgba(255,255,255,.26);     /* soft white wash */
+      --tour-dim:  rgba(2,6,23,.18);          /* extra darkening ring */
     }
-    body { background: #f6f8fb; }
-    .chip { border:1px solid rgba(0,0,0,.08); }
-    .chat-bubble{ border-radius:18px; padding:12px 16px; line-height:1.6; box-shadow:0 1px 4px rgba(0,0,0,.04); max-width:80%; white-space:pre-wrap; word-break:break-word; font-size:.95rem }
+
+    /* Base & readability */
+    .easy-read{ --font-scale: 1.15; --line-scale: 1.12; }
+    html{ font-size: calc(16px * var(--font-scale)); }
+    body{ background:#f6f8fb; line-height: calc(1.55 * var(--line-scale)); letter-spacing:.1px; }
+
+    /* Chat UI */
+    .chip{ border:1px solid rgba(0,0,0,.08); }
+    .chat-bubble{
+      border-radius:18px; padding:12px 16px; line-height:1.75;
+      box-shadow:0 1px 4px rgba(0,0,0,.04); max-width:80%;
+      white-space:pre-wrap; word-break:break-word; font-size:1.05rem;
+    }
+    @media (min-width:640px){ .chat-bubble{ max-width: var(--max-ch); } }
     .chat-user{ background:#0f172a; color:#fff; border-bottom-right-radius:6px!important; margin-left:auto }
     .chat-ai{ background:#ffffff; color:#111827; border:1px solid rgba(0,0,0,.05); border-bottom-left-radius:6px!important; margin-right:auto }
+
+    /* Small animations */
     .pulse{ animation:pulse 1.1s ease-in-out infinite }
-    @keyframes pulse{ 0%,100%{ opacity:.55 } 50%{ opacity:1 } }
-    .dotty::after{ content:""; display:inline-block; width:1.2ch; text-align:left; animation: ellipsis 1.2s steps(4,end) infinite }
-    @keyframes ellipsis{ 0%{ content:"" } 25%{ content:"." } 50%{ content:".." } 75%{ content:"..." } 100%{ content:"" } }
-  .mode-badge{display:inline-flex;align-items:center;gap:.5rem;font-size:.75rem;border-radius:999px;padding:.25rem .6rem;border:1px solid rgba(0,0,0,.08);background:#fff}
+    @keyframes pulse{ 0%,100%{opacity:.55} 50%{opacity:1} }
+    .dotty::after{ content:""; display:inline-block; width:1.2ch; text-align:left; animation:ellipsis 1.2s steps(4,end) infinite }
+    @keyframes ellipsis{ 0%{content:""} 25%{content:"."} 50%{content:".."} 75%{content:"..."} 100%{content:""} }
+
+    .mode-badge{display:inline-flex;align-items:center;gap:.5rem;font-size:.75rem;border-radius:999px;padding:.25rem .6rem;border:1px solid rgba(0,0,0,.08);background:#fff}
+
     .toast{transform:translateY(-10px);opacity:0;transition:transform .2s ease,opacity .2s ease}
     .toast.show{transform:translateY(0);opacity:1}
     .shimmer{position:relative;overflow:hidden}
     .shimmer::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.7) 50%,rgba(255,255,255,0) 100%);transform:translateX(-100%);animation:shimmer 900ms ease forwards}
     @keyframes shimmer{to{transform:translateX(100%)}}
+
+    #modeGroup{ gap:.75rem; }
+    #modeGroup button{ min-height:44px; padding:.65rem .8rem; letter-spacing:.1px; }
+    .suggestion{ padding:.65rem .85rem; font-size:.98rem; }
+    #suggestionsList.compact > .suggestion:nth-child(n+4){ display:none; }
+
+    #uploadBtn,#micBtn,#sendBtn{ min-width:44px; min-height:44px; }
+    :focus-visible{ outline:3px solid #10b981; outline-offset:2px; border-radius:.5rem; }
+
+    @media (prefers-reduced-motion: reduce){
+      .pulse, .dotty::after{ animation:none!important; }
+      .shimmer::after{ animation:none!important; }
+      * { scroll-behavior:auto; }
+    }
+
+    /* =========================
+       Spotlight Tour — CRISP HOLE
+       ========================= */
+    .nm-tour-overlay{ position:fixed; inset:0; z-index:10050; pointer-events:auto; }
+
+    /* Container holding four blurred slabs that avoid the hole */
+    .nm-tour-dim{ position:absolute; inset:0; pointer-events:auto; }
+    .nm-slab{
+      position:absolute;
+      background: var(--tour-wash);
+      backdrop-filter: blur(var(--tour-blur)) saturate(110%);
+      -webkit-backdrop-filter: blur(var(--tour-blur)) saturate(110%);
+    }
+
+    /* Visible ring around the hole */
+    .nm-tour-hole{
+      position:absolute; border-radius:12px;
+      border:2px solid rgba(255,255,255,.95);
+      box-shadow:
+        0 0 0 1px rgba(2,6,23,.05),
+        0 8px 28px rgba(2,6,23,.22),
+        0 0 0 200vmax var(--tour-dim); /* gentle extra dim outside */
+      background:transparent; pointer-events:none;
+      transition: top .18s ease, left .18s ease, width .18s ease, height .18s ease;
+    }
+
+    /* Popover */
+    .nm-tour-pop{
+      position:fixed; z-index:10051;
+      max-width:min(92vw, 360px);
+      border-radius:16px;
+      background: rgba(255,255,255,.94);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      border:1px solid rgba(2,6,23,.06);
+      box-shadow:0 24px 48px rgba(2,6,23,.22);
+      padding:16px;
+    }
+    #nmTitle{ font-weight:700; font-size:1.05rem; letter-spacing:.2px; color:#0f172a; margin-bottom:6px; }
+    #nmBody{ color:#475569; font-size:.95rem; line-height:1.6; }
+
+    /* Pretty checklist */
+    #nmBody ul.nm-list{ list-style:none; padding:0; margin:.5rem 0 0; display:grid; gap:.4rem; }
+    #nmBody ul.nm-list li{ display:flex; align-items:flex-start; gap:.5rem; }
+    #nmBody ul.nm-list li::before{
+      content:"✓"; display:grid; place-items:center; width:18px; height:18px; margin-top:2px;
+      font-size:.75rem; color:#047857; background:#10b9811a; border:1px solid #10b98133; border-radius:999px;
+    }
+
+    /* Popover footer buttons */
+    #nmPop .btn{ padding:.5rem .9rem; border-radius:10px; font-weight:600; }
+    #nmPop .btn-text{ color:#475569; background:transparent; border:1px solid rgba(2,6,23,.08); }
+    #nmPop .btn-ghost{ color:#475569; background:#fff; border:1px solid rgba(2,6,23,.08); }
+    #nmPop .btn-primary{ color:#fff; background:#0f766e; border:1px solid #0d6e67; }
+
+    /* A11y helper & help button */
+    .nm-tour-sr-only{ position:absolute!important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    #nmTourHelp{ position:fixed; left:12px; bottom:12px; z-index:10052; width:44px; height:44px; border-radius:9999px; display:grid; place-items:center; font-weight:700; background:#0f172a; color:#fff; box-shadow:0 8px 20px rgba(2,6,23,.22); }
+    #nmTourHelp:hover{ filter:brightness(1.05); }
   </style>
 </head>
 <body class="text-slate-800">
   <!-- Top bar -->
   <header class="w-full border-b bg-white/80 backdrop-blur">
     <div class="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
-      <!-- Logo -->
       <div class="flex items-center gap-3">
         <i class="fa-solid fa-heart-pulse text-teal-600 text-xl" aria-hidden="true"></i>
         <span class="font-semibold tracking-tight">NeuroMed.ai</span>
       </div>
-  
-      <!-- Links (both visible on mobile + desktop) -->
-      <div class="flex items-center gap-3 text-sm">
+
+      <!-- Auth links (tour step targets this) -->
+      <div id="authLinks" class="flex items-center gap-3 text-sm">
         <span class="hidden md:inline text-slate-500">You can send 1 free message as guest.</span>
         <a href="/signup" class="text-slate-600 hover:text-slate-900">Sign up</a>
         <a href="/login" class="rounded-full px-3 py-1.5 border hover:bg-slate-50">Log in</a>
       </div>
     </div>
   </header>
-  
 
   <!-- Main -->
   <main class="max-w-4xl mx-auto px-4 md:px-5 pt-6 md:pt-10 pb-24">
@@ -54,12 +152,18 @@
       <p class="mt-2 text-slate-600">Explain results, decode prescriptions, draft questions for your doctor — in Science language.</p>
     </div>
 
-    <!-- Mode switcher (segmented) -->
+    <!-- Readability toolbar -->
+    <div class="mt-4 mb-2 flex items-center justify-center gap-2 text-sm">
+      <button id="fontMinus" class="px-3 py-1.5 rounded-full border hover:bg-slate-50" type="button" aria-label="Decrease text size">A−</button>
+      <button id="fontPlus"  class="px-3 py-1.5 rounded-full border hover:bg-slate-50" type="button" aria-label="Increase text size">A＋</button>
+      <button id="easyReadBtn" class="px-3 py-1.5 rounded-full border hover:bg-slate-50" type="button" aria-pressed="false">Easy Read</button>
+    </div>
+
+    <!-- Mode switcher -->
     <div class="mt-5">
       <div class="text-center text-sm text-slate-600 mb-2">Choose a mode</div>
-      <div id="modeGroup" class="mx-auto max-w-xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-        <!-- template items; icons help scanning -->
-        <button data-mode="Plain" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 flex items-center justify-center gap-2 text-sm aria-pressed" aria-pressed="true">
+      <div id="modeGroup" class="mx-auto max-w-xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
+        <button data-mode="Plain" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 flex items-center justify-center gap-2 text-sm" aria-pressed="true">
           <i class="fa-regular fa-message" aria-hidden="true"></i><span>Science</span>
         </button>
         <button data-mode="Caregiver" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 flex items-center justify-center gap-2 text-sm" aria-pressed="false">
@@ -79,7 +183,6 @@
 
     <!-- Card -->
     <section class="mt-6 bg-white border rounded-2xl shadow-sm overflow-hidden">
-      <!-- Intro + mode badge -->
       <div class="px-5 md:px-6 pt-5 flex items-start justify-between gap-3">
         <div id="intro" class="chat-bubble chat-ai flex-1">
 Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, labs, or prescriptions; I’ll translate them into clear action steps you can use.
@@ -90,14 +193,17 @@ Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, 
       <!-- Chat area -->
       <div id="chatWindow" class="px-5 md:px-6 pb-3 pt-3 max-h-[55vh] overflow-y-auto scroll-smooth"></div>
 
-      <!-- Suggestions (wrap into a responsive grid; no drag) -->
+      <!-- Suggestions -->
       <div class="px-5 md:px-6 pb-3">
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2" role="list">
+        <div id="suggestionsList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 compact" role="list">
           <button class="chip w-full text-left px-3 py-2 rounded-full text-sm hover:bg-slate-50 suggestion" role="listitem"><i class="fa-regular fa-hospital mr-2"></i>Summarize this ER discharge note for a caregiver.</button>
           <button class="chip w-full text-left px-3 py-2 rounded-full text-sm hover:bg-slate-50 suggestion" role="listitem"><i class="fa-solid fa-vial-circle-check mr-2"></i>Explain these lab results (CBC, CMP) in simple terms.</button>
           <button class="chip w-full text-left px-3 py-2 rounded-full text-sm hover:bg-slate-50 suggestion" role="listitem"><i class="fa-solid fa-pills mr-2"></i>Turn these prescriptions into a daily medication schedule.</button>
           <button class="chip w-full text-left px-3 py-2 rounded-full text-sm hover:bg-slate-50 suggestion" role="listitem"><i class="fa-regular fa-clipboard mr-2"></i>Draft questions to ask my doctor about this diagnosis.</button>
           <button class="chip w-full text-left px-3 py-2 rounded-full text-sm hover:bg-slate-50 suggestion" role="listitem"><i class="fa-solid fa-language mr-2"></i>Translate this summary to Taglish for my lola.</button>
+        </div>
+        <div class="mt-2 text-center">
+          <button id="toggleSuggestions" class="text-sm text-slate-600 underline" type="button">Show more</button>
         </div>
       </div>
 
@@ -112,11 +218,10 @@ Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, 
                 <i class="fa-solid fa-paperclip"></i>
               </button>
 
-              <!-- Textarea (autosizing) -->
+              <!-- Textarea -->
               <div class="flex-1 min-w-0">
                 <textarea id="chatInput" rows="1" class="w-full resize-none px-3 py-2 outline-none placeholder-slate-400" placeholder="Type your question… (Shift+Enter for new line)" aria-label="Message"></textarea>
                 <div class="flex flex-wrap gap-2 mt-1" id="fileChips"></div>
-                
               </div>
 
               <!-- Controls -->
@@ -140,11 +245,29 @@ Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, 
     </section>
   </main>
 
-  <!-- Tiny toast for mode changes -->
+  <!-- Tiny toast -->
   <div id="toast" class="toast fixed top-4 right-4 z-[60] hidden">
     <div class="bg-white border shadow-lg rounded-xl px-3 py-2 text-sm flex items-center gap-2">
       <i id="toastIcon" class="fa-regular fa-message text-teal-600" aria-hidden="true"></i>
       <span id="toastText" class="text-slate-800">Mode set to Science</span>
+    </div>
+  </div>
+
+  <!-- Auth nudge (guest) -->
+  <div id="authNudge" class="fixed top-20 right-4 z-[60] hidden">
+    <div class="bg-white border shadow-lg rounded-xl p-3 text-sm max-w-[280px]">
+      <div class="flex items-start gap-2">
+        <i class="fa-regular fa-bookmark text-teal-600 mt-0.5" aria-hidden="true"></i>
+        <div class="flex-1">
+          <div class="font-medium">Save your progress</div>
+          <div class="text-slate-600 mt-0.5">Please use the <b>Sign up</b> or <b>Log in</b> buttons (top-right) to keep your chats.</div>
+          <div class="mt-2 flex gap-2 items-center">
+            <a href="/signup" class="px-2.5 py-1.5 rounded-lg bg-teal-600 text-white text-xs">Sign up</a>
+            <a href="/login" class="px-2.5 py-1.5 rounded-lg border text-xs">Log in</a>
+            <button id="authNudgeClose" class="ml-auto text-slate-500 text-xs underline">Dismiss</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -155,9 +278,10 @@ Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, 
         <i class="fa-regular fa-circle-question text-teal-600" aria-hidden="true"></i>
         <h3 class="text-xl font-semibold">Create an account to continue</h3>
       </div>
-      <p class="text-sm text-slate-600 mb-4">You just used your free guest message. Sign up to save chats, sync across devices, and unlock history.</p>
+      <p class="text-sm text-slate-600 mb-4">You just used your free guest message. Please <b>Sign up</b> or <b>Log in</b> to save chats, sync across devices, and unlock history.</p>
       <div class="flex items-center justify-end gap-2">
         <button class="px-4 py-2 rounded-lg border" onclick="hideSignupGate()">Not now</button>
+        <a href="/login" class="px-4 py-2 rounded-lg border">Log in</a>
         <a href="/signup" class="px-4 py-2 rounded-lg bg-teal-600 text-white hover:bg-emerald-800">Sign up</a>
       </div>
     </div>
@@ -171,38 +295,76 @@ Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, 
 
     function appendBubble({ message, isUser=false, timestamp=new Date() }){
       const chatWindow = $('#chatWindow');
-      const wrap = document.createElement('div');
-      wrap.className = 'w-full flex mb-3';
-      const bubble = document.createElement('div');
-      bubble.className = `chat-bubble ${isUser?'chat-user':'chat-ai'}`;
-      bubble.innerText = message;
-      const meta = document.createElement('div');
-      meta.className = 'text-[11px] text-slate-400 mt-1 ' + (isUser ? 'text-right ml-auto pr-1' : 'pl-1');
+      const wrap = document.createElement('div'); wrap.className = 'w-full flex mb-3';
+      const bubble = document.createElement('div'); bubble.className = `chat-bubble ${isUser?'chat-user':'chat-ai'}`; bubble.innerText = message;
+      const meta = document.createElement('div'); meta.className = 'text-[11px] text-slate-400 mt-1 ' + (isUser ? 'text-right ml-auto pr-1' : 'pl-1');
       meta.innerText = new Intl.DateTimeFormat(undefined,{ hour:'2-digit', minute:'2-digit' }).format(timestamp);
-      const col = document.createElement('div');
-      col.className = 'flex flex-col ' + (isUser ? 'items-end ml-auto' : 'items-start mr-auto');
-      col.appendChild(bubble); col.appendChild(meta);
-      wrap.appendChild(col); chatWindow.appendChild(wrap);
+      const col = document.createElement('div'); col.className = 'flex flex-col ' + (isUser ? 'items-end ml-auto' : 'items-start mr-auto');
+      col.appendChild(bubble); col.appendChild(meta); wrap.appendChild(col); chatWindow.appendChild(wrap);
       chatWindow.scrollTop = chatWindow.scrollHeight;
     }
+    function setSendDisabled(disabled){ $('#sendBtn').disabled = disabled; }
 
-    function setSendDisabled(disabled){ const btn=$('#sendBtn'); btn.disabled=disabled; }
-
-    // Persist mode to localStorage
     function loadMode(){ return localStorage.getItem('nm_mode') || 'Plain'; }
     function saveMode(m){ localStorage.setItem('nm_mode', m); }
 
-    // ---------------- Auth check
     async function isAuthenticated(){
-      try{ const r=await fetch('/api/auth/status/',{ credentials:'include' }); if(!r.ok) return false; const j=await r.json(); return !!j.authenticated; }catch{ return false; }
+      try{
+        const r=await fetch('/api/auth/status/',{ credentials:'include' });
+        if(!r.ok) return false; const j=await r.json(); return !!j.authenticated;
+      }catch{ return false; }
     }
 
-    // ---------------- State
-    let firstSendAttempted = false; // allow 1 guest message
-    let files = []; // multiple attachments UX, backend will read first if needed
-    let abortController = null; // stop generating support if you stream later
+    let firstSendAttempted = false;
+    let files = [];
+    let abortController = null;
+    let showGateAfterResponse = false;
 
-    // ---------------- Init
+    // Readability controls + suggestions toggle
+    (function(){
+      const LS_KEY_SCALE = 'nm_font_scale';
+      const LS_KEY_EASY  = 'nm_easy_read';
+      const root = document.documentElement;
+      const body = document.body;
+
+      const savedScale = parseFloat(localStorage.getItem(LS_KEY_SCALE) || '1');
+      if (!isNaN(savedScale)) root.style.setProperty('--font-scale', savedScale);
+      const savedEasy = localStorage.getItem(LS_KEY_EASY) === '1';
+      if (savedEasy) { body.classList.add('easy-read'); $('#easyReadBtn')?.setAttribute('aria-pressed','true'); }
+
+      $('#fontMinus')?.addEventListener('click', () => {
+        const curr = parseFloat(getComputedStyle(root).getPropertyValue('--font-scale')) || 1;
+        const next = Math.max(0.9, Math.min(1.6, curr - 0.05));
+        root.style.setProperty('--font-scale', next.toFixed(2));
+        localStorage.setItem(LS_KEY_SCALE, next.toFixed(2));
+      });
+      $('#fontPlus')?.addEventListener('click', () => {
+        const curr = parseFloat(getComputedStyle(root).getPropertyValue('--font-scale')) || 1;
+        const next = Math.max(0.9, Math.min(1.6, curr + 0.05));
+        root.style.setProperty('--font-scale', next.toFixed(2));
+        localStorage.setItem(LS_KEY_SCALE, next.toFixed(2));
+      });
+      $('#easyReadBtn')?.addEventListener('click', () => {
+        body.classList.toggle('easy-read');
+        const on = body.classList.contains('easy-read');
+        $('#easyReadBtn').setAttribute('aria-pressed', on ? 'true' : 'false');
+        localStorage.setItem(LS_KEY_EASY, on ? '1' : '0');
+      });
+
+      const list = $('#suggestionsList');
+      const toggle = $('#toggleSuggestions');
+      if (list && toggle){
+        let expanded = false;
+        const update = () => {
+          if (expanded){ list.classList.remove('compact'); toggle.textContent = 'Show fewer'; }
+          else { list.classList.add('compact'); toggle.textContent = 'Show more'; }
+        };
+        toggle.addEventListener('click', () => { expanded = !expanded; update(); });
+        update();
+      }
+    })();
+
+    // Init
     document.addEventListener('DOMContentLoaded', () => {
       // Mode buttons
       const savedMode = loadMode();
@@ -213,13 +375,13 @@ Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, 
       });
 
       // Suggestions -> input
-      $$('.suggestion').forEach(btn => btn.addEventListener('click', () => { $('#chatInput').value = btn.innerText.trim(); autosize(); toggleSend(); $('#chatInput').focus(); }));
+      $$('.suggestion').forEach(btn => btn.addEventListener('click', () => {
+        $('#chatInput').value = btn.innerText.trim(); autosize(); toggleSend(); $('#chatInput').focus();
+      }));
 
       // Input events
       $('#chatInput').addEventListener('input', () => { autosize(); toggleSend(); });
-      $('#chatInput').addEventListener('keydown', (e) => {
-        if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendChat(); }
-      });
+      $('#chatInput').addEventListener('keydown', (e) => { if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendChat(); }});
       $('#sendBtn').addEventListener('click', sendChat);
 
       // Upload controls
@@ -240,8 +402,12 @@ Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, 
       // Initial autosize
       autosize(); toggleSend();
 
-      // Focus input for faster first type
+      // Focus input
       setTimeout(()=>$('#chatInput').focus(), 200);
+
+      // Start tutorial + guest nudge
+      startChatTourAuto();
+      showAuthNudgeIfGuest();
     });
 
     function selectMode(btn){
@@ -253,33 +419,28 @@ Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, 
     }
 
     const MODE_META = {
-      'Plain':     { icon:'fa-regular fa-message',      color:'text-teal-600', intro:"Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, labs, or prescriptions; I’ll translate them into clear action steps you can use." },
+      'Plain':     { icon:'fa-regular fa-message',      color:'text-teal-600',  intro:"Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, labs, or prescriptions; I’ll translate them into clear action steps you can use." },
       'Caregiver': { icon:'fa-solid fa-hands-holding-child', color:'text-amber-700', intro:"Caregiver mode on. I’ll keep things gentle and practical — Science-language steps you can follow and watch-outs to keep your loved one safe." },
       'Faith':     { icon:'fa-solid fa-hands-praying',   color:'text-indigo-700', intro:"Faith mode on. I’ll explain medically, with optional words of encouragement and sensitivity to faith-forward language when asked." },
       'Clinical':  { icon:'fa-solid fa-stethoscope',     color:'text-slate-800', intro:"Clinical mode on. I’ll use precise medical terms, cite ranges when relevant, and keep recommendations structured and concise." },
-      'Bilingual': { icon:'fa-solid fa-language',        color:'text-teal-700', intro:"Bilingual mode on. I’ll explain in English + Tagalog (Taglish), keeping key terms accurate and easy to pass along to family." }
+      'Bilingual': { icon:'fa-solid fa-language',        color:'text-teal-700',  intro:"Bilingual mode on. I’ll explain in English + Tagalog (Taglish), keeping key terms accurate and easy to pass along to family." }
     };
 
     function applyModeUI(mode){
       const meta = MODE_META[mode] || MODE_META['Plain'];
-      // Badge update
       const badge = $('#modeBadge');
       badge.querySelector('i').className = meta.icon + ' ' + meta.color;
       badge.querySelector('span').textContent = mode;
-      // Intro refresh with shimmer hint
       const intro = $('#intro');
       intro.classList.add('shimmer');
       setTimeout(()=>{ intro.textContent = meta.intro; intro.classList.remove('shimmer'); }, 220);
-      // Tiny toast
       showToast(`${mode} mode applied` , meta.icon, meta.color);
     }
 
     function showToast(text, icon, color){
       const t = $('#toast'); const ti = $('#toastIcon'); const tt = $('#toastText');
       ti.className = icon + ' ' + color; tt.textContent = text;
-      t.classList.remove('hidden');
-      // force reflow to restart transition
-      void t.offsetWidth; t.classList.add('show');
+      t.classList.remove('hidden'); void t.offsetWidth; t.classList.add('show');
       clearTimeout(showToast._timer);
       showToast._timer = setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.classList.add('hidden'), 220); }, 1600);
     }
@@ -321,34 +482,28 @@ Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, 
 
     async function sendChat(){
       const msg = ($('#chatInput').value || '').trim();
-      const mode = loadMode();
+      const mode = loadMode();                     // keep backend tone names
       if(!msg && files.length===0) return;
 
       if(!firstSendAttempted){
-        firstSendAttempted = true; // allow first send even if guest
+        firstSendAttempted = true;
         const authed = await isAuthenticated();
-        if(!authed){ // let them send the first message; show gate AFTER response
-          // proceed but mark to show signup later
-          showGateAfterResponse = true;
-        }
+        if(!authed){ showGateAfterResponse = true; }
       }
 
       if(msg) appendBubble({ message: msg, isUser:true });
       $('#chatInput').value=''; autosize(); toggleSend();
 
-      // Typing indicator
       const chatWindow = $('#chatWindow');
       const typingWrap = document.createElement('div'); typingWrap.className='w-full flex mb-2';
       const typing = document.createElement('div'); typing.className='chat-bubble chat-ai text-slate-600'; typing.innerHTML = '<i class="fa-solid fa-spinner pulse mr-2" aria-hidden="true"></i><span class="dotty">Thinking</span>';
       const col = document.createElement('div'); col.className='flex flex-col items-start mr-auto'; col.appendChild(typing); typingWrap.appendChild(col); chatWindow.appendChild(typingWrap); chatWindow.scrollTop=chatWindow.scrollHeight;
 
-      // Payload
       const fd = new FormData();
       if(msg) fd.append('message', msg);
-      fd.append('mode', mode);
-      if(files.length){ fd.append('file', files[0]); } // backend currently supports single; keep UX multi for future
+      fd.append('tone', mode);                     // <-- unchanged param name
+      if(files.length){ fd.append('file', files[0]); }
 
-      // Optional: enable streaming cancel
       abortController = new AbortController();
 
       try{
@@ -365,9 +520,6 @@ Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, 
       }
     }
 
-    let showGateAfterResponse = false;
-
-    // Speech
     function startDictation(){
       if(!('webkitSpeechRecognition' in window)){ alert('Speech recognition works best in Chrome.'); return; }
       const rec = new webkitSpeechRecognition(); rec.lang='en-US';
@@ -375,10 +527,280 @@ Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, 
       rec.start();
     }
 
-    // Gate modal
     function showSignupGate(){ const m=$('#signupGate'); m.classList.remove('hidden'); m.classList.add('flex'); }
     function hideSignupGate(){ const m=$('#signupGate'); m.classList.add('hidden'); m.classList.remove('flex'); }
-    window.hideSignupGate = hideSignupGate; // expose for button
+    window.hideSignupGate = hideSignupGate;
+
+    // ---------- Guest nudge ----------
+    async function showAuthNudgeIfGuest(){
+      try{
+        const authed = await isAuthenticated();
+        const dismissed = localStorage.getItem('nm_auth_nudge_dismissed') === '1';
+        if(!authed && !dismissed){
+          setTimeout(()=>{
+            $('#authNudge').classList.remove('hidden');
+            $('#authNudgeClose')?.addEventListener('click', ()=>{
+              localStorage.setItem('nm_auth_nudge_dismissed','1');
+              $('#authNudge').classList.add('hidden');
+            });
+          }, 2000);
+        }
+      }catch{}
+    }
+
+    /* =======================
+       Friendly Spotlight Tour
+       ======================= */
+    (function(){
+      const KEY = 'nm_chat_tour_done_v1';
+
+      function isVisible(el){
+        if(!el) return false;
+        const cs = getComputedStyle(el);
+        if(cs.display==='none' || cs.visibility==='hidden' || parseFloat(cs.opacity)===0) return false;
+        const r = el.getBoundingClientRect();
+        const vw = window.innerWidth, vh = window.innerHeight;
+        return r.width>0 && r.height>0 && r.bottom>0 && r.top<vh && r.right>0 && r.left<vw;
+      }
+
+      function ensureOverlay(){
+        let el = document.getElementById('nmTour');
+        if(el) return el;
+        el = document.createElement('div');
+        el.id = 'nmTour';
+        el.className = 'nm-tour-overlay hidden';
+        el.innerHTML = `
+          <div class="nm-tour-dim" aria-hidden="true">
+            <div id="nmSlabN" class="nm-slab"></div>
+            <div id="nmSlabW" class="nm-slab"></div>
+            <div id="nmSlabE" class="nm-slab"></div>
+            <div id="nmSlabS" class="nm-slab"></div>
+          </div>
+          <div id="nmHole" class="nm-tour-hole" aria-hidden="true"></div>
+          <div id="nmPop" class="nm-tour-pop">
+            <div id="nmTitle" class="text-base font-semibold mb-1"></div>
+            <div id="nmBody" class="text-slate-700 text-sm leading-relaxed"></div>
+            <div class="mt-3 flex items-center justify-between gap-2">
+              <button id="nmSkip" class="btn btn-text">Skip</button>
+              <div class="flex items-center gap-2">
+                <button id="nmPrev" class="btn btn-ghost">Back</button>
+                <button id="nmNext" class="btn btn-primary">Next</button>
+              </div>
+            </div>
+          </div>
+          <span id="nmA11y" class="nm-tour-sr-only" role="status" aria-live="polite"></span>
+        `;
+        document.body.appendChild(el);
+        return el;
+      }
+
+      function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+
+      const STEPS = [
+        {
+          selector: null, placement: 'center',
+          title: 'Welcome to NeuroMed 👋',
+          body: `
+            <p>We turn medical paperwork into <b>clear next steps</b> you can use and share.</p>
+            <ul class="nm-list">
+              <li>Save time on long notes</li>
+              <li>Reduce stress with plain explanations</li>
+              <li>Be ready for doctor visits</li>
+            </ul>
+          `
+        },
+        { selector: '#authLinks', title: 'Save your chats', body: `Please click <b>Sign up</b> or <b>Log in</b> (top-right) to keep your history and sync across devices.` },
+        { selector: '#modeGroup', title: 'Pick your style', body: `Choose how I speak: <b>Science</b>, <b>Caregiver</b>, <b>Faith</b>, <b>Clinical</b>, or <b>Bilingual</b>.` },
+        { selector: '#easyReadBtn', title: 'Easier to read', body: `Use <b>Easy Read</b> for extra spacing, or <b>A−/A+</b> to adjust text size.` },
+        { selector: () => (document.querySelector('#dropZone')?.offsetParent ? '#dropZone' : '#uploadBtn'), title: 'Add your files', body: `Click the paperclip or drag & drop PDFs, images, or docs.` },
+        { selector: '#suggestionsList', title: 'Try a suggestion', body: `Not sure what to ask? Tap a suggestion and edit it as you like.` },
+        { selector: '#chatInput', title: 'Ask your question', body: `One or two sentences is enough. Press <b>Enter</b> to send; <b>Shift+Enter</b> for a new line.` },
+        { selector: '#sendBtn', title: 'Get your summary', body: `I’ll reply with what it means, what to watch, and next steps.` },
+        { selector: '#micBtn', title: 'Hands-free option', body: `Use the mic to dictate your question (works best in Chrome).` },
+        { selector: null, placement: 'center', title: 'You’re all set ✅', body: `Thanks for being here. Tap <b>?</b> anytime to replay this tour.` }
+      ];
+
+      function setRect(el, top, left, width, height){
+        el.style.top = `${Math.max(0, top)}px`;
+        el.style.left = `${Math.max(0, left)}px`;
+        el.style.width = `${Math.max(0, width)}px`;
+        el.style.height = `${Math.max(0, height)}px`;
+      }
+
+      function place(step, idx){
+        const hole = document.querySelector('#nmHole'), pop = document.querySelector('#nmPop'), a11y = document.querySelector('#nmA11y');
+        const slabN = document.getElementById('nmSlabN');
+        const slabW = document.getElementById('nmSlabW');
+        const slabE = document.getElementById('nmSlabE');
+        const slabS = document.getElementById('nmSlabS');
+
+        const target = typeof step.selector === 'function'
+          ? (()=>{ const s = step.selector(); return typeof s === 'string' ? document.querySelector(s) : s; })()
+          : (step.selector ? document.querySelector(step.selector) : null);
+
+        document.querySelector('#nmTitle').innerText = step.title || '';
+        document.querySelector('#nmBody').innerHTML  = step.body  || '';
+        a11y.textContent = `Step ${idx+1}: ${step.title || ''}`;
+
+        const vw = window.innerWidth, vh = window.innerHeight;
+        const pad = 8;
+
+        // Centered step: full blur, hide hole
+        if(!target || !isVisible(target) || step.placement === 'center'){
+          setRect(slabN, 0, 0, vw, vh);
+          setRect(slabW, 0, 0, 0, 0);
+          setRect(slabE, 0, 0, 0, 0);
+          setRect(slabS, 0, 0, 0, 0);
+
+          hole.style.width = hole.style.height = '0px';
+          hole.style.top = hole.style.left = '-9999px';
+          pop.style.left = '50%'; pop.style.top = '50%'; pop.style.transform = 'translate(-50%, -50%)';
+          return;
+        }
+
+        try{ target.scrollIntoView({ block:'center', inline:'center', behavior:'smooth' }); }catch{}
+
+        const r = target.getBoundingClientRect();
+        const hTop = clamp(r.top - pad, 6, vh-12);
+        const hLeft = clamp(r.left - pad, 6, vw-12);
+        const hW = Math.min(vw - 12, r.width + pad*2);
+        const hH = Math.min(vh - 12, r.height + pad*2);
+
+        // Position crisp hole
+        hole.style.top = hTop + 'px';
+        hole.style.left = hLeft + 'px';
+        hole.style.width = hW + 'px';
+        hole.style.height = hH + 'px';
+
+        // Position the four blurred slabs around the hole
+        setRect(slabN, 0, 0, vw, hTop);                                // top strip
+        setRect(slabW, hTop, 0, hLeft, hH);                            // left strip
+        setRect(slabE, hTop, hLeft + hW, vw - (hLeft + hW), hH);       // right strip
+        setRect(slabS, hTop + hH, 0, vw, vh - (hTop + hH));            // bottom strip
+
+        // Popover placement
+        pop.style.transform = 'none';
+        const margin = 10;
+        const wantBottom = r.bottom + margin + pop.offsetHeight <= vh;
+        const wantTop    = r.top - margin - pop.offsetHeight >= 0;
+        const wantRight  = r.right + margin + Math.min(pop.offsetWidth, 360) <= vw;
+        const wantLeft   = r.left  - margin - Math.min(pop.offsetWidth, 360) >= 0;
+
+        if (wantBottom) {
+          pop.style.top  = (r.bottom + margin) + 'px';
+          pop.style.left = clamp(r.left, 8, vw - pop.offsetWidth - 8) + 'px';
+        } else if (wantTop) {
+          pop.style.top  = (r.top - pop.offsetHeight - margin) + 'px';
+          pop.style.left = clamp(r.left, 8, vw - pop.offsetWidth - 8) + 'px';
+        } else if (wantRight) {
+          pop.style.top  = clamp(r.top, 8, vh - pop.offsetHeight - 8) + 'px';
+          pop.style.left = (r.right + margin) + 'px';
+        } else if (wantLeft) {
+          pop.style.top  = clamp(r.top, 8, vh - pop.offsetHeight - 8) + 'px';
+          pop.style.left = (r.left - pop.offsetWidth - margin) + 'px';
+        } else {
+          pop.style.left = '50%'; pop.style.top = '50%'; pop.style.transform = 'translate(-50%, -50%)';
+        }
+      }
+
+      const Tour = {
+        i:0, running:false,
+        start(force=false){
+          if(!force && localStorage.getItem(KEY)) return;
+          this.running = true; this.i = 0;
+          ensureOverlay().classList.remove('hidden');
+          this.bind(); this.goto(0);
+        },
+        end(done=false){
+          const ov = document.querySelector('#nmTour'); if(ov){ ov.classList.add('hidden'); }
+          this.unbind(); this.running = false;
+          if(done) localStorage.setItem(KEY, '1');
+        },
+        next(){
+          let j = this.i + 1;
+          while(j < STEPS.length){
+            const s = STEPS[j];
+            const el = typeof s.selector === 'function'
+              ? (()=>{ const sel = s.selector(); return typeof sel === 'string' ? document.querySelector(sel) : sel; })()
+              : (s.selector ? document.querySelector(s.selector) : null);
+            if(!s.selector || isVisible(el) || s.placement==='center') break;
+            j++;
+          }
+          if(j >= STEPS.length) return this.end(true);
+          this.goto(j);
+        },
+        prev(){
+          let j = this.i - 1;
+          while(j >= 0){
+            const s = STEPS[j];
+            const el = typeof s.selector === 'function'
+              ? (()=>{ const sel = s.selector(); return typeof sel === 'string' ? document.querySelector(sel) : sel; })()
+              : (s.selector ? document.querySelector(s.selector) : null);
+            if(!s.selector || isVisible(el) || s.placement==='center') break;
+            j--;
+          }
+          if(j < 0) return;
+          this.goto(j);
+        },
+        goto(idx){ this.i = idx; requestAnimationFrame(()=> place(STEPS[this.i], this.i)); },
+        bind(){
+          window.addEventListener('resize', this.recalc, { passive:true });
+          window.addEventListener('scroll', this.recalc, { passive:true });
+          document.getElementById('nmNext').onclick = () => this.next();
+          document.getElementById('nmPrev').onclick = () => this.prev();
+          document.getElementById('nmSkip').onclick = () => this.end(false);
+          document.addEventListener('keydown', this.onKey);
+        },
+        unbind(){
+          window.removeEventListener('resize', this.recalc);
+          window.removeEventListener('scroll', this.recalc);
+          document.removeEventListener('keydown', this.onKey);
+        },
+        recalc: () => { if(Tour.running) place(STEPS[Tour.i], Tour.i); },
+        onKey(e){
+          if(!Tour.running) return;
+          if(e.key==='Escape') Tour.end(false);
+          if(e.key==='Enter' || e.key===' ') Tour.next();
+          if(e.key==='ArrowRight') Tour.next();
+          if(e.key==='ArrowLeft') Tour.prev();
+        }
+      };
+
+      function injectHelp(){
+        if(document.getElementById('nmTourHelp')) return;
+        const btn = document.createElement('button');
+        btn.id = 'nmTourHelp';
+        btn.title = 'Show quick tour';
+        btn.innerHTML = '<span class="sr-only">Help</span>?';
+        btn.addEventListener('click', ()=> Tour.start(true));
+        document.body.appendChild(btn);
+      }
+
+      function readCookie(k){ return document.cookie.split('; ').find(r => r.startsWith(k+'='))?.split('=')[1]; }
+      function deleteCookie(k){ document.cookie = `${k}=; Max-Age=0; path=/; samesite=Lax`; }
+      function welcomeSource(){
+        const url = new URL(location.href);
+        if (url.searchParams.get('welcome') === '1') return 'qp';
+        if (readCookie('just_logged_in') === '1')   return 'cookie';
+        if (sessionStorage.getItem('nm_just_logged_in') === '1') return 'ss';
+        return null;
+      }
+
+      window.startChatTourAuto = function(){
+        injectHelp();
+        const src = welcomeSource();
+        if (src) {
+          Tour.start(true);
+          if (src === 'qp'){ const u = new URL(location.href); u.searchParams.delete('welcome'); history.replaceState({}, '', u); }
+          if (src === 'cookie') deleteCookie('just_logged_in');
+          if (src === 'ss') sessionStorage.removeItem('nm_just_logged_in');
+        } else {
+          if (!localStorage.getItem(KEY)){
+            setTimeout(()=> Tour.start(false), 700);
+          }
+        }
+      };
+    })();
   </script>
 </body>
 </html>
