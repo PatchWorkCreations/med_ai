@@ -4,6 +4,12 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>NeuroMed.ai — Friendlier Chat</title>
+  <link rel="manifest" href="/static/pwa/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/pwa/icons/apple-touch-icon-180.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/static/pwa/icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/static/pwa/icons/favicon-16.png">
+<meta name="theme-color" content="#0f766e">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
   <style>
@@ -802,5 +808,13 @@ Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, 
       };
     })();
   </script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js").catch(console.warn);
+      });
+    }
+    </script>
+    
 </body>
 </html>

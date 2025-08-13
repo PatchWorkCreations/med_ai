@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>NeuroMed AI Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/static/pwa/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/static/pwa/icons/apple-touch-icon-180.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/pwa/icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/pwa/icons/favicon-16.png">
+  <meta name="theme-color" content="#0f766e">
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
   <style>
     body { background: linear-gradient(to right, #f5f7fa, #e4ebf5); }
@@ -1401,6 +1407,139 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 })();
+
+/** CENTERED INSTALL MODAL (2-minute delay) **/
+(function () {
+  const DISMISS_KEY = "nm_install_dismissed_v2";
+  const SHOWN_KEY   = "nm_install_shown_v2";   // avoid re-show per session
+  const DELAY_MS    = 120000;                   // 2 minutes
+
+  let deferredPrompt = null;
+  let timer = null;
+
+  // Minimal SW registration is still required for Android installability
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js").catch(console.warn);
+    });
+  }
+
+  // Utility: create modal
+  function buildModal({ title, body, ctaLabel, onCta, showCancel = true }) {
+    const wrap = document.createElement("div");
+    wrap.id = "nmInstallModal";
+    wrap.className = "fixed inset-0 z-[10060] flex items-center justify-center";
+    wrap.setAttribute("role", "dialog");
+    wrap.setAttribute("aria-modal", "true");
+
+    wrap.innerHTML = `
+      <div class="absolute inset-0 bg-black/40 backdrop-blur-[1px]" data-close="1"></div>
+      <div class="relative bg-white w-[92vw] max-w-md rounded-2xl shadow-2xl ring-1 ring-gray-200 p-6 animate-fadeInUp">
+        <button class="absolute top-3 right-4 text-gray-400 hover:text-gray-700 text-2xl leading-none" aria-label="Close" data-close="1">&times;</button>
+        <div class="flex items-center gap-3 mb-3">
+          <div class="shrink-0 rounded-full p-2 bg-teal-100 text-teal-700">
+            <i class="fa-solid fa-mobile-screen"></i>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-800">${title}</h3>
+        </div>
+        <p class="text-sm text-gray-600 mb-4">${body}</p>
+        <div class="flex justify-end gap-2 mt-2">
+          ${showCancel ? `<button class="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50" data-close="1">Not now</button>` : ""}
+          <button id="nmInstallCta" class="px-4 py-2 rounded bg-teal-600 text-white hover:bg-teal-700">${ctaLabel}</button>
+        </div>
+      </div>
+    `;
+
+    // Close handlers
+    function close() {
+      wrap.remove();
+      document.removeEventListener("keydown", onKey);
+    }
+    function onKey(e) { if (e.key === "Escape") close(); }
+
+    wrap.addEventListener("click", (e) => {
+      if (e.target.closest("[data-close]")) {
+        localStorage.setItem(DISMISS_KEY, "1"); // remember dismissal
+        close();
+      }
+    });
+
+    document.addEventListener("keydown", onKey);
+    document.body.appendChild(wrap);
+
+    // Focus the CTA for accessibility
+    setTimeout(() => document.getElementById("nmInstallCta")?.focus(), 0);
+
+    // Wire CTA
+    document.getElementById("nmInstallCta")?.addEventListener("click", async () => {
+      try { await onCta?.(); } finally { close(); }
+    });
+  }
+
+  // Android / Chrome: capture the event but delay showing UI
+  window.addEventListener("beforeinstallprompt", (e) => {
+    if (localStorage.getItem(DISMISS_KEY) === "1" || localStorage.getItem(SHOWN_KEY) === "1") return;
+    e.preventDefault();
+    deferredPrompt = e;
+
+    // Start the 2-minute timer only after we know install is eligible
+    timer = setTimeout(() => {
+      if (!deferredPrompt) return; // eligibility may have changed
+      localStorage.setItem(SHOWN_KEY, "1");
+      buildModal({
+        title: "Add NeuroMed to your Home Screen",
+        body: "Get faster access and a cleaner, app-like experience. Works even better on mobile.",
+        ctaLabel: "Install",
+        onCta: async () => {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === "dismissed") localStorage.setItem(DISMISS_KEY, "1");
+          deferredPrompt = null;
+        }
+      });
+    }, DELAY_MS);
+  });
+
+  // Thank-you + stop future prompts on this device once installed
+  window.addEventListener("appinstalled", () => {
+    localStorage.setItem(DISMISS_KEY, "1");
+    console.log("NeuroMed installed 🎉");
+  });
+
+  // iOS: show a guidance modal after 2 minutes (only if not already standalone)
+  document.addEventListener("DOMContentLoaded", () => {
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
+
+    if (!isIOS || isStandalone || localStorage.getItem(DISMISS_KEY) === "1" || localStorage.getItem(SHOWN_KEY) === "1") {
+      return;
+    }
+
+    setTimeout(() => {
+      localStorage.setItem(SHOWN_KEY, "1");
+      buildModal({
+        title: "Add NeuroMed to your Home Screen",
+        body: `On iPhone/iPad: Tap <b>Share</b> <span aria-hidden="true">⬆️</span> then <b>Add to Home Screen</b>.`,
+        ctaLabel: "Got it",
+        showCancel: false,
+        onCta: () => { localStorage.setItem(DISMISS_KEY, "1"); }
+      });
+    }, DELAY_MS);
+  });
+})();
+
 </script>
+<style>
+  @keyframes fadeInUp { from {opacity:0; transform:translateY(12px)} to {opacity:1; transform:translateY(0)} }
+  .animate-fadeInUp { animation: fadeInUp .22s ease-out; }
+  </style>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js").catch(console.warn);
+    });
+  }
+  </script>
+  
 </body>
 </html>
