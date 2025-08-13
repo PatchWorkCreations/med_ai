@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>NeuroMed AI Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
@@ -15,25 +15,27 @@
       box-shadow: 0 2px 8px rgba(0,0,0,.05); max-width: 75%; white-space: pre-wrap; word-break: break-word;
       animation: fadeInUp .25s ease;
     }
-    /* Keep bubbles neutral so the wrapper controls side */
 
-
-    .chat-user {
+    /* User on the RIGHT */
+.chat-user {
   background-color: #dbeafe;
   color: #1f2937;
   padding: 0.5rem 0.75rem;
   border-radius: 1rem;
   max-width: 75%;
-  margin-right: auto;   /* LEFT side */
+  margin-left: auto;    /* RIGHT side */
+  margin-right: 0;
 }
 
+/* AI on the LEFT */
 .chat-ai {
   background-color: #ecfdf5;
   color: #1f2937;
   padding: 0.5rem 0.75rem;
   border-radius: 1rem;
   max-width: 75%;
-  margin-left: auto;    /* RIGHT side */
+  margin-right: auto;   /* LEFT side */
+  margin-left: 0;
 }
 
 
@@ -45,60 +47,117 @@
     #chatWindow > div:first-child { margin-top:0!important; margin-bottom:0!important; }
 
     /* Composer */
-    .dropzone {
-      border: 2px dashed rgba(0,0,0,.08);
-      transition: .15s ease;
-    }
-    .dropzone.dragover {
-      border-color: #0f766e;
-      background: rgba(20,184,166,.06);
-    }
-    .thumb {
-      position: relative;
-      border-radius: .75rem;
-      border: 1px solid rgba(0,0,0,.06);
-      background: #fff;
-    }
+    .dropzone { border: 2px dashed rgba(0,0,0,.08); transition: .15s ease; }
+    .dropzone.dragover { border-color: #0f766e; background: rgba(20,184,166,.06); }
+    .thumb { position: relative; border-radius: .75rem; border: 1px solid rgba(0,0,0,.06); background: #fff; }
     .thumb img { display:block; width:100%; height:100%; object-fit:cover; border-radius:.65rem; }
     .thumb-remove {
       position:absolute; top:6px; right:6px; background:#111827; color:#fff; border-radius:9999px; width:22px; height:22px;
       display:flex; align-items:center; justify-content:center; font-size:.75rem;
     }
 
+    /* Rotated side tab (hidden on tiny phones; see media queries) */
     #feedbackTab {
-  position: fixed;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%) rotate(-90deg);
-  transform-origin: bottom right;
-  background-color: #0d9488; /* teal-600 */
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem 0.25rem 0 0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  z-index: 9999;
-  cursor: pointer;
-  white-space: nowrap;
-}
+      position: fixed;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%) rotate(-90deg);
+      transform-origin: bottom right;
+      background-color: #0d9488; /* teal-600 */
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem 0.25rem 0 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      z-index: 9999;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    #feedbackTab:hover { background-color: #0f766e; }
+    #feedbackTab:focus { outline: none; }
+    #feedbackTab, #feedbackTab * { pointer-events: auto; }
 
-#feedbackTab:hover {
-  background-color: #0f766e; /* teal-700 */
-}
+    /* --- Core fixes: prevent right-edge clipping on tiny screens --- */
+    /* Let key flex rows shrink and respect viewport width */
+    :where(header, #toneBar, #chatWindow, #dropzone, #composer, section.flex-1) {
+      min-width: 0 !important;
+      max-width: 100vw;
+    }
+    #toneBar { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-#feedbackTab:focus {
-  outline: none;
-}
+    /* Root container: hide vertical overflow only (allow horizontal to avoid hard clipping) */
+    /* iOS Safari 100vh fix */
+    @media (max-width: 480px) {
+      @supports (height: 100dvh) {
+        .h-screen { height: 100dvh; }
+      }
+    }
 
-#feedbackTab,
-#feedbackTab * {
-  pointer-events: auto; /* prevent hover loss */
-}
+    /* Hide rotated tab on small phones and rely on FAB */
+    @media (max-width: 380px) {
+      #feedbackTab { display: none !important; }
+    }
 
+    /* --- Tiny phone hardening (<= 320px) --- */
+    @media (max-width: 320px) {
+      html, body { overflow-x: hidden; }
+
+      #sidebar { width: 88vw !important; padding: 16px !important; }
+
+      header { padding-left: 12px !important; padding-right: 12px !important; }
+      #chatWindow { padding: 10px 12px !important; }
+
+      .chat-bubble { 
+        font-size: 14px !important; 
+        padding: 8px 12px !important; 
+        max-width: 92% !important; 
+      }
+
+      #toneBar {
+        font-size: 12px !important;
+        padding-left: 8px !important;
+        padding-right: 12px !important; /* reduced now that side tab is hidden */
+      }
+      #toneBar label { margin-right: 8px !important; }
+
+      #dropzone { gap: 6px !important; padding: 8px !important; }
+      #addBtn, #micBtn, #sendBtn { width: 34px !important; height: 34px !important; }
+      #addBtn i, #micBtn i, #sendBtn i { font-size: 13px !important; }
+      #chatInput { font-size: 13px !important; padding: 8px 10px !important; min-width: 0 !important; }
+
+      #composer { 
+        position: sticky; 
+        bottom: env(safe-area-inset-bottom); 
+        z-index: 30; 
+        background: #fff; 
+        padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+      }
+
+      /* Feedback slide-over: full width on 320 */
+      #feedbackPanel { width: 100% !important; }
+      #feedbackPanel .px-5 { padding-left: 12px !important; padding-right: 12px !important; }
+
+      #summaryModal .p-8 { padding: 16px !important; }
+      #summaryModal .text-2xl { font-size: 18px !important; }
+      #modalContent { font-size: 14px !important; }
+    }
+
+    /* Slight boost just above 320 for consistency */
+    @media (max-width: 340px) {
+      header h1 { font-size: 18px !important; }
+      header i.text-2xl { font-size: 18px !important; }
+      #chatInput { font-size: 13px !important; }
+      .chat-bubble { max-width: 94% !important; }
+    }
+
+    @media (max-width: 360px) {
+      /* side tab is hidden; no need for big right padding */
+      #feedbackTab { top: 30% !important; }
+    }
   </style>
 </head>
 
 <body class="bg-white font-sans text-gray-800">
-<div class="w-full h-screen flex overflow-hidden">
+<div id="appShell" class="w-full h-screen flex overflow-y-hidden">
   <!-- Sidebar -->
   <aside id="sidebar" class="w-[280px] glass border-r p-6 overflow-y-auto fixed inset-y-0 left-0 z-40 transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:z-auto md:flex flex-col shadow-xl">
     <div class="flex items-center justify-between mb-6 border-b border-gray-200 pb-2">
@@ -168,13 +227,13 @@
     <div id="chatWindow" class="flex-1 px-6 py-4 overflow-y-auto text-base bg-gradient-to-br from-white to-gray-50 rounded-xl"></div>
 
     <!-- Tone Selector -->
-    <div class="px-4 pb-2 pt-1 bg-[#fefaf7] text-base text-gray-600">
-      <span class="font-semibold">Summary Tone:</span>
-      <label class="ml-2"><input type="radio" name="tone" value="Plain" checked> Plain</label>
-      <label class="ml-2"><input type="radio" name="tone" value="Caregiver"> Caregiver</label>
-      <label class="ml-2"><input type="radio" name="tone" value="Faith"> Faith</label>
-      <label class="ml-2"><input type="radio" name="tone" value="Clinical"> Clinical</label>
-      <label class="ml-2"><input type="radio" name="tone" value="Bilingual"> Bilingual</label>
+    <div id="toneBar" class="px-3 py-1 bg-[#fefaf7] text-gray-600 overflow-x-auto whitespace-nowrap">
+      <span class="font-semibold mr-2">Summary Tone:</span>
+      <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="Plain" checked> <span class="ml-1">Plain</span></label>
+      <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="Caregiver"> <span class="ml-1">Caregiver</span></label>
+      <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="Faith"> <span class="ml-1">Faith</span></label>
+      <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="Clinical"> <span class="ml-1">Clinical</span></label>
+      <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="Bilingual"> <span class="ml-1">Bilingual</span></label>
     </div>
 
     <!-- Composer -->
@@ -185,33 +244,36 @@
           <div class="text-sm text-gray-600"><i class="fa-solid fa-paperclip mr-2"></i>Pending attachments</div>
           <button id="clearAllBtn" class="text-xs text-red-600 hover:underline">Clear all</button>
         </div>
-        <div id="pendingGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3"></div>
+        <!-- NOTE: 2 columns by default for tiny phones -->
+        <div id="pendingGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3"></div>
       </div>
 
       <!-- Input row with dropzone -->
-      <div id="dropzone" class="dropzone rounded-xl p-3 flex items-center gap-2">
-        <!-- Add button -->
-        <button id="addBtn" class="w-10 h-10 rounded-full bg-teal-600 hover:bg-teal-700 text-white flex items-center justify-center text-2xl shadow-md" title="Add files">
+      <div id="dropzone" class="dropzone rounded-xl p-3 flex items-center gap-2 overflow-hidden">
+        <!-- Add -->
+        <button id="addBtn" class="shrink-0 w-10 h-10 rounded-full bg-teal-600 hover:bg-teal-700 text-white flex items-center justify-center text-xl shadow-md" title="Add files">
           <i class="fa-solid fa-plus"></i>
         </button>
+
         <input type="file" id="fileInput" class="hidden" multiple
-               accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic" />
+              accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic" />
 
         <!-- Text input -->
         <input type="text" id="chatInput"
-               class="flex-1 px-4 py-2 text-base border rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
-               placeholder="Type your question… (attachments will send with this)" />
+              class="flex-1 min-w-0 px-4 py-2 text-base border rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
+              placeholder="Type your question… (attachments will send with this)" />
 
         <!-- Mic -->
-        <button id="micBtn" class="w-10 h-10 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center hover:bg-gray-300" title="Dictate">
+        <button id="micBtn" class="shrink-0 w-10 h-10 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center hover:bg-gray-300" title="Dictate">
           <i class="fa-solid fa-microphone"></i>
         </button>
 
         <!-- Send -->
-        <button id="sendBtn" class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shadow-md hover:bg-gray-900" title="Send">
+        <button id="sendBtn" class="shrink-0 w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shadow-md hover:bg-gray-900" title="Send">
           <i class="fa-solid fa-paper-plane"></i>
         </button>
       </div>
+
       <p class="mt-1 text-xs text-gray-500 pl-12">Tip: Drag & drop files here to stage them. They won’t send until you hit <b>Send</b>.</p>
     </div>
   </section>
@@ -266,9 +328,10 @@
   </div>
 </div>
 
+<!-- Rotated side tab (hidden on tiny phones) -->
 <button id="feedbackTab"
   class="sm:flex fixed 
-         top-1/2 sm:top-1/2 top-[40%]  /* Higher on mobile */
+         top-1/2 sm:top-1/2 top-[40%]
          -translate-y-1/2 z-[9999]
          bg-teal-600 hover:bg-teal-700 text-white shadow-lg
          px-3 py-2 rounded-tl-md rounded-tr-md
@@ -278,10 +341,9 @@
   <i class="fa-solid fa-comment-dots mr-2 rotate-90"></i> Give feedback
 </button>
 
+<!-- Mobile FAB to open feedback (shows when side tab is hidden) -->
 
 
-
- 
 <!-- Slide-over Panel -->
 <div id="feedbackPanel" class="fixed inset-y-0 right-0 w-full sm:w-[520px] z-[70] translate-x-full transition-transform duration-300">
   <div class="h-full bg-white shadow-2xl border-l flex flex-col">
@@ -306,7 +368,7 @@
         <span>I agree to share feedback for product improvement and won’t include sensitive personal health information.</span>
       </label>
 
-      <!-- What you tested (maps to model.use_case as comma-separated) -->
+      <!-- What you tested -->
       <div>
         <label class="text-sm font-medium">What did you test? (pick any)</label>
         <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
@@ -348,7 +410,6 @@
             <option value="other">Other (no PHI)</option>
           </select>
         </div>
-        <!-- device/browser auto-filled by JS, but user can override if needed -->
         <div>
           <label class="text-sm">Device</label>
           <input name="device" class="mt-1 w-full border rounded p-2" placeholder="e.g. MacBook, iPhone, Windows PC">
@@ -406,7 +467,6 @@
   <div class="bg-green-600 text-white px-4 py-2 rounded shadow">Thanks! Feedback received. 💜</div>
 </div>
 
-
 <!-- Success Modal -->
 <div id="fbSuccess"
      class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/40 backdrop-blur-[1px]">
@@ -446,10 +506,25 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
 
 <script>
-// --- Floating panel controls
+/* ---------- Helpers ---------- */
+function getCSRFToken() {
+  const m = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
+  return m ? m.pop() : '';
+}
+
+/* Ensure external libs are ready (marked/DOMPurify/hljs) without blocking forever */
+async function ensureReady() {
+  const t0 = Date.now();
+  while (Date.now() - t0 < 800) {
+    if (window.marked && window.DOMPurify && window.hljs) break;
+    await new Promise(r => setTimeout(r, 50));
+  }
+}
+
+/* ---------- Feedback panel controls ---------- */
 const panel   = document.getElementById('feedbackPanel');
-const tabBtn  = document.getElementById('feedbackTab');   // side tab (desktop)
-const fabBtn  = document.getElementById('feedbackFab');   // FAB (mobile)
+const tabBtn  = document.getElementById('feedbackTab');
+const fabBtn  = document.getElementById('feedbackFab');
 const closeBtn= document.getElementById('feedbackClose');
 const form    = document.getElementById('feedbackForm');
 const toast   = document.getElementById('fbToast');
@@ -465,8 +540,7 @@ closeBtn?.addEventListener('click', closeFeedback);
 // ESC to close slide-over
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeFeedback(); });
 
-
-// --- Success modal controls
+/* ---------- Success modal ---------- */
 const fbSuccess         = document.getElementById('fbSuccess');
 const fbSuccessMsg      = document.getElementById('fbSuccessMsg');
 const fbSuccessMeta     = document.getElementById('fbSuccessMeta');
@@ -502,26 +576,23 @@ document.addEventListener('keydown', (e) => {
   if (!fbSuccess.classList.contains('hidden') && e.key === 'Escape') closeFbSuccess();
 });
 
-// "Send another" = reopen the panel so they can submit again quickly
+// "Send another" = reopen the panel
 fbSuccessAnother?.addEventListener('click', () => {
   closeFbSuccess();
   openFeedback();
 });
 
-
-// --- Submit with loading state + success modal
+/* ---------- Submit feedback ---------- */
 form.addEventListener('submit', async (e) => {
-  e.preventDefault(); // stop any default navigation
+  e.preventDefault();
   errBox.classList.add('hidden');
   errBox.textContent = '';
 
-  // Build form data (include collapsed use_case)
   const fd = new FormData(form);
   if (typeof collectUseCase === 'function') {
     fd.append('use_case', collectUseCase());
   }
 
-  // Button loading state
   const submitBtn = form.querySelector('button[type="submit"]');
   const originalHTML = submitBtn ? submitBtn.innerHTML : '';
   const setLoading = (on) => {
@@ -553,9 +624,8 @@ form.addEventListener('submit', async (e) => {
       return;
     }
 
-    // success: reset fields, restore button, close panel, show success modal
     form.reset();
-    if (typeof prefillMeta === 'function') prefillMeta(); // repopulate device/browser if you use it
+    if (typeof prefillMeta === 'function') prefillMeta();
     setLoading(false);
     closeFeedback();
     openFbSuccess(data);
@@ -566,59 +636,40 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
+/* ---------- Device/browser prefill ---------- */
 function detectBrowserPretty() {
   const ua = navigator.userAgent || '';
-  // Order matters (Edge before Chrome, Safari after Chrome check, etc.)
   const rules = [
     { name: 'Edge',    re: /(Edg|Edge)\/(\d+)/i },
     { name: 'Chrome',  re: /(Chrome|Chromium)\/(\d+)/i },
     { name: 'Firefox', re: /Firefox\/(\d+)/i },
-    // Safari last: Version/xx with Safari present
     { name: 'Safari',  re: /Version\/(\d+).+Safari/i },
   ];
-  for (const r of rules) {
-    const m = ua.match(r.re);
-    if (m) return `${r.name} ${m[m.length - 1]}`;
-  }
+  for (const r of rules) { const m = ua.match(r.re); if (m) return `${r.name} ${m[m.length - 1]}`; }
   return ua ? ua.split(') ').pop() || 'Unknown' : 'Unknown';
 }
-
 function prefillMeta() {
   const form = document.getElementById('feedbackForm');
   if (!form) return;
-
-  const dev = (navigator.userAgentData && navigator.userAgentData.platform)
-              || navigator.platform || 'Unknown';
+  const dev = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || 'Unknown';
   const browserPretty = detectBrowserPretty();
-
   const devInput = form.querySelector('input[name="device"]');
   const brInput  = form.querySelector('input[name="browser"]');
-
-  // Only fill if user hasn't typed anything yet
   if (devInput && !devInput.value) devInput.value = dev;
   if (brInput  && !brInput.value)  brInput.value  = browserPretty;
 }
-
-// Run once when page loads
 document.addEventListener('DOMContentLoaded', prefillMeta);
 
-
-
-/* ------------------ UTIL ------------------ */
-function getCSRFToken() {
-  const m = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
-  return m ? m.pop() : '';
-}
+/* ---------- Chat UI helpers ---------- */
 function closeModal(){ document.getElementById("summaryModal").classList.add("hidden"); }
+
 function appendRichBubble(content, isUser = false) {
   const chatWindow = document.getElementById("chatWindow");
   if (!chatWindow) return;
 
-  // Wrapper: no justify-* here; margins on the bubble control the side
   const wrap = document.createElement("div");
   wrap.className = "w-full flex mb-3";
 
-  // Bubble picks the side via CSS (.chat-user/.chat-ai)
   const bubble = document.createElement("div");
   bubble.className = `chat-bubble ${isUser ? "chat-user" : "chat-ai"}`;
 
@@ -633,7 +684,6 @@ function appendRichBubble(content, isUser = false) {
     if (asNode) {
       rich.appendChild(content);
     } else {
-      // Markdown → HTML (fallback to minimal escaping)
       let html = text;
       if (window.marked && typeof marked.parse === "function") {
         html = marked.parse(text);
@@ -644,11 +694,8 @@ function appendRichBubble(content, isUser = false) {
           .replace(/>/g, "&gt;")
           .replace(/\n/g, "<br>");
       }
-
-      // Sanitize if available
       rich.innerHTML = window.DOMPurify ? DOMPurify.sanitize(html) : html;
 
-      // Light polish
       rich.querySelectorAll("p").forEach(el => el.classList.add("text-gray-800"));
       rich.querySelectorAll("h1,h2,h3,h4").forEach(el =>
         el.classList.add("font-semibold","tracking-tight","text-gray-900","mt-2")
@@ -675,11 +722,8 @@ function appendRichBubble(content, isUser = false) {
         img.classList.add("rounded-lg","shadow-sm","max-w-full");
         img.loading = "lazy";
       });
-
       if (window.hljs) {
-        rich.querySelectorAll("pre code").forEach(code => {
-          try { hljs.highlightElement(code); } catch {}
-        });
+        rich.querySelectorAll("pre code").forEach(code => { try { hljs.highlightElement(code); } catch {} });
       }
     }
   } catch {
@@ -692,20 +736,74 @@ function appendRichBubble(content, isUser = false) {
   chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
+function appendBubble(message, isUser = false) { appendRichBubble(message, isUser); }
 
-function appendBubble(message, isUser = false) {
-  appendRichBubble(message, isUser);
-}
-
-
+/* ---------- Init ---------- */
 document.addEventListener("DOMContentLoaded", async () => {
-  await ensureReady(); // don’t race the libs on first paint
+  await ensureReady();
   const chatWindow = document.getElementById("chatWindow");
-  if (chatWindow && chatWindow.innerHTML.trim() === '') {
-    greetUser(); // fire after libs/DOM are ready
-  }
+  if (chatWindow && chatWindow.innerHTML.trim() === '') { greetUser(); }
+
+  // Summary modal openers
+  document.querySelectorAll(".open-summary-modal").forEach(btn => {
+    btn.addEventListener("click", function () {
+      const raw = this.dataset.summary;
+      const text = JSON.parse('"' + raw.replace(/"/g, '\\"') + '"');
+      const formatted = text.split(/\n{2,}/g).map(p => `<p>${p.trim()}</p>`).join('');
+      document.getElementById("modalContent").innerHTML = formatted;
+      document.getElementById("summaryModal").classList.remove("hidden");
+    });
+  });
+
+  // New Chat
+  document.getElementById('newChatBtn')?.addEventListener('click', newChat);
+
+  // Search filter
+  const searchInput = document.querySelector('input[placeholder="Search summaries..."]');
+  searchInput?.addEventListener('input', function () {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('.sidebar-link').forEach(item => {
+      const filename = item.querySelector('p.text-white-800')?.innerText.toLowerCase() || '';
+      const text = item.querySelector('p.text-base')?.innerText.toLowerCase() || '';
+      item.style.display = (filename.includes(q) || text.includes(q)) ? 'block' : 'none';
+    });
+  });
+
+  // Composer controls
+  document.getElementById('addBtn').addEventListener('click', () => document.getElementById('fileInput').click());
+  document.getElementById('fileInput').addEventListener('change', e => {
+    if (e.target.files?.length) addFiles(e.target.files);
+    e.target.value = '';
+  });
+  document.getElementById('clearAllBtn').addEventListener('click', clearPending);
+  document.getElementById('micBtn').addEventListener('click', startDictation);
+  document.getElementById('sendBtn').addEventListener('click', sendChat);
+
+  // Drag & drop
+  const dz = document.getElementById('dropzone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('dragover');
+    if (e.dataTransfer?.files?.length) addFiles(e.dataTransfer.files);
+  });
+
+  // Enter to send
+  document.getElementById('chatInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+  });
+
+  // Keep chat padding above composer height
+  const c = document.getElementById('composer');
+  const w = document.getElementById('chatWindow');
+  const ro = new ResizeObserver(updateComposerPadding);
+  if (c) ro.observe(c);
+  updateComposerPadding();
+  addEventListener('resize', updateComposerPadding);
+  addEventListener('orientationchange', updateComposerPadding);
 });
 
+/* ---------- Greeting & new chat ---------- */
 async function greetUser() {
   try {
     const res = await fetch("/api/user/settings/");
@@ -726,13 +824,9 @@ async function greetUser() {
 async function newChat() {
   const chatWindow = document.getElementById("chatWindow");
   if (chatWindow) chatWindow.innerHTML = '';
+  clearPending();
   try {
     await fetch("/clear-session/", { method:"POST", headers:{ "X-CSRFToken": getCSRFToken(), "Content-Type":"application/json" }});
-  } catch {}
-
-  await ensureReady();
-
-  try {
     const res = await fetch("/api/user/settings/");
     const data = await res.json();
     const name = data.display_name || "there";
@@ -748,18 +842,14 @@ async function newChat() {
   }
 }
 
-
-/* ------------------ STATE: pending attachments ------------------ */
+/* ---------- Pending attachments state ---------- */
 const pending = []; // {file: File, url?: string, kind: 'image'|'doc'}
 const pendingTray = document.getElementById('pendingTray');
 const pendingGrid = document.getElementById('pendingGrid');
 
 function renderPending() {
   pendingGrid.innerHTML = '';
-  if (pending.length === 0) {
-    pendingTray.classList.add('hidden');
-    return;
-  }
+  if (pending.length === 0) { pendingTray.classList.add('hidden'); return; }
   pendingTray.classList.remove('hidden');
 
   pending.forEach((item, idx) => {
@@ -814,116 +904,17 @@ function clearPending() {
   renderPending();
 }
 
-/* ------------------ INIT ------------------ */
-document.addEventListener("DOMContentLoaded", () => {
-  // Summary modal
-  document.querySelectorAll(".open-summary-modal").forEach(btn => {
-    btn.addEventListener("click", function () {
-      const raw = this.dataset.summary;
-      const text = JSON.parse('"' + raw.replace(/"/g, '\\"') + '"');
-      const formatted = text.split(/\n{2,}/g).map(p => `<p>${p.trim()}</p>`).join('');
-      document.getElementById("modalContent").innerHTML = formatted;
-      document.getElementById("summaryModal").classList.remove("hidden");
-    });
-  });
-
-  // Greeting (only if empty)
-  const chatWindow = document.getElementById("chatWindow");
-  if (chatWindow.innerHTML.trim() === '') greetUser();
-
-  // New Chat
-  document.getElementById('newChatBtn')?.addEventListener('click', newChat);
-
-  // Search
-  const searchInput = document.querySelector('input[placeholder="Search summaries..."]');
-  searchInput?.addEventListener('input', function () {
-    const q = this.value.toLowerCase();
-    document.querySelectorAll('.sidebar-link').forEach(item => {
-      const filename = item.querySelector('p.text-white-800')?.innerText.toLowerCase() || '';
-      const text = item.querySelector('p.text-base')?.innerText.toLowerCase() || '';
-      item.style.display = (filename.includes(q) || text.includes(q)) ? 'block' : 'none';
-    });
-  });
-
-  // Composer controls
-  document.getElementById('addBtn').addEventListener('click', () => document.getElementById('fileInput').click());
-  document.getElementById('fileInput').addEventListener('change', e => {
-    if (e.target.files?.length) addFiles(e.target.files);
-    e.target.value = ''; // allow re-adding the same file
-  });
-  document.getElementById('clearAllBtn').addEventListener('click', clearPending);
-  document.getElementById('micBtn').addEventListener('click', startDictation);
-  document.getElementById('sendBtn').addEventListener('click', sendChat);
-
-  // Drag & drop
-  const dz = document.getElementById('dropzone');
-  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
-  dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
-  dz.addEventListener('drop', e => {
-    e.preventDefault(); dz.classList.remove('dragover');
-    if (e.dataTransfer?.files?.length) addFiles(e.dataTransfer.files);
-  });
-
-  // Enter to send
-  document.getElementById('chatInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault(); sendChat();
-    }
-  });
-});
-
-/* ------------------ GREETING / NEW CHAT ------------------ */
-async function greetUser() {
-  try {
-    const res = await fetch("/api/user/settings/");
-    const data = await res.json();
-    const name = data.display_name || "there";
-    const options = [
-      `Welcome, ${name}! Let’s get you started on understanding your records.`,
-`Hi ${name}, ready to make sense of your medical documents?`,
-`Glad you’re here, ${name}. Let’s take the first step together.`,
-`${name}, I’m here to help simplify your health information—let’s begin.`,
-
-    ];
-    appendBubble(options[Math.floor(Math.random()*options.length)], false);
-  } catch {
-    appendBubble("Welcome back. Let’s take care of what matters most today.", false);
-  }
-}
-
-async function newChat() {
-  const chatWindow = document.getElementById("chatWindow");
-  chatWindow.innerHTML = '';
-  clearPending();
-  try {
-    await fetch("/clear-session/", { method:"POST", headers:{ "X-CSRFToken": getCSRFToken(), "Content-Type":"application/json" }});
-    const res = await fetch("/api/user/settings/");
-    const data = await res.json();
-    const name = data.display_name || "there";
-    const greetings = [
-      `Hi ${name}, how can I help you today? 🌿`,
-      `Hello ${name}! What can I do for you today? 🤖`,
-      `Hey ${name}, I’m here for you. How are you feeling? 💬`,
-      `${name}, let’s figure things out together. What do you need today? 🧠`
-    ];
-    appendBubble(greetings[Math.floor(Math.random()*greetings.length)], false);
-  } catch {
-    appendBubble("Hi there! How can I help you today?", false);
-  }
-}
-
-/* ------------------ SEND CHAT (bundle text + pending files) ------------------ */
+/* ---------- Send chat (bundles text + pending files) ---------- */
 async function sendChat() {
   const input = document.getElementById("chatInput");
-  const userMessage = input.value.trim();
+  const userMessage = (input.value || '').trim();
   const tone = document.querySelector('input[name="tone"]:checked')?.value || "Plain";
 
   if (!userMessage && pending.length === 0) return;
 
-  // 1) Render the user's message bubble (with staged attachments preview)
+  // Render user bubble + staged attachments gallery
   if (userMessage) appendBubble(userMessage, true);
   if (pending.length) {
-    // Build a compact gallery to show what was sent
     const gallery = document.createElement('div');
     gallery.className = 'grid grid-cols-2 sm:grid-cols-3 gap-2';
     pending.forEach(item => {
@@ -943,37 +934,28 @@ async function sendChat() {
     appendRichBubble(gallery, true);
   }
 
-  // 2) Build request payload
+  // Build payload
   const formData = new FormData();
   if (userMessage) formData.append("message", userMessage);
   formData.append("tone", tone);
-  // Attach files as an array: files[]
   pending.forEach(p => formData.append("files[]", p.file, p.file.name));
 
-  // 3) Clear composer input + pending tray (they’ve been “sent”)
+  // Clear composer state
   input.value = "";
   clearPending();
 
-  // 4) Typing indicator
-
-  // 4) Typing indicator
-const chatWindow = document.getElementById("chatWindow");
-const typingWrap = document.createElement("div");
-// force AI side
-typingWrap.className = "w-full flex mb-2 justify-end";
-const typing = document.createElement("div");
-typing.className = "chat-bubble chat-ai text-gray-500 italic";
-typing.innerText = "Analyzing…";
-typingWrap.appendChild(typing);
-chatWindow.appendChild(typingWrap);
-chatWindow.scrollTop = chatWindow.scrollHeight;
-
+  // Typing indicator (single, de-duped)
+  const chatWindow = document.getElementById("chatWindow");
+  const typingWrap = document.createElement("div");
+  typingWrap.className = "w-full flex mb-2 justify-start";
+  const typing = document.createElement("div");
+  typing.className = "chat-bubble chat-ai text-gray-500 italic";
   typing.innerText = "Analyzing…";
   typingWrap.appendChild(typing);
   chatWindow.appendChild(typingWrap);
   chatWindow.scrollTop = chatWindow.scrollHeight;
 
-  // 5) Send to backend
+  // Send to backend
   try {
     const res = await fetch("/api/send-chat/", {
       method: "POST",
@@ -991,7 +973,7 @@ chatWindow.scrollTop = chatWindow.scrollHeight;
   }
 }
 
-/* ------------------ Speech ------------------ */
+/* ---------- Speech ---------- */
 function startDictation() {
   if (!('webkitSpeechRecognition' in window)) return alert("Speech recognition only works in Chrome.");
   const rec = new webkitSpeechRecognition();
@@ -1003,7 +985,7 @@ function startDictation() {
   rec.start();
 }
 
-/* ------------------ Sidebar / Settings ------------------ */
+/* ---------- Sidebar / Settings ---------- */
 function toggleSidebar() {
   const sidebar = document.getElementById("sidebar");
   const overlay = document.getElementById("overlay");
@@ -1048,7 +1030,6 @@ function toggleSettingsMenu(){
   const menu = document.getElementById("settingsDropdown");
   menu.classList.toggle("hidden"); menu.classList.toggle("block");
 }
-
 function logoutUser(){
   fetch("{% url 'logout' %}", {
     method: "POST",
@@ -1058,6 +1039,15 @@ function logoutUser(){
   }).catch(() => {
     window.location.href = "{% url 'login' %}";
   });
+}
+
+/* ---------- Layout padding sync ---------- */
+function updateComposerPadding() {
+  const c = document.getElementById('composer');
+  const w = document.getElementById('chatWindow');
+  if (!c || !w) return;
+  const h = Math.ceil(c.getBoundingClientRect().height || 0);
+  w.style.paddingBottom = `calc(${h}px + 12px)`;
 }
 </script>
 </body>
