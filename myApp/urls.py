@@ -3,6 +3,7 @@ from django.contrib.auth import views as auth_views
 from . import views
 from django.views.generic import RedirectView
 from .views import LegalView, terms_redirect, privacy_redirect
+from .views import WarmLoginView 
 
 urlpatterns = [
     # Public Pages
@@ -10,14 +11,7 @@ urlpatterns = [
     path('signup/', views.signup_view, name='signup'),
 
     # Auth Pages
-    path(
-        'login/',
-        auth_views.LoginView.as_view(
-            template_name='login.html',
-            redirect_authenticated_user=True
-        ),
-        name='login'
-    ),
+    path('login/', WarmLoginView.as_view(), name='login'),
     path("logout/", views.logout_view, name="logout"),
     # Authenticated Dashboard
     path('dashboard/', views.dashboard, name='dashboard'),

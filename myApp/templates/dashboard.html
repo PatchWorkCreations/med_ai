@@ -153,6 +153,37 @@
       /* side tab is hidden; no need for big right padding */
       #feedbackTab { top: 30% !important; }
     }
+
+
+    /*tutorial*/
+
+    /* === Spotlight Tour (no libs) === */
+.nm-tour-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10050; /* above your 9999 stuff */
+  pointer-events: auto;
+}
+.nm-tour-dim {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.55);
+}
+.nm-tour-hole {
+  position: absolute;
+  border-radius: 12px;
+  box-shadow: 0 0 0 200vmax rgba(0,0,0,.55); /* cut-out trick */
+  background: transparent;
+  pointer-events: none;
+  transition: top .18s ease, left .18s ease, width .18s ease, height .18s ease;
+}
+.nm-tour-pop {
+  position: fixed;
+  max-width: min(92vw, 340px);
+  z-index: 10051;
+}
+@media (max-width: 360px){ .nm-tour-pop { max-width: min(92vw, 300px);} }
+.nm-tour-sr-only { position:absolute!important; left:-9999px!important; }
+
   </style>
 </head>
 
@@ -215,7 +246,7 @@
           NeuroMed AI simplifies complex medical records into compassionate, easy-to-understand summaries.
         </div>
       </div>
-      <button onclick="toggleSidebar()" class="md:hidden text-gray-600 text-2xl focus:outline-none">
+      <button id="burgerBtn" onclick="toggleSidebar()" class="md:hidden text-gray-600 text-2xl focus:outline-none">
         <i class="fa-solid fa-bars"></i>
       </button>
     </header>
@@ -229,7 +260,7 @@
     <!-- Tone Selector -->
     <div id="toneBar" class="px-3 py-1 bg-[#fefaf7] text-gray-600 overflow-x-auto whitespace-nowrap">
       <span class="font-semibold mr-2">Summary Tone:</span>
-      <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="Plain" checked> <span class="ml-1">Plain</span></label>
+      <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="Plain" checked> <span class="ml-1">Straight Talk</span></label>
       <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="Caregiver"> <span class="ml-1">Caregiver</span></label>
       <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="Faith"> <span class="ml-1">Faith</span></label>
       <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="Clinical"> <span class="ml-1">Clinical</span></label>
@@ -359,26 +390,26 @@
     <!-- Body -->
     <form id="feedbackForm" class="px-5 py-4 overflow-y-auto space-y-4" enctype="multipart/form-data">
       <p class="text-sm text-gray-600 -mt-1">
-        Thank you for testing! Please use <b>synthetic/public data</b> only — no PHI.
+        Thanks for trying NeuroMed AI! Please use <b>synthetic or public sample data</b> only — no Personal Health Information (PHI).
       </p>
 
       <!-- Consent -->
       <label class="flex items-start gap-2 text-sm bg-gray-50 border rounded p-3">
         <input type="checkbox" name="consent" required>
-        <span>I agree to share feedback for product improvement and won’t include sensitive personal health information.</span>
+        <span>I agree to share feedback to help improve the product and will not include Personal Health Information (PHI).</span>
       </label>
 
       <!-- What you tested -->
       <div>
-        <label class="text-sm font-medium">What did you test? (pick any)</label>
+        <label class="text-sm font-medium">What did you try today? (choose all that apply)</label>
         <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="upload_summarize"> Upload → Summarize</label>
+          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="upload_summarize"> Upload → Summary</label>
           <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="multi_attachments"> Multiple attachments tray</label>
           <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="tone_selector"> Tone selector</label>
-          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="chat_qna"> Chat Q&A</label>
-          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="summary_modal"> Full Summary modal</label>
-          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="drag_drop"> Drag & drop</label>
-          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="mic_dictation"> Mic dictation</label>
+          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="chat_qna"> Chat Q&amp;A</label>
+          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="summary_modal"> Full summary modal</label>
+          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="drag_drop"> Drag &amp; drop</label>
+          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="mic_dictation"> Voice dictation</label>
           <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="settings_update"> Settings update</label>
         </div>
       </div>
@@ -386,7 +417,7 @@
       <!-- Profile -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label class="text-sm">Role</label>
+          <label class="text-sm">Your role</label>
           <select name="role" class="mt-1 w-full border rounded p-2" required>
             <option value="">Select…</option>
             <option value="caregiver">Caregiver</option>
@@ -397,55 +428,75 @@
           </select>
         </div>
         <div>
-          <label class="text-sm">Email (optional)</label>
+          <label class="text-sm">Email (optional, for follow-up)</label>
           <input name="email" type="email" class="mt-1 w-full border rounded p-2" placeholder="you@example.com">
         </div>
         <div>
-          <label class="text-sm">Input type</label>
+          <label class="text-sm">What kind of input did you use?</label>
           <select name="input_type" class="mt-1 w-full border rounded p-2" required>
             <option value="">Select…</option>
-            <option value="dummy">Dummy text I wrote</option>
-            <option value="synthetic">Synthetic sample from app</option>
-            <option value="public">Public doc (no PHI)</option>
+            <option value="dummy">Text I wrote (dummy)</option>
+            <option value="synthetic">Synthetic sample from the app</option>
+            <option value="public">Public document (no PHI)</option>
             <option value="other">Other (no PHI)</option>
           </select>
         </div>
         <div>
           <label class="text-sm">Device</label>
-          <input name="device" class="mt-1 w-full border rounded p-2" placeholder="e.g. MacBook, iPhone, Windows PC">
+          <input name="device" class="mt-1 w-full border rounded p-2" placeholder="e.g., MacBook, iPhone, Windows PC">
         </div>
         <div>
           <label class="text-sm">Browser</label>
-          <input name="browser" class="mt-1 w-full border rounded p-2" placeholder="e.g. Safari 17, Chrome 126">
+          <input name="browser" class="mt-1 w-full border rounded p-2" placeholder="e.g., Safari 17, Chrome 126">
         </div>
       </div>
 
       <!-- Ratings -->
       <div class="grid grid-cols-2 gap-3">
-        <div><label class="text-sm">Ease (1–5)</label><input name="ease" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2"></div>
-        <div><label class="text-sm">Speed (1–5)</label><input name="speed" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2"></div>
-        <div><label class="text-sm">Accuracy (1–5)</label><input name="accuracy" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2"></div>
-        <div><label class="text-sm">Clarity (1–5)</label><input name="clarity" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2"></div>
+        <div>
+          <label class="text-sm">Ease of use (1–5)</label>
+          <input name="ease" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2">
+        </div>
+        <div>
+          <label class="text-sm">Speed (1–5)</label>
+          <input name="speed" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2">
+        </div>
+        <div>
+          <label class="text-sm">Accuracy (1–5)</label>
+          <input name="accuracy" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2">
+        </div>
+        <div>
+          <label class="text-sm">Clarity (1–5)</label>
+          <input name="clarity" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2">
+        </div>
       </div>
 
       <div class="grid grid-cols-2 gap-3">
-        <div><label class="text-sm">NPS (0–10)</label><input name="nps" type="number" min="0" max="10" class="mt-1 w-full border rounded p-2" required></div>
-        <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="allow_contact"> OK to contact</label>
-        <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="allow_anon" checked> Store anonymously</label>
+        <div>
+          <label class="text-sm" for="nps">How likely are you to recommend NeuroMed AI? (0–10)</label>
+          <input id="nps" name="nps" type="number" min="0" max="10" class="mt-1 w-full border rounded p-2" required>
+          <div class="text-xs text-gray-500 mt-1">0 = Not at all likely • 10 = Extremely likely</div>
+        </div>
+        <label class="flex items-center gap-2 text-sm">
+          <input type="checkbox" name="allow_contact"> It’s okay to contact me about this feedback
+        </label>
+        <label class="flex items-center gap-2 text-sm">
+          <input type="checkbox" name="allow_anon" checked> Store my feedback anonymously
+        </label>
       </div>
 
       <!-- Open text + screenshot -->
       <div>
         <label class="text-sm">What worked well?</label>
-        <textarea name="pros" rows="2" class="w-full border rounded p-2"></textarea>
+        <textarea name="pros" rows="2" class="w-full border rounded p-2" placeholder="What felt smooth or helpful?"></textarea>
       </div>
       <div>
         <label class="text-sm">What can we improve?</label>
-        <textarea name="cons" rows="2" class="w-full border rounded p-2"></textarea>
+        <textarea name="cons" rows="2" class="w-full border rounded p-2" placeholder="Any rough edges or missing pieces?"></textarea>
       </div>
       <div>
-        <label class="text-sm">Bugs or errors (steps)</label>
-        <textarea name="bugs" rows="2" class="w-full border rounded p-2" placeholder="1) Go to… 2) Click… 3) See error…"></textarea>
+        <label class="text-sm">Bugs or errors — steps to reproduce</label>
+        <textarea name="bugs" rows="2" class="w-full border rounded p-2" placeholder="1) Go to… 2) Click… 3) What happened…"></textarea>
       </div>
       <div>
         <label class="text-sm">Screenshot (optional)</label>
@@ -454,13 +505,14 @@
 
       <!-- Submit -->
       <div class="flex items-center justify-between pt-2">
-        <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded">Send feedback</button>
+        <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded">Submit feedback</button>
       </div>
 
       <div id="fbErrors" class="text-sm text-red-600 hidden"></div>
     </form>
   </div>
 </div>
+
 
 <!-- Toast -->
 <div id="fbToast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
@@ -1049,6 +1101,306 @@ function updateComposerPadding() {
   const h = Math.ceil(c.getBoundingClientRect().height || 0);
   w.style.paddingBottom = `calc(${h}px + 12px)`;
 }
+
+
+
+(function(){
+  const KEY = 'nm_tour_done_v1';
+
+  // Utils
+  const $ = s => document.querySelector(s);
+  const isMobile = () => window.matchMedia('(max-width: 540px)').matches;
+
+  // True visibility: displayed, sized, and on-screen (not off-canvas)
+  function isTrulyVisible(el){
+    if(!el) return false;
+    const cs = getComputedStyle(el);
+    if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) === 0) return false;
+    if (el.offsetWidth <= 0 || el.offsetHeight <= 0) return false;
+    const r = el.getBoundingClientRect();
+    const vw = window.innerWidth || document.documentElement.clientWidth;
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+    return r.bottom > 0 && r.top < vh && r.right > 0 && r.left < vw;
+  }
+
+  // On mobile, prefer burger; on desktop, the actual New Chat button
+  const pickNewChatTarget = () => isMobile() ? $('#burgerBtn') : $('#newChatBtn');
+  // Feedback control can be a floating tab or a fab
+  const pickFeedbackButton = () => $('#feedbackFab') || $('#feedbackTab');
+
+  // --- Steps (mobile-aware)
+  const STEPS = [
+    {
+      selector: null,
+      title: "Welcome, beta testers! 🎉",
+      body: "NeuroMed turns messy medical docs into friendly summaries. Here’s a 30-second tour.",
+      placement: "center"
+    },
+    {
+      selector: pickNewChatTarget,
+      title: () => isMobile() ? "Open the menu" : "Start fresh",
+      body: () => isMobile()
+        ? "Tap the ☰ menu first. Inside, you’ll find <b>New Chat</b> to start a fresh thread."
+        : "Tap <b>New Chat</b> anytime to clear the thread and begin a new question.",
+    },
+    {
+      selector: "#dropzone",
+      title: "Upload or drop files",
+      body: "Click the plus to attach, or just drag & drop. I’ll read PDFs, images, and docs."
+    },
+    {
+      selector: "#toneBar",
+      title: "Pick a tone",
+      body: `
+        Choose how the AI speaks:
+        <ul class="list-disc pl-5 mt-1 space-y-1">
+          <li><b>Straight Talk</b> — neutral, clear, friendly.</li>
+          <li><b>Caregiver</b> — gentle, reassuring; may use a little Taglish warmth.</li>
+          <li><b>Faith</b> — hopeful and encouraging; may include a short verse/prayer.</li>
+          <li><b>Clinical</b> — concise, precise medical terminology. No fluff.</li>
+          <li><b>Bilingual</b> — Tagalog + English for clarity where it helps.</li>
+        </ul>
+        <div class="mt-2 text-xs text-slate-500">Tip: you can change the tone any time before sending.</div>
+        <div id="nmTonePreview" class="mt-3 rounded-lg border bg-slate-50 px-3 py-2 text-[13px] text-slate-700"></div>
+      `,
+      // (optional) live preview that follows the selected radio
+      onEnter: () => {
+        const samples = {
+          Plain:      "I’ll explain your results in clear, friendly language.",
+          Caregiver:  "Let’s walk through this gently, step by step—kasama mo ’ko.",
+          Faith:      "Here’s what this means, and a note of hope to carry with you.",
+          Clinical:   "Findings: … Impression: … Recommendations: …",
+          Bilingual:  "Ito ang buod—then I’ll clarify in English where needed."
+        };
+        const preview = document.getElementById("nmTonePreview");
+        const update = () => {
+          const v = document.querySelector('#toneBar input[name="tone"]:checked')?.value || "Plain";
+          preview.textContent = `Example • ${v}: ${samples[v]}`;
+        };
+        document.querySelectorAll('#toneBar input[name="tone"]').forEach(r =>
+          r.addEventListener('change', update)
+        );
+        update();
+      }
+    },
+
+    {
+      selector: "#sendBtn",
+      title: "Ask away",
+      body: "Type your question and hit <b>Send</b>. You can also use the mic on supported browsers."
+    },
+    {
+      selector: pickFeedbackButton,
+      title: "Give quick feedback",
+      body: "Found something confusing? Open this to send thoughts (no PHI (Personal Health Information), please 💜)."
+    },
+    {
+      selector: null,
+      title: "You’re all set ✅",
+      body: "That’s it! Tap the <b>?</b> button anytime to replay this tour.",
+      placement: "center"
+    }
+  ];
+
+  // Create overlay once
+  function ensureOverlay(){
+    let el = document.getElementById('nmTour');
+    if (el) return el;
+    el = document.createElement('div');
+    el.id = 'nmTour';
+    el.className = 'nm-tour-overlay';
+    el.innerHTML = `
+      <div class="nm-tour-dim"></div>
+      <div id="nmHole" class="nm-tour-hole"></div>
+      <div id="nmPop" class="nm-tour-pop bg-white border rounded-2xl shadow-xl p-4 text-sm text-slate-800">
+        <div id="nmTitle" class="text-base font-semibold mb-1"></div>
+        <div id="nmBody" class="text-slate-600 mb-3"></div>
+        <div class="flex items-center justify-between gap-2">
+          <button id="nmSkip" class="px-3 py-1.5 rounded border text-slate-600 hover:bg-slate-50">Skip</button>
+          <div class="flex items-center gap-2">
+            <button id="nmPrev" class="px-3 py-1.5 rounded border text-slate-600 hover:bg-slate-50">Back</button>
+            <button id="nmNext" class="px-3 py-1.5 rounded bg-teal-600 text-white hover:bg-teal-700">Next</button>
+          </div>
+        </div>
+      </div>
+      <span id="nmA11y" class="nm-tour-sr-only" role="status" aria-live="polite"></span>
+    `;
+    document.body.appendChild(el);
+    return el;
+  }
+
+  function place(step, idx){
+    const hole = $('#nmHole'), pop = $('#nmPop'), a11y = $('#nmA11y');
+    const target = typeof step.selector === 'function' ? step.selector() : (step.selector ? $(step.selector) : null);
+
+    // Dynamic titles/bodies allowed
+    const title = typeof step.title === 'function' ? step.title() : (step.title || '');
+    const body  = typeof step.body  === 'function' ? step.body()  : (step.body  || '');
+
+    $('#nmTitle').innerText = title;
+    $('#nmBody').innerHTML  = body;
+    a11y.textContent = `Step ${idx+1}: ${title}`;
+
+    const pad = 8, vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0), vh = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+
+    // Centered card or hidden/offscren target → no hole, center pop
+    if (!target || !isTrulyVisible(target) || step.placement === 'center'){
+      hole.style.width = hole.style.height = '0px';
+      hole.style.top = hole.style.left = '-9999px';
+      pop.style.left = '50%'; pop.style.top = '50%'; pop.style.transform = 'translate(-50%, -50%)';
+      return;
+    }
+
+    // Bring into view if possible
+    try { target.scrollIntoView({ block: 'center', inline: 'center', behavior: 'smooth' }); } catch {}
+
+    const r = target.getBoundingClientRect();
+    const hTop = Math.max(6, r.top - pad);
+    const hLeft = Math.max(6, r.left - pad);
+    const hW = Math.min(vw - 12, r.width + pad*2);
+    const hH = Math.min(vh - 12, r.height + pad*2);
+
+    hole.style.top = hTop + 'px';
+    hole.style.left = hLeft + 'px';
+    hole.style.width = hW + 'px';
+    hole.style.height = hH + 'px';
+
+    // Popover placement: bottom → top → right → left → center
+    pop.style.transform = 'none';
+    const margin = 10;
+    const wantBottom = r.bottom + margin + pop.offsetHeight <= vh;
+    const wantTop    = r.top - margin - pop.offsetHeight >= 0;
+    const wantRight  = r.right + margin + Math.min(pop.offsetWidth, 340) <= vw;
+    const wantLeft   = r.left  - margin - Math.min(pop.offsetWidth, 340) >= 0;
+
+    if (wantBottom) {
+      pop.style.top = (r.bottom + margin) + 'px';
+      pop.style.left = clamp(r.left, 8, vw - pop.offsetWidth - 8) + 'px';
+    } else if (wantTop) {
+      pop.style.top = (r.top - pop.offsetHeight - margin) + 'px';
+      pop.style.left = clamp(r.left, 8, vw - pop.offsetWidth - 8) + 'px';
+    } else if (wantRight) {
+      pop.style.top = clamp(r.top, 8, vh - pop.offsetHeight - 8) + 'px';
+      pop.style.left = (r.right + margin) + 'px';
+    } else if (wantLeft) {
+      pop.style.top = clamp(r.top, 8, vh - pop.offsetHeight - 8) + 'px';
+      pop.style.left = (r.left - pop.offsetWidth - margin) + 'px';
+    } else {
+      pop.style.left = '50%';
+      pop.style.top = '50%';
+      pop.style.transform = 'translate(-50%, -50%)';
+    }
+  }
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+
+  const Tour = {
+    i: 0, running: false,
+    start(force=false){
+      if (!force && localStorage.getItem(KEY)) return;
+      this.running = true; this.i = 0;
+      ensureOverlay().classList.remove('hidden');
+      this.bind(); this.goto(0);
+    },
+    end(done=false){
+      const ov = $('#nmTour'); if (ov) ov.classList.add('hidden');
+      this.unbind(); this.running = false;
+      if (done) localStorage.setItem(KEY, '1');
+    },
+    next(){
+      let j = this.i + 1;
+      while (j < STEPS.length){
+        const s = STEPS[j];
+        const el = typeof s.selector === 'function' ? s.selector() : (s.selector ? $(s.selector) : null);
+        if (!s.selector || isTrulyVisible(el)) break;
+        j++;
+      }
+      if (j >= STEPS.length) return this.end(true);
+      this.goto(j);
+    },
+    prev(){
+      let j = this.i - 1;
+      while (j >= 0){
+        const s = STEPS[j];
+        const el = typeof s.selector === 'function' ? s.selector() : (s.selector ? $(s.selector) : null);
+        if (!s.selector || isTrulyVisible(el)) break;
+        j--;
+      }
+      if (j < 0) return;
+      this.goto(j);
+    },
+    goto(idx){ this.i = idx; requestAnimationFrame(()=> place(STEPS[this.i], this.i)); },
+    bind(){
+      window.addEventListener('resize', this.recalc, { passive:true });
+      window.addEventListener('scroll', this.recalc, { passive:true });
+      document.getElementById('nmNext').onclick = () => this.next();
+      document.getElementById('nmPrev').onclick = () => this.prev();
+      document.getElementById('nmSkip').onclick = () => this.end(false);
+      document.addEventListener('keydown', this.onKey);
+    },
+    unbind(){
+      window.removeEventListener('resize', this.recalc);
+      window.removeEventListener('scroll', this.recalc);
+      document.removeEventListener('keydown', this.onKey);
+    },
+    recalc: () => { if (Tour.running) place(STEPS[Tour.i], Tour.i); },
+    onKey(e){
+      if (!Tour.running) return;
+      if (e.key === 'Escape') Tour.end(false);
+      if (e.key === 'Enter' || e.key === ' ') Tour.next();
+      if (e.key === 'ArrowRight') Tour.next();
+      if (e.key === 'ArrowLeft') Tour.prev();
+    }
+  };
+
+  // Helper button to replay the tour
+  function injectHelp(){
+    if (document.getElementById('nmTourHelp')) return;
+    const btn = document.createElement('button');
+    btn.id = 'nmTourHelp';
+    btn.className = "fixed left-3 bottom-[calc(env(safe-area-inset-bottom)+12px)] md:left-5 md:bottom-5 z-[10052] rounded-full w-10 h-10 bg-slate-900 text-white shadow-lg grid place-items-center";
+    btn.title = "Show quick tour"; btn.innerHTML = '<span class="sr-only">Help</span>?';
+    btn.onclick = () => Tour.start(true);
+    document.body.appendChild(btn);
+  }
+
+  function readCookie(k){
+  return document.cookie.split('; ').find(r => r.startsWith(k + '='))?.split('=')[1];
+}
+function deleteCookie(k){
+  document.cookie = `${k}=; Max-Age=0; path=/; samesite=Lax`;
+}
+function welcomeSource(){
+  const url = new URL(location.href);
+  if (url.searchParams.get('welcome') === '1') return 'qp';
+  if (readCookie('just_logged_in') === '1')   return 'cookie';
+  if (sessionStorage.getItem('nm_just_logged_in') === '1') return 'ss';
+  return null;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  injectHelp();
+
+  const src = welcomeSource();
+  if (src) {
+    // Fire immediately on first page after login/signup
+    Tour.start(true);
+
+    // Clean up the flag so it’s one-shot
+    if (src === 'qp') {
+      const u = new URL(location.href);
+      u.searchParams.delete('welcome');
+      history.replaceState({}, '', u);
+    }
+    if (src === 'cookie') deleteCookie('just_logged_in');
+    if (src === 'ss') sessionStorage.removeItem('nm_just_logged_in');
+  } else {
+    // Fallback: show tour only if user hasn’t done it before
+    setTimeout(() => { Tour.start(false); }, 800);
+  }
+});
+
+
+})();
 </script>
 </body>
 </html>
