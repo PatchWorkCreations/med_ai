@@ -1154,34 +1154,33 @@ from django.views.decorators.http import require_POST
 def logout_view(request):
     logout(request)
     return redirect("login")  # or your LOGOUT_REDIRECT_URL
-
-
-# at top with other imports
+# views.py (auth section)
 from django.contrib.auth.views import LoginView as DjangoLoginView
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+
+# ⬇️ REMOVE the old EmailOrUsernameAuthenticationForm import
+# from .forms import EmailOrUsernameAuthenticationForm
+
+# ⬇️ USE the email-only form instead
+from .forms import EmailAuthenticationForm
 
 class WarmLoginView(DjangoLoginView):
     template_name = "login.html"
     redirect_authenticated_user = True
-    # Optional: default if no ?next=
     success_url = reverse_lazy("dashboard")
+    authentication_form = EmailAuthenticationForm  # ← key line
 
     def form_valid(self, form):
         resp = super().form_valid(form)
-        # one-shot flag the dashboard JS looks for
         resp.set_cookie("just_logged_in", "1", max_age=60, samesite="Lax", path="/")
         return resp
 
     def get_success_url(self):
-        # keep Django’s default behavior (respects ?next=)
         url = super().get_success_url() or str(self.success_url)
-        # Append welcome=1 only if there is no ?next= override
         if "next" in self.request.GET:
             return url
         parts = list(urlparse(url))
-        qs = parse_qs(parts[4])
-        if "welcome" not in qs:
-            qs["welcome"] = ["1"]
+        qs = parse_qs(parts[4]); qs.setdefault("welcome", ["1"])
         parts[4] = urlencode(qs, doseq=True)
         return urlunparse(parts)

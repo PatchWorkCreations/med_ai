@@ -1,35 +1,77 @@
+# forms.py
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
-from .models import Profile
+from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, SetPasswordForm
+from .models import Profile, BetaFeedback
+import re
 
+# forms.py
+from django import forms
+from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth.forms import AuthenticationForm
+
+User = get_user_model()
+
+class EmailAuthenticationForm(AuthenticationForm):
+    username = forms.EmailField(
+        label="Email",
+        widget=forms.EmailInput(attrs={"autofocus": True})
+    )
+
+    def clean(self):
+        email = (self.cleaned_data.get("username") or "").strip()
+        password = (self.cleaned_data.get("password") or "")
+        user_obj = User.objects.filter(email__iexact=email).only("username").first()
+        login_name = user_obj.username if user_obj else None
+
+        self.user_cache = (
+            authenticate(self.request, username=login_name, password=password)
+            if login_name else None
+        )
+        if self.user_cache is None:
+            raise self.get_invalid_login_error()
+        self.confirm_login_allowed(self.user_cache)
+        return self.cleaned_data
+
+
+# -----------------------
+# Signup: keep usernames, but validate email uniqueness; save Profile.profession
+# -----------------------
 class CustomSignupForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(max_length=150, required=True)
-    last_name = forms.CharField(max_length=150, required=True)
-    # UI says optional → make it optional
+    last_name  = forms.CharField(max_length=150, required=True)
+    # Optional field saved into Profile (NOT on User)
     profession = forms.CharField(max_length=100, required=False)
 
-    class Meta:
+    class Meta(UserCreationForm.Meta):
         model = User
-        fields = ["first_name", "last_name", "email", "username", "password1", "password2", "profession"]
+        # Note: do NOT include 'profession' here; it's not a field on auth.User
+        fields = ["first_name", "last_name", "email", "username", "password1", "password2"]
+
+    def clean_email(self):
+        email = self.cleaned_data["email"].strip().lower()
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("This email is already registered.")
+        return email
 
     def save(self, commit=True):
-        user = super().save(commit=False)
-        user.email = self.cleaned_data["email"]
-        user.first_name = self.cleaned_data["first_name"]
-        user.last_name = self.cleaned_data["last_name"]
+        user = super().save(commit=False)  # UserCreationForm already sets hashed password
+        user.email = self.cleaned_data["email"].strip().lower()
+        user.first_name = self.cleaned_data["first_name"].strip()
+        user.last_name  = self.cleaned_data["last_name"].strip()
         if commit:
             user.save()
             Profile.objects.create(
                 user=user,
-                profession=self.cleaned_data.get("profession", "")
+                profession=self.cleaned_data.get("profession", "").strip()
             )
         return user
 
-from django import forms
-from .models import BetaFeedback
 
+# -----------------------
+# Beta Feedback (kept as-is, with small tidy)
+# -----------------------
 USE_CASE_CHOICES = [
     ("upload_summarize", "Upload file → Summarize"),
     ("multi_attachments", "Multiple attachments (staging tray)"),
@@ -45,7 +87,6 @@ USE_CASE_CHOICES = [
     ("loading_overlay", "Loading overlay/typing indicator"),
     ("error_handling", "Error state/failed reply handling"),
 ]
-
 INPUT_TYPE_CHOICES = [
     ("dummy","Dummy text I wrote"),
     ("synthetic","Synthetic sample from app"),
@@ -54,7 +95,6 @@ INPUT_TYPE_CHOICES = [
 ]
 
 class BetaFeedbackForm(forms.ModelForm):
-    # Not saved directly; we collapse this into the model's use_case string
     use_case_multi = forms.MultipleChoiceField(
         choices=USE_CASE_CHOICES,
         required=True,
@@ -66,9 +106,7 @@ class BetaFeedbackForm(forms.ModelForm):
         model = BetaFeedback
         fields = [
             "consent","role","email","device","browser",
-            # "use_case" will be set in clean(); we won't expose the original text field
-            "input_type",
-            "ease","speed","accuracy","clarity","nps",
+            "input_type","ease","speed","accuracy","clarity","nps",
             "pros","cons","bugs","screenshot",
             "allow_contact","allow_anon",
         ]
@@ -81,11 +119,9 @@ class BetaFeedbackForm(forms.ModelForm):
 
     def clean(self):
         data = super().clean()
-
         if not data.get("consent"):
             raise forms.ValidationError("Consent is required (no PHI).")
 
-        # Ratings range checks
         for f in ("ease","speed","accuracy","clarity"):
             v = data.get(f)
             if v is None or not (1 <= v <= 5):
@@ -95,43 +131,32 @@ class BetaFeedbackForm(forms.ModelForm):
         if nps is None or not (0 <= nps <= 10):
             self.add_error("nps", "NPS must be between 0 and 10.")
 
-        # Collapse checklist → comma-separated string for model.use_case
         selected = data.get("use_case_multi", [])
-        data["use_case"] = ", ".join(selected)  # fits your CharField
+        data["use_case"] = ", ".join(selected)
         return data
 
     def save(self, commit=True):
         obj = super().save(commit=False)
-        # Ensure collapsed value is written
         obj.use_case = self.cleaned_data.get("use_case", "")
         if commit:
             obj.save()
-            # handle filefields m2m if ever added later
         return obj
 
 
-
-# forms.py
-from django import forms
-from django.contrib.auth.forms import SetPasswordForm
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
-
+# -----------------------
+# Password reset helpers (unchanged, but using get_user_model)
+# -----------------------
 class ForgotPasswordForm(forms.Form):
     email = forms.EmailField()
 
     def clean_email(self):
-        email = self.cleaned_data["email"].lower().strip()
-        if not User.objects.filter(email=email).exists():
-            # Don’t reveal whether email exists: still pretend success
-            pass
-        return email
+        # normalize; keep success generic (no account enumeration)
+        return self.cleaned_data["email"].lower().strip()
 
 class OTPForm(forms.Form):
     email = forms.EmailField()
     code = forms.CharField(min_length=6, max_length=6)
 
 class OTPSetPasswordForm(SetPasswordForm):
-    # Same fields as SetPasswordForm: new_password1/new_password2
+    """Same fields as SetPasswordForm: new_password1/new_password2"""
     pass
