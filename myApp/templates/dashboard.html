@@ -252,6 +252,37 @@
           NeuroMed AI simplifies complex medical records into compassionate, easy-to-understand summaries.
         </div>
       </div>
+
+      <div class="relative">
+    <button id="langBtn"
+            class="inline-flex items-center gap-2 px-2 py-1.5 rounded-md border hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            aria-haspopup="true" aria-expanded="false" aria-controls="langMenu" title="Language / Tone">
+      <i class="fa-solid fa-globe"></i>
+      <span id="langCurrent" class="hidden sm:inline text-sm text-gray-700">English</span>
+      <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
+    </button>
+
+    <!-- Popover -->
+      <div id="langMenu"
+          class="absolute right-0 mt-2 w-56 bg-white border rounded-lg shadow-lg p-1 hidden z-50"
+          role="menu" aria-labelledby="langBtn">
+        <!-- each item: data-tone maps to your backend tone keys -->
+        <button class="nm-lang-item w-full text-left px-3 py-2 rounded hover:bg-gray-100 text-sm"
+                data-tone="PlainClinical" role="menuitem">English (Plain)</button>
+        <button class="nm-lang-item w-full text-left px-3 py-2 rounded hover:bg-gray-100 text-sm"
+                data-tone="Bilingual" role="menuitem">Taglish (Bilingual)</button>
+        <div class="my-1 border-t"></div>
+        <button class="nm-lang-item w-full text-left px-3 py-2 rounded hover:bg-gray-100 text-sm"
+                data-tone="BilingualEsEn" role="menuitem">Español + English</button>
+        <button class="nm-lang-item w-full text-left px-3 py-2 rounded hover:bg-gray-100 text-sm"
+                data-tone="BilingualFrEn" role="menuitem">Français + English</button>
+        <button class="nm-lang-item w-full text-left px-3 py-2 rounded hover:bg-gray-100 text-sm"
+                data-tone="BilingualDeEn" role="menuitem">Deutsch + English</button>
+        <div class="my-1 border-t"></div>
+        <button class="nm-lang-item w-full text-left px-3 py-2 rounded hover:bg-gray-100 text-sm"
+                data-tone="Auto" role="menuitem">Auto detect + EN recap</button>
+      </div>
+    </div>
       <button id="burgerBtn" onclick="toggleSidebar()" class="md:hidden text-gray-600 text-2xl focus:outline-none">
         <i class="fa-solid fa-bars"></i>
       </button>
@@ -1531,10 +1562,106 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 })();
 
+(function(){
+    const TONE_KEY = 'nm_tone_pref';
+    const btn  = document.getElementById('langBtn');
+    const menu = document.getElementById('langMenu');
+    const cur  = document.getElementById('langCurrent');
+
+    const toneLabels = {
+      PlainClinical: 'English',
+      Bilingual: 'Taglish',
+      BilingualEsEn: 'Español + English',
+      BilingualFrEn: 'Français + English',
+      BilingualDeEn: 'Deutsch + English',
+      Auto: 'Auto + EN'
+    };
+
+    function setTone(tone){
+      // persist
+      localStorage.setItem(TONE_KEY, tone);
+      // reflect in header label
+      if (cur) cur.textContent = toneLabels[tone] || 'English';
+      // sync any existing radio in #toneBar (keeps your UI consistent)
+      const rb = document.querySelector(`#toneBar input[name="tone"][value="${tone}"]`);
+      if (rb) rb.checked = true;
+      // stash for sendChat
+      window.__nmToneOverride = tone;
+    }
+
+    function getTone(){
+      return window.__nmToneOverride
+          || localStorage.getItem(TONE_KEY)
+          || document.querySelector('input[name="tone"]:checked')?.value
+          || 'PlainClinical';
+    }
+
+    // init from storage/UI
+    document.addEventListener('DOMContentLoaded', () => {
+      setTone(getTone());
+    });
+
+    // open/close
+    function openMenu(){
+      menu.classList.remove('hidden');
+      btn.setAttribute('aria-expanded', 'true');
+      // focus first item
+      const first = menu.querySelector('.nm-lang-item');
+      first && first.focus();
+      // click outside to close
+      document.addEventListener('mousedown', onDocClick);
+      document.addEventListener('keydown', onKeyNav);
+    }
+    function closeMenu(){
+      menu.classList.add('hidden');
+      btn.setAttribute('aria-expanded', 'false');
+      document.removeEventListener('mousedown', onDocClick);
+      document.removeEventListener('keydown', onKeyNav);
+    }
+    function onDocClick(e){
+      if (!menu.contains(e.target) && !btn.contains(e.target)) closeMenu();
+    }
+    function onKeyNav(e){
+      if (e.key === 'Escape') { closeMenu(); btn.focus(); }
+      if (e.key === 'Tab')    { closeMenu(); } // simple trap-free close
+    }
+
+    btn?.addEventListener('click', () => {
+      menu.classList.contains('hidden') ? openMenu() : closeMenu();
+    });
+
+    // choose tone
+    menu.querySelectorAll('.nm-lang-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const tone = el.getAttribute('data-tone');
+        setTone(tone);
+        closeMenu();
+      });
+    });
+
+    // make sendChat honor the globe selection first
+    const __origSendChat = window.sendChat;
+    window.sendChat = async function(){
+      window.__nmToneOverride = getTone();
+      return __origSendChat();
+    };
+
+    // also update FormData line inside sendChat if you haven’t yet:
+    // const tone = window.__nmToneOverride
+    //   || document.getElementById('toneSelect')?.value
+    //   || document.querySelector('input[name="tone"]:checked')?.value
+    //   || "PlainClinical";
+  })();
+
+  menu.querySelectorAll('.nm-lang-item').forEach(i => i.classList.toggle('active', i.getAttribute('data-tone') === tone));
+
+
 </script>
 <style>
   @keyframes fadeInUp { from {opacity:0; transform:translateY(12px)} to {opacity:1; transform:translateY(0)} }
   .animate-fadeInUp { animation: fadeInUp .22s ease-out; }
+  .nm-lang-item.active { background:#f0fdfa; }
+
   </style>
 <script>
   if ("serviceWorker" in navigator) {
@@ -1542,6 +1669,8 @@ document.addEventListener('DOMContentLoaded', () => {
       navigator.serviceWorker.register("/sw.js").catch(console.warn);
     });
   }
+
+  
   </script>
   
 </body>
