@@ -169,7 +169,7 @@
     <div class="mt-5">
       <div class="text-center text-sm text-slate-600 mb-2">Choose a mode</div>
       <div id="modeGroup" class="mx-auto max-w-xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
-        <button data-mode="Plain" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 flex items-center justify-center gap-2 text-sm" aria-pressed="true">
+        <button data-mode="PlainClinical" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 flex items-center justify-center gap-2 text-sm" aria-pressed="true">
           <i class="fa-regular fa-message" aria-hidden="true"></i><span>Science</span>
         </button>
         <button data-mode="Caregiver" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 flex items-center justify-center gap-2 text-sm" aria-pressed="false">
@@ -184,6 +184,10 @@
         <button data-mode="Bilingual" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 flex items-center justify-center gap-2 text-sm" aria-pressed="false">
           <i class="fa-solid fa-language" aria-hidden="true"></i><span>Bilingual</span>
         </button>
+        <button data-mode="Geriatric" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 flex items-center justify-center gap-2 text-sm" aria-pressed="false">
+          <i class="fa-solid fa-person-cane" aria-hidden="true"></i><span>Geriatric</span>
+        </button>
+
       </div>
     </div>
 
@@ -193,7 +197,7 @@
         <div id="intro" class="chat-bubble chat-ai flex-1">
 Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, labs, or prescriptions; I’ll translate them into clear action steps you can use.
         </div>
-        <span id="modeBadge" class="mode-badge text-slate-600" title="Current tone"><i class="fa-regular fa-message"></i><span>Plain</span></span>
+        <span id="modeBadge" class="mode-badge text-slate-600" title="Current tone"><i class="fa-regular fa-message"></i><span>Balanced</span></span>
       </div>
 
       <!-- Chat area -->
@@ -311,7 +315,7 @@ Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, 
     }
     function setSendDisabled(disabled){ $('#sendBtn').disabled = disabled; }
 
-    function loadMode(){ return localStorage.getItem('nm_mode') || 'Plain'; }
+    function loadMode(){ return localStorage.getItem('nm_mode') || 'PlainClinical'; }
     function saveMode(m){ localStorage.setItem('nm_mode', m); }
 
     async function isAuthenticated(){
@@ -425,15 +429,36 @@ Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, 
     }
 
     const MODE_META = {
-      'Plain':     { icon:'fa-regular fa-message',      color:'text-teal-600',  intro:"Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, labs, or prescriptions; I’ll translate them into clear action steps you can use." },
-      'Caregiver': { icon:'fa-solid fa-hands-holding-child', color:'text-amber-700', intro:"Caregiver mode on. I’ll keep things gentle and practical — Science-language steps you can follow and watch-outs to keep your loved one safe." },
-      'Faith':     { icon:'fa-solid fa-hands-praying',   color:'text-indigo-700', intro:"Faith mode on. I’ll explain medically, with optional words of encouragement and sensitivity to faith-forward language when asked." },
-      'Clinical':  { icon:'fa-solid fa-stethoscope',     color:'text-slate-800', intro:"Clinical mode on. I’ll use precise medical terms, cite ranges when relevant, and keep recommendations structured and concise." },
-      'Bilingual': { icon:'fa-solid fa-language',        color:'text-teal-700',  intro:"Bilingual mode on. I’ll explain in English + Tagalog (Taglish), keeping key terms accurate and easy to pass along to family." }
+      'PlainClinical': { // Balanced (default)
+        icon:'fa-regular fa-message', color:'text-teal-600',
+        intro:"Balanced mode on. I’ll explain clearly for patients, then follow with tight clinician notes when helpful."
+      },
+      'Caregiver': {
+        icon:'fa-solid fa-hands-holding-child', color:'text-amber-700',
+        intro:"Caregiver mode on. Gentle, practical steps—kasama mo ’ko."
+      },
+      'Faith': {
+        icon:'fa-solid fa-hands-praying', color:'text-indigo-700',
+        intro:"Faith mode on. Clear medical guidance with optional encouragement."
+      },
+      'Clinical': {
+        icon:'fa-solid fa-stethoscope', color:'text-slate-800',
+        intro:"Clinical mode on. Concise, precise terminology. No fluff."
+      },
+      'Bilingual': {
+        icon:'fa-solid fa-language', color:'text-teal-700',
+        intro:"Bilingual mode on. Tagalog + English for extra clarity."
+      },
+      // Optional: expose Geriatric without clutter (only if you added the button)
+      'Geriatric': {
+        icon:'fa-solid fa-person-cane', color:'text-emerald-700',
+        intro:"Geriatric mode on. Extra attention to fall risk, meds, cognition, and family-friendly next steps."
+      }
     };
 
+
     function applyModeUI(mode){
-      const meta = MODE_META[mode] || MODE_META['Plain'];
+      const meta = MODE_META[mode] || MODE_META['PlainClinical'];
       const badge = $('#modeBadge');
       badge.querySelector('i').className = meta.icon + ' ' + meta.color;
       badge.querySelector('span').textContent = mode;
@@ -616,7 +641,8 @@ Hi there! 👋 I’m NeuroMed — your medical-summary companion. Upload notes, 
           `
         },
         { selector: '#authLinks', title: 'Save your chats', body: `Please click <b>Sign up</b> or <b>Log in</b> (top-right) to keep your history and sync across devices.` },
-        { selector: '#modeGroup', title: 'Pick your style', body: `Choose how I speak: <b>Science</b>, <b>Caregiver</b>, <b>Faith</b>, <b>Clinical</b>, or <b>Bilingual</b>.` },
+        { selector: '#modeGroup', title: 'Pick your style', body: `Choose how I speak: <b>Balanced</b>, <b>Caregiver</b>, <b>Faith</b>, <b>Clinical</b>, or <b>Bilingual</b>.
+` },
         { selector: '#easyReadBtn', title: 'Easier to read', body: `Use <b>Easy Read</b> for extra spacing, or <b>A−/A+</b> to adjust text size.` },
         { selector: () => (document.querySelector('#dropZone')?.offsetParent ? '#dropZone' : '#uploadBtn'), title: 'Add your files', body: `Click the paperclip or drag & drop PDFs, images, or docs.` },
         { selector: '#suggestionsList', title: 'Try a suggestion', body: `Not sure what to ask? Tap a suggestion and edit it as you like.` },

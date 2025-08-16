@@ -22,6 +22,89 @@ import fitz  # PyMuPDF
 import docx
 from PIL import Image
 
+# at top of file with other imports
+import re, uuid
+from pathlib import Path
+from django.conf import settings
+
+ALLOWED_IMAGE_EXTS = (".jpg", ".jpeg", ".png", ".heic", ".webp")
+USER_MEDIA_SUBDIR = getattr(settings, "USER_MEDIA_SUBDIR", "user_media")
+SESSION_IMAGE_INDEX = "known_images"  # {lower_filename: relative_path_from_MEDIA_ROOT}
+MAX_INDEXED_IMAGES = 100
+
+
+def _user_media_root(user) -> Path:
+    # Anonymous users get "anon"; you can also force auth if you prefer.
+    uid = getattr(user, "id", None) or "anon"
+    root = Path(settings.MEDIA_ROOT) / USER_MEDIA_SUBDIR / str(uid)
+    root.mkdir(parents=True, exist_ok=True)
+    return root
+
+def _index_known_image(request, display_name: str, abs_path: Path):
+    """Index by the *display* filename the user knows AND the stored filename."""
+    rel = abs_path.relative_to(settings.MEDIA_ROOT).as_posix()
+    idx = request.session.get(SESSION_IMAGE_INDEX, {})
+    # keep lowercase keys for case-insensitive lookups
+    for key in {display_name.lower(), abs_path.name.lower()}:
+        idx[key] = rel
+    # prune if too big (FIFO-ish)
+    if len(idx) > MAX_INDEXED_IMAGES:
+        # drop oldest ~10 items
+        for _ in range(10):
+            try:
+                k = next(iter(idx))
+                idx.pop(k, None)
+            except StopIteration:
+                break
+    request.session[SESSION_IMAGE_INDEX] = idx
+    request.session.modified = True
+
+def _resolve_indexed_image(request, filename: str) -> Path | None:
+    idx = request.session.get(SESSION_IMAGE_INDEX, {})
+    rel = idx.get(filename.lower())
+    if not rel:
+        return None
+    p = Path(settings.MEDIA_ROOT) / rel
+    return p if p.exists() else None
+
+def _scan_user_media_for_name(user, filename: str) -> Path | None:
+    """Fallback: look for exact filename in the user's media dir."""
+    base = _user_media_root(user)
+    target = filename.lower()
+    for p in base.glob("**/*"):
+        if p.is_file() and p.suffix.lower() in ALLOWED_IMAGE_EXTS and p.name.lower() == target:
+            return p
+    return None
+
+def _parse_image_filenames(text: str) -> list[str]:
+    """
+    Find things that look like image filenames in free text.
+    Permissive but safe; prevents paths and URLs (just plain filenames).
+    """
+    if not text:
+        return []
+    # allow letters, numbers, spaces, dashes, underscores, parentheses, dots before extension
+    pattern = r"([A-Za-z0-9 _\-\.\(\)]+?\.(?:jpg|jpeg|png|heic|webp))"
+    # exclude anything containing slashes or backslashes to avoid paths
+    candidates = [m.group(1) for m in re.finditer(pattern, text, flags=re.IGNORECASE)]
+    return [c for c in candidates if "/" not in c and "\\" not in c][:5]  # cap to 5 per message
+
+def _save_copy_to_user_media(request, file_obj, display_name: str) -> Path:
+    """
+    Save an uploaded file to the user's media folder with a unique name,
+    index it by the display name and stored name, and return the absolute path.
+    """
+    base = _user_media_root(request.user)
+    ext = Path(display_name).suffix.lower() or ".bin"
+    unique_name = f"{Path(display_name).stem}-{uuid.uuid4().hex[:6]}{ext}"
+    dest = base / unique_name
+    with dest.open("wb") as out:
+        for chunk in file_obj.chunks():
+            out.write(chunk)
+    _index_known_image(request, display_name, dest)
+    return dest
+
+
 # -------- OpenAI
 from openai import OpenAI
 client = OpenAI()
@@ -29,12 +112,75 @@ client = OpenAI()
 # =============================
 #         PROMPTS
 # =============================
+# ---- Soft-memory config (place near other constants)
+SOFT_MEMORY_TTL_MIN = 15  # how long we remember the last quick exchange
+
+def _now_ts():
+    from django.utils import timezone
+    return int(timezone.now().timestamp())
+
+def _wc(s: str) -> int:
+    return len((s or "").split())
+
+def _is_detailed(msg: str) -> bool:
+    """Treat as detailed if >= 12 words or contains multiple clauses/signals."""
+    if _wc(msg) >= 12:
+        return True
+    msg_l = (msg or "").lower()
+    separators = [",", ";", " because ", " since ", " for weeks", " for days", " after ", " with "]
+    return any(x in msg_l for x in separators)
+
+def _classify_mode(user_message: str, has_files: bool, session: dict) -> tuple[str, str]:
+    """
+    Decide QUICK / EXPLAIN / FULL and a topic hint (soft memory).
+    - QUICK: short single symptom, no files
+    - EXPLAIN: general question, no files, not super short
+    - FULL: any file OR detailed description OR soft-memory upgrade
+    """
+    # Soft-memory pull
+    last_mode = session.get("nm_last_mode")
+    last_msg  = session.get("nm_last_short_msg", "")
+    last_ts   = session.get("nm_last_ts")
+
+    topic_hint = ""
+    if has_files or _is_detailed(user_message):
+        # auto-upgrade to FULL if within TTL and last was QUICK
+        if last_mode == "QUICK" and last_ts and (_now_ts() - last_ts) <= SOFT_MEMORY_TTL_MIN * 60:
+            topic_hint = last_msg[:140]
+        return "FULL", topic_hint
+
+    # no files / not detailed: QUICK vs EXPLAIN
+    if 0 < _wc(user_message) < 12:
+        return "QUICK", ""
+    return "EXPLAIN", ""
+
+
 PROMPT_TEMPLATES = {
-    "Plain": (
-        "You are NeuroMed, a brilliant yet humble medical assistant. "
-        "Speak with clarity, warmth, and intelligence—like a trusted doctor explaining things to a close friend. "
-        "Avoid robotic phrasing and disclaimers. Be accurate but approachable."
+    "PlainClinical": (
+    "You are NeuroMed, a warm but precise medical guide.\n"
+    "Choose response mode based on context:\n"
+    "\n"
+    "— QUICK MODE: If the user gives only 1 short symptom (under 12 words) and no file/image, "
+    "reply in under 5 sentences: empathy + 2–4 safe immediate actions + 1 urgent red flag + 1 follow-up question.\n"
+    "\n"
+    "— EXPLAIN MODE: If the user asks a general health question without a file/image, "
+    "give 2–4 sentences in plain language describing what it is, common signs, and basic prevention/management. "
+    "Do not add clinician notes unless asked.\n"
+    "\n"
+    "— FULL BREAKDOWN MODE: If there is ANY file/image, OR detailed description (multiple symptoms, history, or follow-up), "
+    "always reply in sections, but do NOT write the word 'Introduction' as a heading:\n"
+    "Start with a 1–2 sentence lead-in (no label).\n"
+    "Common signs – 3–5 bullet points.\n"
+    "What you can do – 3–5 bullet points.\n"
+    "When to seek help – 2–4 bullet points.\n"
+    "For clinicians – only if relevant, 1–4 concise points.\n"
+    "\n"
+    "Tone: friendly, human, and confident. No markdown symbols (no **, ##). No robotic phrasing or unnecessary disclaimers."
     ),
+
+
+
+
     "Caregiver": (
         "You are NeuroMed, a comforting health companion. "
         "Speak gently, using Taglish warmth where helpful. "
@@ -53,7 +199,40 @@ PROMPT_TEMPLATES = {
         "You are NeuroMed, a warm Taglish-speaking medical guide. "
         "Use natural Tagalog-English to make explanations crystal clear."
     ),
+    "Geriatric": (
+        "You are NeuroMed, a geriatric-focused health companion. "
+        "Be respectful, unhurried, and practical for older adults and their families. "
+        "Watch for and address common geriatric issues: fall risk, frailty, polypharmacy, cognitive changes, "
+        "continence, mobility, nutrition, advance care planning. "
+        "Offer caregiver-friendly tips and gentle next steps (e.g., medication review, PT/OT, home safety, "
+        "hearing/vision check, cognitive screening, goals-of-care discussion). "
+        "If sensitive topics arise, suggest family huddles and shared decisions."
+    ),
 }
+
+def normalize_tone(tone: str | None) -> str:
+    """
+    Map legacy/unknown tones to our default 'PlainClinical'.
+    Accepts case-insensitive inputs from old frontends (e.g., 'Plain').
+    """
+    if not tone:
+        return "PlainClinical"
+    t = str(tone).strip()
+    # case-insensitive compare
+    key = next((k for k in PROMPT_TEMPLATES.keys() if k.lower() == t.lower()), None)
+    if key:
+        return key
+    # legacy aliases
+    if t.lower() in {"plain", "science", "default"}:
+        return "PlainClinical"
+    return "PlainClinical"
+
+
+def get_system_prompt(tone: str | None) -> str:
+    t = normalize_tone(tone)
+    return PROMPT_TEMPLATES.get(t, PROMPT_TEMPLATES["PlainClinical"])
+
+
 
 VISION_FORMAT_PROMPT = (
     "\n\nFormat your findings like this:\n\n"
@@ -99,10 +278,11 @@ def preprocess_image_for_vision_api(image_path, resize_width=1024):
 # =============================
 #  VISION INTERPRETATION (IMG)
 # =============================
-def extract_contextual_medical_insights_from_image(file_path: str, tone: str = "Plain") -> str:
+def extract_contextual_medical_insights_from_image(file_path: str, tone: str = "PlainClinical") -> str:
+
     image_b64 = preprocess_image_for_vision_api(file_path)
     data_uri = f"data:image/png;base64,{image_b64}"
-    system_prompt = PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"]) + VISION_FORMAT_PROMPT
+    system_prompt = get_system_prompt(tone) + VISION_FORMAT_PROMPT
 
     # First pass: interpret the actual image
     resp = client.chat.completions.create(
@@ -140,12 +320,13 @@ def extract_contextual_medical_insights_from_image(file_path: str, tone: str = "
 @parser_classes([MultiPartParser, FormParser])
 def summarize_medical_record(request):
     uploaded_file = request.FILES.get("file")
-    tone = request.data.get("tone", "Plain")
+    tone = normalize_tone(request.session.get("tone", "PlainClinical"))
+
     if not uploaded_file:
         return Response({"error": "No file provided."}, status=400)
 
     file_name = uploaded_file.name.lower()
-    system_prompt = PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])
+    system_prompt = get_system_prompt(tone)
 
     try:
         # ---------- Images
@@ -248,25 +429,48 @@ def send_chat(request):
     - PDFs/DOCX/TXT → extract + summarize.
     - If user sends only files → return combined file summaries.
     - If user also sends a question → answer using the combined context + session history.
+    - Soft memory: short QUICK exchanges auto-upgrade to FULL if the user follows with files or a longer message soon after.
     """
-    tone = request.data.get("tone", "Plain")
-    system_prompt = PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])
+    tone = normalize_tone(request.session.get("tone", "PlainClinical"))
+    system_prompt = get_system_prompt(tone)
     user_message = (request.data.get("message") or "").strip()
-
-    # Session context (keep it light)
-    summary_context = request.session.get("latest_summary", "")
-    chat_history = request.session.get("chat_history", [{"role": "system", "content": system_prompt}])
 
     # --- Collect files (multi or single for backward-compat)
     files = request.FILES.getlist("files[]")
     if not files and "file" in request.FILES:
         files = [request.FILES["file"]]
+    has_files = bool(files)
 
-    combined_sections = []
+    # --- Decide response mode (+ optional topic hint) using soft memory
+    # Requires the helpers from the earlier snippet: _classify_mode, _now_ts, SOFT_MEMORY_TTL_MIN
+    mode, topic_hint = _classify_mode(user_message, has_files, request.session)
+
+    # --- Build a tiny header the model will obey (your PlainClinical prompt references this)
+    header = f"ResponseMode: {mode}"
+    if topic_hint:
+        header += f"\nTopicHint: {topic_hint}"
+
+    # --- Session context (keep it light)
+    summary_context = request.session.get("latest_summary", "")
+    chat_history = request.session.get(
+        "chat_history",
+        [{"role": "system", "content": system_prompt}, {"role": "system", "content": header}],
+    )
+    # Ensure header exists even if chat_history came from session without it
+    if not any(m.get("role") == "system" and str(m.get("content", "")).startswith("ResponseMode:") for m in chat_history):
+        chat_history.insert(1, {"role": "system", "content": header})
+
     # --- Process each file
+    combined_sections = []
     for f in files:
-        fname, summary = summarize_single_file(f, tone=tone, system_prompt=system_prompt, user=request.user)
-        combined_sections.append(f"### {fname}\n{summary}")
+        fname, summary = summarize_single_file(
+            f,
+            tone=tone,
+            system_prompt=system_prompt,
+            user=request.user,
+            request=request,  # pass the whole request so we can save & index the image
+        )
+        combined_sections.append(f"{fname}\n{summary}")
 
     combined_context = "\n\n".join(combined_sections).strip()
 
@@ -274,11 +478,15 @@ def send_chat(request):
     if files and not user_message:
         # Update session with the combined summaries as the latest context
         request.session["latest_summary"] = combined_context or summary_context
-        # Keep a small rolling chat history with context planted
         request.session["chat_history"] = [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": f"(Here’s the latest medical context):\n{combined_context or summary_context}"}
+            {"role": "system", "content": header},
+            {"role": "user", "content": f"(Here’s the latest medical context):\n{combined_context or summary_context}"},
         ]
+        # Soft-memory writeback: we were in FULL (files), clear short-msg memory
+        request.session["nm_last_mode"] = "FULL"
+        request.session["nm_last_short_msg"] = ""
+        request.session["nm_last_ts"] = _now_ts()
         request.session.modified = True
 
         if combined_context:
@@ -294,15 +502,21 @@ def send_chat(request):
     # Plant the most recent context if not present
     if combined_context:
         # New attachment context takes precedence this turn
-        chat_history = [{"role": "system", "content": system_prompt}]
-        chat_history.append({"role": "user", "content": f"(Here’s the latest medical context):\n{combined_context}"})
+        chat_history = [
+            {"role": "system", "content": system_prompt},
+            {"role": "system", "content": header},
+            {"role": "user", "content": f"(Here’s the latest medical context):\n{combined_context}"},
+        ]
         # Also keep it in session for subsequent turns
         request.session["latest_summary"] = combined_context
     else:
         # If no new files, ensure we have prior context planted at least once
-        if summary_context and all("(Here’s the" not in m.get("content", "") for m in chat_history if m.get("role") == "user"):
+        if summary_context and all(
+            "(Here’s the" not in m.get("content", "") for m in chat_history if m.get("role") == "user"
+        ):
             chat_history.append({"role": "user", "content": f"(Here’s the medical context):\n{summary_context}"})
 
+    # Finally, add the user's message
     chat_history.append({"role": "user", "content": user_message})
 
     try:
@@ -319,6 +533,7 @@ def send_chat(request):
             temperature=0.3,
             messages=[
                 {"role": "system", "content": system_prompt},
+                {"role": "system", "content": header},
                 {"role": "user", "content": f"Rewrite warmly, clearly, and confidently:\n\n{raw}"},
             ],
         ).choices[0].message.content.strip()
@@ -326,10 +541,21 @@ def send_chat(request):
         # Save trimmed history
         chat_history.append({"role": "assistant", "content": reply})
         request.session["chat_history"] = chat_history[-10:]
-        request.session.modified = True
 
+        # ---- Soft-memory writeback
+        if mode == "QUICK":
+            request.session["nm_last_mode"] = "QUICK"
+            request.session["nm_last_short_msg"] = user_message
+            request.session["nm_last_ts"] = _now_ts()
+        else:
+            request.session["nm_last_mode"] = mode
+            request.session["nm_last_short_msg"] = ""
+            request.session["nm_last_ts"] = _now_ts()
+
+        request.session.modified = True
         return JsonResponse({"reply": reply})
-    except Exception as e:
+
+    except Exception:
         traceback.print_exc()
         return JsonResponse({"reply": "I’m having trouble responding right now. Let’s try again in a bit."}, status=500)
 
@@ -341,7 +567,8 @@ def send_chat(request):
 @permission_classes([AllowAny])
 def smart_suggestions(request):
     summary = request.data.get("summary", "") or request.session.get("latest_summary", "")
-    tone = request.data.get("tone", "Plain")
+    tone = normalize_tone(request.session.get("tone", "PlainClinical"))
+
     if not summary.strip():
         return JsonResponse({"suggestions": []})
 
@@ -355,7 +582,8 @@ def smart_suggestions(request):
         model="gpt-4o",
         temperature=0.6,
         messages=[
-            {"role": "system", "content": PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])},
+            {"role": "system", "content": get_system_prompt(tone)},
+
             {"role": "user", "content": prompt},
         ],
     )
@@ -368,7 +596,8 @@ def smart_suggestions(request):
 def answer_question(request):
     question = request.data.get("question", "")
     summary = request.data.get("summary", "") or request.session.get("latest_summary", "")
-    tone = request.data.get("tone", "Plain")
+    tone = normalize_tone(request.session.get("tone", "PlainClinical"))
+
     if not question:
         return JsonResponse({"answer": "Could you repeat the question? I want to make sure I understand."})
 
@@ -377,7 +606,8 @@ def answer_question(request):
         model="gpt-4o",
         temperature=0.6,
         messages=[
-            {"role": "system", "content": PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])},
+            {"role": "system", "content": get_system_prompt(tone)},
+
             {"role": "user", "content": prompt},
         ],
     ).choices[0].message.content.strip()
@@ -386,7 +616,8 @@ def answer_question(request):
         model="gpt-4o",
         temperature=0.3,
         messages=[
-            {"role": "system", "content": PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])},
+            {"role": "system", "content": get_system_prompt(tone)},
+
             {"role": "user", "content": f"Rewrite warmly, clearly, and confidently:\n\n{raw}"},
         ],
     ).choices[0].message.content.strip()
@@ -399,8 +630,8 @@ def answer_question(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def clear_session(request):
-    tone = request.session.get("tone", "Plain")
-    system_prompt = PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])
+    tone = normalize_tone(request.session.get("tone", "PlainClinical"))
+    system_prompt = get_system_prompt(tone)
     request.session["chat_history"] = [{"role": "system", "content": system_prompt}]
     request.session["latest_summary"] = ""
     request.session.modified = True
@@ -411,8 +642,8 @@ def clear_session(request):
 @permission_classes([AllowAny])
 def reset_chat_session(request):
     # mirror of clear_session but AllowAny (if you expose this publicly)
-    tone = request.session.get("tone", "Plain")
-    system_prompt = PROMPT_TEMPLATES.get(tone, PROMPT_TEMPLATES["Plain"])
+    tone = normalize_tone(request.session.get("tone", "PlainClinical"))
+    system_prompt = get_system_prompt(tone)
     request.session["chat_history"] = [{"role": "system", "content": system_prompt}]
     request.session["latest_summary"] = ""
     request.session.modified = True
@@ -501,29 +732,50 @@ def summarize_text_block(raw_text: str, system_prompt: str) -> str:
     return polish.choices[0].message.content.strip()
 
 
-def summarize_single_file(file_obj, tone: str, system_prompt: str, user=None) -> tuple[str, str]:
+# views.py
+
+def summarize_single_file(file_obj, tone: str, system_prompt: str, user=None, request=None) -> tuple[str, str]:
     """
     Returns (filename, summary) for an uploaded file (image or doc).
-    Saves to DB if user is authenticated.
+    Saves a permanent copy of images to per-user media, indexes the filename,
+    and saves to DB if user is authenticated.
     """
     fname = file_obj.name
     lower = fname.lower()
 
-    # Images → vision
-    if lower.endswith((".jpg", ".jpeg", ".png", ".heic", ".webp")):
-        with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(lower)[1]) as tmp:
-            for chunk in file_obj.chunks():
-                tmp.write(chunk)
-            tmp_path = tmp.name
+    # ---- Images → vision
+    if lower.endswith(ALLOWED_IMAGE_EXTS):
+        stored_path = None
+
+        # Try to persist a copy into per-user media + index it for later filename lookups
+        try:
+            if request is not None:
+                stored_path = _save_copy_to_user_media(request, file_obj, fname)  # returns a Path
+        except Exception:
+            traceback.print_exc()
+            stored_path = None
+
+        # If we have a stored copy, analyze that; otherwise fall back to a temp file
+        if stored_path and stored_path.exists():
+            tmp_path = str(stored_path)
+            cleanup_after = False
+        else:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(lower)[1]) as tmp:
+                for chunk in file_obj.chunks():
+                    tmp.write(chunk)
+                tmp_path = tmp.name
+            cleanup_after = True
+
         try:
             summary = extract_contextual_medical_insights_from_image(tmp_path, tone=tone)
         finally:
-            try:
-                os.remove(tmp_path)
-            except Exception:
-                pass
+            if cleanup_after:
+                try:
+                    os.remove(tmp_path)
+                except Exception:
+                    pass
 
-        if user and user.is_authenticated:
+        if user and getattr(user, "is_authenticated", False):
             MedicalSummary.objects.create(
                 user=user,
                 uploaded_filename=fname,
@@ -533,7 +785,7 @@ def summarize_single_file(file_obj, tone: str, system_prompt: str, user=None) ->
             )
         return fname, summary
 
-    # Docs → extract + summarize
+    # ---- Docs → extract + summarize
     if lower.endswith(".pdf"):
         raw_text = extract_text_from_pdf(file_obj)
     elif lower.endswith(".docx"):
@@ -545,7 +797,7 @@ def summarize_single_file(file_obj, tone: str, system_prompt: str, user=None) ->
 
     summary = summarize_text_block(raw_text, system_prompt)
 
-    if user and user.is_authenticated:
+    if user and getattr(user, "is_authenticated", False):
         MedicalSummary.objects.create(
             user=user,
             uploaded_filename=fname,
@@ -554,6 +806,7 @@ def summarize_single_file(file_obj, tone: str, system_prompt: str, user=None) ->
             summary=summary,
         )
     return fname, summary
+
 
 
 from django.shortcuts import render, redirect

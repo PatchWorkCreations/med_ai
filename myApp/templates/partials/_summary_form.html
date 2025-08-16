@@ -278,7 +278,8 @@ function openChatWith(initialMessage) {
 async function regenerateSuggestions() {
   const summary = document.getElementById("summaryOutput")?.value || "";
   const container = document.getElementById("suggestionCards");
-  const tone = document.querySelector('input[name="tone"]:checked')?.value || "Plain";
+  const tone = document.querySelector('input[name="tone"]:checked')?.value || "PlainClinical";
+
 
   container.innerHTML = `<p class="text-sm text-gray-400">Thinking of ways to help you feel better… 🧠💭</p>`;
 

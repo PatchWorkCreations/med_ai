@@ -266,11 +266,13 @@
     <!-- Tone Selector -->
     <div id="toneBar" class="px-3 py-1 bg-[#fefaf7] text-gray-600 overflow-x-auto whitespace-nowrap">
       <span class="font-semibold mr-2">Summary Tone:</span>
-      <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="Plain" checked> <span class="ml-1">Straight Talk</span></label>
+      <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="PlainClinical" checked> <span class="ml-1">Balanced</span></label>
       <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="Caregiver"> <span class="ml-1">Caregiver</span></label>
       <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="Faith"> <span class="ml-1">Faith</span></label>
       <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="Clinical"> <span class="ml-1">Clinical</span></label>
       <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="Bilingual"> <span class="ml-1">Bilingual</span></label>
+      <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="Geriatric"> <span class="ml-1">Geriatric</span></label>
+
     </div>
 
     <!-- Composer -->
@@ -966,7 +968,8 @@ function clearPending() {
 async function sendChat() {
   const input = document.getElementById("chatInput");
   const userMessage = (input.value || '').trim();
-  const tone = document.querySelector('input[name="tone"]:checked')?.value || "Plain";
+  const tone = document.querySelector('input[name="tone"]:checked')?.value || "PlainClinical";
+
 
   if (!userMessage && pending.length === 0) return;
 
