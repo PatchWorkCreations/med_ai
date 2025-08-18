@@ -97,14 +97,17 @@
 </head>
 <body class="text-slate-800">
   <!-- Top bar -->
+  <!-- Top bar -->
   <header class="w-full border-b bg-white/80 backdrop-blur">
-    <div class="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
+    <div class="max-w-6xl mx-auto px-5 py-3 flex items-center justify-between">
+      <!-- Brand -->
+      <a href="/" class="flex items-center gap-3">
         <i class="fa-solid fa-heart-pulse text-teal-600 text-xl" aria-hidden="true"></i>
         <span class="font-semibold tracking-tight">NeuroMed.ai</span>
-      </div>
+      </a>
 
-      <div class="flex items-center gap-2">
+      <!-- Desktop controls -->
+      <div class="hidden md:flex items-center gap-2">
         <button id="fontMinus" class="px-3 py-1 rounded-full border" title="Smaller">A−</button>
         <button id="fontPlus"  class="px-3 py-1 rounded-full border" title="Larger">A＋</button>
         <button id="easyReadBtn" class="px-3 py-1 rounded-full border" aria-pressed="false" title="Easy Read">Easy</button>
@@ -112,8 +115,37 @@
         <a href="/signup" class="ml-2 text-slate-600 hover:text-slate-900">Sign up</a>
         <a href="/login" class="rounded-full px-3 py-1.5 border hover:bg-slate-50">Log in</a>
       </div>
+
+      <!-- Mobile hamburger -->
+      <button id="nmMenuBtn"
+              class="md:hidden inline-flex items-center justify-center rounded-lg p-2 border border-slate-200 text-slate-700 hover:bg-slate-50"
+              aria-label="Open menu" aria-controls="nmMobileMenu" aria-expanded="false">
+        <svg id="nmIconOpen" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-width="2" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/>
+        </svg>
+        <svg id="nmIconClose" class="h-5 w-5 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-width="2" stroke-linecap="round" d="M6 6l12 12M18 6l-12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile menu panel -->
+    <div id="nmMobileMenu" class="md:hidden hidden border-t bg-white/95 backdrop-blur">
+      <div class="max-w-6xl mx-auto px-5 py-3 grid gap-3">
+        <div class="flex items-center gap-2">
+          <button id="mFontMinus" class="px-3 py-1 rounded-full border w-full">A−</button>
+          <button id="mFontPlus"  class="px-3 py-1 rounded-full border w-full">A＋</button>
+          <button id="mEasyReadBtn"  class="px-3 py-1 rounded-full border w-full" aria-pressed="false">Easy</button>
+          <button id="mHighContrast" class="px-3 py-1 rounded-full border w-full" aria-pressed="false">Contrast</button>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="/signup" class="flex-1 text-center rounded-full px-3 py-2 border hover:bg-slate-50">Sign up</a>
+          <a href="/login"  class="flex-1 text-center rounded-full px-3 py-2 border hover:bg-slate-50">Log in</a>
+        </div>
+      </div>
     </div>
   </header>
+
 
   <!-- Main -->
   <main class="max-w-4xl mx-auto px-4 md:px-5 pt-6 md:pt-10 pb-24">
@@ -1028,6 +1060,55 @@ async function runDemo(kind = 'er'){
     typing.innerText = 'Demo failed to run. Try again or switch modes.';
   }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btn   = document.getElementById('nmMenuBtn');
+  const menu  = document.getElementById('nmMobileMenu');
+  const icoOpen  = document.getElementById('nmIconOpen');
+  const icoClose = document.getElementById('nmIconClose');
+
+  function setOpen(isOpen){
+    menu.classList.toggle('hidden', !isOpen);
+    btn.setAttribute('aria-expanded', String(isOpen));
+    icoOpen.classList.toggle('hidden',  isOpen);
+    icoClose.classList.toggle('hidden', !isOpen);
+  }
+
+  btn?.addEventListener('click', () => setOpen(menu.classList.contains('hidden')));
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!menu || menu.classList.contains('hidden')) return;
+    const within = menu.contains(e.target) || btn.contains(e.target);
+    if (!within) setOpen(false);
+  });
+
+  // Close on Esc
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') setOpen(false);
+  });
+
+  // Mirror readability controls for mobile
+  const root = document.documentElement, body = document.body;
+
+  function bumpFont(delta){
+    const curr = parseFloat(getComputedStyle(root).getPropertyValue('font-size')) || 18;
+    root.style.setProperty('font-size', Math.max(16, Math.min(22, curr + delta)) + 'px');
+  }
+
+  document.getElementById('mFontMinus')?.addEventListener('click', () => bumpFont(-1));
+  document.getElementById('mFontPlus') ?.addEventListener('click', () => bumpFont(1));
+
+  document.getElementById('mEasyReadBtn')?.addEventListener('click', (ev) => {
+    body.classList.toggle('easy-read');
+    ev.currentTarget.setAttribute('aria-pressed', body.classList.contains('easy-read') ? 'true' : 'false');
+  });
+
+  document.getElementById('mHighContrast')?.addEventListener('click', (ev) => {
+    body.classList.toggle('hc');
+    ev.currentTarget.setAttribute('aria-pressed', body.classList.contains('hc') ? 'true' : 'false');
+  });
+});
 </script>
 
 </body>
