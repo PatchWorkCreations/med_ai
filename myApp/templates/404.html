@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>404 — Took a tiny nap | NeuroMed.ai</title>
+  <meta name="theme-color" content="#0f766e" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* global vibes */
+    @keyframes floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+    @keyframes pulseGlow { 0%,100%{opacity:.35} 50%{opacity:.55} }
+    .floaty { animation: floaty 4.5s ease-in-out infinite; }
+    .glow { animation: pulseGlow 3.2s ease-in-out infinite; }
+
+    /* panda bits */
+    @keyframes blink { 0%,92%,100%{transform:scaleY(1)} 96%{transform:scaleY(0.1)} }
+    @keyframes tail { 0%,100%{transform:rotate(0deg)} 50%{transform:rotate(-6deg)} }
+    @keyframes cable { 0%,100%{d:path("M8,42 C20,44 36,46 50,42")} 50%{d:path("M8,42 C20,36 36,50 50,42")} }
+    @keyframes plug-bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-2px)} }
+
+    .eye { transform-origin:center; animation: blink 5.5s ease-in-out infinite; }
+    .tail { transform-origin: 52px 42px; animation: tail 3.6s ease-in-out infinite; }
+    .plug { animation: plug-bob 3.2s ease-in-out infinite; }
+    .cable path { animation: cable 2.8s ease-in-out infinite; }
+
+    .glass {
+      background: rgba(255,255,255,.75);
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      border: 1px solid rgba(2,6,23,.08);
+    }
+    .dark .glass {
+      background: rgba(15,23,42,.6);
+      border-color: rgba(255,255,255,.08);
+    }
+    @media (prefers-reduced-motion: reduce){
+      .floaty,.glow,.eye,.tail,.plug,.cable path { animation: none !important; }
+    }
+  </style>
+</head>
+<body class="h-full bg-gradient-to-br from-teal-50 via-white to-emerald-50 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
+  <!-- soft blobs -->
+  <div aria-hidden="true" class="pointer-events-none fixed inset-0 overflow-hidden">
+    <div class="absolute -top-16 -left-16 w-72 h-72 rounded-full bg-emerald-300/30 blur-3xl glow"></div>
+    <div class="absolute -bottom-16 -right-16 w-80 h-80 rounded-full bg-teal-300/30 blur-3xl glow"></div>
+  </div>
+
+  <main class="relative z-10 min-h-full flex items-center justify-center p-6">
+    <section class="glass rounded-3xl shadow-2xl max-w-xl w-full p-7 sm:p-9">
+      <!-- brand crumb -->
+      <div class="mb-5 flex items-center gap-2 text-sm text-teal-700 dark:text-teal-300">
+        <span class="inline-flex w-2 h-2 rounded-full bg-teal-600"></span>
+        <span class="font-semibold tracking-tight">NeuroMed.ai</span>
+      </div>
+
+      <!-- illustration: PANDA + OUTLET (one lead unplugged) -->
+      <div class="mx-auto mb-6 grid place-items-center w-40 h-40 rounded-2xl bg-white/70 dark:bg-white/5 shadow-sm">
+        <svg class="w-28 h-28 floaty" viewBox="0 0 64 64" role="img" aria-label="Cute panda with an unplugged cord">
+          <!-- lamp glow off -->
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="64" y2="64">
+              <stop offset="0" stop-color="#10b981"/>
+              <stop offset="1" stop-color="#0ea5e9"/>
+            </linearGradient>
+          </defs>
+
+          <!-- ground -->
+          <ellipse cx="32" cy="54" rx="18" ry="4" fill="#000" opacity=".06"/>
+
+          <!-- outlet (left, connected) -->
+          <g transform="translate(6,26)">
+            <rect x="0" y="0" width="14" height="10" rx="2" fill="#e5e7eb" stroke="#cbd5e1"/>
+            <circle cx="5" cy="5" r="1" fill="#0f172a"/>
+            <circle cx="9" cy="5" r="1" fill="#0f172a"/>
+          </g>
+
+          <!-- cable from outlet to panda belly (connected) -->
+          <g class="cable" stroke="#94a3b8" stroke-width="1.5" fill="none">
+            <path d="M8,42 C20,44 36,46 50,42"></path>
+          </g>
+
+          <!-- PANDA -->
+          <g transform="translate(20,18)">
+            <!-- body -->
+            <ellipse cx="12" cy="18" rx="12" ry="10" fill="#fff" stroke="#0f172a" stroke-width="1"/>
+            <!-- ears -->
+            <circle cx="4" cy="4" r="3" fill="#0f172a"/>
+            <circle cx="20" cy="4" r="3" fill="#0f172a"/>
+            <!-- head -->
+            <circle cx="12" cy="12" r="9" fill="#fff" stroke="#0f172a" stroke-width="1"/>
+            <!-- eye patches -->
+            <ellipse cx="8" cy="12" rx="3" ry="2.3" fill="#0f172a" opacity=".9"/>
+            <ellipse cx="16" cy="12" rx="3" ry="2.3" fill="#0f172a" opacity=".9"/>
+            <!-- eyes (blink) -->
+            <g class="eye" transform="translate(8,12)"><circle r="0.8" fill="#fff"/></g>
+            <g class="eye" style="animation-delay:.2s" transform="translate(16,12)"><circle r="0.8" fill="#fff"/></g>
+            <!-- nose + smile -->
+            <circle cx="12" cy="14.2" r="0.9" fill="#0f172a"/>
+            <path d="M9.5,16.5 C12,18 14,18 16.5,16.5" stroke="#0f172a" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+            <!-- tail -->
+            <circle class="tail" cx="24" cy="22" r="2.6" fill="#0f172a" />
+            <!-- belly plug (connected LED off) -->
+            <circle cx="12" cy="22" r="3.5" fill="#e2e8f0" stroke="#94a3b8"/>
+            <circle cx="12" cy="22" r="1.2" fill="#94a3b8"/>
+          </g>
+
+          <!-- dangling plug (right, NOT connected) -->
+          <g transform="translate(46,34)">
+            <!-- loose cable -->
+            <path d="M0,0 C4,6 6,10 4,14" stroke="#94a3b8" stroke-width="1.5" fill="none" />
+            <!-- plug head -->
+            <g class="plug" transform="translate(2,14)">
+              <rect x="-3" y="0" width="10" height="6" rx="2" fill="#e5e7eb" stroke="#cbd5e1"/>
+              <rect x="7" y="1.5" width="3" height="3" rx="1" fill="#94a3b8"/>
+              <line x1="-1" y1="-3" x2="-1" y2="0" stroke="#94a3b8" stroke-width="1"/>
+              <line x1="2" y1="-3" x2="2" y2="0" stroke="#94a3b8" stroke-width="1"/>
+            </g>
+          </g>
+
+          <!-- status halo (off, subtle) -->
+          <circle cx="32" cy="12" r="11" fill="url(#g)" opacity=".10"/>
+        </svg>
+      </div>
+
+      <!-- copy -->
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-800 dark:text-white">
+        404 — This page is unplugged
+      </h1>
+      <p class="mt-2 text-slate-600 dark:text-slate-300">
+        It looks like this link isn’t connected. Let’s plug you back into the right place. 💚
+      </p>
+
+      <!-- actions -->
+      <div class="mt-6 grid gap-3 sm:grid-cols-2">
+        <a href="/" class="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 bg-teal-600 text-white hover:bg-teal-700 transition">
+          <span>Go home</span>
+        </a>
+        <button onclick="location.reload()" class="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 border border-slate-200 hover:bg-slate-50 dark:border-white/10 dark:hover:bg-white/5 transition">
+          <span>Retry</span>
+        </button>
+        <button id="copyLinkBtn" class="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 border border-slate-200 hover:bg-slate-50 dark:border-white/10 dark:hover:bg-white/5 transition">
+          <span>Copy link</span>
+        </button>
+        <a id="reportBtn" href="#" class="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 border border-slate-200 hover:bg-slate-50 dark:border-white/10 dark:hover:bg-white/5 transition">
+          <span>Report issue</span>
+        </a>
+      </div>
+
+      <!-- search (optional) -->
+      <form action="/search" method="get" class="mt-5">
+        <label for="q" class="sr-only">Search</label>
+        <div class="flex gap-2">
+          <input id="q" name="q" placeholder="Find what you’re looking for…" class="flex-1 rounded-xl border border-slate-200/80 dark:border-white/10 bg-white/80 dark:bg-white/5 px-4 py-2.5 outline-none focus:ring-2 focus:ring-teal-500/50" />
+          <button class="rounded-xl px-4 py-2.5 bg-black text-white hover:bg-slate-900 dark:bg-white dark:text-slate-900 transition">Search</button>
+        </div>
+      </form>
+
+      <p class="mt-6 text-xs text-slate-400 dark:text-slate-500">
+        Thanks for your patience. If this keeps happening, please include the link when you report it.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    // auto-respect dark mode
+    (function(){
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (prefersDark) document.documentElement.classList.add('dark');
+    })();
+
+    // report + copy link
+    (function(){
+      const url = window.location.href;
+      const report = document.getElementById('reportBtn');
+      report.href = `mailto:support@neuromed.ai?subject=Broken%20link&body=${encodeURIComponent('Hi team,%0A%0AI found a broken link:%0A' + url + '%0A%0AThanks!')}`;
+      const copyBtn = document.getElementById('copyLinkBtn');
+      copyBtn.addEventListener('click', async () => {
+        try{
+          await navigator.clipboard.writeText(url);
+          copyBtn.textContent = 'Link copied ✓';
+          setTimeout(()=> copyBtn.textContent = 'Copy link', 1400);
+        }catch{
+          alert('Copy not available. You can copy from the address bar.');
+        }
+      }, { passive:true });
+    })();
+  </script>
+</body>
+</html>

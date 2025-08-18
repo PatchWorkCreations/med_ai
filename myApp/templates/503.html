@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Just a moment — NeuroMed.ai</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center p-6">
+  <main class="text-center max-w-md">
+    <div class="mx-auto mb-6 w-20 h-20 rounded-2xl bg-white shadow-sm grid place-items-center">
+      <span class="text-3xl">⏳</span>
+    </div>
+    <h1 class="text-3xl font-bold text-slate-800">Hi! Things are a bit busy right now</h1>
+    <p class="mt-2 text-slate-600">
+      Please check your connection and try again in a few minutes.<br/>
+      We appreciate your patience 💚
+    </p>
+    <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+      <button onclick="location.reload()" class="px-4 py-2 rounded-xl bg-teal-600 text-white hover:bg-teal-700">Retry</button>
+      <a href="/" class="px-4 py-2 rounded-xl border hover:bg-slate-50">Go home</a>
+    </div>
+    <p class="mt-4 text-xs text-slate-400">Error 503 • Service temporarily busy</p>
+  </main>
+</body>
+</html>

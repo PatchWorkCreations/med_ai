@@ -721,7 +721,7 @@ form.addEventListener('submit', async (e) => {
     closeFeedback();
     openFbSuccess(data);
   } catch (err) {
-    errBox.textContent = 'Network error. Please try again.';
+    errBox.textContent = 'Hi! It seems the connection is busy at the moment — give it another try in a few minutes. We appreciate your patience.';
     errBox.classList.remove('hidden');
     setLoading(false);
   }
@@ -1061,7 +1061,7 @@ async function sendChat() {
   } catch (err) {
     typing.classList.remove("italic","text-gray-500");
     typing.classList.add("text-red-700","bg-red-100");
-    typing.innerText = "❌ Error getting a response.";
+    typing.innerText = "Hi! Our system is busy right now — please try again in a few minutes.";
   }
 }
 

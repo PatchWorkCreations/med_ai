@@ -52,6 +52,11 @@ urlpatterns = [
     path("api/auth/status/", views.auth_status, name="auth_status"),
     path("api/track", views.track_event, name="track_event"),
 
-
-   
 ]
+
+
+from django.urls import path
+from myApp import views
+
+handler404 = "myApp.views.page_not_found_view"
+handler500 = "myApp.views.server_error_view"

@@ -315,6 +315,14 @@ def extract_contextual_medical_insights_from_image(file_path: str, tone: str = "
 # =============================
 #  SUMMARIZE (PDF/DOCX/TXT/IMG)
 # =============================
+from rest_framework.decorators import api_view, permission_classes, parser_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.response import Response
+import os, tempfile, traceback, logging
+
+log = logging.getLogger(__name__)
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser, FormParser])
@@ -322,10 +330,11 @@ def summarize_medical_record(request):
     uploaded_file = request.FILES.get("file")
     tone = normalize_tone(request.session.get("tone", "PlainClinical"))
 
+    # Friendly validation messages (no negative/error-y phrasing)
     if not uploaded_file:
-        return Response({"error": "No file provided."}, status=400)
+        return Response({"message": "Please attach a file to continue."}, status=400)
 
-    file_name = uploaded_file.name.lower()
+    file_name = (uploaded_file.name or "").lower()
     system_prompt = get_system_prompt(tone)
 
     try:
@@ -339,7 +348,10 @@ def summarize_medical_record(request):
             try:
                 summary = extract_contextual_medical_insights_from_image(tmp_path, tone=tone)
             finally:
-                os.remove(tmp_path)
+                try:
+                    os.remove(tmp_path)
+                except Exception:
+                    pass
 
             # Save to DB
             MedicalSummary.objects.create(
@@ -365,12 +377,16 @@ def summarize_medical_record(request):
         elif file_name.endswith(".docx"):
             raw_text = extract_text_from_docx(uploaded_file)
         elif file_name.endswith(".txt"):
-            raw_text = uploaded_file.read().decode("utf-8")
+            raw_text = uploaded_file.read().decode("utf-8", errors="ignore")
         else:
-            return Response({"error": "Unsupported file format."}, status=400)
+            return Response({
+                "message": "That file type isn’t supported yet. Please upload a PDF, DOCX, TXT, or an image (JPG/PNG/HEIC/WEBP)."
+            }, status=400)  # 415 is also fine; 400 keeps it simple for clients
 
-        if not raw_text.strip():
-            return Response({"error": "Document is empty or unreadable."}, status=400)
+        if not (raw_text or "").strip():
+            return Response({
+                "message": "We couldn’t read content from that file. Try a clearer scan or a different format."
+            }, status=400)
 
         # Summarize text docs
         completion = client.chat.completions.create(
@@ -410,9 +426,12 @@ def summarize_medical_record(request):
 
         return Response({"summary": summary})
 
-    except Exception as e:
-        traceback.print_exc()
-        return Response({"error": f"Failed to process file: {str(e)}"}, status=400)
+    except Exception:
+        # Log privately; keep user-facing copy calm and neutral
+        log.exception("summarize_medical_record unexpected exception")
+        return Response({
+            "message": "Hi! Our system is busy right now due to a lot of users — please try again in a few minutes."
+        }, status=503)  # 503 Service Unavailable fits the “busy” story
 
 # =============================
 #     CHAT (TEXT + FILES)
@@ -557,7 +576,7 @@ def send_chat(request):
 
     except Exception:
         traceback.print_exc()
-        return JsonResponse({"reply": "I’m having trouble responding right now. Let’s try again in a bit."}, status=500)
+        return JsonResponse({"reply": "Hi! Our system is busy right now due to a lot of users — please try again in a few minutes."}, status=500)
 
 # =============================
 #  SMART SUGGESTIONS / Q&A
@@ -698,13 +717,21 @@ def get_user_settings(request):
 @login_required
 def update_user_settings(request):
     if request.method == "POST":
-        data = json.loads(request.body)
-        profile, _ = Profile.objects.get_or_create(user=request.user)
-        profile.display_name = data.get("display_name", profile.display_name)
-        profile.profession = data.get("profession", profile.profession)
-        profile.save()
-        return JsonResponse({"status": "success"})
-    return JsonResponse({"error": "Invalid request"}, status=400)
+        try:
+            data = json.loads(request.body)
+            profile, _ = Profile.objects.get_or_create(user=request.user)
+            profile.display_name = data.get("display_name", profile.display_name)
+            profile.profession = data.get("profession", profile.profession)
+            profile.save()
+            return JsonResponse({"status": "success"})
+        except Exception:
+            return JsonResponse({
+                "message": "Hi! Our system is busy right now. Please try again in a few minutes."
+            }, status=500)
+
+    return JsonResponse({
+        "message": "Hi! That action isn’t available right now. Please try again in a few minutes."
+    }, status=400)
 
 
 def summarize_text_block(raw_text: str, system_prompt: str) -> str:
@@ -1207,3 +1234,17 @@ def track_event(request):
     except Exception:
         pass
     return Response(status=204)
+
+
+from django.shortcuts import render
+
+def page_not_found_view(request, exception, template_name="404.html"):
+    return render(request, template_name, status=404)
+
+def server_error_view(request, template_name="500.html"):
+    return render(request, template_name, status=500)
+
+def service_unavailable_view(request, template_name="503.html"):
+    resp = render(request, template_name, status=503)
+    resp["Retry-After"] = "120"  # hint browsers/clients to retry after ~2 minutes
+    return resp
