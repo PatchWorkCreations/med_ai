@@ -1184,3 +1184,26 @@ class WarmLoginView(DjangoLoginView):
         qs = parse_qs(parts[4]); qs.setdefault("welcome", ["1"])
         parts[4] = urlencode(qs, doseq=True)
         return urlunparse(parts)
+    
+# views.py (if you don’t already have these)
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from django.http import JsonResponse
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def auth_status(request):
+    return JsonResponse({"authenticated": bool(request.user.is_authenticated)})
+
+from django.views.decorators.csrf import csrf_exempt
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def track_event(request):
+    # Accept JSON or form; do nothing (prevents 404s from navigator.sendBeacon)
+    try:
+        _ = request.data
+    except Exception:
+        pass
+    return Response(status=204)

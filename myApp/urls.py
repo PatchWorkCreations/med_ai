@@ -4,7 +4,7 @@ from . import views
 from django.views.generic import RedirectView
 from .views import LegalView, terms_redirect, privacy_redirect
 from .views import WarmLoginView 
-
+from django.urls import path, re_path
 urlpatterns = [
     # Public Pages
     path('', views.landing_page, name='home'),
@@ -49,5 +49,9 @@ urlpatterns = [
     path("password/otp/resend/", views.resend_otp, name="password_otp_resend"),
     path("password/reset/", views.reset_password, name="password_reset_otp"),
 
-    
+    path("api/auth/status/", views.auth_status, name="auth_status"),
+    path("api/track", views.track_event, name="track_event"),
+
+
+   
 ]

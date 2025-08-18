@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NeuroMed AI — Shared Summary</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <main class="max-w-3xl mx-auto px-4 py-10">
+    <div class="bg-white border rounded-2xl p-6 shadow-sm">
+      <div class="flex items-center justify-between">
+        <h1 class="text-xl font-semibold">Shared Summary</h1>
+        <a href="{{ pdf_url }}" class="px-3 py-1.5 rounded-lg bg-teal-600 text-white text-sm hover:bg-teal-700">Download PDF</a>
+      </div>
+      <p class="text-sm text-slate-500 mt-1">Tone: {{ tone }}</p>
+      <hr class="my-4">
+      <div class="prose prose-slate max-w-none whitespace-pre-wrap">{{ summary }}</div>
+      <p class="mt-6 text-xs text-slate-500">
+        For education only. Not medical advice. Remove personal details before sharing.
+      </p>
+    </div>
+  </main>
+</body>
+</html>
