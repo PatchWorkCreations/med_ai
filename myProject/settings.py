@@ -13,11 +13,19 @@ SECRET_KEY = 'django-insecure-6_$3$%3_hxmh@la&^k7g%()ol5nwsc(ne9f#0^_f^lo^yp7-vp
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    '*',
+    'neuromedai.org',
+    'www.neuromedai.org',
+    'medai-production-21ae.up.railway.app'
+]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://medai-production-21ae.up.railway.app",  # Replace with your real domain
+    "https://neuromedai.org",
+    "https://www.neuromedai.org",
+    "https://medai-production-21ae.up.railway.app"
 ]
+
 
 import os
 from dotenv import load_dotenv
