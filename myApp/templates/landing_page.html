@@ -93,6 +93,24 @@
 
     /* action bar buttons start disabled */
     .is-disabled{ opacity:.5; pointer-events:none }
+
+    /* --- Mobile-only tweaks --- */
+@media (max-width: 767px){
+  /* hide the 6-tone button grid on mobile */
+  #modeGroup{ display:none !important; }
+
+  /* show the compact tone selector on mobile only */
+  #modeSelectWrap{ display:block !important; }
+
+  /* slightly tighten paddings in the composer */
+  #chatWindow{ max-height: 60vh; }
+}
+
+/* desktop/tablet keep current look */
+@media (min-width: 768px){
+  #modeSelectWrap{ display:none !important; }
+}
+
   </style>
 </head>
 <body class="text-slate-800">
@@ -150,7 +168,8 @@
   <!-- Main -->
   <main class="max-w-4xl mx-auto px-4 md:px-5 pt-6 md:pt-10 pb-24">
     <!-- Hero (shortened) -->
-    <div class="text-center">
+    <!-- Hero intro -->
+    <div id="heroIntro" class="text-center">
       <h1 class="text-3xl md:text-5xl font-bold tracking-tight">
         Make medical papers easy.
       </h1>
@@ -166,6 +185,7 @@
         </button>
       </div>
     </div>
+
 
     <!-- Mode switcher (kept, tighter) -->
     <div class="mt-5">
@@ -191,6 +211,114 @@
         </button>
       </div>
     </div>
+
+    <!-- Mobile tone selector (compact) -->
+<!-- Mobile tone picker -->
+<div id="modeSelectWrap" class="mt-3 hidden md:hidden">
+  <!-- trigger -->
+  <button id="modePickerBtn"
+          class="w-full rounded-xl border bg-white px-3 py-2.5 flex items-center justify-between shadow-sm active:scale-[.99] transition">
+    <span class="flex items-center gap-2">
+      <i id="modePickerIcon" class="fa-regular fa-message text-teal-600"></i>
+      <span id="modePickerLabel" class="text-sm font-medium">Caregiver</span>
+    </span>
+    <span class="text-slate-400"><i class="fa-solid fa-sliders"></i></span>
+  </button>
+
+  <!-- accessible, hidden fallback -->
+  <select id="modeSelect" class="sr-only" aria-hidden="true" tabindex="-1">
+    <option value="Caregiver">Caregiver</option>
+    <option value="PlainClinical">Balanced</option>
+    <option value="Clinical">Clinical</option>
+    <option value="Faith">Faith</option>
+    <option value="Bilingual">Bilingual</option>
+    <option value="Geriatric">Geriatric</option>
+  </select>
+
+  <!-- bottom sheet -->
+  <div id="modeSheet" class="fixed inset-0 z-[70] hidden">
+    <!-- backdrop -->
+    <button id="modeSheetBackdrop" class="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></button>
+
+    <!-- sheet panel -->
+    <div id="modeSheetPanel"
+         class="absolute inset-x-0 bottom-0 rounded-t-2xl bg-white border-t shadow-2xl translate-y-full transition-transform duration-200 ease-out">
+      <div class="px-4 pt-3 pb-2 flex items-center justify-between">
+        <div class="text-sm font-semibold">Choose a tone</div>
+        <button id="modeSheetClose" class="p-2 text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="divide-y">
+        <!-- option -->
+        <button class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 text-left"
+                data-mode="Caregiver">
+          <i class="fa-solid fa-hands-holding-child text-amber-700"></i>
+          <div class="min-w-0">
+            <div class="text-[15px] font-medium">Caregiver</div>
+            <div class="text-xs text-slate-500 truncate">Gentle, practical steps</div>
+          </div>
+          <i class="fa-solid fa-check ml-auto text-emerald-600 hidden"></i>
+        </button>
+
+        <button class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 text-left"
+                data-mode="PlainClinical">
+          <i class="fa-regular fa-message text-teal-600"></i>
+          <div class="min-w-0">
+            <div class="text-[15px] font-medium">Balanced</div>
+            <div class="text-xs text-slate-500 truncate">Clear + calm explanations</div>
+          </div>
+          <i class="fa-solid fa-check ml-auto text-emerald-600 hidden"></i>
+        </button>
+
+        <button class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 text-left"
+                data-mode="Clinical">
+          <i class="fa-solid fa-stethoscope text-slate-800"></i>
+          <div class="min-w-0">
+            <div class="text-[15px] font-medium">Clinical</div>
+            <div class="text-xs text-slate-500 truncate">Concise & technical</div>
+          </div>
+          <i class="fa-solid fa-check ml-auto text-emerald-600 hidden"></i>
+        </button>
+
+        <button class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 text-left"
+                data-mode="Faith">
+          <i class="fa-solid fa-hands-praying text-indigo-700"></i>
+          <div class="min-w-0">
+            <div class="text-[15px] font-medium">Faith</div>
+            <div class="text-xs text-slate-500 truncate">Guidance with encouragement</div>
+          </div>
+          <i class="fa-solid fa-check ml-auto text-emerald-600 hidden"></i>
+        </button>
+
+        <button class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 text-left"
+                data-mode="Bilingual">
+          <i class="fa-solid fa-language text-teal-700"></i>
+          <div class="min-w-0">
+            <div class="text-[15px] font-medium">Bilingual</div>
+            <div class="text-xs text-slate-500 truncate">Tagalog + English</div>
+          </div>
+          <i class="fa-solid fa-check ml-auto text-emerald-600 hidden"></i>
+        </button>
+
+        <button class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 text-left"
+                data-mode="Geriatric">
+          <i class="fa-solid fa-person-cane text-emerald-700"></i>
+          <div class="min-w-0">
+            <div class="text-[15px] font-medium">Geriatric</div>
+            <div class="text-xs text-slate-500 truncate">Larger text, simpler steps</div>
+          </div>
+          <i class="fa-solid fa-check ml-auto text-emerald-600 hidden"></i>
+        </button>
+      </div>
+
+      <div class="p-4">
+        <button id="modeSheetDone" class="w-full rounded-xl bg-black text-white py-2.5">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
     <!-- Card -->
     <section class="mt-6 bg-white border rounded-2xl shadow-sm overflow-hidden">
@@ -576,6 +704,26 @@ function appendBubble({ message, isUser=false, timestamp=new Date() }) {
     const authed = await isAuthenticated();
     if(!authed){ showGateAfterResponse = true; }
   }
+
+  // after rendering user message / attachments:
+  if (window.innerWidth < 768) {
+    // hide the intro prompt
+    document.getElementById('intro')?.classList.add('hidden');
+
+    // OPTIONAL: also collapse suggestions area on mobile to save space
+    document.getElementById('suggestionsList')?.classList.add('hidden');
+    document.getElementById('toggleSuggestions')?.classList.add('hidden');
+  }
+
+  // Hide intro + prompt + suggestions on first message (mobile only)
+if (window.innerWidth < 768) {
+  document.getElementById('heroIntro')?.classList.add('hidden'); // ⬅️ hides the hero
+  document.getElementById('intro')?.classList.add('hidden');     // ⬅️ hides the prompt
+  document.getElementById('suggestionsList')?.classList.add('hidden');
+  document.getElementById('toggleSuggestions')?.classList.add('hidden');
+}
+
+
 
   // snapshot files for this send (so we can safely clear UI chips)
   const filesToSend = [...files];
@@ -1109,6 +1257,120 @@ document.addEventListener('DOMContentLoaded', () => {
     ev.currentTarget.setAttribute('aria-pressed', body.classList.contains('hc') ? 'true' : 'false');
   });
 });
+
+
+// keep your existing loadMode/saveMode/selectMode/applyModeUI
+
+function syncMobileSelect(mode){
+  const sel = document.getElementById('modeSelect');
+  if (sel && sel.value !== mode) sel.value = mode;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const sheet   = document.getElementById('modeSheet');
+  const panel   = document.getElementById('modeSheetPanel');
+  const btn     = document.getElementById('modePickerBtn');
+  const close   = document.getElementById('modeSheetClose');
+  const done    = document.getElementById('modeSheetDone');
+  const backdrop= document.getElementById('modeSheetBackdrop');
+  const iconEl  = document.getElementById('modePickerIcon');
+  const labelEl = document.getElementById('modePickerLabel');
+
+  const MODE_ICON = {
+    'Caregiver':     'fa-solid fa-hands-holding-child text-amber-700',
+    'PlainClinical': 'fa-regular fa-message text-teal-600',
+    'Clinical':      'fa-solid fa-stethoscope text-slate-800',
+    'Faith':         'fa-solid fa-hands-praying text-indigo-700',
+    'Bilingual':     'fa-solid fa-language text-teal-700',
+    'Geriatric':     'fa-solid fa-person-cane text-emerald-700'
+  };
+
+  function labelFor(mode){
+    return mode === 'PlainClinical' ? 'Balanced' : mode;
+  }
+
+  function updateTrigger(mode){
+    if (!iconEl || !labelEl) return;
+    iconEl.className = MODE_ICON[mode] || 'fa-regular fa-message text-teal-600';
+    labelEl.textContent = labelFor(mode);
+    // reflect on hidden select for a11y state
+    const sel = document.getElementById('modeSelect');
+    if (sel) sel.value = mode;
+    // highlight checkmarks in list
+    document.querySelectorAll('#modeSheet [data-mode]').forEach(item => {
+      const check = item.querySelector('.fa-check');
+      if (check) check.classList.toggle('hidden', item.dataset.mode !== mode);
+    });
+  }
+
+  function openSheet(){
+    if (!sheet) return;
+    sheet.classList.remove('hidden');
+    document.body.classList.add('lock-scroll');
+    // animate up
+    requestAnimationFrame(() => { panel.classList.remove('translate-y-full'); });
+  }
+
+  function closeSheet(){
+    if (!sheet) return;
+    panel.classList.add('translate-y-full');
+    setTimeout(() => {
+      sheet.classList.add('hidden');
+      document.body.classList.remove('lock-scroll');
+    }, 180);
+  }
+
+  // init from saved mode
+  const current = (typeof loadMode === 'function') ? loadMode() : 'Caregiver';
+  updateTrigger(current);
+
+  // open/close handlers
+  btn?.addEventListener('click', openSheet);
+  close?.addEventListener('click', closeSheet);
+  done?.addEventListener('click', closeSheet);
+  backdrop?.addEventListener('click', closeSheet);
+
+  // option clicks
+  document.querySelectorAll('#modeSheet [data-mode]').forEach(item => {
+    item.addEventListener('click', () => {
+      const mode = item.dataset.mode;
+      if (typeof selectModeFromValue === 'function') {
+        selectModeFromValue(mode);       // updates app + saves + toast
+      } else {
+        // fallback if helper isn't present
+        if (typeof saveMode === 'function') saveMode(mode);
+        if (typeof applyModeUI === 'function') applyModeUI(mode);
+      }
+      updateTrigger(mode);
+      // subtle haptic-esque feedback
+      item.classList.add('bg-emerald-50');
+      setTimeout(() => item.classList.remove('bg-emerald-50'), 180);
+    });
+  });
+
+  // keep trigger in sync if desktop buttons change the mode
+  document.querySelectorAll('#modeGroup button').forEach(b => {
+    b.addEventListener('click', () => updateTrigger((typeof loadMode === 'function') ? loadMode() : 'Caregiver'));
+  });
+});
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('modeBadge')?.addEventListener('click', () => {
+    if (window.innerWidth < 768) {
+      document.getElementById('modeSelect')?.focus();
+    }
+  });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.innerWidth < 768) {
+    const ta = document.getElementById('chatInput');
+    if (ta) ta.placeholder = 'Type a question…';
+  }
+});
+
+
 </script>
 
 </body>
