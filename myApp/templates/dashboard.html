@@ -296,15 +296,38 @@
 
     <!-- Tone Selector -->
     <div id="toneBar" class="px-3 py-1 bg-[#fefaf7] text-gray-600 overflow-x-auto whitespace-nowrap">
-      <span class="font-semibold mr-2">Summary Tone:</span>
-      <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="PlainClinical" checked> <span class="ml-1">Balanced</span></label>
-      <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="Caregiver"> <span class="ml-1">Caregiver</span></label>
-      <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="Faith"> <span class="ml-1">Faith</span></label>
-      <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="Clinical"> <span class="ml-1">Clinical</span></label>
-      <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="Bilingual"> <span class="ml-1">Bilingual</span></label>
-      <label class="inline-flex items-center mr-3"><input type="radio" name="tone" value="Geriatric"> <span class="ml-1">Geriatric</span></label>
+  <span class="font-semibold mr-2">Summary Tone:</span>
+  <label class="inline-flex items-center mr-3">
+    <input type="radio" name="tone" value="PlainClinical" checked>
+    <span class="ml-1">Balanced</span>
+  </label>
+  <label class="inline-flex items-center mr-3">
+    <input type="radio" name="tone" value="Caregiver">
+    <span class="ml-1">Caregiver</span>
+  </label>
+  <label class="inline-flex items-center mr-3">
+    <input type="radio" name="tone" value="Faith">
+    <span class="ml-1">Faith</span>
+  </label>
+  <label class="inline-flex items-center mr-3">
+    <input type="radio" name="tone" value="Clinical">
+    <span class="ml-1">Clinical</span>
+  </label>
+  <label class="inline-flex items-center mr-3">
+    <input type="radio" name="tone" value="Bilingual">
+    <span class="ml-1">Bilingual</span>
+  </label>
+  <label class="inline-flex items-center mr-3">
+    <input type="radio" name="tone" value="Geriatric">
+    <span class="ml-1">Geriatric</span>
+  </label>
+  <!-- New Emotional Support tone -->
+  <label class="inline-flex items-center mr-3">
+    <input type="radio" name="tone" value="EmotionalSupport">
+    <span class="ml-1">Emotional Support</span>
+  </label>
+</div>
 
-    </div>
 
     <!-- Composer -->
     <div id="composer" class="border-t p-4 bg-white shadow-inner">
@@ -1199,19 +1222,25 @@ function updateComposerPadding() {
           <li><b>Faith</b> — hopeful and encouraging; may include a short verse/prayer.</li>
           <li><b>Clinical</b> — concise, precise medical terminology. No fluff.</li>
           <li><b>Bilingual</b> — Tagalog + English for clarity where it helps.</li>
+          <li><b>Emotional Support</b> — validating, comforting, focused on encouragement and next steps.</li>
         </ul>
+
         <div class="mt-2 text-xs text-slate-500">Tip: you can change the tone any time before sending.</div>
         <div id="nmTonePreview" class="mt-3 rounded-lg border bg-slate-50 px-3 py-2 text-[13px] text-slate-700"></div>
       `,
       // (optional) live preview that follows the selected radio
       onEnter: () => {
         const samples = {
-          Plain:      "I’ll explain your results in clear, friendly language.",
-          Caregiver:  "Let’s walk through this gently, step by step—kasama mo ’ko.",
-          Faith:      "Here’s what this means, and a note of hope to carry with you.",
-          Clinical:   "Findings: … Impression: … Recommendations: …",
-          Bilingual:  "Ito ang buod—then I’ll clarify in English where needed."
+          PlainClinical:   "I’ll explain your results in clear, friendly language.",
+          Caregiver:       "Let’s walk through this gently, step by step—kasama mo ’ko.",
+          Faith:           "Here’s what this means, and a note of hope to carry with you.",
+          Clinical:        "Findings: … Impression: … Recommendations: …",
+          Bilingual:       "Ito ang buod—then I’ll clarify in English where needed.",
+          Geriatric:       "We’ll go slowly, repeat key points, and keep it extra clear.",
+          Pediatric:       "Kid-friendly words, plus what parents can do today.",
+          EmotionalSupport:"I hear this may feel heavy. You’re not alone—here’s what it means and one gentle next step."
         };
+
         const preview = document.getElementById("nmTonePreview");
         const update = () => {
           const v = document.querySelector('#toneBar input[name="tone"]:checked')?.value || "Plain";
