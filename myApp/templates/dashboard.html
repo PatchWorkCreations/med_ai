@@ -281,6 +281,16 @@
         <div class="my-1 border-t"></div>
         <button class="nm-lang-item w-full text-left px-3 py-2 rounded hover:bg-gray-100 text-sm"
                 data-tone="Auto" role="menuitem">Auto detect + EN recap</button>
+                <!-- Add these to #langMenu -->
+        <button class="nm-lang-item w-full text-left px-3 py-2 rounded hover:bg-gray-100 text-sm"
+        data-tone="BilingualJaEn" role="menuitem">日本語 + English</button>
+
+        <button class="nm-lang-item w-full text-left px-3 py-2 rounded hover:bg-gray-100 text-sm"
+        data-tone="BilingualKoEn" role="menuitem">한국어 + English</button>
+
+        <button class="nm-lang-item w-full text-left px-3 py-2 rounded hover:bg-gray-100 text-sm"
+        data-tone="BilingualArEn" role="menuitem">العربية + English</button>
+
       </div>
     </div>
       <button id="burgerBtn" onclick="toggleSidebar()" class="md:hidden text-gray-600 text-2xl focus:outline-none">
@@ -1603,6 +1613,9 @@ document.addEventListener('DOMContentLoaded', () => {
       BilingualEsEn: 'Español + English',
       BilingualFrEn: 'Français + English',
       BilingualDeEn: 'Deutsch + English',
+      BilingualJaEn: '日本語 + English',
+      BilingualKoEn: '한국어 + English',
+      BilingualArEn: 'العربية + English',
       Auto: 'Auto + EN'
     };
 
