@@ -122,6 +122,36 @@ def _now_ts():
 def _wc(s: str) -> int:
     return len((s or "").split())
 
+# --- Dynamic bilingual + auto prompts ---
+BILINGUAL_LANGS = {
+    "Es": "Spanish",
+    "Fr": "French",
+    "De": "German",
+    "Ja": "Japanese",
+    "Ko": "Korean",
+    "Ar": "Arabic",
+}
+
+def make_bilingual_prompt(lang_name: str) -> str:
+    return (
+        "You are NeuroMed, a warm bilingual medical guide.\n"
+        f"Respond first in {lang_name} for clarity, then add a short English recap.\n"
+        "Keep explanations clear, kind, and practical. Invite follow-up at the end.\n"
+        "If urgent red flags are present, mention them briefly and calmly."
+    )
+
+AUTO_PROMPT = (
+    "You are NeuroMed, a multilingual medical guide.\n"
+    "Detect the user's language and reply in that language first, then add a short English recap.\n"
+    "Keep it warm, clear, practical, and invite follow-up."
+)
+
+def _parse_bilingual_code(t: str) -> str | None:
+    # Accept forms like BilingualEsEn, BilingualFrEn, BilingualJaEn, etc.
+    m = re.match(r"^Bilingual([A-Za-z]{2})En$", t or "")
+    return m.group(1) if m else None
+
+
 def _is_detailed(msg: str) -> bool:
     """Treat as detailed if >= 12 words or contains multiple clauses/signals."""
     if _wc(msg) >= 12:
@@ -239,24 +269,47 @@ PROMPT_TEMPLATES = {
 
 def normalize_tone(tone: str | None) -> str:
     """
-    Map legacy/unknown tones to our default 'PlainClinical'.
-    Accepts case-insensitive inputs from old frontends (e.g., 'Plain').
+    Normalize tone names. Supports dynamic forms like BilingualEsEn, BilingualJaEn, etc.,
+    and an 'Auto' mode. Defaults to PlainClinical.
     """
     if not tone:
         return "PlainClinical"
     t = str(tone).strip()
-    # case-insensitive compare
+
+    # exact key match (case-insensitive)
     key = next((k for k in PROMPT_TEMPLATES.keys() if k.lower() == t.lower()), None)
     if key:
         return key
+
+    # dynamic bilingual variants (e.g., BilingualEsEn, BilingualJaEn, BilingualKoEn, BilingualArEn)
+    if _parse_bilingual_code(t):
+        return t  # keep exact so get_system_prompt can handle it
+
+    # explicit Auto
+    if t.lower() == "auto":
+        return "Auto"
+
     # legacy aliases
     if t.lower() in {"plain", "science", "default"}:
         return "PlainClinical"
+
     return "PlainClinical"
+
 
 
 def get_system_prompt(tone: str | None) -> str:
     t = normalize_tone(tone)
+
+    # Dynamic bilingual (Bilingual??En)
+    code = _parse_bilingual_code(t)
+    if code:
+        lang = BILINGUAL_LANGS.get(code, code)
+        return make_bilingual_prompt(lang)
+
+    # Auto-detect + English recap
+    if t == "Auto":
+        return AUTO_PROMPT
+
     return PROMPT_TEMPLATES.get(t, PROMPT_TEMPLATES["PlainClinical"])
 
 
@@ -355,7 +408,9 @@ log = logging.getLogger(__name__)
 @parser_classes([MultiPartParser, FormParser])
 def summarize_medical_record(request):
     uploaded_file = request.FILES.get("file")
-    tone = normalize_tone(request.session.get("tone", "PlainClinical"))
+    tone = normalize_tone(request.data.get("tone") or request.session.get("tone") or "PlainClinical")
+    request.session["tone"] = tone
+
 
     # Friendly validation messages (no negative/error-y phrasing)
     if not uploaded_file:
@@ -477,8 +532,10 @@ def send_chat(request):
     - If user also sends a question → answer using the combined context + session history.
     - Soft memory: short QUICK exchanges auto-upgrade to FULL if the user follows with files or a longer message soon after.
     """
-    tone = normalize_tone(request.session.get("tone", "PlainClinical"))
+    tone = normalize_tone(request.data.get("tone") or request.session.get("tone") or "PlainClinical")
+    request.session["tone"] = tone
     system_prompt = get_system_prompt(tone)
+
     user_message = (request.data.get("message") or "").strip()
 
     # --- Collect files (multi or single for backward-compat)
@@ -613,7 +670,7 @@ def send_chat(request):
 @permission_classes([AllowAny])
 def smart_suggestions(request):
     summary = request.data.get("summary", "") or request.session.get("latest_summary", "")
-    tone = normalize_tone(request.session.get("tone", "PlainClinical"))
+    tone = normalize_tone(request.data.get("tone") or request.session.get("tone") or "PlainClinical")
 
     if not summary.strip():
         return JsonResponse({"suggestions": []})
@@ -642,7 +699,7 @@ def smart_suggestions(request):
 def answer_question(request):
     question = request.data.get("question", "")
     summary = request.data.get("summary", "") or request.session.get("latest_summary", "")
-    tone = normalize_tone(request.session.get("tone", "PlainClinical"))
+    tone = normalize_tone(request.data.get("tone") or request.session.get("tone") or "PlainClinical")
 
     if not question:
         return JsonResponse({"answer": "Could you repeat the question? I want to make sure I understand."})
@@ -676,7 +733,7 @@ def answer_question(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def clear_session(request):
-    tone = normalize_tone(request.session.get("tone", "PlainClinical"))
+    tone = normalize_tone(request.data.get("tone") or request.session.get("tone") or "PlainClinical")
     system_prompt = get_system_prompt(tone)
     request.session["chat_history"] = [{"role": "system", "content": system_prompt}]
     request.session["latest_summary"] = ""
@@ -688,7 +745,7 @@ def clear_session(request):
 @permission_classes([AllowAny])
 def reset_chat_session(request):
     # mirror of clear_session but AllowAny (if you expose this publicly)
-    tone = normalize_tone(request.session.get("tone", "PlainClinical"))
+    tone = normalize_tone(request.data.get("tone") or request.session.get("tone") or "PlainClinical")
     system_prompt = get_system_prompt(tone)
     request.session["chat_history"] = [{"role": "system", "content": system_prompt}]
     request.session["latest_summary"] = ""

@@ -305,7 +305,8 @@
     <div id="chatWindow" class="flex-1 px-6 py-4 overflow-y-auto text-base bg-gradient-to-br from-white to-gray-50 rounded-xl"></div>
 
     <!-- Tone Selector -->
-    <div id="toneBar" class="px-3 py-1 bg-[#fefaf7] text-gray-600 overflow-x-auto whitespace-nowrap">
+    <!-- Tone Selector -->
+<div id="toneBar" class="px-3 py-1 bg-[#fefaf7] text-gray-600 overflow-x-auto whitespace-nowrap">
   <span class="font-semibold mr-2">Summary Tone:</span>
   <label class="inline-flex items-center mr-3">
     <input type="radio" name="tone" value="PlainClinical" checked>
@@ -336,7 +337,13 @@
     <input type="radio" name="tone" value="EmotionalSupport">
     <span class="ml-1">Emotional Support</span>
   </label>
+
+  <!-- ✅ Add the hidden radios here -->
+  <input type="radio" name="tone" value="BilingualJaEn" class="hidden">
+  <input type="radio" name="tone" value="BilingualKoEn" class="hidden">
+  <input type="radio" name="tone" value="BilingualArEn" class="hidden">
 </div>
+
 
 
     <!-- Composer -->
@@ -1032,7 +1039,9 @@ function clearPending() {
 async function sendChat() {
   const input = document.getElementById("chatInput");
   const userMessage = (input.value || '').trim();
-  const tone = document.querySelector('input[name="tone"]:checked')?.value || "PlainClinical";
+  const tone = window.__nmToneOverride
+  || document.querySelector('input[name="tone"]:checked')?.value
+  || "PlainClinical";
 
 
   if (!userMessage && pending.length === 0) return;
@@ -1102,13 +1111,25 @@ async function sendChat() {
 function startDictation() {
   if (!('webkitSpeechRecognition' in window)) return alert("Speech recognition only works in Chrome.");
   const rec = new webkitSpeechRecognition();
-  rec.lang = "en-US";
+  const tone = window.__nmToneOverride || 'PlainClinical';
+  const map = {
+    Bilingual: 'fil-PH',
+    BilingualEsEn: 'es-ES',
+    BilingualFrEn: 'fr-FR',
+    BilingualDeEn: 'de-DE',
+    BilingualJaEn: 'ja-JP',
+    BilingualKoEn: 'ko-KR',
+    BilingualArEn: 'ar-SA',
+    PlainClinical: 'en-US'
+  };
+  rec.lang = map[tone] || 'en-US';
   rec.onresult = (e) => {
     const t = e.results[0][0].transcript;
     document.getElementById("chatInput").value = t;
   };
   rec.start();
 }
+
 
 /* ---------- Sidebar / Settings ---------- */
 function toggleSidebar() {
@@ -1695,8 +1716,7 @@ document.addEventListener('DOMContentLoaded', () => {
     //   || "PlainClinical";
   })();
 
-  menu.querySelectorAll('.nm-lang-item').forEach(i => i.classList.toggle('active', i.getAttribute('data-tone') === tone));
-
+  
 
 </script>
 <style>
