@@ -151,10 +151,26 @@
       <div class="hidden md:flex items-center gap-2">
         <button id="fontMinus" class="px-3 py-1 rounded-full border" title="Smaller">A−</button>
         <button id="fontPlus"  class="px-3 py-1 rounded-full border" title="Larger">A＋</button>
-        <button id="easyReadBtn" class="px-3 py-1 rounded-full border" aria-pressed="false" title="Easy Read">Easy</button>
+        <button id="easyReadBtn" class="px-3 py-1 rounded-full border hidden" aria-pressed="false" title="Easy Read">Easy</button>
         <button id="highContrast" class="px-3 py-1 rounded-full border" aria-pressed="false" title="High contrast">Contrast</button>
         <a href="/signup" class="ml-2 text-slate-600 hover:text-slate-900">Sign up</a>
         <a href="/login" class="rounded-full px-3 py-1.5 border hover:bg-slate-50">Log in</a>
+        <!-- LANG: Desktop picker -->
+<div class="relative">
+  <button id="langBtn"
+          class="px-3 py-1 rounded-full border flex items-center gap-2"
+          aria-haspopup="menu" aria-expanded="false" title="Language">
+    <i class="fa-solid fa-globe"></i>
+    <span id="langBtnLabel">English</span>
+    <i class="fa-solid fa-caret-down opacity-70"></i>
+  </button>
+  <div id="langMenu"
+       class="hidden absolute right-0 mt-2 w-56 max-h-72 overflow-auto bg-white border rounded-xl shadow-lg z-50">
+    <!-- options injected by JS -->
+  </div>
+</div>
+
+
       </div>
 
       <!-- Mobile hamburger -->
@@ -176,13 +192,29 @@
         <div class="flex items-center gap-2">
           <button id="mFontMinus" class="px-3 py-1 rounded-full border w-full">A−</button>
           <button id="mFontPlus"  class="px-3 py-1 rounded-full border w-full">A＋</button>
-          <button id="mEasyReadBtn"  class="px-3 py-1 rounded-full border w-full" aria-pressed="false">Easy</button>
+          <button id="mEasyReadBtn"  class="px-3 py-1 rounded-full border w-full hidden" aria-pressed="false">Easy</button>
           <button id="mHighContrast" class="px-3 py-1 rounded-full border w-full" aria-pressed="false">Contrast</button>
         </div>
         <div class="flex items-center gap-2">
           <a href="/signup" class="flex-1 text-center rounded-full px-3 py-2 border hover:bg-slate-50">Sign up</a>
           <a href="/login"  class="flex-1 text-center rounded-full px-3 py-2 border hover:bg-slate-50">Log in</a>
         </div>
+        <!-- LANG: Mobile picker -->
+<div class="grid gap-2">
+  <button id="mLangBtn"
+          class="px-3 py-2 rounded-lg border w-full flex items-center justify-between">
+    <span class="flex items-center gap-2">
+      <i class="fa-solid fa-globe"></i>
+      <span id="mLangBtnLabel">English</span>
+    </span>
+    <i class="fa-solid fa-caret-down opacity-70"></i>
+  </button>
+  <div id="mLangMenu"
+       class="hidden border rounded-xl bg-white shadow-lg max-h-72 overflow-auto">
+    <!-- options injected by JS -->
+  </div>
+</div>
+
       </div>
     </div>
   </header>
@@ -459,6 +491,158 @@ Hi! Upload a file or ask a question. I’ll turn it into clear next steps.
   </div>
 
   <script>
+
+const LANGUAGE_CHOICES = [
+  ['en-US','English'],
+  ['ja-JP','Japanese'],
+  ['es-ES','Spanish'],
+  ['fr-FR','French'],
+  ['de-DE','German'],
+  ['it-IT','Italian'],
+  ['pt-PT','Portuguese (Portugal)'],
+  ['pt-BR','Portuguese (Brazil)'],
+  ['ru-RU','Russian'],
+  ['zh-CN','Chinese (Simplified)'],
+  ['zh-TW','Chinese (Traditional)'],
+  ['ko-KR','Korean'],
+  ['ar-SA','Arabic (Saudi Arabia)'],
+  ['tr-TR','Turkish'],
+  ['nl-NL','Dutch'],
+  ['sv-SE','Swedish'],
+  ['pl-PL','Polish'],
+  ['da-DK','Danish'],
+  ['no-NO','Norwegian'],
+  ['fi-FI','Finnish'],
+  ['he-IL','Hebrew'],
+  ['th-TH','Thai'],
+  ['hi-IN','Hindi'],
+  ['cs-CZ','Czech'],
+  ['ro-RO','Romanian'],
+  ['hu-HU','Hungarian'],
+  ['sk-SK','Slovak'],
+  ['bg-BG','Bulgarian'],
+  ['uk-UA','Ukrainian'],
+  ['vi-VN','Vietnamese'],
+  ['id-ID','Indonesian'],
+  ['ms-MY','Malay'],
+  ['sr-RS','Serbian'],
+  ['hr-HR','Croatian'],
+  ['el-GR','Greek'],
+  ['lt-LT','Lithuanian'],
+  ['lv-LV','Latvian'],
+  ['et-EE','Estonian'],
+  ['sl-SI','Slovenian'],
+  ['is-IS','Icelandic'],
+  ['sq-AL','Albanian'],
+  ['mk-MK','Macedonian'],
+  ['bs-BA','Bosnian'],
+  ['ca-ES','Catalan'],
+  ['gl-ES','Galician'],
+  ['eu-ES','Basque'],
+  ['hy-AM','Armenian'],
+  ['fa-IR','Persian'],
+  ['sw-KE','Swahili'],
+  ['ta-IN','Tamil'],
+  ['te-IN','Telugu'],
+  ['kn-IN','Kannada'],
+  ['ml-IN','Malayalam'],
+  ['mr-IN','Marathi'],
+  ['pa-IN','Punjabi'],
+  ['gu-IN','Gujarati'],
+  ['or-IN','Odia'],
+  ['as-IN','Assamese'],
+  ['ne-NP','Nepali'],
+  ['si-LK','Sinhala'],
+];
+
+function guessBrowserLang(){
+  const nav = (navigator.languages && navigator.languages[0]) || navigator.language || 'en-US';
+  // Only return if supported; else fallback:
+  return LANGUAGE_CHOICES.find(([code]) => code === nav) ? nav : 'en-US';
+}
+function loadLang(){ return localStorage.getItem('nm_lang') || guessBrowserLang(); }
+function saveLang(code){ localStorage.setItem('nm_lang', code); }
+
+function labelForLang(code){
+  const found = LANGUAGE_CHOICES.find(([c])=>c===code);
+  return found ? found[1] : code;
+}
+
+function buildLangMenu(menuEl, onPick){
+  if (!menuEl) return;
+  menuEl.innerHTML = '';
+  LANGUAGE_CHOICES.forEach(([code, label]) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center gap-2';
+    btn.dataset.lang = code;
+    btn.innerHTML = `<span class="flex-1 truncate">${label}</span>
+                     <span class="text-xs text-slate-500">${code}</span>`;
+    btn.addEventListener('click', () => onPick(code));
+    menuEl.appendChild(btn);
+  });
+}
+
+function toggleMenu(el, open){
+  if (!el) return;
+  el.classList.toggle('hidden', !open);
+}
+
+function applyLangUI(code){
+  const label = labelForLang(code);
+  const b1 = document.getElementById('langBtnLabel');
+  const b2 = document.getElementById('mLangBtnLabel');
+  if (b1) b1.textContent = label;
+  if (b2) b2.textContent = label;
+  // Optional toast:
+  if (typeof showToast === 'function'){
+    showToast(`Language set: ${label}`, 'fa-solid fa-globe', 'text-teal-600');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const desktopBtn  = document.getElementById('langBtn');
+  const desktopMenu = document.getElementById('langMenu');
+  const mobileBtn   = document.getElementById('mLangBtn');
+  const mobileMenu  = document.getElementById('mLangMenu');
+
+  const current = loadLang();
+  applyLangUI(current);
+  buildLangMenu(desktopMenu, pickLang);
+  buildLangMenu(mobileMenu,  pickLang);
+
+  function pickLang(code){
+    saveLang(code);
+    applyLangUI(code);
+    toggleMenu(desktopMenu, false);
+    toggleMenu(mobileMenu, false);
+  }
+
+  // Open/close handlers
+  desktopBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = desktopMenu && desktopMenu.classList.contains('hidden') === false;
+    toggleMenu(desktopMenu, !isOpen);
+  });
+  mobileBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = mobileMenu && mobileMenu.classList.contains('hidden') === false;
+    toggleMenu(mobileMenu, !isOpen);
+  });
+
+  // close on outside click / Esc
+  document.addEventListener('click', (e) => {
+    if (!desktopMenu && !mobileMenu) return;
+    if (desktopMenu && !desktopMenu.contains(e.target) && e.target !== desktopBtn) toggleMenu(desktopMenu, false);
+    if (mobileMenu  && !mobileMenu.contains(e.target)  && e.target !== mobileBtn ) toggleMenu(mobileMenu,  false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape'){ toggleMenu(desktopMenu, false); toggleMenu(mobileMenu, false); }
+  });
+});
+
+// Expose for other scripts
+window.__nmLang = () => loadLang();
     // ---------------- Utilities
     function getCSRFToken(){ const m=document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)'); return m?m.pop():''; }
     const $ = sel => document.querySelector(sel);
@@ -506,7 +690,11 @@ Hi! Upload a file or ask a question. I’ll turn it into clear next steps.
 
   const meta = document.createElement('div');
   meta.className = 'text-[11px] text-slate-300 mt-1 text-right ml-auto pr-1';
-  meta.innerText = new Intl.DateTimeFormat(undefined,{ hour:'2-digit', minute:'2-digit' }).format(new Date());
+  meta.innerText = new Intl.DateTimeFormat(
+  (typeof __nmLang === 'function' ? __nmLang() : undefined),
+  { hour:'2-digit', minute:'2-digit' }
+).format(new Date());
+
 
   const col = document.createElement('div');
   col.className = 'flex flex-col items-end ml-auto';
@@ -744,8 +932,9 @@ function appendBubble({ message, isUser=false, timestamp=new Date() }) {
     }
 
     async function sendChat(){
-  const msg  = (document.getElementById('chatInput').value || '').trim();
-  const mode = loadMode();
+  const msg   = (document.getElementById('chatInput').value || '').trim();
+  const mode  = loadMode();
+  const lang  = (typeof __nmLang === 'function' ? __nmLang() : (navigator.language || 'en-US'));
   if(!msg && files.length===0) return;
 
   if(!firstSendAttempted){
@@ -764,15 +953,13 @@ function appendBubble({ message, isUser=false, timestamp=new Date() }) {
     document.getElementById('toggleSuggestions')?.classList.add('hidden');
   }
 
-  // Hide intro + prompt + suggestions on first message (mobile only)
-if (window.innerWidth < 768) {
-  document.getElementById('heroIntro')?.classList.add('hidden'); // ⬅️ hides the hero
-  document.getElementById('intro')?.classList.add('hidden');     // ⬅️ hides the prompt
-  document.getElementById('suggestionsList')?.classList.add('hidden');
-  document.getElementById('toggleSuggestions')?.classList.add('hidden');
-}
-
-
+  // Hide hero + prompt + suggestions on first message (mobile only)
+  if (window.innerWidth < 768) {
+    document.getElementById('heroIntro')?.classList.add('hidden'); // ⬅️ hides the hero
+    document.getElementById('intro')?.classList.add('hidden');     // ⬅️ hides the prompt
+    document.getElementById('suggestionsList')?.classList.add('hidden');
+    document.getElementById('toggleSuggestions')?.classList.add('hidden');
+  }
 
   // snapshot files for this send (so we can safely clear UI chips)
   const filesToSend = [...files];
@@ -801,6 +988,7 @@ if (window.innerWidth < 768) {
   const fd = new FormData();
   if (msg) fd.append('message', msg);
   fd.append('tone', mode);
+  fd.append('lang', lang); // ✅ pass selected language to backend
   if (filesToSend.length) {
     // backend supports files[] OR file (single). Prefer files[].
     for (const f of filesToSend) fd.append('files[]', f);
@@ -811,7 +999,10 @@ if (window.innerWidth < 768) {
   try{
     const res = await fetch('/api/send-chat/', { 
       method:'POST',
-      headers:{ 'X-CSRFToken': getCSRFToken() },
+      headers:{ 
+        'X-CSRFToken': getCSRFToken(),
+        'Accept-Language': lang  // optional but nice-to-have
+      },
       body: fd,
       credentials:'include',
       signal: abortController.signal
@@ -823,7 +1014,7 @@ if (window.innerWidth < 768) {
     const ok = !!(data && typeof data.reply === 'string' && data.reply.trim().length);
     document.getElementById('btnPdf')?.classList.toggle('is-disabled', !ok);
     document.getElementById('btnShare')?.classList.toggle('is-disabled', !ok);
-    track('result_rendered');
+    track('result_rendered', { mode, lang, hasFiles: filesToSend.length>0 });
   }catch(e){
     typing.classList.remove('text-slate-600'); typing.classList.add('text-red-700','bg-red-100');
     typing.innerText = 'I couldn’t finish that—want me to try a lighter summary or split the file?';
@@ -859,11 +1050,13 @@ if (window.innerWidth < 768) {
     }
 
     function startDictation(){
-      if(!('webkitSpeechRecognition' in window)){ alert('Speech recognition works best in Chrome.'); return; }
-      const rec = new webkitSpeechRecognition(); rec.lang='en-US';
-      rec.onresult = (e)=>{ $('#chatInput').value = e.results[0][0].transcript; autosize(); toggleSend(); };
-      rec.start();
-    }
+  if(!('webkitSpeechRecognition' in window)){ alert('Speech recognition works best in Chrome.'); return; }
+  const rec = new webkitSpeechRecognition();
+  rec.lang = (typeof __nmLang === 'function' ? __nmLang() : 'en-US');  // ✅ use selected lang
+  rec.onresult = (e)=>{ $('#chatInput').value = e.results[0][0].transcript; autosize(); toggleSend(); };
+  rec.start();
+}
+
 
     function showSignupGate(){ const m=$('#signupGate'); if(!m) return; m.classList.remove('hidden'); m.classList.add('flex'); track('signup_shown'); }
     function showPostResultInvite(){ $('#postResultInvite').classList.remove('hidden'); }
@@ -1238,6 +1431,8 @@ async function runDemo(kind = 'er'){
   const fd = new FormData();
   fd.append('tone', mode);
   fd.append('message', sample);
+
+  fd.append('lang', (typeof __nmLang === 'function' ? __nmLang() : 'en-US'));
 
   try{
     const res = await fetch('/api/send-chat/', {

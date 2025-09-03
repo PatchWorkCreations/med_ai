@@ -247,51 +247,91 @@
     <header class="flex items-center justify-between px-6 py-4 border-b relative">
       <div class="flex items-center gap-2 relative group">
         <i class="fa-solid fa-notes-medical text-teal-600 text-2xl"></i>
-        <h1 class="text-2xl font-bold text-gray-800 cursor-help">NeuroMed <span class="text-teal-600">AI</span></h1>
+        <h1 class="text-2xl font-bold text-gray-800 cursor-help">
+          NeuroMed <span class="text-teal-600">AI</span>
+        </h1>
+      
+        <!-- tooltip -->
         <div class="absolute -bottom-12 left-0 z-10 w-max max-w-xs px-3 py-2 text-base text-white bg-gray-800 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none shadow-md">
           NeuroMed AI simplifies complex medical records into compassionate, easy-to-understand summaries.
         </div>
+      
+        <!-- DESKTOP language picker (hidden on mobile; pairs with your mobile one) -->
+        <div class="hidden md:block ml-3">
+          <div class="relative">
+            <button id="langBtn"
+                    class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    aria-haspopup="true" aria-expanded="false" aria-controls="langMenu" title="Language">
+              <i class="fa-solid fa-globe"></i>
+              <span id="langBtnLabel" class="text-sm text-gray-700">English</span>
+              <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
+            </button>
+      
+            <!-- options are injected by your JS buildLangMenu(...) -->
+            <div id="langMenu"
+                 class="hidden absolute right-0 mt-2 w-56 max-h-72 overflow-auto bg-white border rounded-lg shadow-lg z-50">
+            </div>
+          </div>
+        </div>
       </div>
+      
 
       <div class="relative">
-    <button id="langBtn"
-            class="inline-flex items-center gap-2 px-2 py-1.5 rounded-md border hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-500"
-            aria-haspopup="true" aria-expanded="false" aria-controls="langMenu" title="Language / Tone">
+    <!-- Mobile language picker -->
+<!-- Mobile language trigger -->
+<div class="md:hidden">
+  <button id="mLangBtn"
+          class="w-full px-3 py-2 rounded-lg border flex items-center justify-between bg-white active:scale-[.99] transition"
+          aria-haspopup="dialog" aria-expanded="false">
+    <span class="flex items-center gap-2">
       <i class="fa-solid fa-globe"></i>
-      <span id="langCurrent" class="hidden sm:inline text-sm text-gray-700">English</span>
-      <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
-    </button>
+      <span id="mLangBtnLabel">English</span>
+    </span>
+    <i class="fa-solid fa-caret-down opacity-70"></i>
+  </button>
+</div>
+
+<!-- Mobile Language Bottom Sheet -->
+<div id="mLangMenu" class="fixed inset-0 z-50 hidden">
+  <!-- Backdrop -->
+  <button id="mLangBackdrop" class="absolute inset-0 bg-black/40" aria-label="Close language menu"></button>
+
+  <!-- Sheet -->
+  <div id="mLangPanel"
+       class="absolute inset-x-0 bottom-0 max-h-[70vh] overflow-hidden rounded-t-2xl bg-white shadow-2xl
+              translate-y-full transition-transform duration-200 ease-out">
+    <!-- Header -->
+    <div class="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between">
+      <div class="text-sm font-semibold">Choose language</div>
+      <button id="mLangClose" class="p-2 text-slate-500" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Search -->
+    <div class="p-3">
+      <label for="mLangSearch" class="sr-only">Search language</label>
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        <input id="mLangSearch" type="text"
+               class="w-full pl-9 pr-3 py-2 border rounded-lg"
+               placeholder="Search…">
+      </div>
+    </div>
+
+    <!-- List -->
+    <div id="mLangList"
+         class="px-2 pb-4 overflow-y-auto"
+         style="max-height: calc(70vh - 96px); padding-bottom: calc(env(safe-area-inset-bottom) + 12px);">
+      <!-- options injected by JS -->
+    </div>
+  </div>
+</div>
+
+
 
     <!-- Popover -->
-      <div id="langMenu"
-          class="absolute right-0 mt-2 w-56 bg-white border rounded-lg shadow-lg p-1 hidden z-50"
-          role="menu" aria-labelledby="langBtn">
-        <!-- each item: data-tone maps to your backend tone keys -->
-        <button class="nm-lang-item w-full text-left px-3 py-2 rounded hover:bg-gray-100 text-sm"
-                data-tone="PlainClinical" role="menuitem">English (Plain)</button>
-        <button class="nm-lang-item w-full text-left px-3 py-2 rounded hover:bg-gray-100 text-sm"
-                data-tone="Bilingual" role="menuitem">Taglish (Bilingual)</button>
-        <div class="my-1 border-t"></div>
-        <button class="nm-lang-item w-full text-left px-3 py-2 rounded hover:bg-gray-100 text-sm"
-                data-tone="BilingualEsEn" role="menuitem">Español + English</button>
-        <button class="nm-lang-item w-full text-left px-3 py-2 rounded hover:bg-gray-100 text-sm"
-                data-tone="BilingualFrEn" role="menuitem">Français + English</button>
-        <button class="nm-lang-item w-full text-left px-3 py-2 rounded hover:bg-gray-100 text-sm"
-                data-tone="BilingualDeEn" role="menuitem">Deutsch + English</button>
-        <div class="my-1 border-t"></div>
-        <button class="nm-lang-item w-full text-left px-3 py-2 rounded hover:bg-gray-100 text-sm"
-                data-tone="Auto" role="menuitem">Auto detect + EN recap</button>
-                <!-- Add these to #langMenu -->
-        <button class="nm-lang-item w-full text-left px-3 py-2 rounded hover:bg-gray-100 text-sm"
-        data-tone="BilingualJaEn" role="menuitem">日本語 + English</button>
-
-        <button class="nm-lang-item w-full text-left px-3 py-2 rounded hover:bg-gray-100 text-sm"
-        data-tone="BilingualKoEn" role="menuitem">한국어 + English</button>
-
-        <button class="nm-lang-item w-full text-left px-3 py-2 rounded hover:bg-gray-100 text-sm"
-        data-tone="BilingualArEn" role="menuitem">العربية + English</button>
-
-      </div>
+    
     </div>
       <button id="burgerBtn" onclick="toggleSidebar()" class="md:hidden text-gray-600 text-2xl focus:outline-none">
         <i class="fa-solid fa-bars"></i>
@@ -324,10 +364,7 @@
     <input type="radio" name="tone" value="Clinical">
     <span class="ml-1">Clinical</span>
   </label>
-  <label class="inline-flex items-center mr-3">
-    <input type="radio" name="tone" value="Bilingual">
-    <span class="ml-1">Bilingual</span>
-  </label>
+  
   <label class="inline-flex items-center mr-3">
     <input type="radio" name="tone" value="Geriatric">
     <span class="ml-1">Geriatric</span>
@@ -338,10 +375,8 @@
     <span class="ml-1">Emotional Support</span>
   </label>
 
-  <!-- ✅ Add the hidden radios here -->
-  <input type="radio" name="tone" value="BilingualJaEn" class="hidden">
-  <input type="radio" name="tone" value="BilingualKoEn" class="hidden">
-  <input type="radio" name="tone" value="BilingualArEn" class="hidden">
+  
+  
 </div>
 
 
@@ -637,6 +672,237 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
 
 <script>
+
+/* ---------- Language picker (shared with landing) ---------- */
+/* ---------------- Language selection (desktop dropdown + mobile sheet) ---------------- */
+
+const LANGUAGE_CHOICES = [
+  ['en-US','English'],
+  ['ja-JP','Japanese'],
+  ['es-ES','Spanish'],
+  ['fr-FR','French'],
+  ['de-DE','German'],
+  ['it-IT','Italian'],
+  ['pt-PT','Portuguese (Portugal)'],
+  ['pt-BR','Portuguese (Brazil)'],
+  ['ru-RU','Russian'],
+  ['zh-CN','Chinese (Simplified)'],
+  ['zh-TW','Chinese (Traditional)'],
+  ['ko-KR','Korean'],
+  ['ar-SA','Arabic (Saudi Arabia)'],
+  ['tr-TR','Turkish'],
+  ['nl-NL','Dutch'],
+  ['sv-SE','Swedish'],
+  ['pl-PL','Polish'],
+  ['da-DK','Danish'],
+  ['no-NO','Norwegian'],
+  ['fi-FI','Finnish'],
+  ['he-IL','Hebrew'],
+  ['th-TH','Thai'],
+  ['hi-IN','Hindi'],
+  ['cs-CZ','Czech'],
+  ['ro-RO','Romanian'],
+  ['hu-HU','Hungarian'],
+  ['sk-SK','Slovak'],
+  ['bg-BG','Bulgarian'],
+  ['uk-UA','Ukrainian'],
+  ['vi-VN','Vietnamese'],
+  ['id-ID','Indonesian'],
+  ['ms-MY','Malay'],
+  ['sr-RS','Serbian'],
+  ['hr-HR','Croatian'],
+  ['el-GR','Greek'],
+  ['lt-LT','Lithuanian'],
+  ['lv-LV','Latvian'],
+  ['et-EE','Estonian'],
+  ['sl-SI','Slovenian'],
+  ['is-IS','Icelandic'],
+  ['sq-AL','Albanian'],
+  ['mk-MK','Macedonian'],
+  ['bs-BA','Bosnian'],
+  ['ca-ES','Catalan'],
+  ['gl-ES','Galician'],
+  ['eu-ES','Basque'],
+  ['hy-AM','Armenian'],
+  ['fa-IR','Persian'],
+  ['sw-KE','Swahili'],
+  ['ta-IN','Tamil'],
+  ['te-IN','Telugu'],
+  ['kn-IN','Kannada'],
+  ['ml-IN','Malayalam'],
+  ['mr-IN','Marathi'],
+  ['pa-IN','Punjabi'],
+  ['gu-IN','Gujarati'],
+  ['or-IN','Odia'],
+  ['as-IN','Assamese'],
+  ['ne-NP','Nepali'],
+  ['si-LK','Sinhala'],
+];
+
+function guessBrowserLang(){
+  const nav = (navigator.languages && navigator.languages[0]) || navigator.language || 'en-US';
+  return LANGUAGE_CHOICES.find(([code]) => code === nav) ? nav : 'en-US';
+}
+function loadLang(){ return localStorage.getItem('nm_lang') || guessBrowserLang(); }
+function saveLang(code){ localStorage.setItem('nm_lang', code); }
+
+function labelForLang(code){
+  const found = LANGUAGE_CHOICES.find(([c])=>c===code);
+  return found ? found[1] : code;
+}
+
+/* ---- Desktop dropdown builder ---- */
+function buildDesktopMenu(menuEl, onPick){
+  if (!menuEl) return;
+  menuEl.innerHTML = '';
+  LANGUAGE_CHOICES.forEach(([code, label]) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center gap-2';
+    btn.dataset.lang = code;
+    btn.innerHTML = `
+      <span class="flex-1 truncate">${label}</span>
+      <span class="text-xs text-slate-500">${code}</span>`;
+    btn.addEventListener('click', () => onPick(code));
+    menuEl.appendChild(btn);
+  });
+}
+
+/* ---- Mobile bottom-sheet list builder ---- */
+function buildMobileLangList(listEl, selected, onPick){
+  if (!listEl) return;
+  listEl.innerHTML = '';
+  LANGUAGE_CHOICES.forEach(([code, label])=>{
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.dataset.lang = code;
+    item.className = 'w-full px-4 py-3 mb-1 flex items-center gap-3 rounded-[10px] text-left hover:bg-slate-50';
+    item.innerHTML = `
+      <div class="min-w-0">
+        <div class="text-[15px] font-medium nm-lang-label truncate">${label}</div>
+        <div class="text-xs text-slate-500">${code}</div>
+      </div>
+      <i class="fa-solid fa-check ml-auto text-emerald-600 ${code===selected ? '' : 'hidden'}"></i>`;
+    item.addEventListener('click', () => onPick(code));
+    listEl.appendChild(item);
+  });
+}
+
+/* ---- UI helpers ---- */
+function toggleMenu(el, open){ if (el) el.classList.toggle('hidden', !open); }
+
+function applyLangUI(code){
+  const label = labelForLang(code);
+  const b1 = document.getElementById('langBtnLabel');
+  const b2 = document.getElementById('mLangBtnLabel');
+  if (b1) b1.textContent = label;
+  if (b2) b2.textContent = label;
+
+  // Update checkmarks in mobile sheet if present
+  document.querySelectorAll('#mLangList [data-lang]').forEach(el=>{
+    el.querySelector('.fa-check')?.classList.toggle('hidden', el.dataset.lang !== code);
+  });
+
+  if (typeof showToast === 'function'){
+    showToast(`Language set: ${label}`, 'fa-solid fa-globe', 'text-teal-600');
+  }
+}
+
+/* ---- Mobile sheet open/close ---- */
+function openMobileLang(){
+  const menu  = document.getElementById('mLangMenu');
+  const panel = document.getElementById('mLangPanel');
+  if (!menu || !panel) return; // fallback if using old dropdown
+  menu.classList.remove('hidden');
+  requestAnimationFrame(()=> panel.classList.remove('translate-y-full'));
+  document.getElementById('mLangBtn')?.setAttribute('aria-expanded','true');
+  setTimeout(()=> document.getElementById('mLangSearch')?.focus(), 80);
+}
+function closeMobileLang(){
+  const menu  = document.getElementById('mLangMenu');
+  const panel = document.getElementById('mLangPanel');
+  if (!menu || !panel) return toggleMenu(menu, false);
+  panel.classList.add('translate-y-full');
+  setTimeout(()=> menu.classList.add('hidden'), 180);
+  document.getElementById('mLangBtn')?.setAttribute('aria-expanded','false');
+}
+
+/* ---- Init + wiring ---- */
+document.addEventListener('DOMContentLoaded', () => {
+  const desktopBtn   = document.getElementById('langBtn');
+  const desktopMenu  = document.getElementById('langMenu');
+
+  const mobileBtn    = document.getElementById('mLangBtn');
+  const mobileMenu   = document.getElementById('mLangMenu');   // overlay (sheet root)
+  const mobilePanel  = document.getElementById('mLangPanel');  // sliding panel
+  const mobileList   = document.getElementById('mLangList');   // scrollable list
+  const mobileSearch = document.getElementById('mLangSearch'); // search input
+  const mobileClose  = document.getElementById('mLangClose');
+  const mobileBack   = document.getElementById('mLangBackdrop');
+
+  const current = loadLang();
+
+  // Build menus
+  buildDesktopMenu(desktopMenu, pickLang);
+  if (mobileList) buildMobileLangList(mobileList, current, pickLang);
+
+  // Apply current label text
+  applyLangUI(current);
+
+  function pickLang(code){
+    saveLang(code);
+    applyLangUI(code);
+    // close any open surfaces
+    toggleMenu(desktopMenu, false);
+    closeMobileLang();
+  }
+
+  // Desktop open/close
+  desktopBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = desktopMenu && !desktopMenu.classList.contains('hidden');
+    toggleMenu(desktopMenu, !isOpen);
+  });
+
+  // Mobile open (sheet) — if sheet markup exists use it, else toggle old dropdown
+  mobileBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (mobilePanel) openMobileLang();
+    else {
+      const isOpen = mobileMenu && !mobileMenu.classList.contains('hidden');
+      toggleMenu(mobileMenu, !isOpen);
+    }
+  });
+  mobileBack?.addEventListener('click', closeMobileLang);
+  mobileClose?.addEventListener('click', closeMobileLang);
+
+  // Search filter (mobile)
+  mobileSearch?.addEventListener('input', (e)=>{
+    const q = (e.target.value || '').trim().toLowerCase();
+    document.querySelectorAll('#mLangList [data-lang]').forEach(el=>{
+      const code  = el.dataset.lang.toLowerCase();
+      const label = el.querySelector('.nm-lang-label')?.textContent.toLowerCase() || '';
+      el.classList.toggle('hidden', !(code.includes(q) || label.includes(q)));
+    });
+  });
+
+  // Close on outside click / Esc
+  document.addEventListener('click', (e) => {
+    if (desktopMenu && !desktopMenu.contains(e.target) && e.target !== desktopBtn) toggleMenu(desktopMenu, false);
+    // mobile sheet closes only via backdrop/close; if using old dropdown, allow outside-click close:
+    if (!mobilePanel && mobileMenu && !mobileMenu.contains(e.target) && e.target !== mobileBtn) toggleMenu(mobileMenu, false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape'){
+      toggleMenu(desktopMenu, false);
+      closeMobileLang();
+    }
+  });
+});
+
+// Expose for other scripts (sendChat/dictation)
+window.__nmLang = () => loadLang();
+
 /* ---------- Helpers ---------- */
 function getCSRFToken() {
   const m = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
@@ -1039,10 +1305,18 @@ function clearPending() {
 async function sendChat() {
   const input = document.getElementById("chatInput");
   const userMessage = (input.value || '').trim();
-  const tone = window.__nmToneOverride
-  || document.querySelector('input[name="tone"]:checked')?.value
-  || "PlainClinical";
 
+  // tone still comes from your radios (or any override you set elsewhere)
+  const tone =
+    window.__nmToneOverride ||
+    document.querySelector('input[name="tone"]:checked')?.value ||
+    "PlainClinical";
+
+  // language matches the landing page picker (window.__nmLang is defined there)
+  const lang =
+    (typeof window.__nmLang === 'function' && window.__nmLang()) ||
+    navigator.language ||
+    'en-US';
 
   if (!userMessage && pending.length === 0) return;
 
@@ -1072,6 +1346,7 @@ async function sendChat() {
   const formData = new FormData();
   if (userMessage) formData.append("message", userMessage);
   formData.append("tone", tone);
+  formData.append("lang", lang); // ✅ pass selected language to backend
   pending.forEach(p => formData.append("files[]", p.file, p.file.name));
 
   // Clear composer state
@@ -1093,13 +1368,24 @@ async function sendChat() {
   try {
     const res = await fetch("/api/send-chat/", {
       method: "POST",
-      headers: { "X-CSRFToken": getCSRFToken() },
-      body: formData
+      headers: {
+        "X-CSRFToken": getCSRFToken(),
+        "Accept-Language": lang // ✅ nice hint for server/localization middleware
+      },
+      body: formData,
+      credentials: "include"
     });
-    const data = await res.json();
+
+    let data = null;
+    try { data = await res.json(); } catch {}
+
+    if (!res.ok) {
+      throw new Error((data && (data.error || data.detail)) || `HTTP ${res.status}`);
+    }
+
     typing.classList.remove("italic","text-gray-500");
     typing.classList.add("text-gray-800");
-    typing.innerText = data.reply || "⚠️ No reply received.";
+    typing.innerText = (data && data.reply) ? data.reply : "⚠️ No reply received.";
   } catch (err) {
     typing.classList.remove("italic","text-gray-500");
     typing.classList.add("text-red-700","bg-red-100");
@@ -1108,27 +1394,14 @@ async function sendChat() {
 }
 
 /* ---------- Speech ---------- */
-function startDictation() {
-  if (!('webkitSpeechRecognition' in window)) return alert("Speech recognition only works in Chrome.");
+function startDictation(){
+  if(!('webkitSpeechRecognition' in window)){ alert('Speech recognition works best in Chrome.'); return; }
   const rec = new webkitSpeechRecognition();
-  const tone = window.__nmToneOverride || 'PlainClinical';
-  const map = {
-    Bilingual: 'fil-PH',
-    BilingualEsEn: 'es-ES',
-    BilingualFrEn: 'fr-FR',
-    BilingualDeEn: 'de-DE',
-    BilingualJaEn: 'ja-JP',
-    BilingualKoEn: 'ko-KR',
-    BilingualArEn: 'ar-SA',
-    PlainClinical: 'en-US'
-  };
-  rec.lang = map[tone] || 'en-US';
-  rec.onresult = (e) => {
-    const t = e.results[0][0].transcript;
-    document.getElementById("chatInput").value = t;
-  };
+  rec.lang = (typeof __nmLang === 'function' ? __nmLang() : 'en-US');  // ✅
+  rec.onresult = (e)=>{ $('#chatInput').value = e.results[0][0].transcript; autosize(); toggleSend(); };
   rec.start();
 }
+
 
 
 /* ---------- Sidebar / Settings ---------- */
@@ -1623,46 +1896,8 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 
 (function(){
-    const TONE_KEY = 'nm_tone_pref';
-    const btn  = document.getElementById('langBtn');
-    const menu = document.getElementById('langMenu');
-    const cur  = document.getElementById('langCurrent');
+    
 
-    const toneLabels = {
-      PlainClinical: 'English',
-      Bilingual: 'Taglish',
-      BilingualEsEn: 'Español + English',
-      BilingualFrEn: 'Français + English',
-      BilingualDeEn: 'Deutsch + English',
-      BilingualJaEn: '日本語 + English',
-      BilingualKoEn: '한국어 + English',
-      BilingualArEn: 'العربية + English',
-      Auto: 'Auto + EN'
-    };
-
-    function setTone(tone){
-      // persist
-      localStorage.setItem(TONE_KEY, tone);
-      // reflect in header label
-      if (cur) cur.textContent = toneLabels[tone] || 'English';
-      // sync any existing radio in #toneBar (keeps your UI consistent)
-      const rb = document.querySelector(`#toneBar input[name="tone"][value="${tone}"]`);
-      if (rb) rb.checked = true;
-      // stash for sendChat
-      window.__nmToneOverride = tone;
-    }
-
-    function getTone(){
-      return window.__nmToneOverride
-          || localStorage.getItem(TONE_KEY)
-          || document.querySelector('input[name="tone"]:checked')?.value
-          || 'PlainClinical';
-    }
-
-    // init from storage/UI
-    document.addEventListener('DOMContentLoaded', () => {
-      setTone(getTone());
-    });
 
     // open/close
     function openMenu(){

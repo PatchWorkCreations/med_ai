@@ -524,46 +524,70 @@ def summarize_medical_record(request):
 @parser_classes([MultiPartParser, FormParser])
 def send_chat(request):
     """
-    Unified chat endpoint:
+    Unified chat endpoint with tone + language support:
     - Accepts multiple files via `files[]` (new UI) or a single `file` (backward compatible).
     - Images → vision interpretation.
     - PDFs/DOCX/TXT → extract + summarize.
     - If user sends only files → return combined file summaries.
     - If user also sends a question → answer using the combined context + session history.
-    - Soft memory: short QUICK exchanges auto-upgrade to FULL if the user follows with files or a longer message soon after.
+    - Supports tone + language (persistent via Profile).
+    - Soft memory: QUICK → FULL upgrade if follow-up soon after.
     """
-    tone = normalize_tone(request.data.get("tone") or request.session.get("tone") or "PlainClinical")
+    # --- Tone handling (existing)
+    tone = normalize_tone(
+        request.data.get("tone") or request.session.get("tone") or "PlainClinical"
+    )
     request.session["tone"] = tone
-    system_prompt = get_system_prompt(tone)
 
+    # --- Language handling (new)
+    lang = request.data.get("lang")
+    if request.user.is_authenticated:
+        from .models import Profile
+        profile, _ = Profile.objects.get_or_create(user=request.user)
+        if lang:  # update preference if provided
+            profile.language = lang
+            profile.save()
+        else:
+            lang = profile.language or "en-US"
+    else:
+        lang = lang or "en-US"
+
+    # --- Build system prompt with tone + language
+    base_prompt = get_system_prompt(tone)
+    system_prompt = (
+        f"{base_prompt}\n\n"
+        f"(Always respond in {lang} unless explicitly told otherwise.)"
+    )
+
+    # --- Message
     user_message = (request.data.get("message") or "").strip()
 
-    # --- Collect files (multi or single for backward-compat)
+    # --- Collect files
     files = request.FILES.getlist("files[]")
     if not files and "file" in request.FILES:
         files = [request.FILES["file"]]
     has_files = bool(files)
 
-    # --- Decide response mode (+ optional topic hint) using soft memory
-    # Requires the helpers from the earlier snippet: _classify_mode, _now_ts, SOFT_MEMORY_TTL_MIN
+    # --- Decide response mode
     mode, topic_hint = _classify_mode(user_message, has_files, request.session)
-
-    # --- Build a tiny header the model will obey (your PlainClinical prompt references this)
     header = f"ResponseMode: {mode}"
     if topic_hint:
         header += f"\nTopicHint: {topic_hint}"
 
-    # --- Session context (keep it light)
+    # --- Session context
     summary_context = request.session.get("latest_summary", "")
     chat_history = request.session.get(
         "chat_history",
         [{"role": "system", "content": system_prompt}, {"role": "system", "content": header}],
     )
-    # Ensure header exists even if chat_history came from session without it
-    if not any(m.get("role") == "system" and str(m.get("content", "")).startswith("ResponseMode:") for m in chat_history):
+    if not any(
+        m.get("role") == "system"
+        and str(m.get("content", "")).startswith("ResponseMode:")
+        for m in chat_history
+    ):
         chat_history.insert(1, {"role": "system", "content": header})
 
-    # --- Process each file
+    # --- Process files
     combined_sections = []
     for f in files:
         fname, summary = summarize_single_file(
@@ -571,22 +595,20 @@ def send_chat(request):
             tone=tone,
             system_prompt=system_prompt,
             user=request.user,
-            request=request,  # pass the whole request so we can save & index the image
+            request=request,
         )
         combined_sections.append(f"{fname}\n{summary}")
 
     combined_context = "\n\n".join(combined_sections).strip()
 
-    # --- If files were provided and no user message, just return the combined summaries
+    # --- If only files
     if files and not user_message:
-        # Update session with the combined summaries as the latest context
         request.session["latest_summary"] = combined_context or summary_context
         request.session["chat_history"] = [
             {"role": "system", "content": system_prompt},
             {"role": "system", "content": header},
             {"role": "user", "content": f"(Here’s the latest medical context):\n{combined_context or summary_context}"},
         ]
-        # Soft-memory writeback: we were in FULL (files), clear short-msg memory
         request.session["nm_last_mode"] = "FULL"
         request.session["nm_last_short_msg"] = ""
         request.session["nm_last_ts"] = _now_ts()
@@ -595,42 +617,42 @@ def send_chat(request):
         if combined_context:
             return JsonResponse({"reply": combined_context})
         else:
-            return JsonResponse({"reply": "I couldn’t read any useful content from the attachments."}, status=400)
+            return JsonResponse(
+                {"reply": "I couldn’t read any useful content from the attachments."}, status=400
+            )
 
-    # --- If no files and no message
+    # --- If no input at all
     if not files and not user_message:
         return JsonResponse({"reply": "Hmm… I didn’t catch that. Can you try again?"})
 
-    # --- Prepare context for question/answer
-    # Plant the most recent context if not present
+    # --- Prepare context
     if combined_context:
-        # New attachment context takes precedence this turn
         chat_history = [
             {"role": "system", "content": system_prompt},
             {"role": "system", "content": header},
             {"role": "user", "content": f"(Here’s the latest medical context):\n{combined_context}"},
         ]
-        # Also keep it in session for subsequent turns
         request.session["latest_summary"] = combined_context
     else:
-        # If no new files, ensure we have prior context planted at least once
         if summary_context and all(
             "(Here’s the" not in m.get("content", "") for m in chat_history if m.get("role") == "user"
         ):
-            chat_history.append({"role": "user", "content": f"(Here’s the medical context):\n{summary_context}"})
+            chat_history.append(
+                {"role": "user", "content": f"(Here’s the medical context):\n{summary_context}"}
+            )
 
-    # Finally, add the user's message
+    # --- Add user message
     chat_history.append({"role": "user", "content": user_message})
 
     try:
-        # First pass: grounded answer
+        # First pass
         raw = client.chat.completions.create(
             model="gpt-4o",
             temperature=0.6,
             messages=chat_history,
         ).choices[0].message.content.strip()
 
-        # Second pass: tone polish
+        # Second pass (tone polish)
         reply = client.chat.completions.create(
             model="gpt-4o",
             temperature=0.3,
@@ -645,7 +667,7 @@ def send_chat(request):
         chat_history.append({"role": "assistant", "content": reply})
         request.session["chat_history"] = chat_history[-10:]
 
-        # ---- Soft-memory writeback
+        # --- Soft-memory writeback
         if mode == "QUICK":
             request.session["nm_last_mode"] = "QUICK"
             request.session["nm_last_short_msg"] = user_message
@@ -660,7 +682,10 @@ def send_chat(request):
 
     except Exception:
         traceback.print_exc()
-        return JsonResponse({"reply": "Hi! Our system is busy right now due to a lot of users — please try again in a few minutes."}, status=500)
+        return JsonResponse(
+            {"reply": "Hi! Our system is busy right now due to a lot of users — please try again in a few minutes."},
+            status=500,
+        )
 
 # =============================
 #  SMART SUGGESTIONS / Q&A
@@ -796,6 +821,7 @@ def get_user_settings(request):
     return JsonResponse({
         "display_name": profile.display_name or request.user.first_name or request.user.username,
         "profession": profile.profession or "",
+        "language": profile.language,  # ✅ include language
     })
 
 @login_required
@@ -806,6 +832,10 @@ def update_user_settings(request):
             profile, _ = Profile.objects.get_or_create(user=request.user)
             profile.display_name = data.get("display_name", profile.display_name)
             profile.profession = data.get("profession", profile.profession)
+
+            if "language" in data:  # ✅ allow updates
+                profile.language = data["language"]
+
             profile.save()
             return JsonResponse({"status": "success"})
         except Exception:
@@ -816,6 +846,7 @@ def update_user_settings(request):
     return JsonResponse({
         "message": "Hi! That action isn’t available right now. Please try again in a few minutes."
     }, status=400)
+
 
 
 def summarize_text_block(raw_text: str, system_prompt: str) -> str:
