@@ -1363,3 +1363,14 @@ def service_unavailable_view(request, template_name="503.html"):
     resp = render(request, template_name, status=503)
     resp["Retry-After"] = "120"  # hint browsers/clients to retry after ~2 minutes
     return resp
+
+
+# views.py
+def trust_privacy_view(request, template_name="trust_privacy.html"):
+    return render(request, template_name)
+
+def privacy_view(request, template_name="privacy.html"):
+    return render(request, template_name)
+
+def terms_view(request, template_name="terms.html"):
+    return render(request, template_name)

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>NeuroMed AI — Trust & Privacy</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Icons: Font Awesome 6.4.2 (CSS only) -->
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+        referrerpolicy="no-referrer">
+
+  <link rel="icon" href="/static/pwa/icons/favicon-32.png">
+
+  <style>
+    /* Subtle card shadow + rounded corners */
+    .nm-card { border-radius: 1rem; }
+    /* Improve anchor scrolling position below sticky headers if you add one later */
+    :target { scroll-margin-top: 80px; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <!-- Header -->
+  <header class="bg-white border-b">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2">
+        <i class="fa-solid fa-heart-pulse text-teal-600" aria-hidden="true"></i>
+        <span class="font-semibold tracking-tight">NeuroMed AI</span>
+      </a>
+
+      <!-- Desktop nav -->
+      <nav class="hidden md:flex items-center gap-4">
+        <a href="/" class="text-sm text-slate-600 hover:text-slate-900">Home</a>
+        <a href="/trust" class="text-sm font-medium text-teal-700">Trust & Privacy</a>
+        <a href="/login" class="text-sm text-slate-600 hover:text-slate-900">Log in</a>
+      </nav>
+
+      <!-- Mobile menu (optional; keep header light for this page) -->
+      <a href="/login" class="md:hidden text-sm rounded-lg border px-3 py-1.5">Log in</a>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+    <section class="mb-8">
+      <h1 class="text-3xl font-bold tracking-tight flex items-start gap-3">
+        <span class="shrink-0 mt-1.5 inline-flex w-8 h-8 rounded-full bg-teal-100 text-teal-700 items-center justify-center">
+          <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+        </span>
+        <span>Designing Privacy as a Foundation for NeuroMed AI</span>
+      </h1>
+      <p class="mt-2 text-slate-600">Our approach to compliance, security, and patient trust.</p>
+    </section>
+
+    <!-- On-page TOC -->
+    <aside class="mb-6">
+      <div class="bg-white border nm-card p-4">
+        <div class="text-sm font-semibold text-slate-700 mb-2">Quick navigation</div>
+        <nav class="grid sm:grid-cols-2 gap-2 text-sm">
+          <a href="#legal" class="text-teal-700 hover:underline"><i class="fa-solid fa-scale-balanced mr-2" aria-hidden="true"></i>1. Legal & Compliance Framework</a>
+          <a href="#security" class="text-teal-700 hover:underline"><i class="fa-solid fa-lock mr-2" aria-hidden="true"></i>2. Data Security Architecture</a>
+          <a href="#consent" class="text-teal-700 hover:underline"><i class="fa-regular fa-circle-check mr-2" aria-hidden="true"></i>3. Consent & Transparency</a>
+          <a href="#ops" class="text-teal-700 hover:underline"><i class="fa-solid fa-clipboard-list mr-2" aria-hidden="true"></i>4. Operational Safeguards</a>
+          <a href="#ai" class="text-teal-700 hover:underline"><i class="fa-solid fa-microchip mr-2" aria-hidden="true"></i>5. Technical Best Practices for AI</a>
+          <a href="#trust" class="text-teal-700 hover:underline"><i class="fa-solid fa-user-shield mr-2" aria-hidden="true"></i>6. User Trust Features</a>
+          <a href="#practice" class="text-teal-700 hover:underline"><i class="fa-solid fa-list-check mr-2" aria-hidden="true"></i>✅ In Practice</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- 1 -->
+    <section id="legal" class="bg-white border nm-card p-5 mb-5">
+      <h2 class="text-xl font-semibold flex items-center gap-2">
+        <i class="fa-solid fa-scale-balanced text-teal-700" aria-hidden="true"></i>
+        1. Legal & Compliance Framework
+      </h2>
+      <ul class="mt-2 list-disc pl-5 space-y-1">
+        <li><b>HIPAA (U.S.)</b>: Safeguards for Protected Health Information (PHI) across storage, transmission, and access.</li>
+        <li><b>GDPR (EU)</b>: Consent, transparency, and user rights (access, deletion, portability).</li>
+      </ul>
+      <p class="mt-3 bg-amber-50 border border-amber-200 text-amber-900 text-sm rounded-lg p-3">
+        <span class="mr-1">📌</span><b>Action:</b> Draft a Privacy Policy and a Data Protection Impact Assessment (DPIA) mapping how NeuroMed AI handles PHI under both frameworks.
+      </p>
+    </section>
+
+    <!-- 2 -->
+    <section id="security" class="bg-white border nm-card p-5 mb-5">
+      <h2 class="text-xl font-semibold flex items-center gap-2">
+        <i class="fa-solid fa-lock text-teal-700" aria-hidden="true"></i>
+        2. Data Security Architecture
+      </h2>
+      <div class="mt-2 grid sm:grid-cols-2 gap-4">
+        <div>
+          <h3 class="font-medium">Encryption</h3>
+          <ul class="list-disc pl-5 text-sm space-y-1">
+            <li>AES-256 at rest</li>
+            <li>TLS 1.3+ in transit</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-medium">Access Controls</h3>
+          <ul class="list-disc pl-5 text-sm space-y-1">
+            <li>Role-based access (RBAC)</li>
+            <li>Multi-factor authentication (MFA)</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-medium">Data Minimization</h3>
+          <ul class="list-disc pl-5 text-sm space-y-1">
+            <li>Collect only what’s necessary</li>
+            <li>Store PHI separate from metadata when possible</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section id="consent" class="bg-white border nm-card p-5 mb-5">
+      <h2 class="text-xl font-semibold flex items-center gap-2">
+        <i class="fa-regular fa-circle-check text-teal-700" aria-hidden="true"></i>
+        3. Consent & Transparency
+      </h2>
+      <ul class="mt-2 list-disc pl-5 space-y-1">
+        <li><b>Explicit consent</b> before summarizing or sharing (clear, plain language).</li>
+        <li><b>Audit trails</b> for every access, summary, or data action.</li>
+        <li><b>Right to be forgotten</b> (GDPR): ability to delete data upon request.</li>
+      </ul>
+      <p class="mt-3 text-sm bg-slate-50 border rounded-lg p-3">
+        Example consent: “By clicking continue, you consent to your medical file being summarized with AI.”
+      </p>
+    </section>
+
+    <!-- 4 -->
+    <section id="ops" class="bg-white border nm-card p-5 mb-5">
+      <h2 class="text-xl font-semibold flex items-center gap-2">
+        <i class="fa-solid fa-clipboard-list text-teal-700" aria-hidden="true"></i>
+        4. Operational Safeguards
+      </h2>
+      <ul class="mt-2 list-disc pl-5 space-y-1">
+        <li><b>Business Associate Agreements (BAAs)</b> with cloud providers.</li>
+        <li><b>Training & Policies</b> for staff/contractors (HIPAA/GDPR).</li>
+        <li><b>Incident Response Plan</b> with GDPR 72-hour notification.</li>
+      </ul>
+    </section>
+
+    <!-- 5 -->
+    <section id="ai" class="bg-white border nm-card p-5 mb-5">
+      <h2 class="text-xl font-semibold flex items-center gap-2">
+        <i class="fa-solid fa-microchip text-teal-700" aria-hidden="true"></i>
+        5. Technical Best Practices for AI
+      </h2>
+      <ul class="mt-2 list-disc pl-5 space-y-1">
+        <li><b>De-identification</b>: strip names, DOBs, identifiers before processing.</li>
+        <li><b>Secure sandboxing</b>: prevent PHI from leaving private endpoints.</li>
+        <li><b>Model guardrails</b>: block recalling/reusing personal data in outputs.</li>
+      </ul>
+    </section>
+
+    <!-- 6 -->
+    <section id="trust" class="bg-white border nm-card p-5 mb-5">
+      <h2 class="text-xl font-semibold flex items-center gap-2">
+        <i class="fa-solid fa-user-shield text-teal-700" aria-hidden="true"></i>
+        6. User Trust Features
+      </h2>
+      <ul class="mt-2 list-disc pl-5 space-y-1">
+        <li><b>Patient & Caregiver dashboards</b>: show exactly what data is used.</li>
+        <li><b>Export/Delete</b>: self-service data control anytime.</li>
+        <li><b>Family access</b>: secure portals over email attachments.</li>
+      </ul>
+    </section>
+
+    <!-- In Practice -->
+    <section id="practice" class="bg-white border nm-card p-5">
+      <h2 class="text-xl font-semibold flex items-center gap-2">
+        <i class="fa-solid fa-list-check text-teal-700" aria-hidden="true"></i>
+        ✅ In Practice
+      </h2>
+      <ul class="mt-2 list-disc pl-5 space-y-1">
+        <li>Use HIPAA-compliant cloud (e.g., AWS HealthLake, Azure for Healthcare, GCP Healthcare API).</li>
+        <li>Sign Data Processing Agreements with any vendor touching data.</li>
+        <li>Appoint a Data Protection Officer (DPO) for GDPR/HIPAA governance.</li>
+      </ul>
+    </section>
+
+    <div class="mt-8 text-sm text-slate-500">
+      Last updated: <span id="lastUpdated"></span>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-10 border-t">
+    <div class="max-w-5xl mx-auto px-4 py-6 text-sm text-slate-500 flex flex-wrap gap-x-6 gap-y-2">
+      <a href="/privacy" class="hover:underline">Privacy Policy</a>
+      <a href="/terms" class="hover:underline">Terms</a>
+      <a href="/trust" class="hover:underline font-medium text-teal-700">Trust & Privacy</a>
+      <span class="ml-auto">&copy; <span id="yr"></span> NeuroMed AI</span>
+    </div>
+  </footer>
+
+  <!-- Tiny util script -->
+  <script>
+    document.getElementById('yr').textContent = new Date().getFullYear();
+    document.getElementById('lastUpdated').textContent = new Date().toLocaleDateString();
+  </script>
+</body>
+</html>

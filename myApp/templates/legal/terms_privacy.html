@@ -1,29 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>NeuroMed.ai — Terms of Use & Privacy Policy</title>
+
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <!-- Font Awesome 6.4.2 (professional set per your ask) -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+        referrerpolicy="no-referrer"/>
 
   <style>
     :root { --brand:#0b3b36; }
     body { background:#f7fafc; }
-    .prose h2 { scroll-margin-top: 96px; }
     .card { background:#fff; border:1px solid rgba(2,6,23,.08); }
     .chip { border:1px solid rgba(2,6,23,.08); }
+    .prose h2, .prose h3, .anchor-target { scroll-margin-top: 92px; }
+
+    /* Accordion chevron */
+    details summary { list-style: none; }
+    details summary::-webkit-details-marker { display:none; }
+    .chev { transition: transform .18s ease; }
+    details[open] .chev { transform: rotate(180deg); }
+
+    /* Current section in TOC */
+    .toc-item.active { background:#f1f5f9; color:#0f766e; font-weight:600; }
+
+    /* Mobile sticky top controls */
+    .sticky-top { position: sticky; top: 64px; z-index: 30; }
+
     /* Print */
     @media print {
-      .no-print { display:none !important; }
+      .no-print, .mobile-toc { display:none !important; }
       body { background:#fff; }
       a[href^="#"]:after { content:""; }
+      .card { border:0; box-shadow:none; }
     }
   </style>
 </head>
 <body class="text-slate-800">
   <!-- Header -->
-  <header class="w-full border-b bg-white/80 backdrop-blur">
+  <header class="w-full border-b bg-white/80 backdrop-blur supports-[backdrop-filter]:backdrop-blur">
     <div class="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3">
         <i class="fa-solid fa-heart-pulse text-teal-600 text-xl" aria-hidden="true"></i>
@@ -41,11 +61,16 @@
     <div class="card rounded-2xl p-6 md:p-8">
       <div class="flex items-start justify-between gap-4">
         <div>
-          <h1 class="text-3xl md:text-4xl font-bold tracking-tight">Terms of Use & Privacy Policy</h1>
+          <h1 class="text-3xl md:text-4xl font-bold tracking-tight flex items-center gap-3">
+            <i class="fa-solid fa-shield-halved text-emerald-700"></i>
+            Terms of Use & Privacy Policy
+          </h1>
           <p class="mt-2 text-slate-600">Clear, human-friendly policies for using NeuroMed.ai.</p>
-          <p class="mt-3 text-sm text-slate-500">
-            <span id="effectiveLabel">Effective:</span>
+          <p class="mt-3 text-sm text-slate-500 flex items-center gap-2">
+            <span id="effectiveLabel" class="whitespace-nowrap">Effective:</span>
             <time id="effectiveDate" datetime=""></time>
+            <span aria-hidden="true" class="hidden sm:inline">•</span>
+            <span class="hidden sm:inline">Last updated: <span id="lastUpdated"></span></span>
           </p>
         </div>
         <div class="no-print flex items-center gap-2">
@@ -60,16 +85,33 @@
     </div>
   </section>
 
+  <!-- Mobile TOC (collapsible) -->
+  <div class="md:hidden max-w-6xl mx-auto px-5 -mt-1 mb-4 mobile-toc">
+    <div class="sticky-top">
+      <details class="card rounded-xl p-3">
+        <summary class="flex items-center justify-between cursor-pointer select-none">
+          <span class="text-sm font-semibold text-slate-700">On this page</span>
+          <i class="fa-solid fa-chevron-down chev text-slate-500"></i>
+        </summary>
+        <nav class="mt-2 grid gap-1 text-sm">
+          <a class="px-3 py-2 rounded-lg hover:bg-slate-50 toc-item" href="#terms">Terms of Use</a>
+          <a class="px-3 py-2 rounded-lg hover:bg-slate-50 toc-item" href="#privacy">Privacy Policy</a>
+          <a class="px-3 py-2 rounded-lg hover:bg-slate-50 toc-item" href="#contact">Contact</a>
+        </nav>
+      </details>
+    </div>
+  </div>
+
   <!-- Layout -->
-  <main class="max-w-6xl mx-auto px-5 pb-16 grid grid-cols-1 md:grid-cols-[250px,1fr] gap-6">
-    <!-- Sticky TOC -->
+  <main class="max-w-6xl mx-auto px-5 pb-16 grid grid-cols-1 md:grid-cols-[260px,1fr] gap-6">
+    <!-- Sticky TOC (desktop) -->
     <aside class="no-print hidden md:block">
       <div class="card rounded-2xl p-4 sticky top-20">
         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On this page</p>
-        <nav class="space-y-2 text-sm">
-          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="#terms">Terms of Use</a>
-          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="#privacy">Privacy Policy</a>
-          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="#contact">Contact</a>
+        <nav class="space-y-2 text-sm" id="toc">
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50 toc-item" href="#terms">Terms of Use</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50 toc-item" href="#privacy">Privacy Policy</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50 toc-item" href="#contact">Contact</a>
         </nav>
       </div>
     </aside>
@@ -77,7 +119,7 @@
     <!-- Content -->
     <section class="prose max-w-none">
       <!-- TERMS -->
-      <div id="terms" class="card rounded-2xl p-6 md:p-8 mb-6">
+      <div id="terms" class="anchor-target card rounded-2xl p-6 md:p-8 mb-6">
         <h2 class="text-2xl md:text-3xl font-semibold flex items-center gap-2">
           <i class="fa-regular fa-file-lines text-emerald-700"></i> Terms of Use
         </h2>
@@ -90,10 +132,11 @@
         <details class="mt-5 group">
           <summary class="cursor-pointer select-none flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50">
             <span class="shrink-0 mt-1 chip w-6 h-6 grid place-items-center rounded-full text-xs">1</span>
-            <div>
+            <div class="min-w-0">
               <p class="font-medium">Informational Use Only</p>
               <p class="text-sm text-slate-600">AI outputs are not medical advice.</p>
             </div>
+            <i class="fa-solid fa-chevron-down chev ml-auto text-slate-400 mt-1"></i>
           </summary>
           <div class="mt-2 ml-12 text-slate-700">
             NeuroMed AI is not a licensed healthcare provider. The summaries, explanations, and AI-generated responses are
@@ -106,10 +149,11 @@
         <details class="mt-3 group">
           <summary class="cursor-pointer select-none flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50">
             <span class="shrink-0 mt-1 chip w-6 h-6 grid place-items-center rounded-full text-xs">2</span>
-            <div>
+            <div class="min-w-0">
               <p class="font-medium">User Responsibility</p>
               <p class="text-sm text-slate-600">Stay lawful; you own your content.</p>
             </div>
+            <i class="fa-solid fa-chevron-down chev ml-auto text-slate-400 mt-1"></i>
           </summary>
           <div class="mt-2 ml-12 text-slate-700">
             You agree not to upload, submit, or share any content that violates applicable laws or regulations.
@@ -122,10 +166,11 @@
         <details class="mt-3 group">
           <summary class="cursor-pointer select-none flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50">
             <span class="shrink-0 mt-1 chip w-6 h-6 grid place-items-center rounded-full text-xs">3</span>
-            <div>
+            <div class="min-w-0">
               <p class="font-medium">Data Accuracy</p>
               <p class="text-sm text-slate-600">We strive for quality; outcomes may vary.</p>
             </div>
+            <i class="fa-solid fa-chevron-down chev ml-auto text-slate-400 mt-1"></i>
           </summary>
           <div class="mt-2 ml-12 text-slate-700">
             NeuroMed AI makes no guarantees regarding the accuracy, completeness, or suitability of the information
@@ -137,10 +182,11 @@
         <details class="mt-3 group">
           <summary class="cursor-pointer select-none flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50">
             <span class="shrink-0 mt-1 chip w-6 h-6 grid place-items-center rounded-full text-xs">4</span>
-            <div>
+            <div class="min-w-0">
               <p class="font-medium">Emergency Disclaimer</p>
               <p class="text-sm text-slate-600">Not for emergencies.</p>
             </div>
+            <i class="fa-solid fa-chevron-down chev ml-auto text-slate-400 mt-1"></i>
           </summary>
           <div class="mt-2 ml-12 text-slate-700">
             Do not use NeuroMed AI in emergencies. If you or someone else is experiencing a medical emergency,
@@ -152,10 +198,11 @@
         <details class="mt-3 group">
           <summary class="cursor-pointer select-none flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50">
             <span class="shrink-0 mt-1 chip w-6 h-6 grid place-items-center rounded-full text-xs">5</span>
-            <div>
+            <div class="min-w-0">
               <p class="font-medium">Modifications</p>
               <p class="text-sm text-slate-600">We may update these terms.</p>
             </div>
+            <i class="fa-solid fa-chevron-down chev ml-auto text-slate-400 mt-1"></i>
           </summary>
           <div class="mt-2 ml-12 text-slate-700">
             We reserve the right to update or modify these Terms of Use at any time. Continued use of the platform
@@ -165,7 +212,7 @@
       </div>
 
       <!-- PRIVACY -->
-      <div id="privacy" class="card rounded-2xl p-6 md:p-8">
+      <div id="privacy" class="anchor-target card rounded-2xl p-6 md:p-8">
         <h2 class="text-2xl md:text-3xl font-semibold flex items-center gap-2">
           <i class="fa-solid fa-shield-heart text-emerald-700"></i> Privacy Policy
         </h2>
@@ -177,10 +224,11 @@
         <details class="mt-5 group">
           <summary class="cursor-pointer select-none flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50">
             <span class="shrink-0 mt-1 chip w-6 h-6 grid place-items-center rounded-full text-xs">1</span>
-            <div>
+            <div class="min-w-0">
               <p class="font-medium">Data We Collect</p>
               <p class="text-sm text-slate-600">What may be captured when you use NeuroMed.</p>
             </div>
+            <i class="fa-solid fa-chevron-down chev ml-auto text-slate-400 mt-1"></i>
           </summary>
           <div class="mt-2 ml-12 text-slate-700">
             We may collect the following data when you use our platform:
@@ -196,10 +244,11 @@
         <details class="mt-3 group">
           <summary class="cursor-pointer select-none flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50">
             <span class="shrink-0 mt-1 chip w-6 h-6 grid place-items-center rounded-full text-xs">2</span>
-            <div>
+            <div class="min-w-0">
               <p class="font-medium">Data Usage</p>
               <p class="text-sm text-slate-600">Only to power your session.</p>
             </div>
+            <i class="fa-solid fa-chevron-down chev ml-auto text-slate-400 mt-1"></i>
           </summary>
           <div class="mt-2 ml-12 text-slate-700">
             Your data is used solely to generate summaries, responses, and support interactions within your session.
@@ -211,10 +260,11 @@
         <details class="mt-3 group">
           <summary class="cursor-pointer select-none flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50">
             <span class="shrink-0 mt-1 chip w-6 h-6 grid place-items-center rounded-full text-xs">3</span>
-            <div>
+            <div class="min-w-0">
               <p class="font-medium">Data Security</p>
               <p class="text-sm text-slate-600">Encryption in transit and at rest.</p>
             </div>
+            <i class="fa-solid fa-chevron-down chev ml-auto text-slate-400 mt-1"></i>
           </summary>
           <div class="mt-2 ml-12 text-slate-700">
             We use secure encryption protocols for data in transit and at rest. Data is retained only as long as needed
@@ -226,10 +276,11 @@
         <details class="mt-3 group">
           <summary class="cursor-pointer select-none flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50">
             <span class="shrink-0 mt-1 chip w-6 h-6 grid place-items-center rounded-full text-xs">4</span>
-            <div>
+            <div class="min-w-0">
               <p class="font-medium">HIPAA Alignment</p>
               <p class="text-sm text-slate-600">Best practices; enterprise options available.</p>
             </div>
+            <i class="fa-solid fa-chevron-down chev ml-auto text-slate-400 mt-1"></i>
           </summary>
           <div class="mt-2 ml-12 text-slate-700">
             While not a covered entity under HIPAA, NeuroMed AI aligns with HIPAA best practices. For enterprise or clinical
@@ -241,10 +292,11 @@
         <details class="mt-3 group">
           <summary class="cursor-pointer select-none flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50">
             <span class="shrink-0 mt-1 chip w-6 h-6 grid place-items-center rounded-full text-xs">5</span>
-            <div>
+            <div class="min-w-0">
               <p class="font-medium">Your Rights</p>
               <p class="text-sm text-slate-600">Access, delete, or opt out of retention.</p>
             </div>
+            <i class="fa-solid fa-chevron-down chev ml-auto text-slate-400 mt-1"></i>
           </summary>
           <div class="mt-2 ml-12 text-slate-700">
             You may request deletion of your data or opt out of data-retention features at any time. Questions?
@@ -254,7 +306,7 @@
       </div>
 
       <!-- CONTACT / FOOTER -->
-      <div id="contact" class="mt-6 text-sm text-slate-600">
+      <div id="contact" class="anchor-target mt-6 text-sm text-slate-600">
         <div class="flex flex-wrap items-center gap-3">
           <i class="fa-regular fa-envelope"></i>
           <a href="mailto:hello@iriseup.ai" class="underline">hello@iriseup.ai</a>
@@ -265,13 +317,50 @@
     </section>
   </main>
 
+  <!-- Back-to-top (mobile/desktop) -->
+  <button id="backTop"
+          class="no-print fixed bottom-4 right-4 z-40 hidden rounded-full bg-slate-900 text-white w-11 h-11 grid place-items-center shadow-lg hover:opacity-90"
+          aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
   <script>
-    // Effective date (change to your real date or pass from backend)
-    const effective = new Date(); // today; set a fixed ISO string if needed
+    // Dates
+    const today = new Date();
+    const effective = today; // set to a fixed ISO if you prefer
     const ef = document.getElementById('effectiveDate');
     ef.dateTime = effective.toISOString().split('T')[0];
     ef.textContent = effective.toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' });
-    document.getElementById('year').textContent = new Date().getFullYear();
+    document.getElementById('lastUpdated').textContent = today.toLocaleDateString();
+    document.getElementById('year').textContent = today.getFullYear();
+
+    // Scrollspy for TOC
+    const sections = ['terms','privacy','contact'].map(id => document.getElementById(id));
+    const tocLinks = Array.from(document.querySelectorAll('.toc-item'));
+    const linkFor = id => tocLinks.find(a => a.getAttribute('href') === '#' + id);
+
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const link = linkFor(entry.target.id);
+        if (!link) return;
+        if (entry.isIntersecting) {
+          tocLinks.forEach(a => a.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-45% 0px -50% 0px', threshold: 0.01 });
+
+    sections.forEach(s => s && obs.observe(s));
+
+    // Back-to-top visibility + behavior
+    const back = document.getElementById('backTop');
+    const showBack = () => {
+      if (window.scrollY > 320) back.classList.remove('hidden');
+      else back.classList.add('hidden');
+    };
+    window.addEventListener('scroll', showBack, { passive:true });
+    back.addEventListener('click', () => window.scrollTo({ top:0, behavior:'smooth' }));
+    showBack();
   </script>
 </body>
 </html>
