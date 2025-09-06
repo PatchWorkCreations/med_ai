@@ -261,9 +261,7 @@
     <button data-mode="Faith" class="mode-chip justify-center text-sm" aria-pressed="false">
       <i class="fa-solid fa-hands-praying text-indigo-700"></i><span>Faith</span>
     </button>
-    <button data-mode="Bilingual" class="mode-chip justify-center text-sm" aria-pressed="false">
-      <i class="fa-solid fa-language text-teal-700"></i><span>Bilingual</span>
-    </button>
+    
     <button data-mode="Geriatric" class="mode-chip justify-center text-sm" aria-pressed="false">
       <i class="fa-solid fa-person-cane text-emerald-700"></i><span>Geriatric</span>
     </button>
@@ -295,7 +293,7 @@
     <option value="PlainClinical">Balanced</option>
     <option value="Clinical">Clinical</option>
     <option value="Faith">Faith</option>
-    <option value="Bilingual">Bilingual</option>
+  
     <option value="Geriatric">Geriatric</option>
     <option value="EmotionalSupport">Emotional Support</option>
 
@@ -356,15 +354,7 @@
           <i class="fa-solid fa-check ml-auto text-emerald-600 hidden"></i>
         </button>
 
-        <button class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 text-left"
-                data-mode="Bilingual">
-          <i class="fa-solid fa-language text-teal-700"></i>
-          <div class="min-w-0">
-            <div class="text-[15px] font-medium">Bilingual</div>
-            <div class="text-xs text-slate-500 truncate">Tagalog + English</div>
-          </div>
-          <i class="fa-solid fa-check ml-auto text-emerald-600 hidden"></i>
-        </button>
+        
 
         <button class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 text-left"
                 data-mode="Geriatric">
@@ -854,14 +844,38 @@ function appendBubble({ message, isUser=false, timestamp=new Date() }) {
     }
 
     const MODE_META = {
-      'PlainClinical': { icon:'fa-regular fa-message', color:'text-teal-600', intro:"Balanced mode on. Clear explanations; add clinician notes when helpful." },
-      'Caregiver':     { icon:'fa-solid fa-hands-holding-child', color:'text-amber-700', intro:"Caregiver mode on. Gentle, practical steps." },
-      'Faith':         { icon:'fa-solid fa-hands-praying', color:'text-indigo-700', intro:"Faith mode on. Clear guidance with encouragement." },
-      'Clinical':      { icon:'fa-solid fa-stethoscope', color:'text-slate-800', intro:"Clinical mode on. Concise and technical." },
-      'Bilingual':     { icon:'fa-solid fa-language', color:'text-teal-700', intro:"Bilingual mode on. Tagalog + English." },
-      'Geriatric':     { icon:'fa-solid fa-person-cane', color:'text-emerald-700', intro:"Geriatric mode on. Larger text and simpler steps." },
-      'EmotionalSupport': { icon:'fa-solid fa-heart', color:'text-rose-700', intro:"Emotional Support mode on. Validating, calm, and actionably gentle." }
-    };
+  'PlainClinical': { 
+    icon: 'fa-regular fa-message', 
+    color: 'text-teal-600', 
+    intro: "Hi there! You're in **Balanced Mode**. I can help you with clear explanations and add clinician notes when useful." 
+  },
+  'Caregiver': { 
+    icon: 'fa-solid fa-hands-holding-child', 
+    color: 'text-amber-700', 
+    intro: "Hi there! You're in **Caregiver Mode**. I can guide you with gentle, practical steps to make caregiving easier." 
+  },
+  'Faith': { 
+    icon: 'fa-solid fa-hands-praying', 
+    color: 'text-indigo-700', 
+    intro: "Hi there! You're in **Faith Mode**. I can support you with guidance and encouragement, rooted in faith and hope." 
+  },
+  'Clinical': { 
+    icon: 'fa-solid fa-stethoscope', 
+    color: 'text-slate-800', 
+    intro: "Hi there! You're in **Clinical Mode**. I can provide concise, technical answers with a clinical focus." 
+  },
+  'Geriatric': { 
+    icon: 'fa-solid fa-person-cane', 
+    color: 'text-emerald-700', 
+    intro: "Hi there! You're in **Geriatric Mode**. I can explain things in simpler steps with clarity, tailored for older adults." 
+  },
+  'EmotionalSupport': { 
+    icon: 'fa-solid fa-heart', 
+    color: 'text-rose-700', 
+    intro: "Hi there! You're in **Emotional Support Mode**. I can be here with calm, validating support and gentle guidance whenever you need it." 
+  }
+};
+
 
     function applyModeUI(mode){
       const meta = MODE_META[mode] || MODE_META['Caregiver'];
@@ -1175,7 +1189,7 @@ function appendBubble({ message, isUser=false, timestamp=new Date() }) {
 
     { selector: '#modeGroup',
       title: 'Pick your tone',
-      body:  'Caregiver, Balanced, Clinical, Faith, Bilingual, Geriatric, or Emotional Support. Switch anytime.' },
+      body:  'Caregiver, Balanced, Clinical, Faith, Geriatric, or Emotional Support. Switch anytime.' },
 
 
     { selector: '#dropZone',
@@ -1526,7 +1540,7 @@ document.addEventListener('DOMContentLoaded', () => {
     'PlainClinical': 'fa-regular fa-message text-teal-600',
     'Clinical':      'fa-solid fa-stethoscope text-slate-800',
     'Faith':         'fa-solid fa-hands-praying text-indigo-700',
-    'Bilingual':     'fa-solid fa-language text-teal-700',
+    
     'Geriatric':     'fa-solid fa-person-cane text-emerald-700',
     'EmotionalSupport': 'fa-solid fa-heart text-rose-700'
   };
