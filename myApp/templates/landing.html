@@ -295,132 +295,258 @@
     </div>
   </section>
 
-  <!-- Demo (form only) -->
-  <section id="demo" class="beautify relative py-24 overflow-hidden">
-    <div class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_600px_at_90%_-10%,rgba(16,185,129,0.10),transparent),radial-gradient(900px_500px_at_10%_30%,rgba(14,165,233,0.08),transparent)]"></div>
+  <style>
+    /* --- FORM LOOK & FEEL (softer, cleaner) --- */
+    .modern-form .field { margin-top: 1rem; }
+    .modern-form .field:first-child { margin-top: 0; }
+    @media (min-width:640px){ .modern-form .field { margin-top: 1.125rem; } }
+  
+    .modern-form label{
+      display:block;
+      margin-bottom: .5rem;               /* clearer separation from input */
+      font-weight: 600;
+      color:#0f172a;                      /* ink */
+    }
+  
+    .modern-form .input-with-icon{
+      position:relative;
+      border:1px solid #cbd5e1;           /* slate-300 for clearer outline */
+      border-radius: .75rem;              /* 12px: crisp, less pill-y */
+      background:#fff;
+      padding: .6rem .9rem .6rem 2.9rem;  /* balanced padding, room for icon */
+      transition: border-color .15s, box-shadow .15s, background-color .15s;
+    }
+    .modern-form .input-with-icon:hover{
+      border-color:#94a3b8;               /* slate-400 on hover */
+    }
+    .modern-form .input-with-icon:focus-within{
+      border-color:#10b981;               /* emerald-500 */
+      box-shadow: 0 0 0 3px rgba(16,185,129,.12); /* softer ring */
+    }
+  
+    .modern-form .input-with-icon > i{
+      position:absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: .95rem;
+      color:#94a3b8;                      /* slate-400 */
+      pointer-events:none;
+    }
+  
+    /* Controls adopt the shell; zero extra borders */
+    .modern-form .input-with-icon input,
+    .modern-form .input-with-icon select,
+    .modern-form .input-with-icon textarea{
+      width:100%;
+      height: 48px;                       /* consistent touch target */
+      background:transparent !important;
+      border:0 !important;
+      outline:none !important;
+      box-shadow:none !important;
+      color:#0f172a;
+      line-height:1.4;
+    }
+    .modern-form ::placeholder{ color:#94a3b8; } /* slate-400 */
+  
+    /* Error state: clear but not screaming */
+    .modern-form .has-error .input-with-icon{
+      border-color:#f43f5e;               /* rose-500 */
+      box-shadow: 0 0 0 3px rgba(244,63,94,.12);
+    }
+    .form-error{ margin-top:.375rem; font-size:.875rem; color:#dc2626; }
+  
+    /* Tighten grid spacing between halves on small screens */
+    .modern-form .row { display:grid; grid-template-columns: 1fr; gap: .875rem; }
+    @media (min-width:640px){ .modern-form .row { grid-template-columns: 1fr 1fr; gap: 1rem; } }
 
-    <div class="max-w-7xl mx-auto px-4 md:px-8 grid lg:grid-cols-2 gap-12">
-      <!-- Left -->
-      <div class="max-w-xl">
-        <p class="uppercase tracking-[0.18em] text-xs text-slate-500">Get a look in 20 minutes</p>
-        <h3 class="mt-2 text-4xl font-extrabold leading-tight bg-gradient-to-r from-emerald-600 to-sky-700 bg-clip-text text-transparent">
-          Book a live <span class="whitespace-nowrap">NeuroMed demo</span>
-        </h3>
-        <p class="mt-3 text-slate-600">See your AI team in action and leave with a tailored rollout plan for your clinic or hospital.</p>
+    .demo-h{
+    font-size: clamp(1.9rem, 7.8vw, 3rem);  /* ~30px → 48px */
+    line-height: 1.12;                      /* a hair tighter for big text */
+  }
+  </style>
+  
+  
+  
+  <section
+  id="demo"
+  class="demo-section beautify relative overflow-hidden scroll-mt-24 lg:scroll-mt-32 pt-10 sm:pt-12 md:pt-16 lg:pt-20 pb-12 md:pb-16 lg:pb-20"
+>
+  <!-- soft background -->
+  <div class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_600px_at_90%_-10%,rgba(16,185,129,0.10),transparent),radial-gradient(900px_500px_at_10%_30%,rgba(14,165,233,0.08),transparent)]"></div>
 
-        <ul class="mt-8 space-y-4 text-slate-800">
-          <li class="flex items-start gap-3">
-            <span class="mt-1 h-6 w-6 grid place-items-center rounded-full bg-slate-100"><i class="fa-solid fa-display text-slate-600 text-[13px]"></i></span>
-            <div><strong>Live walkthrough</strong> of agents & workflows (clinical, admin, specialized)</div>
-          </li>
-          <li class="flex items-start gap-3">
-            <span class="mt-1 h-6 w-6 grid place-items-center rounded-full bg-slate-100"><i class="fa-solid fa-chart-line text-slate-600 text-[13px]"></i></span>
-            <div><strong>ROI estimates</strong> for your volumes & denial rates</div>
-          </li>
-          <li class="flex items-start gap-3">
-            <span class="mt-1 h-6 w-6 grid place-items-center rounded-full bg-slate-100"><i class="fa-solid fa-user-shield text-slate-600 text-[13px]"></i></span>
-            <div><strong>HIPAA & security overview</strong> covering data flow and access controls</div>
-          </li>
-        </ul>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-start">
+    <!-- COPY (first on mobile) -->
+    <div class="order-1 lg:order-1 max-w-xl lg:max-w-none pt-6 sm:pt-8 md:pt-10 lg:pt-12">
+      <p class="demo-eyebrow uppercase text-slate-500">Get a look in 20 minutes</p>
 
-        <div class="mt-6 flex flex-wrap items-center gap-2 text-xs text-slate-600">
-          <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1"><i class="fa-regular fa-clock"></i> 20 minutes</span>
-          <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1"><i class="fa-solid fa-video"></i> Zoom</span>
-          <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1"><i class="fa-solid fa-shield-halved"></i> BAA available</span>
-          <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1"><i class="fa-solid fa-circle-check"></i> No sales pitch</span>
-        </div>
-      </div>
+      <h3 class="demo-h mt-2 font-extrabold tracking-tight text-ink">
+        Book a live <span class="text-emerald-700">NeuroMed demo</span>
+      </h3>
+      <div class="mt-3 h-2 w-20 sm:w-24 bg-emerald-500 rounded-full"></div>
+      
 
-      <!-- Right: form card -->
-      <div class="lg:sticky lg:top-24">
-        <div class="p-[1px] rounded-3xl bg-gradient-to-br from-emerald-200/60 via-slate-200/30 to-sky-200/60 shadow-soft">
-          <div class="rounded-3xl bg-white/90 backdrop-blur border border-slate-200/70">
-            <form method="post" action="{% url 'book_demo' %}" class="modern-form p-6 md:p-8 space-y-5">
-              {% csrf_token %}
-              {{ form.non_field_errors }}
+      <p class="demo-p mt-3 text-slate-600">
+        See your AI team in action and leave with a tailored rollout plan for your clinic or hospital.
+      </p>
 
-              <div>
-                <label for="{{ form.name.id_for_label }}" class="text-sm font-semibold">Full name</label>
-                <div class="input-with-icon relative">
-                  <i class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                  {{ form.name }}
-                </div>
-                {% if form.name.errors %}<p class="form-error">{{ form.name.errors|join:', ' }}</p>{% endif %}
+      <ul class="demo-bullets mt-5 sm:mt-6 text-slate-800">
+        <li class="flex items-start gap-3">
+          <span class="mt-1 h-6 w-6 grid place-items-center rounded-full bg-slate-100">
+            <i class="fa-solid fa-display text-slate-600 text-[13px]"></i>
+          </span>
+          <div><strong>Live walkthrough</strong> of agents & workflows (clinical, admin, specialized)</div>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="mt-1 h-6 w-6 grid place-items-center rounded-full bg-slate-100">
+            <i class="fa-solid fa-chart-line text-slate-600 text-[13px]"></i>
+          </span>
+          <div><strong>ROI estimates</strong> for your volumes & denial rates</div>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="mt-1 h-6 w-6 grid place-items-center rounded-full bg-slate-100">
+            <i class="fa-solid fa-user-shield text-slate-600 text-[13px]"></i>
+          </span>
+          <div><strong>HIPAA & security overview</strong> covering data flow and access controls</div>
+        </li>
+      </ul>
+
+      <!-- Comfort chips: airy grid on mobile, tidy wrap on desktop -->
+<div class="mt-8 sm:mt-9">
+    <ul class="grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:gap-3 text-slate-700">
+      <li>
+        <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-2 leading-none shadow-sm">
+          <i class="fa-regular fa-clock text-slate-500 text-[14px]"></i>
+          <span class="text-sm font-medium">20 minutes</span>
+        </span>
+      </li>
+      <li>
+        <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-2 leading-none shadow-sm">
+          <i class="fa-solid fa-video text-slate-500 text-[14px]"></i>
+          <span class="text-sm font-medium">Zoom</span>
+        </span>
+      </li>
+      <li>
+        <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-2 leading-none shadow-sm">
+          <i class="fa-solid fa-shield-halved text-slate-500 text-[14px]"></i>
+          <span class="text-sm font-medium">BAA available</span>
+        </span>
+      </li>
+      <li>
+        <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-2 leading-none shadow-sm">
+          <i class="fa-solid fa-circle-check text-slate-500 text-[14px]"></i>
+          <span class="text-sm font-medium">No sales pitch</span>
+        </span>
+      </li>
+    </ul>
+  </div>
+  
+
+      <!-- Handy jump-to-form on phones -->
+      <a href="#demo-form"
+         class="mt-6 inline-flex lg:hidden items-center justify-center rounded-full bg-ink text-white px-5 py-3 font-semibold">
+        Book my 20-min demo
+      </a>
+    </div>
+
+    <!-- FORM (second on mobile, sticky on desktop) -->
+    <div class="order-2 lg:order-2 lg:sticky lg:top-24">
+      <div class="p-[1px] rounded-3xl bg-gradient-to-br from-emerald-200/60 via-slate-200/30 to-sky-200/60 shadow-soft">
+        <div class="rounded-3xl bg-white/90 backdrop-blur border border-slate-200/70">
+          <!-- ⬇️ DO NOT TOUCH: form kept exactly as provided -->
+          <form id="demo-form" method="post" action="{% url 'book_demo' %}" class="modern-form p-6 sm:p-7 md:p-8 rounded-2xl space-y-0">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+          
+            <!-- Name -->
+            <div class="field {% if form.name.errors %}has-error{% endif %}">
+              <label for="{{ form.name.id_for_label }}">Full name</label>
+              <div class="input-with-icon">
+                <i class="fa-solid fa-user"></i>
+                {{ form.name }}
               </div>
-
-              <div>
-                <label for="{{ form.email.id_for_label }}" class="text-sm font-semibold">Work email</label>
-                <div class="input-with-icon relative">
-                  <i class="fa-solid fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                  {{ form.email }}
-                </div>
-                {% if form.email.errors %}<p class="form-error">{{ form.email.errors|join:', ' }}</p>{% endif %}
+              {% if form.name.errors %}<p class="form-error">{{ form.name.errors|join:', ' }}</p>{% endif %}
+            </div>
+          
+            <!-- Email -->
+            <div class="field {% if form.email.errors %}has-error{% endif %}">
+              <label for="{{ form.email.id_for_label }}">Work email</label>
+              <div class="input-with-icon">
+                <i class="fa-solid fa-envelope"></i>
+                {{ form.email }}
               </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label for="{{ form.company.id_for_label }}" class="text-sm font-semibold">Company/Clinic</label>
-                  <div class="input-with-icon relative">
-                    <i class="fa-solid fa-building absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    {{ form.company }}
-                  </div>
+              {% if form.email.errors %}<p class="form-error">{{ form.email.errors|join:', ' }}</p>{% endif %}
+            </div>
+          
+            <!-- Company / Phone -->
+            <div class="field row">
+              <div class="{% if form.company.errors %}has-error{% endif %}">
+                <label for="{{ form.company.id_for_label }}">Company/Clinic</label>
+                <div class="input-with-icon">
+                  <i class="fa-solid fa-building"></i>
+                  {{ form.company }}
                 </div>
-                <div>
-                  <label for="{{ form.phone.id_for_label }}" class="text-sm font-semibold">Phone (optional)</label>
-                  <div class="input-with-icon relative">
-                    <i class="fa-solid fa-phone absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    {{ form.phone }}
-                  </div>
+                {% if form.company.errors %}<p class="form-error">{{ form.company.errors|join:', ' }}</p>{% endif %}
+              </div>
+          
+              <div class="{% if form.phone.errors %}has-error{% endif %}">
+                <label for="{{ form.phone.id_for_label }}">Phone (optional)</label>
+                <div class="input-with-icon">
+                  <i class="fa-solid fa-phone"></i>
+                  {{ form.phone }}
                 </div>
+                {% if form.phone.errors %}<p class="form-error">{{ form.phone.errors|join:', ' }}</p>{% endif %}
               </div>
-
-              <div>
-                <label for="{{ form.use_case.id_for_label }}" class="text-sm font-semibold">What do you want to improve first?</label>
-                <div class="input-with-icon relative">
-                  <i class="fa-solid fa-wand-magic-sparkles absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                  {{ form.use_case }}
-                </div>
+            </div>
+          
+            <!-- Use case -->
+            <div class="field {% if form.use_case.errors %}has-error{% endif %}">
+              <label for="{{ form.use_case.id_for_label }}">What do you want to improve first?</label>
+              <div class="input-with-icon">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                {{ form.use_case }}
               </div>
-
-              <div class="hidden">
-                {{ form.website }} {{ form.utm_source }} {{ form.utm_medium }} {{ form.utm_campaign }} {{ form.utm_term }} {{ form.utm_content }}
-              </div>
-
-              <button class="w-full rounded-full bg-ink text-white py-3.5 font-semibold tracking-wide hover:opacity-90">
+              {% if form.use_case.errors %}<p class="form-error">{{ form.use_case.errors|join:', ' }}</p>{% endif %}
+            </div>
+          
+            <!-- Hidden tracking -->
+            <div class="hidden">
+              {{ form.website }} {{ form.utm_source }} {{ form.utm_medium }} {{ form.utm_campaign }} {{ form.utm_term }} {{ form.utm_content }}
+            </div>
+          
+            <!-- Submit -->
+            <div class="field" style="margin-top:1.25rem">
+              <button class="w-full rounded-full bg-ink text-white py-3.5 font-semibold tracking-wide shadow-sm hover:opacity-90 active:opacity-95">
                 Get my demo
               </button>
-              <p class="text-[11px] text-slate-500 text-center">
+              <p class="mt-2 text-[11px] text-slate-500 text-center">
                 I agree to the
                 <a href="{% url 'terms' %}" class="font-medium text-teal-700 hover:underline">Terms of Use</a>
                 and
                 <a href="{% url 'privacy' %}" class="font-medium text-teal-700 hover:underline">Privacy Policy</a>.
               </p>
-            </form>
-          </div>
+            </div>
+          </form>
+          <!-- ⬆️ DO NOT TOUCH: form kept exactly as provided -->
         </div>
       </div>
     </div>
+  </div>
+</section>
 
-    <!-- tiny CSS helpers -->
-    <style>
-      .modern-form .input-with-icon input,
-      .modern-form .input-with-icon select { padding-left: 2.6rem !important; }
-      .modern-form input, .modern-form select {
-        border-radius: 0.875rem !important; height: 44px; background: #fff;
-      }
-    </style>
-  </section>
-
-  <!-- Calendar (full-width) -->
-  <section id="calendar" class="py-16">
-    <div class="max-w-7xl mx-auto px-4 md:px-8">
-      <div class="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-700">
+  
+  
+  
+  <section id="calendar" class="py-12 sm:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+      <div class="mb-3 sm:mb-4 flex items-center gap-2 text-sm font-semibold text-slate-700">
         <i class="fa-regular fa-calendar-check"></i>
         <span>Or pick a time now</span>
       </div>
-
+  
       <div class="rounded-2xl overflow-hidden ring-1 ring-slate-200/70 shadow-soft bg-white">
-        <div id="calendly-full" style="min-width:320px;height:860px;"></div>
+        <!-- Use responsive heights instead of a fixed inline style -->
+        <div id="calendly-full" class="w-full h-[620px] sm:h-[720px] md:h-[860px]"></div>
         <noscript>
           <div class="p-4 text-sm text-slate-600">
             JavaScript is required to book. <a class="underline" href="https://calendly.com/iriseupgroupofcompanies/30min">Open Calendly</a>.
@@ -429,27 +555,7 @@
       </div>
     </div>
   </section>
-
-  <!-- Early Access -->
-  <section id="signup" class="py-16 bg-gradient-to-br from-emerald-50 via-slate-50 to-transparent">
-    <div class="max-w-3xl mx-auto px-4 md:px-8">
-      <div class="bg-white/80 backdrop-blur rounded-2xl shadow-xl ring-1 ring-slate-200 p-8">
-        <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 text-center">Get Early Access</h2>
-        <p class="mt-2 text-center text-slate-600">Join our pilot list to bring clarity and compassion to your community.</p>
-        <form id="lead-form" class="mt-6 grid md:grid-cols-3 gap-3">
-          <input type="text" name="name" placeholder="Full name" required class="px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand/50">
-          <input type="email" name="email" placeholder="Work email" required class="px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand/50">
-          <button class="px-6 py-3 rounded-lg bg-brand text-white font-semibold hover:opacity-90">Request Invite</button>
-        </form>
-        <p class="mt-3 text-center text-xs text-slate-500">
-          I agree to the
-          <a href="{% url 'terms' %}" class="font-medium text-teal-700 hover:underline">Terms of Use</a>
-          and
-          <a href="{% url 'privacy' %}" class="font-medium text-teal-700 hover:underline">Privacy Policy</a>.
-        </p>
-      </div>
-    </div>
-  </section>
+  
 
   <!-- FAQ -->
   <section id="faq" class="py-16 bg-white">
