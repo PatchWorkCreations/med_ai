@@ -160,3 +160,19 @@ class OTPForm(forms.Form):
 class OTPSetPasswordForm(SetPasswordForm):
     """Same fields as SetPasswordForm: new_password1/new_password2"""
     pass
+
+
+class DemoRequestForm(forms.Form):
+    name = forms.CharField(max_length=120)
+    email = forms.EmailField()
+    company = forms.CharField(max_length=120, required=False)
+    phone = forms.CharField(max_length=40, required=False)
+    use_case = forms.ChoiceField(choices=USE_CASE_CHOICES, required=False)
+
+    # Hidden/tracking fields (already in your template)
+    website = forms.CharField(required=False, widget=forms.HiddenInput)
+    utm_source = forms.CharField(required=False, widget=forms.HiddenInput)
+    utm_medium = forms.CharField(required=False, widget=forms.HiddenInput)
+    utm_campaign = forms.CharField(required=False, widget=forms.HiddenInput)
+    utm_term = forms.CharField(required=False, widget=forms.HiddenInput)
+    utm_content = forms.CharField(required=False, widget=forms.HiddenInput)

@@ -52,6 +52,9 @@ urlpatterns = [
     path("api/auth/status/", views.auth_status, name="auth_status"),
     path("api/track", views.track_event, name="track_event"),
 
+        path("landing/", views.landing, name="landing"),
+    path("book-demo/", views.book_demo, name="book_demo"),
+
 ]
 
 

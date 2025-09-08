@@ -1365,3 +1365,131 @@ def service_unavailable_view(request, template_name="503.html"):
     return resp
 
 
+from urllib.parse import urlencode
+from django.conf import settings
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.urls import reverse
+from django.utils.html import escape
+from django.core.mail import EmailMultiAlternatives
+from .forms import DemoRequestForm
+
+# Renders the landing page with prefilled form + optional success modal
+def landing(request):
+    q = request.GET
+    initial = {}
+
+    # Prefill name/email if present
+    if q.get("name"):
+        initial["name"] = q.get("name").strip()
+    if q.get("email"):
+        initial["email"] = q.get("email").strip().lower()
+
+    # Capture UTM params if they exist
+    for key in ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"]:
+        val = q.get(key)
+        if val:
+            initial[key] = val
+
+    # Helpful for context on submit
+    try:
+        initial["website"] = request.build_absolute_uri(request.get_full_path())
+    except Exception:
+        initial["website"] = ""
+
+    form = DemoRequestForm(initial=initial)
+
+    # Flag to trigger the success modal on page load
+    show_demo_modal = (q.get("demo") == "ok")
+
+    return render(request, "landing.html", {
+        "form": form,
+        "show_demo_modal": show_demo_modal,
+    })
+
+
+# Handles the POST of the Django form in #demo
+def book_demo(request):
+    if request.method != "POST":
+        return redirect("landing")
+
+    form = DemoRequestForm(request.POST)
+    if not form.is_valid():
+        # Re-render landing with errors
+        return render(request, "landing.html", {"form": form})
+
+    data = form.cleaned_data
+
+    # Compose email to *you* (goes to DEFAULT_FROM_EMAIL inbox)
+    subject = f"[Neuromed Demo] {data.get('name')} — {data.get('company') or 'No company'}"
+    to = [settings.DEFAULT_FROM_EMAIL]     # Change if you want another recipient list
+    reply_to = [data["email"]]
+
+    html_body = f"""
+      <h2>New Demo Request</h2>
+      <p><strong>Name:</strong> {escape(data.get('name') or '')}</p>
+      <p><strong>Email:</strong> {escape(data.get('email') or '')}</p>
+      <p><strong>Company/Clinic:</strong> {escape(data.get('company') or '')}</p>
+      <p><strong>Phone:</strong> {escape(data.get('phone') or '')}</p>
+      <p><strong>Use Case:</strong> {escape(data.get('use_case') or '')}</p>
+      <hr/>
+      <p><strong>Website:</strong> {escape(data.get('website') or '')}</p>
+      <p><strong>utm_source:</strong> {escape(data.get('utm_source') or '')}</p>
+      <p><strong>utm_medium:</strong> {escape(data.get('utm_medium') or '')}</p>
+      <p><strong>utm_campaign:</strong> {escape(data.get('utm_campaign') or '')}</p>
+      <p><strong>utm_term:</strong> {escape(data.get('utm_term') or '')}</p>
+      <p><strong>utm_content:</strong> {escape(data.get('utm_content') or '')}</p>
+    """
+    text_body = (
+        "New Demo Request\n"
+        f"Name: {data.get('name')}\n"
+        f"Email: {data.get('email')}\n"
+        f"Company/Clinic: {data.get('company')}\n"
+        f"Phone: {data.get('phone')}\n"
+        f"Use Case: {data.get('use_case')}\n"
+        "-----\n"
+        f"Website: {data.get('website')}\n"
+        f"utm_source: {data.get('utm_source')}\n"
+        f"utm_medium: {data.get('utm_medium')}\n"
+        f"utm_campaign: {data.get('utm_campaign')}\n"
+        f"utm_term: {data.get('utm_term')}\n"
+        f"utm_content: {data.get('utm_content')}\n"
+    )
+
+    msg = EmailMultiAlternatives(
+        subject=subject,
+        body=text_body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=to,
+        reply_to=reply_to,
+    )
+    msg.attach_alternative(html_body, "text/html")
+    msg.send(fail_silently=False)
+
+    # Optional: confirmation to requester
+    try:
+        confirm_msg = EmailMultiAlternatives(
+            subject="Thanks for booking a NeuroMed demo",
+            body="Thanks! Our team will reach out shortly to coordinate a 20-minute demo.\n— NeuroMed AI",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[data["email"]],
+        )
+        confirm_msg.attach_alternative(
+            f"<p>Hi {escape(data.get('name') or '')},</p>"
+            f"<p>Thanks! Our team will reach out shortly to coordinate a 20-minute demo.</p>"
+            f"<p>— NeuroMed AI</p>",
+            "text/html"
+        )
+        confirm_msg.send(fail_silently=True)
+    except Exception:
+        pass
+
+    # Redirect with a flag so the template shows the success modal.
+    # (If you don't want name/email in the URL, remove them from params.)
+    params = {
+        "demo": "ok",
+        "name": data.get("name", ""),
+        "email": data.get("email", ""),
+    }
+    return redirect(f"{reverse('landing')}?{urlencode(params)}#calendar")
+

@@ -146,3 +146,5 @@ class BetaFeedback(models.Model):
 
     def __str__(self):
         return f"Feedback {self.id} — {self.role}"
+
+
