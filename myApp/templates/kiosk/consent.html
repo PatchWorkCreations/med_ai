@@ -1,0 +1,27 @@
+<!doctype html><html><head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Consent</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-50">
+  <div class="max-w-3xl mx-auto px-4 py-8">
+    <div class="rounded-2xl bg-white border border-slate-200 p-6 shadow-xl">
+      <h1 class="text-xl font-semibold">Consent</h1>
+      <p class="text-sm text-slate-600 mt-1">Please review and accept to continue.</p>
+      <div class="mt-4 text-sm text-slate-700 space-y-2">
+        <p>• I consent to digital intake and secure processing of my information.</p>
+        <p>• I understand this system assists clinicians and doesn’t replace medical care.</p>
+      </div>
+      <label class="mt-4 flex items-center gap-2 text-sm text-slate-700">
+        <input id="ok" type="checkbox" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+        I agree
+      </label>
+      <button id="next" disabled class="mt-4 rounded-xl bg-emerald-600 text-white px-4 py-2.5 disabled:opacity-50">Continue</button>
+    </div>
+  </div>
+<script>
+const ok=document.getElementById('ok'), next=document.getElementById('next');
+ok.onchange=()=>{ next.disabled=!ok.checked; };
+next.onclick=()=>{ location.href="/kiosk/intake"; };
+</script>
+</body></html>

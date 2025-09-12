@@ -14,16 +14,21 @@ SECRET_KEY = 'django-insecure-6_$3$%3_hxmh@la&^k7g%()ol5nwsc(ne9f#0^_f^lo^yp7-vp
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '*',
-    'neuromedai.org',
-    'www.neuromedai.org',
-    'medai-production-21ae.up.railway.app'
+    "neuromedai.org", ".neuromedai.org",
+    "medai-production-21ae.up.railway.app",
+    "localhost", "127.0.0.1",
+    ".localtest.me",          # ← allow any *.localtest.me subdomain
+    ".lvh.me",                # ← optional alt to localtest.me
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://neuromedai.org",
-    "https://www.neuromedai.org",
-    "https://medai-production-21ae.up.railway.app"
+    "https://*.neuromedai.org",
+    "https://medai-production-21ae.up.railway.app",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://*.localtest.me:8000",  # ← add
+    "http://*.lvh.me:8000",        # ← optional
 ]
 
 
@@ -57,6 +62,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'myProject.middleware.BusyModeMiddleware',
+    'myApp.middleware.CurrentOrgByHostMiddleware',
+    'myApp.middleware.EnforceOrgMembershipMiddleware',
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

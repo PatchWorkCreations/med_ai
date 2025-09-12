@@ -1,0 +1,602 @@
+{% load static %}
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Triage — Chat</title>
+  <meta name="theme-color" content="#0b3b36" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{
+      --brand:
+        {% if request.org and request.org.theme and request.org.theme.primary %}
+          {{ request.org.theme.primary }}
+        {% else %} #0b3b36 {% endif %};
+    }
+    .brand-btn{ background:var(--brand); color:#fff; }
+    .brand-btn:hover{ filter:brightness(1.05); }
+    .brand-chip{ color:var(--brand); }
+    .hero-grad{
+      background:
+        radial-gradient(1200px 420px at 50% -120px, var(--brand) 0%, #10b981 45%, #10b98118 100%);
+    }
+    .bubble{
+      max-width: 78%;
+      border-radius: 16px;
+      padding: .75rem .9rem;
+      box-shadow: 0 8px 28px rgba(2,6,23,.06);
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-slate-50">
+  <!-- Hero -->
+  <header class="hero-grad text-white">
+    <div class="max-w-6xl mx-auto px-4 pt-6 pb-16">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          {% if request.org and request.org.logo_url %}
+            <img src="{{ request.org.logo_url }}" class="h-9 w-9 rounded-lg object-cover ring-2 ring-white/50" alt="">
+          {% else %}
+            <div class="h-9 w-9 rounded-lg ring-2 ring-white/50" style="background:var(--brand)"></div>
+          {% endif %}
+          <div class="text-sm/5 opacity-90">
+            {% if request.org %}{{ request.org.name }}{% else %}NeuroMed{% endif %} • Secure triage
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <select id="tone" class="hidden md:block text-xs bg-white/10 border border-white/20 rounded-lg px-2 py-1">
+            <option value="PlainClinical" selected>Plain clinical</option>
+            <option value="WarmSupportive">Warm & supportive</option>
+          </select>
+          <a href="/portal/dashboard/?section=frontdesk" class="hidden md:inline text-sm/5 underline/20 hover:underline">
+            Staff dashboard
+          </a>
+        </div>
+      </div>
+
+      <h1 class="mt-6 text-3xl md:text-4xl font-extrabold tracking-tight">
+        Tell us what’s going on
+      </h1>
+      <p class="mt-2 max-w-2xl text-white/85">
+        Chat with our assistant. It will gather details so your care team is prepared.
+        <span class="opacity-80">For this demo, please don’t include personal identifiers.</span>
+      </p>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 -mt-10 pb-16">
+    <div class="grid lg:grid-cols-[1fr_360px] gap-6">
+
+      <!-- Chat panel -->
+      <section class="rounded-2xl bg-white border border-slate-200/80 shadow-xl overflow-hidden flex flex-col min-h-[70vh]">
+        <!-- Transcript -->
+        <div id="chat" class="flex-1 overflow-auto p-4 space-y-3" role="log" aria-live="polite">
+          <!-- Assistant welcome -->
+          <div class="flex items-start gap-3">
+            <div class="h-8 w-8 rounded-full flex items-center justify-center text-white" style="background:var(--brand)">
+              <i class="fa-solid fa-robot text-xs" aria-hidden="true"></i>
+            </div>
+            <div class="bubble bg-slate-100 text-slate-800">
+              Hi! I’m your intake assistant. What brings you in today?
+            </div>
+          </div>
+        </div>
+
+        <!-- Composer -->
+        <div class="border-t border-slate-200 p-3">
+          <div class="flex flex-wrap items-end gap-3">
+            <textarea id="input"
+              rows="2"
+              class="flex-1 min-w-[240px] rounded-xl border border-slate-300 px-3 py-2 focus:ring-emerald-500 focus:border-emerald-500"
+              placeholder="Type your message… (e.g., Right knee pain for 3 months, worse on stairs)"></textarea>
+            <button id="send" class="brand-btn rounded-xl px-4 py-2.5 inline-flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+              <i class="fa-solid fa-paper-plane" aria-hidden="true"></i><span>Send</span>
+            </button>
+            <button id="clear" class="rounded-xl px-3 py-2 border text-slate-700 hover:bg-slate-50">
+              Clear
+            </button>
+          </div>
+
+          <!-- Quick chips -->
+          <div class="mt-2 flex flex-wrap gap-2">
+            <button class="px-3 py-1.5 text-sm rounded-full bg-slate-100 hover:bg-slate-200 chip">knee pain</button>
+            <button class="px-3 py-1.5 text-sm rounded-full bg-slate-100 hover:bg-slate-200 chip">swelling</button>
+            <button class="px-3 py-1.5 text-sm rounded-full bg-slate-100 hover:bg-slate-200 chip">worse on stairs</button>
+            <button class="px-3 py-1.5 text-sm rounded-full bg-slate-100 hover:bg-slate-200 chip">no fever</button>
+          </div>
+
+          <div class="mt-3 flex items-center justify-between text-xs text-slate-500">
+            <div class="flex items-center gap-3">
+              <span id="typing" class="hidden items-center gap-2">
+                <i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i> Assistant is typing…
+              </span>
+              <span id="offline" class="hidden items-center gap-2 text-amber-700">
+                <i class="fa-solid fa-plug-circle-exclamation" aria-hidden="true"></i> You’re offline
+              </span>
+            </div>
+            <button id="finish" class="rounded-lg px-3 py-1.5 border border-emerald-600 text-emerald-700 hover:bg-emerald-50 disabled:opacity-60 disabled:cursor-not-allowed">
+              Finish & send to clinic
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- “We’re collecting” panel -->
+      <aside class="rounded-2xl bg-white border border-slate-200/80 shadow-xl p-5">
+        <div class="flex items-center justify-between">
+          <h2 class="font-semibold">We’re collecting</h2>
+          <span id="collectStatus" class="text-xs px-2 py-1 rounded bg-emerald-50 text-emerald-700">building…</span>
+        </div>
+        <dl class="mt-4 space-y-3 text-sm">
+          <div>
+            <dt class="text-slate-500">Chief complaint</dt>
+            <dd id="f_complaint" class="font-medium">—</dd>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <dt class="text-slate-500">Duration</dt>
+              <dd id="f_duration" class="font-medium">—</dd>
+            </div>
+            <div>
+              <dt class="text-slate-500">Severity</dt>
+              <dd id="f_severity" class="font-medium">—</dd>
+            </div>
+          </div>
+          <div>
+            <dt class="text-slate-500">Location</dt>
+            <dd id="f_location" class="font-medium">—</dd>
+          </div>
+          <div>
+            <dt class="text-slate-500">Red flags</dt>
+            <dd id="f_redflags" class="font-medium">—</dd>
+          </div>
+          <div>
+            <dt class="text-slate-500">Next questions</dt>
+            <dd id="f_questions" class="font-medium">—</dd>
+          </div>
+        </dl>
+
+        <div id="finishCard" class="hidden mt-5 rounded-xl bg-slate-50 border border-slate-200 p-3 text-sm">
+          <div class="font-medium mb-1">Saved to clinic</div>
+          <div>Encounter <span id="encId" class="font-semibold"></span> created.</div>
+          <a id="goDash" href="/portal/dashboard/?section=frontdesk" class="mt-2 inline-block text-emerald-700 hover:underline">
+            View in Front Desk →
+          </a>
+        </div>
+
+        <div class="mt-6 text-[11px] text-slate-500">
+          This assistant does not replace medical care. If you’re experiencing an emergency, call your local emergency number.
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 hidden">
+    <div class="rounded-xl bg-rose-600 text-white px-4 py-2 text-sm shadow-lg">
+      <span id="toastMsg">Something went wrong.</span>
+    </div>
+  </div>
+
+
+  <!-- Patient details modal -->
+<div id="ptModal" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-black/40"></div>
+  <div class="relative mx-auto mt-20 w-[560px] max-w-[92vw] rounded-2xl bg-white border border-slate-200 p-5 shadow-2xl">
+    <div class="flex items-center justify-between">
+      <h3 class="font-semibold">Your details</h3>
+      <button id="ptClose" class="text-slate-500 hover:text-slate-700">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <p class="mt-1 text-xs text-slate-500">We’ll share this with the clinic to contact you.</p>
+
+    <form id="ptForm" class="mt-4 grid grid-cols-2 gap-3">
+      <div class="col-span-2">
+        <label class="text-xs text-slate-600">Full name</label>
+        <input name="full_name" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., Jane Doe">
+      </div>
+      <div>
+        <label class="text-xs text-slate-600">Phone</label>
+        <input name="phone" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="(555) 123-4567">
+      </div>
+      <div>
+        <label class="text-xs text-slate-600">Email</label>
+        <input name="email" type="email" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="you@example.com">
+      </div>
+      <div>
+        <label class="text-xs text-slate-600">Date of birth</label>
+        <input name="dob" type="date" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+      </div>
+      <div>
+        <label class="text-xs text-slate-600">Insurance</label>
+        <input name="insurer" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., Aetna">
+      </div>
+      <div class="col-span-2 flex items-center gap-2 mt-2">
+        <input id="ptConsent" type="checkbox" class="h-4 w-4">
+        <label for="ptConsent" class="text-xs text-slate-600">I consent to share this information with the clinic.</label>
+      </div>
+      <div class="col-span-2 mt-2 flex items-center justify-end gap-2">
+        <button type="button" id="ptCancel" class="rounded-lg border px-3 py-2 text-sm">Cancel</button>
+        <button type="submit" id="ptSubmit" class="brand-btn rounded-lg px-4 py-2 text-sm">Send to clinic</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(() => {
+  const chat      = document.getElementById('chat');
+  const input     = document.getElementById('input');
+  const sendBtn   = document.getElementById('send');
+  const typing    = document.getElementById('typing');
+  const finishBtn = document.getElementById('finish');
+  const clearBtn  = document.getElementById('clear');
+  const toneSel   = document.getElementById('tone');
+  const offlineEl = document.getElementById('offline');
+  const statusEl  = document.getElementById('collectStatus');
+
+  // Kiosk token (so the API can resolve org even if request.org isn't set)
+  const KIOSK_TOKEN = new URLSearchParams(location.search).get('t') || null;
+
+  // Patient details passed via URL (optional) to prefill the modal
+  const qs = new URLSearchParams(location.search);
+  const PATIENT_QS = {
+    full_name: (qs.get('full_name') || '').trim(),
+    phone:     (qs.get('phone')     || '').trim(),
+    email:     (qs.get('email')     || '').trim(),
+    dob:       (qs.get('dob')       || '').trim(), // YYYY-MM-DD
+    insurer:   (qs.get('insurer')   || '').trim(),
+  };
+
+  // Try to find a chip container (prefer #chips; else the parent of the first .chip)
+  const chipContainer = document.getElementById('chips')
+    || (document.querySelector('.chip') ? document.querySelector('.chip').parentElement : null);
+
+  const f = (id) => document.getElementById(id);
+  const $ = (sel) => document.querySelector(sel);
+
+  const toast = (msg) => {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg || 'Something went wrong.';
+    t.classList.remove('hidden');
+    setTimeout(() => t.classList.add('hidden'), 2400);
+  };
+
+  const setStatusBadge = (label, scheme) => {
+    const classes = {
+      build:    'text-xs px-2 py-1 rounded bg-slate-100 text-slate-600',
+      progress: 'text-xs px-2 py-1 rounded bg-emerald-50 text-emerald-700',
+      ready:    'text-xs px-2 py-1 rounded bg-emerald-100 text-emerald-800 ring-1 ring-emerald-300',
+      urgent:   'text-xs px-2 py-1 rounded bg-rose-50 text-rose-700 ring-1 ring-rose-200',
+    };
+    statusEl.textContent = label;
+    statusEl.className = classes[scheme] || classes.build;
+  };
+
+  const fields = { complaint:null, duration:null, severity:null, location:null, red_flags:[], next_questions:[] };
+  const updateFieldsUI = () => {
+    f('f_complaint').textContent = fields.complaint || '—';
+    f('f_duration').textContent  = fields.duration  || '—';
+    f('f_severity').textContent  = fields.severity  || '—';
+    f('f_location').textContent  = fields.location  || '—';
+    f('f_redflags').textContent  = (fields.red_flags && fields.red_flags.length) ? fields.red_flags.join(', ') : '—';
+    f('f_questions').textContent = (fields.next_questions && fields.next_questions.length) ? fields.next_questions.join(' • ') : '—';
+    const building = !(fields.complaint || fields.severity || (fields.red_flags||[]).length);
+    setStatusBadge(building ? 'building…' : 'in progress', building ? 'build' : 'progress');
+  };
+
+  const transcript = []; // {role:'user'|'assistant', content:'...'}
+
+  const appendBubble = (role, text) => {
+    const row = document.createElement('div');
+    row.className = 'flex items-start gap-3 ' + (role==='user' ? 'justify-end' : '');
+    if (role==='assistant'){
+      const avatar = document.createElement('div');
+      avatar.className = 'h-8 w-8 rounded-full flex items-center justify-center text-white';
+      avatar.style.background = 'var(--brand)';
+      avatar.innerHTML = '<i class="fa-solid fa-robot text-xs" aria-hidden="true"></i>';
+      row.appendChild(avatar);
+    }
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble ' + (role==='user' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-800');
+    bubble.textContent = text;
+    row.appendChild(bubble);
+    if (role==='user'){
+      const spacer = document.createElement('div');
+      spacer.className = 'h-8 w-8';
+      row.appendChild(spacer);
+    }
+    chat.appendChild(row);
+    chat.scrollTop = chat.scrollHeight;
+  };
+
+  // Online/offline indicator
+  const setOnline  = () => offlineEl.classList.add('hidden');
+  const setOffline = () => offlineEl.classList.remove('hidden');
+  window.addEventListener('online', setOnline);
+  window.addEventListener('offline', setOffline);
+  if (!navigator.onLine) setOffline();
+
+  // Dynamic quick chips
+  const renderChips = (opts = []) => {
+    if (!chipContainer) return;
+    chipContainer.innerHTML = '';
+    if (!opts.length) return;
+    opts.forEach(text => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'px-3 py-1.5 text-sm rounded-full bg-slate-100 hover:bg-slate-200 chip';
+      btn.textContent = text;
+      btn.addEventListener('click', () => { input.value = text; send(); });
+      chipContainer.appendChild(btn);
+    });
+  };
+
+  // Existing static chips still append text
+  document.querySelectorAll('.chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const t = btn.textContent.trim();
+      input.value = input.value ? (input.value + (input.value.endsWith(' ') ? '' : ' ') + t) : t;
+      input.focus();
+    });
+  });
+
+  // ----- Patient modal (created on-demand) -----
+  const ensurePatientModal = () => {
+    if (document.getElementById('ptModal')) return;
+
+    const tpl = document.createElement('div');
+    tpl.innerHTML = `
+      <div id="ptModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/40"></div>
+        <div class="relative mx-auto mt-20 w-[560px] max-w-[92vw] rounded-2xl bg-white border border-slate-200 p-5 shadow-2xl">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold">Your details</h3>
+            <button type="button" id="ptClose" class="text-slate-500 hover:text-slate-700"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <p class="mt-1 text-xs text-slate-500">We’ll share this with the clinic to contact you.</p>
+          <form id="ptForm" class="mt-4 grid grid-cols-2 gap-3">
+            <div class="col-span-2">
+              <label class="text-xs text-slate-600">Full name</label>
+              <input name="full_name" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., Jane Doe">
+            </div>
+            <div>
+              <label class="text-xs text-slate-600">Phone</label>
+              <input name="phone" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="(555) 123-4567">
+            </div>
+            <div>
+              <label class="text-xs text-slate-600">Email</label>
+              <input name="email" type="email" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="you@example.com">
+            </div>
+            <div>
+              <label class="text-xs text-slate-600">Date of birth</label>
+              <input name="dob" type="date" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+              <label class="text-xs text-slate-600">Insurance</label>
+              <input name="insurer" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., Aetna">
+            </div>
+            <div class="col-span-2 flex items-center gap-2 mt-2">
+              <input id="ptConsent" type="checkbox" class="h-4 w-4">
+              <label for="ptConsent" class="text-xs text-slate-600">I consent to share this information with the clinic.</label>
+            </div>
+            <div class="col-span-2 mt-2 flex items-center justify-end gap-2">
+              <button type="button" id="ptCancel" class="rounded-lg border px-3 py-2 text-sm">Cancel</button>
+              <button type="submit" id="ptSubmit" class="brand-btn rounded-lg px-4 py-2 text-sm">Send to clinic</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `.trim();
+    document.body.appendChild(tpl.firstChild);
+
+    // Prefill from query string if present
+    if (PATIENT_QS.full_name)  $('#ptForm [name=full_name]').value = PATIENT_QS.full_name;
+    if (PATIENT_QS.phone)      $('#ptForm [name=phone]').value     = PATIENT_QS.phone;
+    if (PATIENT_QS.email)      $('#ptForm [name=email]').value     = PATIENT_QS.email;
+    if (PATIENT_QS.dob)        $('#ptForm [name=dob]').value       = PATIENT_QS.dob;
+    if (PATIENT_QS.insurer)    $('#ptForm [name=insurer]').value   = PATIENT_QS.insurer;
+
+    // Wire up modal buttons
+    $('#ptClose')?.addEventListener('click', hideModal);
+    $('#ptCancel')?.addEventListener('click', hideModal);
+
+    // Submit handler
+    $('#ptForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData($('#ptForm'));
+      const patient = {
+        full_name: fd.get('full_name')?.toString().trim() || "",
+        phone:     fd.get('phone')?.toString().trim() || "",
+        email:     fd.get('email')?.toString().trim() || "",
+        dob:       fd.get('dob')?.toString().trim() || "",
+        insurer:   fd.get('insurer')?.toString().trim() || ""
+      };
+      const consent = $('#ptConsent')?.checked;
+      if (!consent) { toast("Please consent to share info with the clinic."); return; }
+      if (!patient.full_name || !(patient.phone || patient.email)) {
+        toast("Please provide your name and a phone or email.");
+        return;
+      }
+      await submitToClinic(patient);
+    });
+  };
+
+  const showModal = () => { ensurePatientModal(); $('#ptModal').classList.remove('hidden'); };
+  const hideModal = () => { $('#ptModal')?.classList.add('hidden'); };
+
+  // Helpers
+  const buildSummary = () => ([
+    fields.complaint ? `CC: ${fields.complaint}` : null,
+    fields.duration  ? `Duration: ${fields.duration}` : null,
+    fields.severity  ? `Severity: ${fields.severity}` : null,
+    fields.location  ? `Location: ${fields.location}` : null,
+    (fields.red_flags && fields.red_flags.length) ? `Red flags: ${fields.red_flags.join(', ')}` : null
+  ].filter(Boolean).join(' | '));
+
+  let pending = false;
+
+  const callAssistant = async (message) => {
+    typing.classList.remove('hidden');
+    sendBtn.disabled = true; finishBtn.disabled = true; pending = true;
+    try{
+      const res = await fetch("/api/v1/triage/chat", {
+        method:"POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+          message,
+          history: transcript.slice(-10),
+          tone: (toneSel?.value || "PlainClinical"),
+          fields,
+          kiosk_token: KIOSK_TOKEN
+        }),
+        keepalive: true
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Bad response');
+
+      const text = data.assistant || "Thanks—tell me more.";
+
+      if (data.fields){
+        Object.assign(fields, data.fields);
+        if (Array.isArray(data.fields.red_flags))      fields.red_flags = data.fields.red_flags;
+        if (Array.isArray(data.fields.next_questions)) fields.next_questions = data.fields.next_questions;
+        updateFieldsUI();
+      }
+
+      if (Array.isArray(data.quick_options)) renderChips(data.quick_options);
+
+      if (data.escalate) setStatusBadge('urgent', 'urgent');
+      if (data.done && !data.escalate) {
+        setStatusBadge('ready', 'ready');
+        // Nudge user to finish by opening patient modal
+        input.disabled = true;
+        sendBtn.disabled = true;
+        finishBtn.classList.add('ring-2','ring-emerald-300','ring-offset-2');
+        showModal();
+        setTimeout(() => finishBtn.focus(), 200);
+      }
+
+      transcript.push({role:'assistant', content:text});
+      appendBubble('assistant', text);
+    }catch(e){
+      const fallback = "Thanks—could you share when this started and how severe the pain is (mild/moderate/severe)?";
+      transcript.push({role:'assistant', content:fallback});
+      appendBubble('assistant', fallback);
+      toast(e.message);
+    }finally{
+      typing.classList.add('hidden');
+      if (!input.disabled) sendBtn.disabled = false;
+      finishBtn.disabled = false;
+      pending = false;
+    }
+  };
+
+  const send = async () => {
+    const msg = input.value.trim();
+    if(!msg || pending) return;
+    input.value = '';
+    transcript.push({role:'user', content:msg});
+    appendBubble('user', msg);
+    await callAssistant(msg);
+    try { sessionStorage.setItem('triage_transcript', JSON.stringify(transcript)); } catch(e){}
+  };
+
+  sendBtn.addEventListener('click', send);
+  input.addEventListener('keydown', (e)=>{
+    if (e.key === 'Enter' && !e.shiftKey){
+      e.preventDefault();
+      send();
+    }
+  });
+
+  clearBtn.addEventListener('click', ()=>{
+    if (!confirm('Clear the conversation?')) return;
+    chat.innerHTML = '';
+    transcript.length = 0;
+    fields.complaint = fields.duration = fields.severity = fields.location = null;
+    fields.red_flags = []; fields.next_questions = [];
+    input.disabled = false; sendBtn.disabled = false;
+    finishBtn.classList.remove('ring-2','ring-emerald-300','ring-offset-2');
+    renderChips([]);
+    updateFieldsUI();
+    const row = document.createElement('div');
+    row.className = 'flex items-start gap-3';
+    row.innerHTML = `
+      <div class="h-8 w-8 rounded-full flex items-center justify-center text-white" style="background:var(--brand)">
+        <i class="fa-solid fa-robot text-xs" aria-hidden="true"></i>
+      </div>
+      <div class="bubble bg-slate-100 text-slate-800">
+        Hi! I’m your intake assistant. What brings you in today?
+      </div>`;
+    chat.appendChild(row);
+    chat.scrollTop = chat.scrollHeight;
+    try { sessionStorage.removeItem('triage_transcript'); } catch(e){}
+  });
+
+  // Finish now opens the patient modal (safer UX)
+  finishBtn.addEventListener('click', ()=>{
+    if (pending) return;
+    showModal();
+  });
+
+  // Submit to clinic with optional patient block
+  const submitToClinic = async (patient = null) => {
+    const btn = $('#ptSubmit');
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+    finishBtn.disabled = true;
+    finishBtn.textContent = 'Saving…';
+
+    try{
+      const res = await fetch("/api/v1/triage/submit", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({
+          message: buildSummary() || (transcript[0]?.content || "Patient-reported symptoms."),
+          history: transcript,
+          fields,
+          patient: patient || undefined,
+          kiosk_token: KIOSK_TOKEN
+        }),
+        keepalive: true
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Submit failed');
+
+      if (data.encounter_id){
+        hideModal();
+        document.getElementById('encId').textContent = `#${data.encounter_id}`;
+        document.getElementById('finishCard').classList.remove('hidden');
+        try { sessionStorage.removeItem('triage_transcript'); } catch(e){}
+        appendBubble('assistant', "Thanks — I’ve shared this with the care team. They’ll review and reach out soon. Anything else before we close?");
+      } else {
+        toast('Saved, but no encounter id returned.');
+      }
+    }catch(e){
+      toast(e.message);
+    }finally{
+      if (btn) { btn.disabled = false; btn.textContent = 'Send to clinic'; }
+      finishBtn.disabled = false;
+      finishBtn.textContent = 'Finish & send to clinic';
+    }
+  };
+
+  // Kick off with a gentle nudge
+  setTimeout(()=> { callAssistant("Hello"); }, 1200);
+
+  updateFieldsUI();
+})();
+</script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+<section aria-label="Revenue Cycle Management">
+  <div class="grid md:grid-cols-3 gap-4">
+    <!-- Auto Coding Specialist -->
+    <div class="rounded-2xl bg-white border border-slate-200 p-5 soft md:col-span-2">
+      <div class="flex items-center justify-between">
+        <div class="text-sm font-semibold text-indigo-700">RCM</div>
+        <i class="fa-solid fa-file-invoice-dollar text-indigo-700"></i>
+      </div>
+      <h3 class="mt-2 font-extrabold text-lg">AI Coding Specialist</h3>
+      <p class="mt-1 text-sm text-slate-600">Convert visit notes into ICD/CPT suggestions to reduce denials.</p>
+
+      <form id="coding-form" class="mt-4 space-y-2" onsubmit="return false;">
+        <textarea name="message" rows="4" placeholder="Paste a short note (no PHI in demo)."
+                  class="w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400"></textarea>
+        <div class="flex items-center gap-2">
+          <button class="rounded-xl px-4 py-2 text-sm font-semibold text-white" style="background: var(--brand);" onclick="rcmAsk('coding-form','Provide ICD-10 and CPT candidates with brief rationales.')">Suggest codes</button>
+          <a class="text-sm font-semibold link-brand" href="#" onclick="copyText('Subjective: cough 3d, fever, sore throat. Objective: erythematous tonsils, no exudate. Assessment: strep pharyngitis suspected. Plan: rapid strep, amoxicillin 500mg.');return false;">Use sample</a>
+        </div>
+      </form>
+      <pre id="coding-out" class="mt-3 text-xs bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-auto h-48"></pre>
+    </div>
+
+    <!-- Denials Auditor -->
+    <div class="rounded-2xl bg-white border border-slate-200 p-5 soft">
+      <div class="flex items-center justify-between">
+        <div class="text-sm font-semibold text-indigo-700">RCM</div>
+        <i class="fa-solid fa-clipboard-check text-indigo-700"></i>
+      </div>
+      <h3 class="mt-2 font-extrabold text-lg">Denials Auditor</h3>
+      <p class="mt-1 text-sm text-slate-600">Paste a payer denial to get fix steps & appeal letter draft.</p>
+
+      <form id="denial-form" class="mt-4 space-y-2" onsubmit="return false;">
+        <textarea name="message" rows="6" placeholder="Paste payer denial text (no PHI in demo)."
+                  class="w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400"></textarea>
+        <button class="rounded-xl px-4 py-2 text-sm font-semibold text-white" style="background: var(--brand);" onclick="rcmAsk('denial-form','Explain likely root cause, missing documentation, and draft a concise appeal.')">
+          Analyze denial
+        </button>
+      </form>
+      <pre id="denial-out" class="mt-3 text-xs bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-auto h-48"></pre>
+    </div>
+  </div>
+
+  <script>
+    async function rcmAsk(formId, systemHint){
+      const form = document.getElementById(formId);
+      const msg  = form.querySelector('textarea[name="message"]').value.trim();
+      if(!msg){ alert("Paste a note or denial first."); return; }
+
+      const fd = new FormData();
+      fd.append("message", systemHint + "\n\n" + msg);
+
+      const res = await fetch("{% url 'send_chat' %}", { method:"POST", headers:{ "X-Requested-With":"fetch" }, body: fd }).catch(()=>null);
+      const data = res && await res.json();
+      const outId = formId.replace("-form","-out");
+      document.getElementById(outId).textContent = (data && (data.reply || data.summary)) || "No response.";
+    }
+  </script>
+</section>

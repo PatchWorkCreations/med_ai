@@ -1,0 +1,106 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>{% if request.org %}{{ request.org.name }} — {% endif %}NeuroMed AI Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+
+  <style>
+    :root{
+      --brand:
+        {% if request.org and request.org.theme and request.org.theme.primary %}
+          {{ request.org.theme.primary }}
+        {% else %}
+          #0b3b36
+        {% endif %};
+    }
+    html,body{ font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    .btn-brand { background: var(--brand); color:#fff; }
+    .btn-brand:hover { filter: brightness(1.05); }
+    .link-brand { color: var(--brand); }
+    .soft { box-shadow: 0 12px 40px rgba(2,6,23,.06); }
+    .pill { background:#f1f5f9; }
+    .pill-active { background:rgba(11,59,54,.12); color:#0b3b36; }
+    .card { background:#fff; border:1px solid #e2e8f0; border-radius:16px; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+  <div class="min-h-screen grid grid-cols-1 lg:grid-cols-[260px_1fr]">
+    <!-- Sidebar -->
+    {% include "dashboard/_sidebar.html" %}
+
+    <!-- Main -->
+    <div class="min-h-screen flex flex-col">
+      {% include "dashboard/_topbar.html" %}
+
+      <!-- Flash messages -->
+      {% if messages %}
+      <div class="mx-4 md:mx-8 mt-3 space-y-2">
+        {% for message in messages %}
+          <div class="rounded-xl border p-3 text-sm
+                      {% if message.tags == 'error' %}border-rose-300 bg-rose-50 text-rose-800
+                      {% elif message.tags == 'success' %}border-emerald-300 bg-emerald-50 text-emerald-800
+                      {% else %}border-slate-200 bg-white text-slate-700{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Tabs -->
+      <div class="px-4 md:px-8 mt-4">
+        <div class="flex items-center gap-2">
+          <a href="{% url 'portal_dashboard' %}?section=overview" class="pill px-3 py-1.5 rounded-full text-sm {% if active_section == 'overview' %}pill-active{% endif %}">Overview</a>
+          <a href="{% url 'portal_dashboard' %}?section=clinical" class="pill px-3 py-1.5 rounded-full text-sm {% if active_section == 'clinical' %}pill-active{% endif %}">Clinical</a>
+          <a href="{% url 'portal_dashboard' %}?section=frontdesk" class="pill px-3 py-1.5 rounded-full text-sm {% if active_section == 'frontdesk' %}pill-active{% endif %}">Front Desk</a>
+          <a href="{% url 'portal_dashboard' %}?section=rcm" class="pill px-3 py-1.5 rounded-full text-sm {% if active_section == 'rcm' %}pill-active{% endif %}">RCM</a>
+          <a href="{% url 'portal_dashboard' %}?section=admin" class="pill px-3 py-1.5 rounded-full text-sm {% if active_section == 'admin' %}pill-active{% endif %}">Admin</a>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <main class="flex-1 px-4 md:px-8 py-6">
+        {% if active_section == "overview" %}
+          {% include "dashboard/sections/overview.html" %}
+        {% elif active_section == "frontdesk" %}
+          {% include "dashboard/sections/frontdesk.html" %}
+        {% elif active_section == "rcm" %}
+          {% include "dashboard/sections/rcm.html" %}
+        {% elif active_section == "admin" %}
+          {% include "dashboard/sections/admin.html" %}
+        {% else %}
+          {% include "dashboard/sections/clinical.html" %}
+        {% endif %}
+      </main>
+    </div>
+  </div>
+
+  {% include "dashboard/_roi_drawer.html" %}
+
+  <script>
+    // ROI drawer
+    const roiOpenBtn   = document.getElementById("roi-open");
+    const roiCloseBtn  = document.getElementById("roi-close");
+    const roiPanel     = document.getElementById("roi-panel");
+    const roiOverlay   = document.getElementById("roi-overlay");
+
+    function openRoi(){ roiPanel?.classList.remove("translate-x-full"); roiOverlay?.classList.remove("hidden"); }
+    function closeRoi(){ roiPanel?.classList.add("translate-x-full"); roiOverlay?.classList.add("hidden"); }
+
+    roiOpenBtn?.addEventListener("click", openRoi);
+    roiCloseBtn?.addEventListener("click", closeRoi);
+    roiOverlay?.addEventListener("click", closeRoi);
+
+    // Copy helper (used by Overview -> Kiosk link)
+    window.copyText = async (txt) => {
+      try{ await navigator.clipboard.writeText(txt); alert("Copied to clipboard"); } catch(e){ console.log(e); }
+    };
+  </script>
+</body>
+</html>

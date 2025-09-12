@@ -1,0 +1,82 @@
+<section aria-label="Admin & Settings">
+  <div class="grid lg:grid-cols-3 gap-4">
+    <!-- Org details -->
+    <div class="rounded-2xl bg-white border border-slate-200 p-5 soft">
+      <div class="flex items-center justify-between">
+        <div class="text-sm font-semibold text-slate-700">Organization</div>
+        <i class="fa-solid fa-building text-slate-700"></i>
+      </div>
+      <h3 class="mt-2 font-extrabold text-lg">Org profile</h3>
+
+      <dl class="mt-3 space-y-2 text-sm">
+        <div class="flex items-center justify-between">
+          <dt class="text-slate-600">Name</dt><dd class="font-medium">{% if request.org %}{{ request.org.name }}{% else %}NeuroMed AI{% endif %}</dd>
+        </div>
+        <div class="flex items-center justify-between">
+          <dt class="text-slate-600">Slug</dt><dd class="font-medium">{% if request.org %}{{ request.org.slug }}{% else %}-{% endif %}</dd>
+        </div>
+        <div>
+          <div class="text-slate-600">Domains</div>
+          <ul class="mt-1 space-y-1">
+            {% if request.org %}
+              {% for d in request.org.domains.all %}
+                <li class="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2">
+                  <span>{{ d.domain }}</span>
+                  {% if d.is_primary %}
+                  <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Primary</span>
+                  {% endif %}
+                </li>
+              {% empty %}
+                <li class="text-slate-500">No domains.</li>
+              {% endfor %}
+            {% else %}
+              <li class="text-slate-500">No organization set.</li>
+            {% endif %}
+          </ul>
+        </div>
+      </dl>
+    </div>
+
+    <!-- Team (if provided in context) -->
+    <div class="rounded-2xl bg-white border border-slate-200 p-5 soft lg:col-span-2">
+      <div class="flex items-center justify-between">
+        <div class="text-sm font-semibold text-slate-700">Members</div>
+        <i class="fa-solid fa-users text-slate-700"></i>
+      </div>
+      <h3 class="mt-2 font-extrabold text-lg">Team access</h3>
+
+      <div class="mt-3 overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="text-left text-slate-600">
+            <tr>
+              <th class="py-2">Email</th>
+              <th class="py-2">Role</th>
+              <th class="py-2">Active</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            {% if members %}
+              {% for m in members %}
+              <tr>
+                <td class="py-2">{{ m.user.email }}</td>
+                <td class="py-2">{{ m.get_role_display }}</td>
+                <td class="py-2">{{ m.is_active|yesno:"Yes,No" }}</td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr><td colspan="3" class="py-4 text-slate-500">No members provided in this view.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if request.user.is_staff %}
+        <div class="mt-4 text-right">
+          <a href="/dev/clients/{{ request.org.slug }}/" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-white">
+            Open staff client detail
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>

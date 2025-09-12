@@ -1,0 +1,37 @@
+<!doctype html><html><head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Front Desk — App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-50">
+<div class="max-w-5xl mx-auto px-4 py-6">
+  <header class="flex items-center justify-between mb-6">
+    <div class="text-xl font-semibold">Front Desk Scheduler</div>
+    <a href="/portal/dashboard/" class="text-sm text-emerald-700 hover:underline">Back</a>
+  </header>
+
+  <div class="rounded-2xl bg-white border border-slate-200 p-6 shadow-xl">
+    <div class="flex flex-col md:flex-row gap-3 items-end">
+      <div class="flex-1">
+        <label class="text-sm text-slate-600">Encounter ID</label>
+        <input id="enc" class="mt-1 w-full rounded-xl border-slate-300 focus:border-emerald-500 focus:ring-emerald-500" placeholder="e.g., 12" />
+      </div>
+      <button id="suggest" class="rounded-xl bg-emerald-600 text-white px-4 py-2.5 hover:bg-emerald-700">Suggest slots</button>
+      <button id="book" class="rounded-xl border border-slate-300 px-4 py-2.5 hover:bg-slate-50">Book sample</button>
+    </div>
+    <pre id="out" class="mt-4 text-sm text-slate-800 whitespace-pre-wrap"></pre>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+$('suggest').onclick=async()=>{
+  const r=await fetch("/api/v1/scheduling/suggest",{method:"POST"});
+  $('out').textContent=JSON.stringify(await r.json(),null,2);
+};
+$('book').onclick=async()=>{
+  const r=await fetch("/api/v1/scheduling/book",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({encounter_id:$('enc').value||null,slot:"2025-09-12T09:30:00"})});
+  $('out').textContent=JSON.stringify(await r.json(),null,2);
+};
+</script>
+</body></html>

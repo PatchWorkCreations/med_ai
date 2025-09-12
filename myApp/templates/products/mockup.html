@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NeuroMed AI — Demo Command Center</title>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: '#0f172a',
+            slate: tailwind.colors.slate,
+            brand: {
+              DEFAULT: '#0b3b36',
+              50: '#eef8f7', 100: '#d6efec', 200: '#b6e1dd', 300: '#86cbc6',
+              400: '#4db0a8', 500: '#228f87', 600: '#0b3b36', 700: '#082f2b', 800: '#072624', 900: '#061f1d'
+            },
+            emerald: tailwind.colors.emerald,
+            sky: tailwind.colors.sky,
+            violet: tailwind.colors.violet
+          },
+          boxShadow: {
+            soft: '0 12px 40px rgba(2,6,23,.08)',
+          },
+          fontFamily: {
+            sans: ['Inter','ui-sans-serif','system-ui','-apple-system','Segoe UI','Roboto','Arial','sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --brand: #0b3b36;       /* default NeuroMed */
+      --brand-ink: #0f172a;   /* deep navy */
+      --brand-acc: #10b981;   /* emerald */
+    }
+    body { font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    .glass { background: rgba(255,255,255,.75); backdrop-filter: blur(10px); }
+    .route { display: none; }
+    .route.is-active { display: block; }
+    .tab-btn[aria-selected="true"] { background: rgba(16,185,129,.1); color:#065f46; border-color: rgba(16,185,129,.25); }
+  </style>
+</head>
+<body class="bg-slate-50 text-ink">
+
+  <!-- ===== Global Shell ===== -->
+  <div class="min-h-dvh grid grid-cols-1 lg:grid-cols-[280px,1fr] grid-rows-[auto,1fr] lg:grid-rows-[1fr]">
+
+    <!-- Sidebar -->
+    <aside class="lg:row-span-2 hidden lg:block bg-white border-r border-slate-200">
+      <div class="h-16 px-5 flex items-center gap-3 border-b border-slate-200">
+        <div class="h-9 w-9 grid place-content-center rounded-xl" style="background:var(--brand)">
+          <i class="fa-solid fa-heart-pulse text-white"></i>
+        </div>
+        <div class="leading-tight">
+          <div class="font-extrabold">NeuroMed AI</div>
+          <div class="text-xs text-slate-500">Demo Command Center</div>
+        </div>
+      </div>
+
+      <nav class="p-3">
+        <ul class="space-y-1">
+          <li><button data-goto="home" class="w-full nav-btn flex items-center gap-3 px-3 py-2 rounded-xl text-left hover:bg-slate-100 active:bg-slate-200 font-medium"><i class="fa-solid fa-house"></i> Home</button></li>
+          <li><button data-goto="clinical" class="w-full nav-btn flex items-center gap-3 px-3 py-2 rounded-xl text-left hover:bg-slate-100 font-medium"><i class="fa-solid fa-stethoscope"></i> Clinical</button></li>
+          <li><button data-goto="frontdesk" class="w-full nav-btn flex items-center gap-3 px-3 py-2 rounded-xl text-left hover:bg-slate-100 font-medium"><i class="fa-solid fa-bell-concierge"></i> Front Desk</button></li>
+          <li><button data-goto="rcm" class="w-full nav-btn flex items-center gap-3 px-3 py-2 rounded-xl text-left hover:bg-slate-100 font-medium"><i class="fa-solid fa-file-invoice-dollar"></i> RCM</button></li>
+          <li><button data-goto="admin" class="w-full nav-btn flex items-center gap-3 px-3 py-2 rounded-xl text-left hover:bg-slate-100 font-medium"><i class="fa-solid fa-gear"></i> Admin</button></li>
+        </ul>
+
+        <div class="mt-6 p-3 rounded-2xl bg-slate-50 border border-slate-200">
+          <div class="text-xs uppercase tracking-wider text-slate-500 mb-2">Scenario</div>
+          <select id="scenario" class="w-full rounded-xl border-slate-300 text-sm">
+            <option>Chest pain (ED)</option>
+            <option selected>Knee MRI (Outpatient)</option>
+            <option>Diabetes follow‑up (Primary Care)</option>
+            <option>GI procedure (Endoscopy)</option>
+            <option>Spanish consult (Pediatrics)</option>
+          </select>
+        </div>
+      </nav>
+
+      <div class="mt-auto p-4 text-xs text-slate-500">
+        <div class="flex items-center gap-2"><i class="fa-regular fa-circle-question"></i> Help & ROI</div>
+        <div class="mt-2">v0.1 static mockup</div>
+      </div>
+    </aside>
+
+    <!-- Topbar -->
+    <header class="col-span-1 lg:col-span-1 h-16 bg-white/90 backdrop-blur border-b border-slate-200 sticky top-0 z-30">
+      <div class="h-full px-4 lg:px-6 flex items-center justify-between">
+        <!-- Brand switcher (left on mobile) -->
+        <div class="flex items-center gap-3 lg:hidden">
+          <div class="h-9 w-9 grid place-content-center rounded-xl" style="background:var(--brand)">
+            <i class="fa-solid fa-heart-pulse text-white"></i>
+          </div>
+          <div class="leading-tight">
+            <div class="font-extrabold">NeuroMed AI</div>
+            <div class="text-xs text-slate-500">Demo</div>
+          </div>
+        </div>
+
+        <!-- Persona tabs (center) -->
+        <div class="hidden md:flex items-center gap-2 border border-slate-200 rounded-full p-1 bg-white shadow-sm">
+          <button class="tab-btn px-3 py-1.5 rounded-full text-sm border border-transparent" data-tab="Clinician" aria-selected="true">Clinician</button>
+          <button class="tab-btn px-3 py-1.5 rounded-full text-sm border border-transparent" data-tab="Front Desk">Front Desk</button>
+          <button class="tab-btn px-3 py-1.5 rounded-full text-sm border border-transparent" data-tab="RCM">RCM</button>
+          <button class="tab-btn px-3 py-1.5 rounded-full text-sm border border-transparent" data-tab="Admin">Admin</button>
+        </div>
+
+        <!-- Right controls -->
+        <div class="flex items-center gap-3">
+          <select id="brand" class="rounded-xl border-slate-300 text-sm">
+            <option value="nm" selected>NeuroMed (Demo)</option>
+            <option value="mercy">MercyCare Clinic</option>
+            <option value="stjude">St. Jude Outpatient</option>
+          </select>
+          <button id="open-roi" class="rounded-full bg-ink text-white px-4 py-2 text-sm font-semibold hover:opacity-90">
+            <i class="fa-solid fa-chart-line mr-2"></i>ROI
+          </button>
+          <button class="h-9 w-9 grid place-content-center rounded-full border border-slate-200 hover:bg-slate-100" aria-label="Notifications">
+            <i class="fa-regular fa-bell"></i>
+          </button>
+          <button class="h-9 w-9 grid place-content-center rounded-full border border-slate-200 hover:bg-slate-100" aria-label="Account">
+            <i class="fa-regular fa-user"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main class="bg-slate-50 p-4 lg:p-6">
+
+      <!-- ===== HOME / OVERVIEW ===== -->
+      <section id="route-home" class="route is-active">
+        <!-- KPI band -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-soft">
+            <div class="text-xs text-slate-500">Time saved</div>
+            <div class="mt-1 text-2xl font-extrabold">–70%</div>
+            <div class="text-xs text-slate-500">vs baseline</div>
+          </div>
+          <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-soft">
+            <div class="text-xs text-slate-500">Denials reduced</div>
+            <div class="mt-1 text-2xl font-extrabold">↓45%</div>
+            <div class="text-xs text-slate-500">last 30 days</div>
+          </div>
+          <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-soft">
+            <div class="text-xs text-slate-500">Notes drafted</div>
+            <div class="mt-1 text-2xl font-extrabold">128</div>
+            <div class="text-xs text-slate-500">this week</div>
+          </div>
+          <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-soft">
+            <div class="text-xs text-slate-500">Throughput</div>
+            <div class="mt-1 text-2xl font-extrabold">↑32%</div>
+            <div class="text-xs text-slate-500">triage + intake</div>
+          </div>
+        </div>
+
+        <!-- Workflow tiles -->
+        <div class="mt-5 grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          <!-- Tile component -->
+          <button data-goto="clinical" class="group text-left p-[1px] rounded-2xl bg-gradient-to-b from-emerald-200/60 via-slate-100 to-transparent">
+            <div class="h-full rounded-2xl bg-white/90 border border-slate-200 p-5 shadow-soft group-hover:-translate-y-0.5 transition">
+              <div class="flex items-center justify-between text-sm">
+                <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold">Clinical</span>
+                <i class="fa-solid fa-notes-medical text-emerald-600"></i>
+              </div>
+              <div class="mt-2 text-lg font-extrabold">AI Scribe</div>
+              <div class="text-sm text-slate-600">12 notes drafted today</div>
+            </div>
+          </button>
+
+          <button data-goto="rcm" class="group text-left p-[1px] rounded-2xl bg-gradient-to-b from-sky-200/60 via-slate-100 to-transparent">
+            <div class="h-full rounded-2xl bg-white/90 border border-slate-200 p-5 shadow-soft group-hover:-translate-y-0.5 transition">
+              <div class="flex items-center justify-between text-sm">
+                <span class="px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 font-semibold">Admin</span>
+                <i class="fa-solid fa-file-invoice-dollar text-sky-700"></i>
+              </div>
+              <div class="mt-2 text-lg font-extrabold">AI Coding</div>
+              <div class="text-sm text-slate-600">18 codes validated</div>
+            </div>
+          </button>
+
+          <button data-goto="rcm" class="group text-left p-[1px] rounded-2xl bg-gradient-to-b from-violet-200/60 via-slate-100 to-transparent">
+            <div class="h-full rounded-2xl bg-white/90 border border-slate-200 p-5 shadow-soft group-hover:-translate-y-0.5 transition">
+              <div class="flex items-center justify-between text-sm">
+                <span class="px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 font-semibold">Specialized</span>
+                <i class="fa-solid fa-shield-halved text-violet-700"></i>
+              </div>
+              <div class="mt-2 text-lg font-extrabold">Denial Risk</div>
+              <div class="text-sm text-slate-600">3 flags resolved</div>
+            </div>
+          </button>
+
+          <button data-goto="frontdesk" class="group text-left p-[1px] rounded-2xl bg-gradient-to-b from-sky-200/60 via-slate-100 to-transparent">
+            <div class="h-full rounded-2xl bg-white/90 border border-slate-200 p-5 shadow-soft group-hover:-translate-y-0.5 transition">
+              <div class="flex items-center justify-between text-sm">
+                <span class="px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 font-semibold">Front Desk</span>
+                <i class="fa-solid fa-calendar-check text-sky-700"></i>
+              </div>
+              <div class="mt-2 text-lg font-extrabold">Triage & Intake</div>
+              <div class="text-sm text-slate-600">7 patients cleared</div>
+            </div>
+          </button>
+
+          <button data-goto="clinical" class="group text-left p-[1px] rounded-2xl bg-gradient-to-b from-violet-200/60 via-slate-100 to-transparent">
+            <div class="h-full rounded-2xl bg-white/90 border border-slate-200 p-5 shadow-soft group-hover:-translate-y-0.5 transition">
+              <div class="flex items-center justify-between text-sm">
+                <span class="px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 font-semibold">Specialized</span>
+                <i class="fa-solid fa-microscope text-violet-700"></i>
+              </div>
+              <div class="mt-2 text-lg font-extrabold">Diagnostic Assistant</div>
+              <div class="text-sm text-slate-600">4 imaging summarized</div>
+            </div>
+          </button>
+
+          <button data-goto="clinical" class="group text-left p-[1px] rounded-2xl bg-gradient-to-b from-emerald-200/60 via-slate-100 to-transparent">
+            <div class="h-full rounded-2xl bg-white/90 border border-slate-200 p-5 shadow-soft group-hover:-translate-y-0.5 transition">
+              <div class="flex items-center justify-between text-sm">
+                <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold">Clinical</span>
+                <i class="fa-solid fa-language text-emerald-600"></i>
+              </div>
+              <div class="mt-2 text-lg font-extrabold">Language Specialist</div>
+              <div class="text-sm text-slate-600">5 Spanish consults</div>
+            </div>
+          </button>
+        </div>
+
+        <!-- Activity -->
+        <div class="mt-6 grid lg:grid-cols-3 gap-4">
+          <div class="lg:col-span-2 rounded-2xl bg-white border border-slate-200 p-5 shadow-soft">
+            <div class="font-semibold">Recent Activity</div>
+            <ol class="mt-3 space-y-3 text-sm">
+              <li class="flex gap-3"><span class="h-6 w-6 grid place-content-center rounded-full bg-emerald-50 text-emerald-700"><i class="fa-solid fa-file-pen text-[12px]"></i></span><span><strong>SOAP note</strong> drafted for Patient #KM‑102 (Knee MRI)</span></li>
+              <li class="flex gap-3"><span class="h-6 w-6 grid place-content-center rounded-full bg-sky-50 text-sky-700"><i class="fa-solid fa-code text-[12px]"></i></span><span>Codes <strong>ICD-10</strong> + <strong>CPT</strong> suggested with 98% confidence</span></li>
+              <li class="flex gap-3"><span class="h-6 w-6 grid place-content-center rounded-full bg-violet-50 text-violet-700"><i class="fa-solid fa-triangle-exclamation text-[12px]"></i></span><span>Denial risk: bundling conflict detected → fix applied</span></li>
+              <li class="flex gap-3"><span class="h-6 w-6 grid place-content-center rounded-full bg-emerald-50 text-emerald-700"><i class="fa-solid fa-language text-[12px]"></i></span><span>Caregiver summary generated in <strong>Spanish</strong></span></li>
+            </ol>
+          </div>
+          <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-soft">
+            <div class="font-semibold">This Week's Wins</div>
+            <ul class="mt-3 text-sm space-y-2">
+              <li>Saved <strong>11.2 hours</strong> of provider time</li>
+              <li>Recovered <strong>$4,520</strong> in revenue</li>
+              <li>First-pass yield up to <strong>96.4%</strong></li>
+            </ul>
+            <button id="open-roi-2" class="mt-4 w-full rounded-xl border border-slate-200 py-2 font-semibold hover:bg-slate-50">Open ROI</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== CLINICAL ===== -->
+      <section id="route-clinical" class="route">
+        <div class="grid lg:grid-cols-[320px,1fr,360px] gap-4">
+          <!-- Left: Patient Context -->
+          <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-soft">
+            <div class="font-semibold">Patient Context</div>
+            <div class="mt-3 text-sm text-slate-600 space-y-2">
+              <div><span class="text-slate-500">Patient:</span> Jane Doe (34F)</div>
+              <div><span class="text-slate-500">Reason:</span> Knee pain / MRI review</div>
+              <div><span class="text-slate-500">Vitals:</span> 120/78 • 72 bpm • 98.4°F</div>
+            </div>
+            <div class="mt-4">
+              <div class="text-xs text-slate-500">Uploads</div>
+              <ul class="mt-2 space-y-2 text-sm">
+                <li class="flex items-center gap-2"><i class="fa-regular fa-file-lines text-slate-400"></i> MRI-report.pdf</li>
+                <li class="flex items-center gap-2"><i class="fa-regular fa-file-audio text-slate-400"></i> encounter-transcript.mp3</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Center: Scribe -->
+          <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-soft">
+            <div class="flex items-center justify-between">
+              <div class="font-semibold">AI Scribe — Draft Note</div>
+              <div class="text-xs text-slate-500">Scenario: Knee MRI</div>
+            </div>
+            <div class="mt-3 text-sm space-y-3">
+              <div>
+                <div class="text-slate-500 text-xs">Subjective</div>
+                <p>Patient reports intermittent right knee pain aggravated by activity; denies locking; mild swelling post-run.</p>
+              </div>
+              <div>
+                <div class="text-slate-500 text-xs">Objective</div>
+                <p>Mild effusion; ROM limited at end flexion; no ligamentous laxity. MRI: small medial meniscus tear, mild chondral wear.</p>
+              </div>
+              <div>
+                <div class="text-slate-500 text-xs">Assessment</div>
+                <p>Right knee pain secondary to medial meniscus tear; chondromalacia grade I.</p>
+              </div>
+              <div>
+                <div class="text-slate-500 text-xs">Plan</div>
+                <p>RICE, PT referral, NSAIDs PRN, activity modification; follow-up 6–8 weeks; consider ortho consult if no improvement.</p>
+              </div>
+            </div>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button class="rounded-full bg-ink text-white px-4 py-2 text-sm font-semibold">Accept</button>
+              <button class="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold">Edit</button>
+              <button class="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold">Family Summary</button>
+            </div>
+          </div>
+
+          <!-- Right: Diagnostic Assistant -->
+          <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-soft">
+            <div class="font-semibold">Diagnostic Assistant</div>
+            <ul class="mt-3 text-sm space-y-2">
+              <li class="flex items-start gap-2"><span class="mt-1 h-5 w-5 grid place-content-center rounded-full bg-violet-50 text-violet-700"><i class="fa-solid fa-highlighter text-[11px]"></i></span><span>MRI: Small medial meniscus tear (posterior horn) — likely source of pain.</span></li>
+              <li class="flex items-start gap-2"><span class="mt-1 h-5 w-5 grid place-content-center rounded-full bg-violet-50 text-violet-700"><i class="fa-solid fa-book-medical text-[11px]"></i></span><span>Guidelines: Begin conservative management before surgical consideration.</span></li>
+              <li class="flex items-start gap-2"><span class="mt-1 h-5 w-5 grid place-content-center rounded-full bg-violet-50 text-violet-700"><i class="fa-solid fa-language text-[11px]"></i></span><span>Offer Spanish family summary if preferred.</span></li>
+            </ul>
+            <div class="mt-4">
+              <button class="w-full rounded-xl border border-slate-300 py-2 font-semibold hover:bg-slate-50">Export to EHR (PDF)</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== FRONT DESK ===== -->
+      <section id="route-frontdesk" class="route">
+        <div class="grid lg:grid-cols-4 gap-4">
+          <!-- Kanban Columns -->
+          <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-soft">
+            <div class="font-semibold">New</div>
+            <div class="mt-3 space-y-3">
+              <div class="rounded-xl border border-slate-200 p-3">
+                <div class="flex items-center justify-between text-sm"><span>Maria R.</span><span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">Medium</span></div>
+                <div class="mt-1 text-xs text-slate-500">Knee pain • Insurance: Aetna</div>
+              </div>
+            </div>
+          </div>
+          <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-soft">
+            <div class="font-semibold">Screening</div>
+            <div class="mt-3 space-y-3">
+              <div class="rounded-xl border border-slate-200 p-3">
+                <div class="flex items-center justify-between text-sm"><span>Jason T.</span><span class="px-2 py-0.5 rounded-full bg-red-50 text-red-700">High</span></div>
+                <div class="mt-1 text-xs text-slate-500">Chest pain • Eligibility check suggested</div>
+              </div>
+            </div>
+          </div>
+          <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-soft">
+            <div class="font-semibold">Ready</div>
+            <div class="mt-3 space-y-3">
+              <div class="rounded-xl border border-slate-200 p-3">
+                <div class="flex items-center justify-between text-sm"><span>Luisa M.</span><span class="px-2 py-0.5 rounded-full bg-green-50 text-green-700">Low</span></div>
+                <div class="mt-1 text-xs text-slate-500">Diabetes f/u • Forms complete</div>
+              </div>
+            </div>
+          </div>
+          <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-soft">
+            <div class="font-semibold">Scheduled</div>
+            <div class="mt-3 space-y-3">
+              <div class="rounded-xl border border-slate-200 p-3">
+                <div class="flex items-center justify-between text-sm"><span>Ken C.</span><span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">Booked</span></div>
+                <div class="mt-1 text-xs text-slate-500">GI procedure • 10:30 AM, Thu</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== RCM ===== -->
+      <section id="route-rcm" class="route">
+        <div class="grid lg:grid-cols-2 gap-4">
+          <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-soft">
+            <div class="font-semibold">AI Coding Assistant</div>
+            <ul class="mt-3 text-sm space-y-3">
+              <li class="flex items-start gap-2"><span class="mt-1 h-5 w-5 grid place-content-center rounded-full bg-sky-50 text-sky-700"><i class="fa-solid fa-code text-[11px]"></i></span><span>ICD‑10: M23.206 (Derangement of medial meniscus), M25.561 (Pain in right knee)</span></li>
+              <li class="flex items-start gap-2"><span class="mt-1 h-5 w-5 grid place-content-center rounded-full bg-sky-50 text-sky-700"><i class="fa-solid fa-code text-[11px]"></i></span><span>CPT: 99213 (Established patient visit, low complexity)</span></li>
+              <li class="flex items-start gap-2"><span class="mt-1 h-5 w-5 grid place-content-center rounded-full bg-sky-50 text-sky-700"><i class="fa-solid fa-shield-heart text-[11px]"></i></span><span>Rationale: Linked to documented exam, imaging report, and plan</span></li>
+            </ul>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button class="rounded-full bg-ink text-white px-4 py-2 text-sm font-semibold">Accept</button>
+              <button class="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold">Add Modifier</button>
+              <button class="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold">Export</button>
+            </div>
+          </div>
+
+          <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-soft">
+            <div class="font-semibold">Denial Risk Review</div>
+            <ul class="mt-3 text-sm space-y-3">
+              <li class="flex items-start gap-2"><span class="mt-1 h-5 w-5 grid place-content-center rounded-full bg-violet-50 text-violet-700"><i class="fa-solid fa-triangle-exclamation text-[11px]"></i></span><span>Bundling rule: CPT 99213 with 73721 requires medical necessity documentation — present ✓</span></li>
+              <li class="flex items-start gap-2"><span class="mt-1 h-5 w-5 grid place-content-center rounded-full bg-violet-50 text-violet-700"><i class="fa-solid fa-clipboard-check text-[11px]"></i></span><span>Missing element: pain duration added to Subjective (now included)</span></li>
+            </ul>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button class="rounded-full bg-ink text-white px-4 py-2 text-sm font-semibold">Apply Fixes</button>
+              <button class="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold">Export Audit</button>
+            </div>
+            <div class="mt-5 text-xs text-slate-500">Batch: 10 encounters processed today • Approval rate 96%</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== ADMIN ===== -->
+      <section id="route-admin" class="route">
+        <div class="grid lg:grid-cols-3 gap-4">
+          <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-soft">
+            <div class="font-semibold">Branding</div>
+            <div class="mt-3 text-sm text-slate-600">Switch logo, colors, and favicon to white-label this demo instantly.</div>
+            <div class="mt-4 flex items-center gap-3">
+              <div class="h-12 w-12 grid place-content-center rounded-xl text-white" style="background:var(--brand)"><i class="fa-solid fa-heart-pulse"></i></div>
+              <select id="brand-2" class="rounded-xl border-slate-300 text-sm">
+                <option value="nm" selected>NeuroMed (Demo)</option>
+                <option value="mercy">MercyCare Clinic</option>
+                <option value="stjude">St. Jude Outpatient</option>
+              </select>
+            </div>
+            <div class="mt-4 grid grid-cols-3 gap-2 text-xs">
+              <div class="rounded-lg h-10" style="background:var(--brand)"></div>
+              <div class="rounded-lg h-10" style="background:var(--brand-acc)"></div>
+              <div class="rounded-lg h-10" style="background:var(--brand-ink)"></div>
+            </div>
+          </div>
+
+          <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-soft">
+            <div class="font-semibold">Security & Compliance</div>
+            <ul class="mt-3 text-sm space-y-2">
+              <li>HIPAA-aware design ✓</li>
+              <li>BAA available ✓</li>
+              <li>SOC 2 Type I — in progress</li>
+              <li>Audit logs & access controls</li>
+            </ul>
+          </div>
+
+          <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-soft">
+            <div class="font-semibold">Integrations</div>
+            <ul class="mt-3 text-sm space-y-2">
+              <li>Export: PDF/JSON (demo)</li>
+              <li>EHR: FHIR/HL7 (on request)</li>
+              <li>SSO: SAML/OIDC (enterprise)</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ===== ROI Drawer ===== -->
+  <div id="roi" class="fixed inset-y-0 right-0 w-full sm:w-[420px] bg-white border-l border-slate-200 shadow-2xl translate-x-full transition-transform duration-300 z-50">
+    <div class="h-16 px-4 flex items-center justify-between border-b border-slate-200">
+      <div class="font-semibold"><i class="fa-solid fa-chart-line mr-2"></i>Live ROI</div>
+      <button id="close-roi" class="h-9 w-9 grid place-content-center rounded-full border border-slate-200 hover:bg-slate-100" aria-label="Close ROI"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="p-4 space-y-4">
+      <div class="rounded-xl border border-slate-200 p-4">
+        <div class="text-sm text-slate-600">Providers</div>
+        <input type="number" value="8" class="mt-1 w-full rounded-lg border-slate-300" />
+      </div>
+      <div class="rounded-xl border border-slate-200 p-4">
+        <div class="text-sm text-slate-600">Visits per provider / day</div>
+        <input type="number" value="18" class="mt-1 w-full rounded-lg border-slate-300" />
+      </div>
+      <div class="rounded-xl border border-slate-200 p-4">
+        <div class="text-sm text-slate-600">Baseline denial rate</div>
+        <input type="number" value="12" class="mt-1 w-full rounded-lg border-slate-300" />
+      </div>
+
+      <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
+        <div class="text-sm text-slate-600">Projected impact (demo)</div>
+        <ul class="mt-2 text-sm space-y-1">
+          <li>Time saved: <strong>~10.6 hrs/week</strong></li>
+          <li>Revenue recovered: <strong>$4,500 / mo</strong></li>
+          <li>First-pass yield: <strong>+7.8 pts</strong></li>
+        </ul>
+      </div>
+
+      <button class="w-full rounded-full bg-ink text-white py-3 font-semibold">Email me this ROI</button>
+    </div>
+  </div>
+
+  <!-- ===== JS: routing, persona, theming, ROI ===== -->
+  <script>
+    const routes = {
+      home: document.getElementById('route-home'),
+      clinical: document.getElementById('route-clinical'),
+      frontdesk: document.getElementById('route-frontdesk'),
+      rcm: document.getElementById('route-rcm'),
+      admin: document.getElementById('route-admin')
+    };
+
+    function goto(name){
+      Object.values(routes).forEach(el=>el.classList.remove('is-active'));
+      (routes[name]||routes.home).classList.add('is-active');
+      document.querySelectorAll('.nav-btn').forEach(b=>{
+        b.classList.toggle('bg-slate-100', b.dataset.goto===name);
+      })
+    }
+
+    // Sidebar routing
+    document.querySelectorAll('.nav-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=> goto(btn.dataset.goto));
+    });
+    // Tiles deep link
+    document.querySelectorAll('[data-goto]').forEach(el=>{
+      el.addEventListener('click', ()=> goto(el.dataset.goto));
+    })
+
+    // Persona tabs (visual only in mockup)
+    document.querySelectorAll('.tab-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        document.querySelectorAll('.tab-btn').forEach(b=>b.setAttribute('aria-selected','false'));
+        btn.setAttribute('aria-selected','true');
+      })
+    });
+
+    // ROI Drawer
+    const roi = document.getElementById('roi');
+    document.getElementById('open-roi').addEventListener('click', ()=> roi.classList.remove('translate-x-full'));
+    document.getElementById('open-roi-2').addEventListener('click', ()=> roi.classList.remove('translate-x-full'));
+    document.getElementById('close-roi').addEventListener('click', ()=> roi.classList.add('translate-x-full'));
+
+    // Brand switcher (simple theme demo)
+    function applyBrand(val){
+      if(val==='mercy'){
+        document.documentElement.style.setProperty('--brand', '#1e3a8a'); // blue
+        document.documentElement.style.setProperty('--brand-acc', '#06b6d4'); // cyan
+        document.documentElement.style.setProperty('--brand-ink', '#0f172a');
+      } else if(val==='stjude'){
+        document.documentElement.style.setProperty('--brand', '#7c3aed'); // violet
+        document.documentElement.style.setProperty('--brand-acc', '#22c55e'); // green
+        document.documentElement.style.setProperty('--brand-ink', '#0f172a');
+      } else { // NeuroMed
+        document.documentElement.style.setProperty('--brand', '#0b3b36');
+        document.documentElement.style.setProperty('--brand-acc', '#10b981');
+        document.documentElement.style.setProperty('--brand-ink', '#0f172a');
+      }
+      // update swatches
+      document.querySelectorAll('[style*="var(--brand)"]');
+    }
+    const brandSel = document.getElementById('brand');
+    const brandSel2 = document.getElementById('brand-2');
+    brandSel.addEventListener('change', e=>{ applyBrand(e.target.value); });
+    brandSel2.addEventListener('change', e=>{ applyBrand(e.target.value); });
+
+    // Default route
+    goto('home');
+  </script>
+</body>
+</html>

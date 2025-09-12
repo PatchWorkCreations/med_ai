@@ -1,0 +1,101 @@
+{% load static %}
+{% load widget_tweaks %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{% if request.org %}{{ request.org.name }}{% else %}NeuroMed AI{% endif %} — Sign in</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+  <div class="mx-auto max-w-6xl grid lg:grid-cols-2 min-h-screen">
+    <!-- Brand / Hero -->
+    <div class="hidden lg:flex flex-col justify-between p-10 bg-white border-r border-slate-200">
+      <div>
+        <a href="#" class="inline-flex items-center gap-3 group">
+          {% if request.org and request.org.logo_url %}
+            <img src="{{ request.org.logo_url }}" alt="{{ request.org.name }}" class="h-8 w-auto rounded-md">
+          {% else %}
+            <div class="h-8 w-8 rounded-lg bg-emerald-600"></div>
+          {% endif %}
+          <span class="text-xl font-bold tracking-tight group-hover:opacity-90">
+            {% if request.org %}{{ request.org.name }}{% else %}NeuroMed AI{% endif %}
+          </span>
+        </a>
+        <h1 class="mt-10 text-3xl font-black leading-tight">
+          Welcome back
+        </h1>
+        <p class="mt-2 text-slate-600">
+          Sign in to your portal to access your AI workspace and care operations.
+        </p>
+      </div>
+
+      <div class="text-xs text-slate-500">
+        © {{ now|date:"Y" }} NeuroMed AI. All rights reserved.
+      </div>
+    </div>
+
+    <!-- Auth Panel -->
+    <div class="flex items-center justify-center p-6 sm:p-10">
+      <div class="w-full max-w-md">
+        {% if messages %}
+          <div class="mb-4 space-y-2">
+            {% for message in messages %}
+              <div class="rounded-xl border p-3 text-sm
+                          {% if message.tags == 'error' %}border-rose-300 bg-rose-50 text-rose-800
+                          {% elif message.tags == 'success' %}border-emerald-300 bg-emerald-50 text-emerald-800
+                          {% else %}border-slate-200 bg-white text-slate-700{% endif %}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-6 sm:p-7">
+          <h2 class="text-xl font-semibold">Sign in</h2>
+          <p class="mt-1 text-sm text-slate-600">
+            Use your work email and password.
+          </p>
+
+          <form method="post" class="mt-6 space-y-4">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ form.username.id_for_label }}">Email</label>
+              {% render_field form.username class+="w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-emerald-100 focus:border-emerald-400" placeholder="you@clinic.com" %}
+              {% if form.username.errors %}
+                <p class="mt-1 text-sm text-rose-700">{{ form.username.errors|join:", " }}</p>
+              {% endif %}
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ form.password.id_for_label }}">Password</label>
+              {% render_field form.password class+="w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-emerald-100 focus:border-emerald-400" placeholder="••••••••" %}
+              {% if form.password.errors %}
+                <p class="mt-1 text-sm text-rose-700">{{ form.password.errors|join:", " }}</p>
+              {% endif %}
+            </div>
+
+            <div class="flex items-center justify-between pt-2">
+              <a href="{% url 'portal_password_forgot' %}" class="text-sm font-medium text-emerald-700 hover:text-emerald-800">
+                Forgot password?
+              </a>
+            </div>
+
+            <button class="w-full mt-4 rounded-xl bg-emerald-700 text-white py-2.5 font-semibold hover:bg-emerald-800">
+              Sign in
+            </button>
+          </form>
+        </div>
+
+        <p class="mt-4 text-center text-xs text-slate-500">
+          You’re signing into the portal for
+          <strong>{% if request.org %}{{ request.org.name }}{% else %}NeuroMed AI{% endif %}</strong>.
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

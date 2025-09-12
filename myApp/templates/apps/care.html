@@ -1,0 +1,31 @@
+<!doctype html><html><head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Care Coordinator — App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+<div class="max-w-5xl mx-auto px-4 py-6">
+  <header class="flex items-center justify-between mb-6">
+    <div class="text-xl font-semibold">Care Plans & Messaging</div>
+    <a href="/portal/dashboard/" class="text-sm text-emerald-700 hover:underline">Back</a>
+  </header>
+  <div class="rounded-2xl bg-white border border-slate-200 p-6 shadow-xl">
+    <div class="flex gap-3">
+      <button id="plan" class="rounded-xl bg-emerald-600 text-white px-4 py-2.5 hover:bg-emerald-700">Generate plan</button>
+      <button id="msg"  class="rounded-xl border border-slate-300 px-4 py-2.5 hover:bg-slate-50">Send sample SMS</button>
+    </div>
+    <pre id="out" class="mt-4 text-sm text-slate-800 whitespace-pre-wrap"></pre>
+  </div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+$('plan').onclick=async()=>{
+  const r=await fetch("/api/v1/careplan/generate",{method:"POST"});
+  $('out').textContent=JSON.stringify(await r.json(),null,2);
+};
+$('msg').onclick=async()=>{
+  const r=await fetch("/api/v1/messages/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({to:"+15550001111",text:"Thanks for visiting! PT eval in 2 weeks."})});
+  $('out').textContent=JSON.stringify(await r.json(),null,2);
+};
+</script>
+</body></html>

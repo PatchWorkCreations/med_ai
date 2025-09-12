@@ -1,0 +1,67 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>{% block title %}{{ org.name|default:"NeuroMed AI" }} Portal{% endblock %}</title>
+
+  <!-- Tailwind (CDN for speed in demo) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root{
+      --brand: {{ org.theme.primary|default:"#0b3b36" }};
+      --ink: #0f172a;
+    }
+    .btn{ @apply inline-flex items-center justify-center rounded-lg px-4 py-2 font-semibold; }
+    .btn-primary{ background:var(--brand); color:#fff; }
+    .btn-primary:hover{ filter:brightness(0.95); }
+    .btn-ghost{ @apply border border-slate-300 text-slate-700 bg-white; }
+    .badge{ @apply text-[11px] px-2 py-0.5 rounded-full; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+  <!-- Topbar -->
+  <header class="bg-white border-b border-slate-200">
+    <div class="max-w-6xl mx-auto h-14 px-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        {% if org.logo_url %}
+          <img src="{{ org.logo_url }}" alt="{{ org.name }}" class="h-7 w-auto"/>
+        {% else %}
+          <div class="h-8 w-8 grid place-items-center rounded-md" style="background: var(--brand); color: #fff;">
+            <span class="text-sm font-bold">{{ org.name|default:"NM" |slice:":2"|upper }}</span>
+          </div>
+        {% endif %}
+        <div class="leading-tight">
+          <div class="font-semibold">{{ org.name|default:"NeuroMed AI" }}</div>
+          <div class="text-xs text-slate-500">
+            {{ request.get_host }} • <span class="badge bg-emerald-50 text-emerald-700">{{ org.plan|default:"standard" }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="text-xs text-slate-500">Secure Portal</div>
+    </div>
+  </header>
+
+  <!-- Flash messages -->
+  {% if messages %}
+    <div class="max-w-lg mx-auto mt-4 px-4">
+      {% for message in messages %}
+        <div class="mb-2 rounded-lg border p-3 text-sm
+          {% if message.tags == 'error' %} border-rose-200 bg-rose-50 text-rose-700
+          {% elif message.tags == 'success' %} border-emerald-200 bg-emerald-50 text-emerald-800
+          {% else %} border-slate-200 bg-white text-slate-700 {% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+
+  <footer class="mt-12 py-8 text-center text-xs text-slate-500">
+    © {{ now|date:"Y" }} {{ org.name|default:"NeuroMed AI" }} • Powered by NeuroMed
+  </footer>
+</body>
+</html>

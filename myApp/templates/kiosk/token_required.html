@@ -1,0 +1,22 @@
+<!-- templates/kiosk/token_required.html -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Device link required</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+  <div class="max-w-md w-full bg-white border border-slate-200 rounded-2xl p-6 shadow-xl">
+    <h1 class="text-lg font-semibold text-slate-900">This kiosk needs a device link</h1>
+    <p class="mt-2 text-sm text-slate-600">
+      Ask a staff member to create a kiosk link from <span class="font-medium">Portal → Admin → Quick Launch</span>.
+    </p>
+    <div class="mt-4 text-sm">
+      <a href="/portal/dashboard/?section=admin" class="inline-flex items-center gap-2 text-emerald-700 hover:underline">
+        Go to staff portal →
+      </a>
+    </div>
+  </div>
+</body>
+</html>

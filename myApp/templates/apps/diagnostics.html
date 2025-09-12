@@ -1,0 +1,27 @@
+<!doctype html><html><head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Diagnostics — App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+<div class="max-w-5xl mx-auto px-4 py-6">
+  <header class="flex items-center justify-between mb-6">
+    <div class="text-xl font-semibold">Diagnostic Assistant</div>
+    <a href="/portal/dashboard/" class="text-sm text-emerald-700 hover:underline">Back</a>
+  </header>
+  <div class="rounded-2xl bg-white border border-slate-200 p-6 shadow-xl">
+    <input id="files" type="file" multiple class="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-600 file:text-white file:px-4 file:py-2.5 file:hover:bg-emerald-700"/>
+    <button id="run" class="mt-4 rounded-xl bg-emerald-600 text-white px-4 py-2.5 hover:bg-emerald-700">Interpret</button>
+    <pre id="out" class="mt-4 text-sm text-slate-800 whitespace-pre-wrap"></pre>
+  </div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+$('run').onclick=async()=>{
+  const f=$('files').files; if(!f.length){alert("Attach images/docs");return;}
+  const fd=new FormData(); for(const x of f) fd.append("files",x);
+  const r=await fetch("/api/v1/diagnostics/interpret",{method:"POST",body:fd});
+  $('out').textContent=JSON.stringify(await r.json(),null,2);
+};
+</script>
+</body></html>

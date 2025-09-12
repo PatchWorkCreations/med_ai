@@ -176,3 +176,17 @@ class DemoRequestForm(forms.Form):
     utm_campaign = forms.CharField(required=False, widget=forms.HiddenInput)
     utm_term = forms.CharField(required=False, widget=forms.HiddenInput)
     utm_content = forms.CharField(required=False, widget=forms.HiddenInput)
+
+
+
+from django import forms
+from .models import Org
+
+class OrgCreateForm(forms.ModelForm):
+    owner_email = forms.EmailField(help_text="Initial account owner email")
+    class Meta:
+        model = Org
+        fields = ["name","slug","logo_url"]
+
+class OrgSwitchForm(forms.Form):
+    org = forms.ModelChoiceField(queryset=Org.objects.all())

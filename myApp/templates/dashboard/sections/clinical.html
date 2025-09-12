@@ -1,0 +1,86 @@
+<section aria-label="Clinical Agents">
+  <div class="grid md:grid-cols-3 gap-4">
+    <!-- Triage Specialist -->
+    <div class="rounded-2xl bg-white border border-slate-200 p-5 soft">
+      <div class="flex items-center justify-between">
+        <div class="text-sm font-semibold text-emerald-700">Clinical</div>
+        <i class="fa-solid fa-notes-medical text-emerald-600"></i>
+      </div>
+      <h3 class="mt-2 font-extrabold text-lg">AI Triage Specialist</h3>
+      <p class="mt-1 text-sm text-slate-600">Assess symptoms, determine urgency, and route to the right level of care.</p>
+
+      <form id="triage-form" class="mt-4 space-y-2" onsubmit="return false;">
+        <textarea name="message" rows="3" placeholder="Describe symptoms (no PHI in demo)."
+                  class="w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-emerald-100 focus:border-emerald-400"></textarea>
+        <div class="flex items-center gap-2">
+          <button class="btn-brand rounded-xl px-4 py-2 text-sm font-semibold" onclick="clinicalAsk('triage-form')">Run triage</button>
+          <a class="text-sm font-semibold link-brand" href="#" onclick="copyText('Can you triage: fever, cough, shortness of breath for 2 days?');return false;">Use sample</a>
+        </div>
+      </form>
+
+      <pre id="triage-out" class="mt-3 text-xs bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-auto h-36"></pre>
+    </div>
+
+    <!-- Clinical Assistant -->
+    <div class="rounded-2xl bg-white border border-slate-200 p-5 soft">
+      <div class="flex items-center justify-between">
+        <div class="text-sm font-semibold text-emerald-700">Clinical</div>
+        <i class="fa-solid fa-stethoscope text-emerald-600"></i>
+      </div>
+      <h3 class="mt-2 font-extrabold text-lg">AI Clinical Assistant</h3>
+      <p class="mt-1 text-sm text-slate-600">Pull history, summarize findings, and suggest talking points.</p>
+
+      <form id="assistant-form" class="mt-4 space-y-2" onsubmit="return false;">
+        <textarea name="message" rows="3" placeholder="Ask about workup, education, or counseling steps."
+                  class="w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-emerald-100 focus:border-emerald-400"></textarea>
+        <div class="flex items-center gap-2">
+          <button class="btn-brand rounded-xl px-4 py-2 text-sm font-semibold" onclick="clinicalAsk('assistant-form')">Ask</button>
+          <a class="text-sm font-semibold link-brand" href="#" onclick="copyText('Give me an objective-oriented exam plan for knee pain.');return false;">Use sample</a>
+        </div>
+      </form>
+
+      <pre id="assistant-out" class="mt-3 text-xs bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-auto h-36"></pre>
+    </div>
+
+    <!-- Care Coordinator -->
+    <div class="rounded-2xl bg-white border border-slate-200 p-5 soft">
+      <div class="flex items-center justify-between">
+        <div class="text-sm font-semibold text-emerald-700">Clinical</div>
+        <i class="fa-solid fa-people-carry-box text-emerald-600"></i>
+      </div>
+      <h3 class="mt-2 font-extrabold text-lg">AI Care Coordinator</h3>
+      <p class="mt-1 text-sm text-slate-600">Close the loop on referrals, follow-ups, and med reminders.</p>
+
+      <form id="coordinator-form" class="mt-4 space-y-2" onsubmit="return false;">
+        <textarea name="message" rows="3" placeholder="Ask for follow-up plan templates or referral messaging."
+                  class="w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-emerald-100 focus:border-emerald-400"></textarea>
+        <div class="flex items-center gap-2">
+          <button class="btn-brand rounded-xl px-4 py-2 text-sm font-semibold" onclick="clinicalAsk('coordinator-form')">Plan</button>
+          <a class="text-sm font-semibold link-brand" href="#" onclick="copyText('Draft a follow-up and reminder plan after ER discharge for dehydration.');return false;">Use sample</a>
+        </div>
+      </form>
+
+      <pre id="coordinator-out" class="mt-3 text-xs bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-auto h-36"></pre>
+    </div>
+  </div>
+
+  <script>
+    async function clinicalAsk(formId){
+      const form = document.getElementById(formId);
+      const msg  = form.querySelector('textarea[name="message"]').value.trim();
+      if(!msg){ alert("Type something first 😊"); return; }
+
+      // Hit your existing chat API
+      const res = await fetch("{% url 'send_chat' %}", {
+        method: "POST",
+        headers: { "X-Requested-With": "fetch" },
+        body: new FormData(Object.assign(document.createElement('form'), { message: msg }))
+      }).catch(()=>null);
+
+      const data = res && await res.json();
+      const outId = formId.replace("-form","-out");
+      const out = document.getElementById(outId);
+      out.textContent = (data && (data.reply || data.summary)) || "No response.";
+    }
+  </script>
+</section>

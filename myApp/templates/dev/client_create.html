@@ -1,0 +1,67 @@
+{% load widget_tweaks %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Create Client — NeuroMed AI Admin</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+  <div class="max-w-4xl mx-auto p-6 sm:p-10">
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-black">Create Client</h1>
+      <a href="{% url 'admin:index' %}" class="text-sm font-semibold text-slate-700 hover:text-slate-900">Django Admin</a>
+    </div>
+
+    {% if messages %}
+      <div class="mt-4 space-y-2">
+        {% for message in messages %}
+          <div class="rounded-xl border p-3 text-sm
+                      {% if message.tags == 'error' %}border-rose-300 bg-rose-50 text-rose-800
+                      {% elif message.tags == 'success' %}border-emerald-300 bg-emerald-50 text-emerald-800
+                      {% else %}border-slate-200 bg-white text-slate-700{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+
+      <div class="md:col-span-2">
+        <label class="block text-sm font-medium mb-1">Client name</label>
+        {% render_field form.name class+="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="MercyCare Clinic" %}
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-1">Slug</label>
+        {% render_field form.slug class+="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="mercycare" %}
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-1">Primary domain</label>
+        {% render_field form.primary_domain class+="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="mercycare.neuromedai.org" %}
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-1">Owner email</label>
+        {% render_field form.owner_email class+="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="owner@clinic.com" %}
+      </div>
+
+      <div class="flex items-center gap-2">
+        {% render_field form.send_email class+="h-4 w-4 rounded border-slate-300" %}
+        <label class="text-sm font-medium">Send welcome email</label>
+      </div>
+
+      <div class="md:col-span-2 pt-2">
+        <button class="rounded-xl bg-emerald-700 text-white px-5 py-2.5 font-semibold hover:bg-emerald-800">
+          Create client
+        </button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

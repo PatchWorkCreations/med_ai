@@ -672,6 +672,73 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
 
 <script>
+(() => {
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const micBtn = document.getElementById('micBtn');
+  const input  = document.getElementById('chatInput');
+  let rec = null, listening = false;
+
+  const IS_TRUSTED =
+    window.isSecureContext ||                         // real HTTPS
+    location.hostname === 'localhost' ||
+    location.hostname === '127.0.0.1' ||
+    location.hostname === '::1' ||
+    location.hostname.endsWith('.localhost');         // dev subdomains
+
+  function nmLangCode() {
+    try {
+      return (typeof window.__nmLang === 'function' && window.__nmLang()) ||
+             navigator.language || 'en-US';
+    } catch { return 'en-US'; }
+  }
+
+  function startDictation() {
+    if (!SpeechRec) { alert('Voice dictation needs a Chromium browser (Chrome/Edge).'); return; }
+    if (!IS_TRUSTED) { alert('Use HTTPS or localhost for mic access.'); return; }
+    if (listening) { try { rec.stop(); } catch {} return; }
+
+    rec = new SpeechRec();
+    rec.lang = nmLangCode();
+    rec.continuous = false;
+    rec.interimResults = true;
+
+    rec.onstart = () => {
+      listening = true;
+      micBtn.classList.add('bg-teal-600','text-white');
+      micBtn.title = 'Listening… click to stop';
+    };
+    rec.onend = () => {
+      listening = false;
+      micBtn.classList.remove('bg-teal-600','text-white');
+      micBtn.title = 'Dictate';
+      rec = null;
+    };
+    rec.onerror = (e) => console.warn('speech error:', e.error);
+
+    let finalText = '';
+    rec.onresult = (e) => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalText += t; else interim += t;
+      }
+      input.value = (finalText || interim).trim();
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+    };
+
+    rec.start();
+  }
+
+  // Bind once, within a user gesture context
+  micBtn?.addEventListener('click', startDictation);
+
+  // tiny API if you ever want to trigger it elsewhere
+  window.nmDictation = { start: startDictation, supported: !!SpeechRec, trusted: IS_TRUSTED };
+})();
+</script>
+
+<script>
 
 /* ---------- Language picker (shared with landing) ---------- */
 /* ---------------- Language selection (desktop dropdown + mobile sheet) ---------------- */
@@ -1173,7 +1240,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     e.target.value = '';
   });
   document.getElementById('clearAllBtn').addEventListener('click', clearPending);
-  document.getElementById('micBtn').addEventListener('click', startDictation);
+
   document.getElementById('sendBtn').addEventListener('click', sendChat);
 
   // Drag & drop
@@ -1392,16 +1459,6 @@ async function sendChat() {
     typing.innerText = "Hi! Our system is busy right now — please try again in a few minutes.";
   }
 }
-
-/* ---------- Speech ---------- */
-function startDictation(){
-  if(!('webkitSpeechRecognition' in window)){ alert('Speech recognition works best in Chrome.'); return; }
-  const rec = new webkitSpeechRecognition();
-  rec.lang = (typeof __nmLang === 'function' ? __nmLang() : 'en-US');  // ✅
-  rec.onresult = (e)=>{ $('#chatInput').value = e.results[0][0].transcript; autosize(); toggleSend(); };
-  rec.start();
-}
-
 
 
 /* ---------- Sidebar / Settings ---------- */
