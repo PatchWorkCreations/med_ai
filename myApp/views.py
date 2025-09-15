@@ -561,10 +561,17 @@ def send_chat(request):
     - Soft memory: QUICK → FULL upgrade if follow-up soon after.
     """
     # --- Tone handling (existing)
-    tone = normalize_tone(
-        request.data.get("tone") or request.session.get("tone") or "PlainClinical"
-    )
+    raw_tone = request.data.get("tone") or request.session.get("tone") or "PlainClinical"
+    tone = normalize_tone(raw_tone)
     request.session["tone"] = tone
+    log.info(
+    "send_chat path=%s method=%s tone_in=%r -> normalized=%s lang_in=%r accept_lang=%r files=%d has_msg=%s",
+    request.path, request.method, raw_tone, tone,
+    request.data.get("lang"),
+    request.headers.get("Accept-Language"),
+    len(request.FILES or []),
+    bool((request.data.get("message") or "").strip()),
+)
 
     # --- Language handling (new)
     lang = request.data.get("lang")
@@ -723,6 +730,7 @@ def send_chat(request):
 def smart_suggestions(request):
     summary = request.data.get("summary", "") or request.session.get("latest_summary", "")
     tone = normalize_tone(request.data.get("tone") or request.session.get("tone") or "PlainClinical")
+    
 
     if not summary.strip():
         return JsonResponse({"suggestions": []})

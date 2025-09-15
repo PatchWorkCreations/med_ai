@@ -414,7 +414,7 @@
         </button>
 
         <!-- Send -->
-        <button id="sendBtn" class="shrink-0 w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shadow-md hover:bg-gray-900" title="Send">
+        <button id="sendBtn" type="button" class="shrink-0 w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shadow-md hover:bg-gray-900" title="Send">
           <i class="fa-solid fa-paper-plane"></i>
         </button>
       </div>
@@ -691,6 +691,36 @@
              navigator.language || 'en-US';
     } catch { return 'en-US'; }
   }
+
+  function flattenMarkdown(md){
+  if (!md) return '';
+  let s = String(md).trim();
+
+  // remove markdown headings like "# …", "## …", "### …"
+  s = s.replace(/^\s{0,3}#{1,6}\s+/gm, '');
+
+  // remove bold markers **…** (keep text)
+  s = s.replace(/\*\*(.*?)\*\*/g, '$1');
+
+  // strip horizontal rules (---, ___, ***)
+  s = s.replace(/^\s*([-*_])\1\1+\s*$/gm, '');
+
+  // unquote blockquotes
+  s = s.replace(/^\s*>\s?/gm, '');
+
+  // collapse 3+ blank lines → 1
+  s = s.replace(/\n{3,}/g, '\n\n');
+
+  return s;
+}
+
+function mdToHtml(md){
+  const flat = flattenMarkdown(md);
+  const raw  = (window.marked && typeof marked.parse === 'function')
+    ? marked.parse(flat, { gfm:true, breaks:false, headerIds:false })
+    : flat.replace(/\n/g, '<br>');
+  return (window.DOMPurify ? DOMPurify.sanitize(raw) : raw);
+}
 
   function startDictation() {
     if (!SpeechRec) { alert('Voice dictation needs a Chromium browser (Chrome/Edge).'); return; }
@@ -1132,34 +1162,63 @@ function appendRichBubble(content, isUser = false) {
   if (!chatWindow) return;
 
   const wrap = document.createElement("div");
-  wrap.className = "w-full flex mb-3";
+  wrap.className = "w-full flex mb-1.5";
+
 
   const bubble = document.createElement("div");
   bubble.className = `chat-bubble ${isUser ? "chat-user" : "chat-ai"}`;
 
   const rich = document.createElement("div");
-  rich.className = "leading-relaxed text-[15px] space-y-2";
+  rich.className = "leading-[1.45] text-[15px] space-y-0.5";
   rich.setAttribute("dir", "auto");
 
   const asNode = content instanceof Node;
   const text = asNode ? null : String(content ?? "");
 
+  // --- helpers: strip headings + bold, then convert to HTML safely ---
+  const flattenMarkdown = (md) => {
+    if (!md) return "";
+    let s = String(md).trim();
+
+    // remove markdown headings like "# …", "## …", "### …"
+    s = s.replace(/^\s{0,3}#{1,6}\s+/gm, "");
+
+    // remove bold markers **…** (keep inner text)
+    s = s.replace(/\*\*(.*?)\*\*/g, "$1");
+
+    // strip horizontal rules (---, ___, ***)
+    s = s.replace(/^\s*([-*_])\1\1+\s*$/gm, "");
+
+    // collapse 3+ blank lines → 1
+    s = s.replace(/\n{3,}/g, "\n\n");
+
+    return s;
+  };
+
+  const mdToHtml = (md) => {
+    const flat = flattenMarkdown(md);
+    let rawHtml;
+    if (window.marked && typeof marked.parse === "function") {
+      rawHtml = marked.parse(flat, { gfm: true, breaks: false, headerIds: false });
+    } else {
+      rawHtml = flat
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\n/g, "<br>");
+    }
+    return window.DOMPurify ? DOMPurify.sanitize(rawHtml) : rawHtml;
+  };
+  // -------------------------------------------------------------------
+
   try {
     if (asNode) {
       rich.appendChild(content);
     } else {
-      let html = text;
-      if (window.marked && typeof marked.parse === "function") {
-        html = marked.parse(text);
-      } else {
-        html = text
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/\n/g, "<br>");
-      }
-      rich.innerHTML = window.DOMPurify ? DOMPurify.sanitize(html) : html;
+      const html = mdToHtml(text);
+      rich.innerHTML = html;
 
+      // styling hooks (unchanged)
       rich.querySelectorAll("p").forEach(el => el.classList.add("text-gray-800"));
       rich.querySelectorAll("h1,h2,h3,h4").forEach(el =>
         el.classList.add("font-semibold","tracking-tight","text-gray-900","mt-2")
@@ -1167,8 +1226,9 @@ function appendRichBubble(content, isUser = false) {
       rich.querySelectorAll("h1").forEach(el => el.classList.add("text-xl"));
       rich.querySelectorAll("h2").forEach(el => el.classList.add("text-lg"));
       rich.querySelectorAll("h3,h4").forEach(el => el.classList.add("text-base"));
-      rich.querySelectorAll("ul").forEach(el => el.classList.add("list-disc","pl-5","space-y-1"));
-      rich.querySelectorAll("ol").forEach(el => el.classList.add("list-decimal","pl-5","space-y-1"));
+      rich.querySelectorAll("ul").forEach(el => el.classList.add("list-disc","pl-5","space-y-0.5"));
+
+      rich.querySelectorAll("ol").forEach(el => el.classList.add("list-decimal","pl-5","space-y-0.5"));
       rich.querySelectorAll("blockquote").forEach(el =>
         el.classList.add("border-l-4","border-teal-500","pl-3","italic","text-gray-700","bg-teal-50/40","rounded-r")
       );
@@ -1200,6 +1260,7 @@ function appendRichBubble(content, isUser = false) {
   chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
+
 function appendBubble(message, isUser = false) { appendRichBubble(message, isUser); }
 
 /* ---------- Init ---------- */
@@ -1208,16 +1269,81 @@ document.addEventListener("DOMContentLoaded", async () => {
   const chatWindow = document.getElementById("chatWindow");
   if (chatWindow && chatWindow.innerHTML.trim() === '') { greetUser(); }
 
-  // Summary modal openers
+  // Summary modal openers (updated)
   document.querySelectorAll(".open-summary-modal").forEach(btn => {
     btn.addEventListener("click", function () {
-      const raw = this.dataset.summary;
-      const text = JSON.parse('"' + raw.replace(/"/g, '\\"') + '"');
-      const formatted = text.split(/\n{2,}/g).map(p => `<p>${p.trim()}</p>`).join('');
-      document.getElementById("modalContent").innerHTML = formatted;
-      document.getElementById("summaryModal").classList.remove("hidden");
+      const raw = this.dataset.summary || "";
+
+      // robust decode of Django's |escapejs content
+      let text = "";
+      try {
+        text = JSON.parse(
+          '"' +
+          raw
+            .replace(/\\/g, '\\\\')
+            .replace(/"/g, '\\"') +
+          '"'
+        );
+      } catch { text = raw; }
+
+      // strip headings + bold markers, collapse gaps
+      const flat = text
+        .replace(/^\s{0,3}#{1,6}\s+/gm, "")   // remove #, ##, …
+        .replace(/\*\*(.*?)\*\*/g, "$1")      // remove **bold**
+        .replace(/^\s*([-*_])\1\1+\s*$/gm, "")// strip hr
+        .replace(/\n{3,}/g, "\n\n");
+
+      // markdown → HTML (or plain fallback), then sanitize
+      let html;
+      if (window.marked && typeof marked.parse === "function") {
+        html = marked.parse(flat, { gfm: true, breaks: false, headerIds: false });
+      } else {
+        html = flat
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\n/g, "<br>");
+      }
+      const safe = window.DOMPurify ? DOMPurify.sanitize(html) : html;
+
+      // inject + style like chat bubbles
+      const target = document.getElementById("modalContent");
+      if (target) {
+        target.innerHTML = safe;
+
+        target.querySelectorAll("p").forEach(el => el.classList.add("text-gray-800"));
+        target.querySelectorAll("h1,h2,h3,h4").forEach(el =>
+          el.classList.add("font-semibold","tracking-tight","text-gray-900","mt-2")
+        );
+        target.querySelectorAll("h1").forEach(el => el.classList.add("text-xl"));
+        target.querySelectorAll("h2").forEach(el => el.classList.add("text-lg"));
+        target.querySelectorAll("h3,h4").forEach(el => el.classList.add("text-base"));
+        target.querySelectorAll("ul").forEach(el => el.classList.add("list-disc","pl-5","space-y-1"));
+        target.querySelectorAll("ol").forEach(el => el.classList.add("list-decimal","pl-5","space-y-1"));
+        target.querySelectorAll("blockquote").forEach(el =>
+          el.classList.add("border-l-4","border-teal-500","pl-3","italic","text-gray-700","bg-teal-50/40","rounded-r")
+        );
+        target.querySelectorAll("a").forEach(a => {
+          a.classList.add("text-teal-700","hover:underline","font-medium");
+          a.target = "_blank"; a.rel = "noopener noreferrer";
+        });
+        target.querySelectorAll("p > code, li > code").forEach(code =>
+          code.classList.add("px-1.5","py-0.5","rounded","bg-gray-100","text-gray-900","text-[13px]")
+        );
+        target.querySelectorAll("pre code").forEach(code =>
+          code.parentElement.classList.add("overflow-x-auto","rounded-lg","p-3","bg-gray-900","text-gray-100","text-sm")
+        );
+        if (window.hljs) {
+          target.querySelectorAll("pre code").forEach(code => { try { hljs.highlightElement(code); } catch {} });
+        }
+      }
+
+      document.getElementById("summaryModal")?.classList.remove("hidden");
     });
   });
+});
+
+
 
   // New Chat
   document.getElementById('newChatBtn')?.addEventListener('click', newChat);
@@ -1241,7 +1367,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   document.getElementById('clearAllBtn').addEventListener('click', clearPending);
 
-  document.getElementById('sendBtn').addEventListener('click', sendChat);
+
 
   // Drag & drop
   const dz = document.getElementById('dropzone');
@@ -1253,19 +1379,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // Enter to send
-  document.getElementById('chatInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
-  });
-
-  // Keep chat padding above composer height
-  const c = document.getElementById('composer');
-  const w = document.getElementById('chatWindow');
-  const ro = new ResizeObserver(updateComposerPadding);
-  if (c) ro.observe(c);
-  updateComposerPadding();
-  addEventListener('resize', updateComposerPadding);
-  addEventListener('orientationchange', updateComposerPadding);
-});
+  
 
 /* ---------- Greeting & new chat ---------- */
 async function greetUser() {
@@ -1369,25 +1483,30 @@ function clearPending() {
 }
 
 /* ---------- Send chat (bundles text + pending files) ---------- */
+// bind safely (in case markup changes)
+document.getElementById('sendBtn')?.addEventListener('click', sendChat);
+document.getElementById('chatInput')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+});
+
 async function sendChat() {
   const input = document.getElementById("chatInput");
-  const userMessage = (input.value || '').trim();
+  const chatWindow = document.getElementById("chatWindow");
+  const userMessage = (input?.value || '').trim();
 
-  // tone still comes from your radios (or any override you set elsewhere)
   const tone =
     window.__nmToneOverride ||
     document.querySelector('input[name="tone"]:checked')?.value ||
     "PlainClinical";
 
-  // language matches the landing page picker (window.__nmLang is defined there)
   const lang =
     (typeof window.__nmLang === 'function' && window.__nmLang()) ||
-    navigator.language ||
-    'en-US';
+    navigator.language || 'en-US';
 
+  // use your existing pending[] helpers
   if (!userMessage && pending.length === 0) return;
 
-  // Render user bubble + staged attachments gallery
+  // render user bubble + staged attachments
   if (userMessage) appendBubble(userMessage, true);
   if (pending.length) {
     const gallery = document.createElement('div');
@@ -1409,19 +1528,18 @@ async function sendChat() {
     appendRichBubble(gallery, true);
   }
 
-  // Build payload
+  // payload
   const formData = new FormData();
   if (userMessage) formData.append("message", userMessage);
   formData.append("tone", tone);
-  formData.append("lang", lang); // ✅ pass selected language to backend
+  formData.append("lang", lang);
   pending.forEach(p => formData.append("files[]", p.file, p.file.name));
 
-  // Clear composer state
-  input.value = "";
+  // clear composer
+  if (input) input.value = "";
   clearPending();
 
-  // Typing indicator (single, de-duped)
-  const chatWindow = document.getElementById("chatWindow");
+  // typing indicator
   const typingWrap = document.createElement("div");
   typingWrap.className = "w-full flex mb-2 justify-start";
   const typing = document.createElement("div");
@@ -1431,17 +1549,10 @@ async function sendChat() {
   chatWindow.appendChild(typingWrap);
   chatWindow.scrollTop = chatWindow.scrollHeight;
 
-  // Send to backend
   try {
-    const res = await fetch("/api/send-chat/", {
-      method: "POST",
-      headers: {
-        "X-CSRFToken": getCSRFToken(),
-        "Accept-Language": lang // ✅ nice hint for server/localization middleware
-      },
-      body: formData,
-      credentials: "include"
-    });
+    const API_SEND = "/api/send-chat/";
+const res = await fetch(API_SEND, { method:"POST", headers:{ "X-CSRFToken": getCSRFToken(), "Accept-Language": lang }, body: formData, credentials: "include" });
+
 
     let data = null;
     try { data = await res.json(); } catch {}
@@ -1450,15 +1561,17 @@ async function sendChat() {
       throw new Error((data && (data.error || data.detail)) || `HTTP ${res.status}`);
     }
 
-    typing.classList.remove("italic","text-gray-500");
-    typing.classList.add("text-gray-800");
-    typing.innerText = (data && data.reply) ? data.reply : "⚠️ No reply received.";
+    // replace typing with rich AI bubble
+    typingWrap.remove();
+    const reply = (data && data.reply) ? data.reply : "⚠️ No reply received.";
+    appendRichBubble(reply, false);
   } catch (err) {
     typing.classList.remove("italic","text-gray-500");
     typing.classList.add("text-red-700","bg-red-100");
     typing.innerText = "Hi! Our system is busy right now — please try again in a few minutes.";
   }
 }
+
 
 
 /* ---------- Sidebar / Settings ---------- */

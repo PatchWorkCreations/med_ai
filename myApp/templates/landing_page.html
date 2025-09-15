@@ -1780,6 +1780,90 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+
+</script>
+
+
+
+<!-- Signup Gate (shown to guests on first load) -->
+<div id="signupGate"
+     class="fixed inset-0 z-[80] hidden items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+  <div class="w-full max-w-md rounded-2xl bg-white shadow-2xl border p-5">
+    <div class="flex items-center gap-3 mb-2">
+      <i class="fa-solid fa-heart-pulse text-teal-600 text-xl"></i>
+      <h2 class="text-lg font-semibold">✨ Welcome to NeuroMed AI!</h2>
+    </div>
+    <p class="text-sm text-slate-700">
+      We’re currently in <strong>beta testing</strong>, which means you’re among the first to try it out.
+    </p>
+    <ul class="mt-3 text-sm text-slate-700 list-disc pl-5 space-y-1">
+      <li>Save your files and summaries</li>
+      <li>Share feedback to improve accuracy</li>
+      <li>Keep everything secure while testing</li>
+    </ul>
+
+    <a href="/signup"
+       class="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-medium py-2.5">
+      👉 Create Account <span class="text-xs opacity-90">(fast & free)</span>
+    </a>
+
+    <div class="mt-3 text-xs text-slate-500">
+      Your insights help shape the future of NeuroMed AI. Thanks for building with us!
+    </div>
+
+    <div class="mt-3 text-center text-xs">
+      Already have an account?
+      <a class="underline text-slate-700 hover:text-slate-900" href="/login">Log in</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Hard gate: if not logged in, disable inputs and show the signup overlay immediately.
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const authed = await isAuthenticated(); // you already have this helper
+      if (!authed) enforceSignupGate();
+    } catch {
+      // If the status check fails, be safe and gate anyway
+      enforceSignupGate();
+    }
+  });
+
+  function enforceSignupGate(){
+    // 1) Show overlay
+    showSignupGate();
+
+    // 2) Disable interactive bits (composer, upload, mic, suggestions)
+    const disable = (el) => { if(!el) return; el.setAttribute('disabled',''); el.classList.add('is-disabled'); };
+    disable(document.getElementById('sendBtn'));
+    disable(document.getElementById('uploadBtn'));
+    disable(document.getElementById('micBtn'));
+    const ta = document.getElementById('chatInput');
+    if (ta) ta.setAttribute('readonly','');
+
+    // suggestions become promos
+    document.querySelectorAll('.suggestion').forEach(btn => {
+      btn.addEventListener('click', () => location.href='/signup', { once:true });
+    });
+
+    // 3) Make primary CTAs go to /signup
+    const up = document.getElementById('ctaUpload');
+    const demo = document.getElementById('ctaDemo');
+    if (up)   up.onclick   = () => { location.href = '/signup'; return false; };
+    if (demo) demo.onclick = () => { location.href = '/signup'; return false; };
+
+    // 4) Block drag/drop from doing anything for guests
+    const dz = document.getElementById('dropZone');
+    if (dz){
+      ['dragenter','dragover','dragleave','drop'].forEach(ev =>
+        dz.addEventListener(ev, (e)=>{ e.preventDefault(); e.stopPropagation(); }, { passive:false })
+      );
+    }
+
+    // Optional: visually dim the main section behind the gate
+    document.querySelector('main')?.classList.add('opacity-50', 'pointer-events-none');
+  }
 </script>
 
 </body>
