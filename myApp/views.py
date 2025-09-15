@@ -26,6 +26,8 @@ from PIL import Image
 import re, uuid
 from pathlib import Path
 from django.conf import settings
+from .models import Profile
+from .utils import get_client_ip
 
 ALLOWED_IMAGE_EXTS = (".jpg", ".jpeg", ".png", ".heic", ".webp")
 USER_MEDIA_SUBDIR = getattr(settings, "USER_MEDIA_SUBDIR", "user_media")
@@ -817,17 +819,28 @@ def speaking_view(request):
 from django.shortcuts import render, redirect
 from .forms import CustomSignupForm
 
+# myApp/views.py
 def signup_view(request):
     if request.method == "POST":
         form = CustomSignupForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()
+
+            # Ensure profile exists
+            profile, _ = Profile.objects.get_or_create(user=user)
+
+            # Capture IP from helper, country from middleware
+            profile.signup_ip = get_client_ip(request)
+            profile.signup_country = getattr(request, "country_code", None) or profile.signup_country
+            profile.save()
+
             resp = redirect("dashboard")
             resp.set_cookie("just_logged_in", "1", max_age=60, samesite="Lax", path="/")
             return resp
     else:
         form = CustomSignupForm()
     return render(request, "signup.html", {"form": form})
+
 
 
 # =============================
@@ -1332,16 +1345,29 @@ from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 # ⬇️ USE the email-only form instead
 from .forms import EmailAuthenticationForm
 
+# myApp/views.py
 class WarmLoginView(DjangoLoginView):
     template_name = "login.html"
     redirect_authenticated_user = True
     success_url = reverse_lazy("dashboard")
-    authentication_form = EmailAuthenticationForm  # ← key line
+    authentication_form = EmailAuthenticationForm
 
     def form_valid(self, form):
         resp = super().form_valid(form)
+        try:
+            user = self.request.user
+            if user and user.is_authenticated:
+                profile, _ = Profile.objects.get_or_create(user=user)
+                profile.last_login_ip = get_client_ip(self.request)
+                profile.last_login_country = getattr(self.request, "country_code", None) or profile.last_login_country
+                profile.save()
+        except Exception:
+            # Don’t block login if telemetry fails
+            pass
+
         resp.set_cookie("just_logged_in", "1", max_age=60, samesite="Lax", path="/")
         return resp
+
 
     def get_success_url(self):
         url = super().get_success_url() or str(self.success_url)

@@ -64,6 +64,7 @@ MIDDLEWARE = [
     'myProject.middleware.BusyModeMiddleware',
     'myApp.middleware.CurrentOrgByHostMiddleware',
     'myApp.middleware.EnforceOrgMembershipMiddleware',
+    'myApp.middleware.CountryMiddleware',
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

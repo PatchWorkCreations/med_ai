@@ -107,3 +107,112 @@ class EnforceOrgMembershipMiddleware:
             return HttpResponseForbidden("You do not have access to this organization.")
 
         return self.get_response(request)
+
+
+# myApp/middleware.py
+import ipaddress, re
+from typing import Optional
+from django.utils.deprecation import MiddlewareMixin
+from django.core.cache import cache
+
+DEFAULT_COUNTRY = "US"  # safest fallback
+
+def _client_ip(request) -> str:
+    return (
+        request.META.get("HTTP_CF_CONNECTING_IP")  # Cloudflare direct client IP
+        or (request.META.get("HTTP_X_FORWARDED_FOR") or "").split(",")[0].strip()
+        or request.META.get("REMOTE_ADDR", "")
+    )
+
+def _is_private(ip: str) -> bool:
+    try:
+        return ipaddress.ip_address(ip).is_private
+    except Exception:
+        return True
+
+def _country_from_accept_language(al: Optional[str]) -> Optional[str]:
+    if not al:
+        return None
+    for token in al.split(","):
+        token = token.split(";")[0].strip()  # e.g., en-PH
+        m = re.match(r"^[A-Za-z]{2,3}-(?P<region>[A-Za-z]{2})$", token)
+        if m:
+            return m.group("region").upper()
+        if token.lower() in ("fil", "tl", "tagalog"):
+            return "PH"
+    return None
+
+def _country_from_http(ip: str) -> Optional[str]:
+    """
+    Lightweight HTTPS lookup with caching (24h).
+    Uses ipwho.is (no auth required). Safe to remove if you want 100% offline.
+    """
+    if not ip or _is_private(ip):
+        return None
+    key = "ipcc:%s" % ip
+    cached = cache.get(key)
+    if cached:
+        return cached
+    try:
+        import requests  # if not installed, just `pip install requests`
+        r = requests.get("https://ipwho.is/%s?fields=country_code" % ip, timeout=1.8)
+        if r.ok:
+            data = r.json() or {}
+            cc = data.get("country_code")
+            if cc and len(cc) == 2:
+                cc = cc.upper()
+                cache.set(key, cc, 60 * 60 * 24)
+                return cc
+    except Exception:
+        pass
+    return None
+
+class CountryMiddleware(MiddlewareMixin):
+    """
+    Attaches request.country_code (e.g., 'PH') for downstream use.
+    Order:
+      1) CDN headers
+      2) HTTP fallback (ipwho.is), cached 24h
+      3) Accept-Language
+      4) Dev default (PH if DEBUG; else US)
+      5) DEFAULT_COUNTRY
+    """
+    def process_request(self, request):
+        # 1) CDN headers
+        for key in (
+            "HTTP_CF_IPCOUNTRY",
+            "HTTP_CLOUDFRONT_VIEWER_COUNTRY",
+            "HTTP_X_APPENGINE_COUNTRY",
+            "HTTP_X_GEO_COUNTRY",
+        ):
+            val = request.META.get(key)
+            if val and len(val) == 2:
+                request.country_code = val.upper()
+                return
+
+        ip = _client_ip(request)
+
+        # 2) HTTP fallback (cached)
+        cc = _country_from_http(ip)
+        if cc:
+            request.country_code = cc
+            return
+
+        # 3) Accept-Language
+        cc = _country_from_accept_language(request.META.get("HTTP_ACCEPT_LANGUAGE"))
+        if cc:
+            request.country_code = cc
+            return
+
+        # 4) Localhost dev default
+        host = (request.get_host() or "").lower()
+        if host.startswith(("127.0.0.1", "localhost")):
+            try:
+                from django.conf import settings
+                request.country_code = "PH" if getattr(settings, "DEBUG", False) else DEFAULT_COUNTRY
+                return
+            except Exception:
+                pass
+
+        # 5) Final fallback
+        request.country_code = DEFAULT_COUNTRY

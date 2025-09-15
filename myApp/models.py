@@ -96,6 +96,11 @@ class Profile(models.Model):
         default='en-US'
     )
 
+    signup_ip = models.GenericIPAddressField(blank=True, null=True)
+    last_login_ip = models.GenericIPAddressField(blank=True, null=True)
+    signup_country = models.CharField(max_length=2, blank=True, null=True)     # e.g. "PH"
+    last_login_country = models.CharField(max_length=2, blank=True, null=True) # e.g. "PH"
+
     def __str__(self):
         return f"{self.display_name or self.user.username} Profile"
 
