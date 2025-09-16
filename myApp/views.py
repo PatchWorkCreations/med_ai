@@ -34,6 +34,11 @@ USER_MEDIA_SUBDIR = getattr(settings, "USER_MEDIA_SUBDIR", "user_media")
 SESSION_IMAGE_INDEX = "known_images"  # {lower_filename: relative_path_from_MEDIA_ROOT}
 MAX_INDEXED_IMAGES = 100
 
+# views.py (top)
+from django.utils import timezone
+from .models import ChatSession
+
+
 
 def _user_media_root(user) -> Path:
     # Anonymous users get "anon"; you can also force auth if you prefer.
@@ -545,40 +550,241 @@ def summarize_medical_record(request):
 # =============================
 #     CHAT (TEXT + FILES)
 # =============================
+# myApp/views_chat.py   (or merge into your existing views.py)
+
+import logging
+from django.http import JsonResponse
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+
+from rest_framework.decorators import api_view, parser_classes, permission_classes
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import AllowAny, IsAuthenticated
+
+from .models import ChatSession
+
+# If these are elsewhere, import from your modules
+# from .llm import client, get_system_prompt, normalize_tone, _classify_mode, summarize_single_file
+# from .utils import _now_ts
+
+log = logging.getLogger(__name__)
+
+
+# ---------- helpers ----------
+
+def _now_iso():
+    return timezone.now().isoformat()
+
+def _trim_history(msgs, keep=200):
+    return msgs if len(msgs) <= keep else msgs[-keep:]
+
+def _ensure_session_for_user(user, tone, lang, first_user_msg=None, session_id=None):
+    """
+    Reuse session if id belongs to user; otherwise create a new one.
+    """
+    if session_id:
+        try:
+            s = ChatSession.objects.get(id=session_id, user=user, archived=False)
+            updates = []
+            if s.tone != tone:
+                s.tone = tone; updates.append("tone")
+            if s.lang != lang:
+                s.lang = lang; updates.append("lang")
+            if updates:
+                s.updated_at = timezone.now(); updates.append("updated_at")
+                s.save(update_fields=updates)
+            return s, False
+        except ChatSession.DoesNotExist:
+            pass
+
+    title = (first_user_msg or "New chat").strip()[:120] if first_user_msg else "New chat"
+    s = ChatSession.objects.create(user=user, title=title, tone=tone, lang=lang)
+    return s, True
+
+
+# ---------- sessions: list & detail (for sidebar) ----------
+
+def _row(s: ChatSession):
+    return {
+        "id": s.id,
+        "title": s.title or "Untitled",
+        "tone": s.tone or "PlainClinical",
+        "lang": s.lang or "en-US",
+        "archived": s.archived,
+        "created_at": s.created_at.isoformat(),
+        "updated_at": s.updated_at.isoformat(),
+    }
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def list_chat_sessions(request):
+    rows = (
+        ChatSession.objects
+        .filter(user=request.user, archived=False)
+        .order_by("-updated_at")[:200]
+    )
+    return JsonResponse([_row(r) for r in rows], safe=False)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_chat_session(request, session_id: int):
+    try:
+        s = ChatSession.objects.get(id=session_id, user=request.user, archived=False)
+    except ChatSession.DoesNotExist:
+        return JsonResponse({"detail": "Not found"}, status=404)
+    return JsonResponse({**_row(s), "messages": s.messages or []})
+
+
+# ---------- clear soft memory + sticky id (used by your New Chat button) ----------
+
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def clear_session(request):
+    for k in ["latest_summary","chat_history","nm_last_mode","nm_last_short_msg","nm_last_ts"]:
+        request.session.pop(k, None)
+    request.session.pop("active_chat_session_id", None)  # <- important
+    request.session.modified = True
+    return JsonResponse({"ok": True})
+
+# views_chat.py  (add this next to your other session views)
+from django.http import JsonResponse
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from django.forms.models import model_to_dict
+from .models import ChatSession
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def create_chat_session(request):
+    """
+    Create an empty ChatSession and make it the active one.
+    """
+    # Create the row with the minimum required fields
+    s = ChatSession.objects.create(user=request.user)
+
+    # If your model has optional fields like title/tone/lang, set them safely:
+    # (No-ops if those fields don't exist)
+    try:
+        if hasattr(s, "title") and not s.title:
+            s.title = "New chat"
+        if hasattr(s, "messages") and s.messages is None:
+            s.messages = []
+        s.save()
+    except Exception:
+        pass
+
+    # Make it server-sticky so the next send reuses this session
+    request.session["active_chat_session_id"] = s.id
+    request.session.modified = True
+
+    return JsonResponse({"session_id": s.id})
+
+
+# --- AI title helpers ---
+
+import os, re
+from django.utils import timezone
+
+def _clean_title(s: str) -> str:
+    s = re.sub(r"\s+", " ", (s or "")).strip()
+    s = s.replace("\n", " ").replace("\r", " ")
+    return s
+
+def _derive_title(user_message: str = "", files=None, reply: str = "", max_len: int = 80) -> str:
+    """Heuristic fallback: user text → filenames → assistant reply."""
+    if user_message:
+        txt = _clean_title(user_message)
+        m = re.split(r"(?<=[.!?])\s+", txt, maxsplit=1)
+        title = m[0] if m else txt
+        return title[:max_len]
+
+    files = files or []
+    if files:
+        names = []
+        for f in files[:2]:
+            base = os.path.splitext(getattr(f, "name", "file"))[0]
+            names.append(base[:40])
+        extra = len(files) - 2
+        label = " & ".join(names) + (f" (+{extra} more)" if extra > 0 else "")
+        return label[:max_len]
+
+    if reply:
+        return _clean_title(reply)[:max_len]
+
+    return "New chat"
+
+def _ai_title(user_message: str, files, reply: str, lang: str = "en-US", max_len: int = 80) -> str:
+    """
+    Ask the model for a concise, PHI-safe title. Falls back to _derive_title on any hiccup.
+    """
+    try:
+        # Prepare a compact context
+        fnames = []
+        for f in files or []:
+            name = getattr(f, "name", "")
+            if name:
+                fnames.append(os.path.splitext(name)[0][:60])
+        files_hint = ", ".join(fnames[:3])
+
+        system = (
+            "You name chat threads.\n"
+            "Rules: 3–6 words • Title Case • No emojis • No dates, names, or IDs • "
+            "Use neutral, non-identifying phrasing • Be specific but short.\n"
+            f"Write the title in the user's language: {lang}."
+        )
+
+        user = "Create a short title for this conversation.\n"
+        if user_message:
+            user += f"\nUser message: {user_message[:400]}"
+        if files_hint:
+            user += f"\nFiles: {files_hint}"
+        if reply:
+            user += f"\nAssistant reply (hint): {reply[:400]}"
+
+        # Use a lightweight model if you have it; otherwise gpt-4o is fine
+        resp = client.chat.completions.create(
+            model="gpt-4o-mini",  # change to your smallest available title-friendly model
+            temperature=0.2,
+            messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
+        )
+        raw = (resp.choices[0].message.content or "").strip()
+        # Keep it tight + safe
+        title = _clean_title(raw)[:max_len]
+        # Basic guardrails
+        if not title or title.lower() in ("new chat", "untitled"):
+            raise ValueError("weak title")
+        # Nuke obvious PHI-ish tokens (very light heuristic)
+        if re.search(r"\b(MRN|SSN|Account|#\d{3,})\b", title, re.I):
+            raise ValueError("contains id-like token")
+        return title
+    except Exception:
+        return _derive_title(user_message=user_message, files=files, reply=reply, max_len=max_len)
+
+
+
+
+# ---------- main: send_chat (db persistence + sticky session) ----------
+
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes([AllowAny])
 @parser_classes([MultiPartParser, FormParser])
 def send_chat(request):
     """
-    Unified chat endpoint with tone + language support:
-    - Accepts multiple files via `files[]` (new UI) or a single `file` (backward compatible).
-    - Images → vision interpretation.
-    - PDFs/DOCX/TXT → extract + summarize.
-    - If user sends only files → return combined file summaries.
-    - If user also sends a question → answer using the combined context + session history.
-    - Supports tone + language (persistent via Profile).
-    - Soft memory: QUICK → FULL upgrade if follow-up soon after.
+    Chat endpoint with tone/lang, file support, DB persistence, and server-sticky session.
     """
-    # --- Tone handling (existing)
+    # --- Tone
     raw_tone = request.data.get("tone") or request.session.get("tone") or "PlainClinical"
     tone = normalize_tone(raw_tone)
     request.session["tone"] = tone
-    log.info(
-    "send_chat path=%s method=%s tone_in=%r -> normalized=%s lang_in=%r accept_lang=%r files=%d has_msg=%s",
-    request.path, request.method, raw_tone, tone,
-    request.data.get("lang"),
-    request.headers.get("Accept-Language"),
-    len(request.FILES or []),
-    bool((request.data.get("message") or "").strip()),
-)
 
-    # --- Language handling (new)
+    # --- Language
     lang = request.data.get("lang")
     if request.user.is_authenticated:
         from .models import Profile
         profile, _ = Profile.objects.get_or_create(user=request.user)
-        if lang:  # update preference if provided
+        if lang:
             profile.language = lang
             profile.save()
         else:
@@ -586,140 +792,291 @@ def send_chat(request):
     else:
         lang = lang or "en-US"
 
-    # --- Build system prompt with tone + language
+    # --- System prompt
     base_prompt = get_system_prompt(tone)
-    system_prompt = (
-        f"{base_prompt}\n\n"
-        f"(Always respond in {lang} unless explicitly told otherwise.)"
-    )
+    system_prompt = f"{base_prompt}\n\n(Always respond in {lang} unless explicitly told otherwise.)"
 
-    # --- Message
+    # --- Inputs
     user_message = (request.data.get("message") or "").strip()
-
-    # --- Collect files
     files = request.FILES.getlist("files[]")
     if not files and "file" in request.FILES:
         files = [request.FILES["file"]]
     has_files = bool(files)
 
-    # --- Decide response mode
+    # --- Mode header
     mode, topic_hint = _classify_mode(user_message, has_files, request.session)
-    header = f"ResponseMode: {mode}"
-    if topic_hint:
-        header += f"\nTopicHint: {topic_hint}"
+    header = f"ResponseMode: {mode}" + (f"\nTopicHint: {topic_hint}" if topic_hint else "")
 
-    # --- Session context
-    summary_context = request.session.get("latest_summary", "")
-    chat_history = request.session.get(
-        "chat_history",
-        [{"role": "system", "content": system_prompt}, {"role": "system", "content": header}],
-    )
-    if not any(
-        m.get("role") == "system"
-        and str(m.get("content", "")).startswith("ResponseMode:")
-        for m in chat_history
-    ):
-        chat_history.insert(1, {"role": "system", "content": header})
+    # --- Decide persistence
+    use_db = request.user.is_authenticated
+    session_obj = None
 
-    # --- Process files
+    # 🔑 STICKY: prefer payload id, else the server-sticky id
+    incoming_session_id = request.data.get("session_id")
+    sticky_session_id = request.session.get("active_chat_session_id")
+    chosen_session_id = incoming_session_id or sticky_session_id
+
+    # --- Build initial chat_history (DB vs guest)
+    if use_db:
+        session_obj, _created = _ensure_session_for_user(
+            request.user, tone, lang,
+            first_user_msg=user_message or ("[attachments]" if has_files else "New chat"),
+            session_id=chosen_session_id
+        )
+        # remember sticky id on server
+        request.session["active_chat_session_id"] = session_obj.id
+        request.session.modified = True
+
+        chat_history = []
+        for m in (session_obj.messages or []):
+            r, c = m.get("role"), m.get("content")
+            if r and c is not None:
+                chat_history.append({"role": r, "content": c})
+        if not any(m.get("role") == "system" and str(m.get("content","")).startswith("ResponseMode:") for m in chat_history):
+            chat_history.insert(0, {"role": "system", "content": header})
+        if not any(m.get("role") == "system" and base_prompt in m.get("content","") for m in chat_history):
+            chat_history.insert(0, {"role": "system", "content": system_prompt})
+    else:
+        summary_context = request.session.get("latest_summary", "")
+        chat_history = request.session.get(
+            "chat_history",
+            [{"role": "system", "content": system_prompt}, {"role": "system", "content": header}],
+        )
+        if not any(m.get("role") == "system" and str(m.get("content", "")).startswith("ResponseMode:") for m in chat_history):
+            chat_history.insert(1, {"role": "system", "content": header})
+
+    # --- Process files → combined_context
     combined_sections = []
     for f in files:
         fname, summary = summarize_single_file(
-            f,
-            tone=tone,
-            system_prompt=system_prompt,
-            user=request.user,
-            request=request,
+            f, tone=tone, system_prompt=system_prompt, user=request.user, request=request,
         )
         combined_sections.append(f"{fname}\n{summary}")
-
     combined_context = "\n\n".join(combined_sections).strip()
 
-    # --- If only files
+    # --- Case: only files
     if files and not user_message:
-        request.session["latest_summary"] = combined_context or summary_context
-        request.session["chat_history"] = [
-            {"role": "system", "content": system_prompt},
-            {"role": "system", "content": header},
-            {"role": "user", "content": f"(Here’s the latest medical context):\n{combined_context or summary_context}"},
-        ]
-        request.session["nm_last_mode"] = "FULL"
-        request.session["nm_last_short_msg"] = ""
-        request.session["nm_last_ts"] = _now_ts()
-        request.session.modified = True
-
-        if combined_context:
-            return JsonResponse({"reply": combined_context})
+        reply_text = combined_context or "I couldn’t read any useful content from the attachments."
+        if use_db:
+            msgs = session_obj.messages or []
+            if not msgs:
+                msgs.extend([
+                    {"role": "system", "content": system_prompt, "ts": _now_iso()},
+                    {"role": "system", "content": header,         "ts": _now_iso()},
+                ])
+            msgs.append({"role": "user", "content": "(New attachments uploaded)", "ts": _now_iso(), "meta": {"has_files": True}})
+            msgs.append({"role": "assistant", "content": reply_text, "ts": _now_iso()})
+            
+            try:
+                current = (getattr(session_obj, "title", "") or "").strip().lower()
+                if current in ("", "new chat", "untitled"):
+                    ai_name = _ai_title(user_message="", files=files, reply=reply_text, lang=lang)
+                    if ai_name:
+                        session_obj.title = ai_name
+            except Exception:
+                # fall back quietly
+                if not getattr(session_obj, "title", None):
+                    session_obj.title = _derive_title(user_message="", files=files, reply=reply_text)
+                
+            session_obj.messages = _trim_history(msgs, keep=200)
+            session_obj.updated_at = timezone.now()
+            session_obj.save(update_fields=["messages", "updated_at"])
+            return JsonResponse({"reply": reply_text, "session_id": session_obj.id}, status=(200 if combined_context else 400))
         else:
-            return JsonResponse(
-                {"reply": "I couldn’t read any useful content from the attachments."}, status=400
-            )
+            request.session["latest_summary"] = combined_context or summary_context
+            request.session["chat_history"] = [
+                {"role": "system", "content": system_prompt},
+                {"role": "system", "content": header},
+                {"role": "user",   "content": f"(Here’s the latest medical context):\n{combined_context or summary_context}"},
+            ]
+            request.session["nm_last_mode"] = "FULL"
+            request.session["nm_last_short_msg"] = ""
+            request.session["nm_last_ts"] = _now_ts()
+            request.session.modified = True
+            return JsonResponse({"reply": reply_text}, status=(200 if combined_context else 400))
 
-    # --- If no input at all
+    # --- No input at all
     if not files and not user_message:
         return JsonResponse({"reply": "Hmm… I didn’t catch that. Can you try again?"})
 
-    # --- Prepare context
+    # --- Prepare context for model call
     if combined_context:
         chat_history = [
             {"role": "system", "content": system_prompt},
             {"role": "system", "content": header},
-            {"role": "user", "content": f"(Here’s the latest medical context):\n{combined_context}"},
+            {"role": "user",   "content": f"(Here’s the latest medical context):\n{combined_context}"},
         ]
-        request.session["latest_summary"] = combined_context
+        if not use_db:
+            request.session["latest_summary"] = combined_context
     else:
-        if summary_context and all(
-            "(Here’s the" not in m.get("content", "") for m in chat_history if m.get("role") == "user"
-        ):
-            chat_history.append(
-                {"role": "user", "content": f"(Here’s the medical context):\n{summary_context}"}
-            )
+        if not use_db:
+            summary_context = request.session.get("latest_summary", "")
+            if summary_context and all("(Here’s the" not in m.get("content", "") for m in chat_history if m.get("role") == "user"):
+                chat_history.append({"role": "user", "content": f"(Here’s the medical context):\n{summary_context}"})
 
-    # --- Add user message
+    # --- Add user message to model history
     chat_history.append({"role": "user", "content": user_message})
 
+    # --- Persist user turn pre-model (DB)
+    if use_db:
+        msgs = session_obj.messages or []
+        if not msgs:
+            msgs.extend([
+                {"role": "system", "content": system_prompt, "ts": _now_iso()},
+                {"role": "system", "content": header,         "ts": _now_iso()},
+            ])
+        if combined_context:
+            msgs.append({
+                "role": "user",
+                "content": f"(Here’s the latest medical context):\n{combined_context}",
+                "ts": _now_iso(),
+                "meta": {"context": "files"},
+            })
+        msgs.append({"role": "user", "content": user_message, "ts": _now_iso()})
+
+        if not session_obj.title:
+            session_obj.title = (user_message or "New chat")[:120]
+        session_obj.tone = tone
+        session_obj.lang = lang
+
+        session_obj.messages = _trim_history(msgs, keep=200)
+        session_obj.updated_at = timezone.now()
+        session_obj.save(update_fields=["messages", "updated_at", "title", "tone", "lang"])
+
+    # --- Call the model (your existing flow)
     try:
-        # First pass
         raw = client.chat.completions.create(
-            model="gpt-4o",
-            temperature=0.6,
-            messages=chat_history,
+            model="gpt-4o", temperature=0.6, messages=chat_history,
         ).choices[0].message.content.strip()
 
-        # Second pass (tone polish)
         reply = client.chat.completions.create(
-            model="gpt-4o",
-            temperature=0.3,
-            messages=[
+            model="gpt-4o", temperature=0.3, messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "system", "content": header},
-                {"role": "user", "content": f"Rewrite warmly, clearly, and confidently:\n\n{raw}"},
+                {"role": "user",   "content": f"Rewrite warmly, clearly, and confidently:\n\n{raw}"},
             ],
         ).choices[0].message.content.strip()
 
-        # Save trimmed history
-        chat_history.append({"role": "assistant", "content": reply})
-        request.session["chat_history"] = chat_history[-10:]
+        if use_db:
+            msgs = session_obj.messages or []
+            msgs.append({"role":"assistant","content":reply,"ts":_now_iso()})
 
-        # --- Soft-memory writeback
-        if mode == "QUICK":
-            request.session["nm_last_mode"] = "QUICK"
-            request.session["nm_last_short_msg"] = user_message
-            request.session["nm_last_ts"] = _now_ts()
+            # 🔹 Auto-title if placeholder
+            try:
+                current = (getattr(session_obj, "title", "") or "").strip().lower()
+                if current in ("", "new chat", "untitled"):
+                    ai_name = _ai_title(user_message=user_message, files=files, reply=reply, lang=lang)
+                    if ai_name:
+                        session_obj.title = ai_name
+            except Exception:
+                if not getattr(session_obj, "title", None):
+                    session_obj.title = _derive_title(user_message=user_message, files=files, reply=reply)
+
+            session_obj.messages = _trim_history(msgs, keep=200)
+            session_obj.updated_at = timezone.now()
+            session_obj.save(update_fields=["messages","updated_at","title"])
         else:
-            request.session["nm_last_mode"] = mode
-            request.session["nm_last_short_msg"] = ""
+            chat_history.append({"role": "assistant", "content": reply})
+            request.session["chat_history"] = chat_history[-10:]
+            if mode == "QUICK":
+                request.session["nm_last_mode"] = "QUICK"
+                request.session["nm_last_short_msg"] = user_message
+            else:
+                request.session["nm_last_mode"] = mode
+                request.session["nm_last_short_msg"] = ""
             request.session["nm_last_ts"] = _now_ts()
+            request.session.modified = True
 
-        request.session.modified = True
-        return JsonResponse({"reply": reply})
+        return JsonResponse({"reply": reply, "session_id": getattr(session_obj, "id", None)})
 
     except Exception:
-        traceback.print_exc()
+        log.exception("send_chat failed")
         return JsonResponse(
             {"reply": "Hi! Our system is busy right now due to a lot of users — please try again in a few minutes."},
             status=500,
         )
+
+# --- ChatSession actions: rename / archive toggle / delete --------------------
+import json
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+
+from .models import ChatSession
+
+
+def _owned_session(request, pk: int) -> ChatSession:
+    return get_object_or_404(ChatSession, id=pk, user=request.user)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def chat_session_rename(request, pk: int):
+    """
+    POST { "title": "New title" }
+    """
+    s = _owned_session(request, pk)
+    try:
+        payload = request.data or json.loads(request.body or "{}")
+    except json.JSONDecodeError:
+        payload = {}
+
+    title = (payload.get("title") or "").strip()
+    if not title:
+        return JsonResponse({"ok": False, "error": "Title is required."}, status=400)
+
+    s.title = title[:120]
+    s.updated_at = timezone.now()
+    s.save(update_fields=["title", "updated_at"])
+    return JsonResponse({"ok": True, "id": s.id, "title": s.title})
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def chat_session_archive(request, pk: int):
+    """
+    Toggle archive OR set explicitly.
+    Accepts optional JSON: { "archived": true|false }
+    """
+    s = _owned_session(request, pk)
+    try:
+        payload = request.data or json.loads(request.body or "{}")
+    except json.JSONDecodeError:
+        payload = {}
+
+    if "archived" in payload:
+        s.archived = bool(payload.get("archived"))
+    else:
+        s.archived = not bool(s.archived)
+
+    s.updated_at = timezone.now()
+    s.save(update_fields=["archived", "updated_at"])
+
+    # If archiving the active session, clear sticky id so next send makes a new one
+    if s.archived and request.session.get("active_chat_session_id") == s.id:
+        request.session.pop("active_chat_session_id", None)
+        request.session.modified = True
+
+    return JsonResponse({"ok": True, "id": s.id, "archived": s.archived})
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def chat_session_delete(request, pk: int):
+    """
+    Hard delete the session.
+    """
+    s = _owned_session(request, pk)
+    s.delete()
+
+    if request.session.get("active_chat_session_id") == pk:
+        request.session.pop("active_chat_session_id", None)
+        request.session.modified = True
+
+    return JsonResponse({"ok": True, "id": pk, "deleted": True})
+
 
 # =============================
 #  SMART SUGGESTIONS / Q&A
@@ -787,30 +1144,6 @@ def answer_question(request):
 
     return JsonResponse({"answer": polish})
 
-# =============================
-#      SESSION UTILITIES
-# =============================
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def clear_session(request):
-    tone = normalize_tone(request.data.get("tone") or request.session.get("tone") or "PlainClinical")
-    system_prompt = get_system_prompt(tone)
-    request.session["chat_history"] = [{"role": "system", "content": system_prompt}]
-    request.session["latest_summary"] = ""
-    request.session.modified = True
-    return Response({"status": "✅ New chat started!", "tone": tone})
-
-@csrf_exempt
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def reset_chat_session(request):
-    # mirror of clear_session but AllowAny (if you expose this publicly)
-    tone = normalize_tone(request.data.get("tone") or request.session.get("tone") or "PlainClinical")
-    system_prompt = get_system_prompt(tone)
-    request.session["chat_history"] = [{"role": "system", "content": system_prompt}]
-    request.session["latest_summary"] = ""
-    request.session.modified = True
-    return JsonResponse({"message": "✅ New chat started fresh.", "tone": tone})
 
 # =============================
 #       BASIC PAGES / AUTH

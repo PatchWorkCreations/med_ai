@@ -190,13 +190,66 @@
 @media (max-width: 360px){ .nm-tour-pop { max-width: min(92vw, 300px);} }
 .nm-tour-sr-only { position:absolute!important; left:-9999px!important; }
 
+
+:root { --kebab-space: 36px; } /* reserve space on the right */
+
+/* card + ring need the same radius */
+.nm-card {
+  position: relative;
+  border-radius: 12px;         /* rounded corners */
+  background: #fff;
+}
+
+/* the full-width card button */
+.nm-row  { padding: 8px 10px; min-height: 44px; border-radius: 12px; }
+
+/* content: add right padding so chips/title never go under kebab */
+.nm-content { padding-right: var(--kebab-space); }
+
+.nm-title  { font-size: 14px; line-height: 1.25; font-weight: 600; color:#0f172a; }
+.nm-1line  { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.nm-chip   { font-size:10px; line-height:1; padding:3px 6px; border-radius:9999px; white-space:nowrap; }
+
+/* chips: right-aligned under the title, nudged left a bit */
+.nm-chips {
+  margin-top: 4px;
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  margin-right: calc(var(--kebab-space) + 4px);
+}
+
+/* kebab pinned to the upper-right, above the button */
+.nm-kebab {
+  position: absolute;
+  top: 6px; right: 6px;
+  z-index: 10;                /* <- ensure it's above the button */
+  padding: 6px;
+  border-radius: 8px;
+}
+.nm-kebab button { pointer-events: auto; }
+.nm-kebab:hover { background: #f1f5f9; }
+
+
+.nm-rename-input{
+    font-size:14px; font-weight:600; color:#0f172a;
+    border:1px solid #e2e8f0; background:#fff;
+    padding:4px 8px; border-radius:8px; width:100%;
+  }
+  .nm-rename-input:focus{
+    outline:none; box-shadow:0 0 0 2px rgba(20,184,166,.25);
+    border-color:#14b8a6;
+  }
   </style>
+
+
 </head>
 
 <body class="bg-white font-sans text-gray-800">
 <div id="appShell" class="w-full h-screen flex overflow-y-hidden">
   <!-- Sidebar -->
-  <aside id="sidebar" class="w-[280px] glass border-r p-6 overflow-y-auto fixed inset-y-0 left-0 z-40 transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:z-auto md:flex flex-col shadow-xl">
+  <aside id="sidebar" class="w-[300px] md:w-[320px] glass border-r p-6 overflow-y-auto fixed inset-y-0 left-0 z-40 transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:z-auto md:flex flex-col shadow-xl">
     <div class="flex items-center justify-between mb-6 border-b border-gray-200 pb-2">
       <h2 class="text-2xl font-semibold text-gray-800 flex items-center gap-3">
         <i class="fa-solid fa-clock-rotate-left text-teal-600 text-2xl"></i>
@@ -223,22 +276,11 @@
       <i class="fa-solid fa-magnifying-glass absolute right-3 top-2.5 text-gray-400 text-base"></i>
     </div>
 
-    {% if summaries %}
-      <ul class="space-y-4">
-        {% for item in summaries %}
-          <li class="bg-white border rounded-xl p-4 text-base shadow-sm hover:shadow-md transition sidebar-link">
-            <p class="text-gray-400 text-base">{{ item.created_at|date:"M d, Y – H:i" }} · {{ item.tone }}</p>
-            <p class="text-gray-800 font-medium mt-1 truncate">{{ item.uploaded_filename }}</p>
-            <p class="text-base text-gray-600 mt-1 line-clamp-3">{{ item.summary|truncatewords:20 }}</p>
-            <button class="mt-2 text-teal-600 text-base hover:underline open-summary-modal" data-summary="{{ item.summary|escapejs }}">
-              View Full Summary
-            </button>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p class="text-base italic text-gray-400">No summaries yet.</p>
-    {% endif %}
+        <!-- Sidebar list -->
+    <ul id="sessionList" class="space-y-4">
+      <!-- JS will populate -->
+    </ul>
+
   </aside>
 
   <!-- Main -->
@@ -672,6 +714,381 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
 
 <script>
+
+async function startInlineRename(li, id){
+  const titleEl = li.querySelector('.nm-title');
+  if (!titleEl) return;
+
+  const current = (titleEl.textContent || '').trim();
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'nm-rename-input';
+  input.value = current;
+  input.setAttribute('maxlength', '120');
+
+  // replace title with input
+  titleEl.replaceWith(input);
+  input.focus();
+  input.select();
+
+  let saved = false;
+  const done = async (commit) => {
+    if (saved) return;
+    saved = true;
+    const next = (commit ? input.value.trim() : current) || 'Untitled';
+
+    // swap back to <h3>
+    const h3 = document.createElement('h3');
+    h3.className = 'nm-title nm-1line';
+    h3.textContent = next;
+    input.replaceWith(h3);
+
+    // save if changed
+    if (commit && next !== current) {
+      try {
+        await apiPost(`/api/chat/sessions/${id}/rename/`, { title: next });
+        // refresh list to update ordering/timestamps if server bumps updated_at
+        await refreshSessionList();
+      } catch (e) {
+        // optional toast; revert UI if you prefer
+        console.warn('Rename failed', e);
+      }
+    }
+  };
+
+  // commit on Enter, cancel on Esc, commit on blur
+  input.addEventListener('keydown', async (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); await done(true); }
+    if (e.key === 'Escape'){ e.preventDefault(); await done(false); }
+  });
+  input.addEventListener('blur', () => done(true));
+
+  // prevent click from bubbling to "open session" button
+  input.addEventListener('click', (e) => e.stopPropagation());
+}
+
+
+async function apiPost(url, data) {
+  const opts = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': (window.getCSRFToken ? getCSRFToken() : '')
+    },
+    credentials: 'include',
+    body: data ? JSON.stringify(data) : '{}'
+  };
+  const r = await fetch(url, opts);
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const ul = document.getElementById('sessionList');
+  if (!ul) return;
+
+  // avoid double-binding if this code runs more than once
+  if (!ul.__nmBound) {
+    ul.addEventListener('click', async (e) => {
+      const btnMenu   = e.target.closest('[data-menu]');
+      const btnRename = e.target.closest('[data-rename]');
+      const btnArchive= e.target.closest('[data-archive]');
+      const btnDelete = e.target.closest('[data-delete]');
+      const titleClick = e.target.closest('.nm-title');
+
+      if (btnMenu) {
+        const id = btnMenu.getAttribute('data-menu');
+        const menu = document.getElementById(`menu-${id}`);
+        ul.querySelectorAll('[id^="menu-"]').forEach(m => { if (m !== menu) m.classList.add('hidden'); });
+        menu?.classList.toggle('hidden');
+        e.stopPropagation();
+        return;
+      }
+
+      if (btnRename) {
+        const id  = btnRename.getAttribute('data-rename');
+        const li  = btnRename.closest('.nm-card');
+        // close the popover
+        const menu = document.getElementById(`menu-${id}`);
+        menu && menu.classList.add('hidden');
+        // start inline edit
+        startInlineRename(li, id);
+        return;
+      }
+
+
+      if (btnArchive) {
+        const id = btnArchive.getAttribute('data-archive');
+        try {
+          const res = await apiPost(`/api/chat/sessions/${id}/archive/`);
+          const active = localStorage.getItem('nm_session_id');
+          if (active && String(active) === String(id) && res.archived) {
+            localStorage.removeItem('nm_session_id');
+            const cw = document.getElementById('chatWindow'); if (cw) cw.innerHTML = '';
+          }
+          await refreshSessionList();
+        } catch { alert('Archive failed.'); }
+        return;
+      }
+
+      if (btnDelete) {
+        const id = btnDelete.getAttribute('data-delete');
+        if (!confirm('Delete this chat? This cannot be undone.')) return;
+        try {
+          await apiPost(`/api/chat/sessions/${id}/delete/`);
+          const active = localStorage.getItem('nm_session_id');
+          if (active && String(active) === String(id)) {
+            localStorage.removeItem('nm_session_id');
+            const cw = document.getElementById('chatWindow'); if (cw) cw.innerHTML = '';
+          }
+          await refreshSessionList();
+        } catch { alert('Delete failed.'); }
+        return;
+      }
+
+      if (titleClick) {
+          e.preventDefault();
+          e.stopPropagation();
+          const li = titleClick.closest('.nm-card');
+          const id = li?.dataset.sid;
+          if (id) startInlineRename(li, id);
+          return;
+        }
+    });
+
+    // click outside closes any open kebab menus
+    document.addEventListener('click', (e) => {
+      const open = document.querySelector('#sessionList [id^="menu-"]:not(.hidden)');
+      if (open && !open.contains(e.target)) open.classList.add('hidden');
+    });
+
+    ul.__nmBound = true;
+  }
+});
+
+const SESSION_KEY = 'nm_session_id';
+
+function getSessionId(){ return localStorage.getItem(SESSION_KEY); }
+function setSessionId(id){ localStorage.setItem(SESSION_KEY, String(id)); }
+function clearSessionId(){ localStorage.removeItem(SESSION_KEY); }
+
+async function apiJson(url, opt={}){
+  const res = await fetch(url, { credentials:'include', ...opt });
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}
+
+function fmtDate(s){
+  try { return new Date(s).toLocaleString(); } catch { return s; }
+}
+async function refreshSessionList() {
+  // super minimal look
+  const SHOW_MENU = true;   // set false to remove the kebab
+
+  const ul = document.getElementById('sessionList');
+  if (!ul) return;
+
+  // helpers
+  const escapeHtml = s => String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const toneMeta = t => ({
+    PlainClinical:['Balanced','bg-slate-100 text-slate-700'],
+    Balanced:     ['Balanced','bg-slate-100 text-slate-700'],
+    Caregiver:    ['Caregiver','bg-rose-50 text-rose-700'],
+    Faith:        ['Faith','bg-indigo-50 text-indigo-700'],
+    Clinical:     ['Clinical','bg-amber-50 text-amber-700'],
+    Geriatric:    ['Geriatric','bg-emerald-50 text-emerald-700'],
+    EmotionalSupport:['Support','bg-violet-50 text-violet-700'],
+  }[t] || ['Balanced','bg-slate-100 text-slate-700']);
+  const langShort = c => (c || 'en-US').split('-')[0].toUpperCase();
+
+  // light skeleton
+  ul.innerHTML = '';
+  for (let i=0;i<3;i++){
+    ul.insertAdjacentHTML('beforeend', `
+      <li class="nm-card border bg-white p-2 mb-2">
+        <div class="h-4 w-32 bg-slate-200 rounded animate-pulse"></div>
+      </li>
+    `);
+  }
+
+  // fetch list
+  let rows = [];
+  try { rows = await apiJson('/api/chat/sessions/'); }
+  catch { ul.innerHTML = `<li class="text-sm text-red-600">Could not load history.</li>`; return; }
+
+  // empty state
+  if (!rows.length) {
+    ul.innerHTML = `
+      <li class="nm-card border border-dashed p-4 text-center bg-white/70 text-sm text-slate-600">
+        No conversations yet
+      </li>`;
+    return;
+  }
+
+  // render compact cards
+  const activeId = String(localStorage.getItem('nm_session_id') || '');
+  ul.innerHTML = '';
+
+  for (const s of rows) {
+    const [tLabel, tClass] = toneMeta(s.tone);
+    const isActive = String(s.id) === activeId;
+
+    const li = document.createElement('li');
+    li.className = `nm-card border mb-2 rounded-xl ${isActive ? 'ring-1 ring-teal-500' : ''}`;
+    li.dataset.sid = s.id; // <-- add this
+
+li.innerHTML = `
+  <button type="button" data-open-session="${s.id}" class="nm-row w-full flex items-start gap-2 text-left">
+    <!-- thin left accent -->
+    <div class="mt-0.5 h-6 w-1 rounded bg-teal-500/80"></div>
+
+    <!-- tiny icon -->
+    <div class="mt-0.5 h-6 w-6 rounded-md bg-slate-50 grid place-items-center text-teal-700 text-[11px]">
+      <i class="fa-solid fa-brain"></i>
+    </div>
+
+    <!-- content -->
+    <div class="min-w-0 flex-1 nm-content">
+      <div class="flex items-start">
+        <h3 class="nm-title nm-1line" title="${escapeHtml(s.title || 'New chat')}">
+          ${escapeHtml(s.title || 'New chat')}
+        </h3>
+      </div>
+      <div class="nm-chips">
+        <span class="nm-chip ${tClass}">${escapeHtml(tLabel)}</span>
+        <span class="nm-chip bg-slate-100 text-slate-700">${escapeHtml(langShort(s.lang))}</span>
+      </div>
+    </div>
+  </button>
+
+  <!-- kebab lives OUTSIDE the button, absolute-positioned -->
+  <div class="nm-kebab">
+    <button class="rounded p-1.5 hover:bg-slate-100" aria-haspopup="true" data-menu="${s.id}">
+      <i class="fa-solid fa-ellipsis-vertical text-slate-500"></i>
+    </button>
+    <div id="menu-${s.id}" class="hidden absolute right-0 top-8 w-44 bg-white border rounded-xl shadow-md z-10">
+      <button class="w-full text-left px-3 py-2 hover:bg-slate-50 text-sm" data-rename="${s.id}">
+        <i class="fa-solid fa-i-cursor mr-2"></i>Rename
+      </button>
+      <button class="w-full text-left px-3 py-2 hover:bg-slate-50 text-sm ${s.archived ? '' : 'text-amber-700'}" data-archive="${s.id}">
+        <i class="fa-solid fa-box-archive mr-2"></i>${s.archived ? 'Unarchive' : 'Archive'}
+      </button>
+      <button class="w-full text-left px-3 py-2 hover:bg-slate-50 text-sm text-red-600" data-delete="${s.id}">
+        <i class="fa-regular fa-trash-can mr-2"></i>Delete
+      </button>
+    </div>
+  </div>
+`;
+
+    ul.appendChild(li);
+  }
+
+  // open handlers
+  ul.querySelectorAll('[data-open-session]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.getAttribute('data-open-session');
+      localStorage.setItem('nm_session_id', String(id));
+      try { await openSession(id); } catch {}
+      // highlight active
+      ul.querySelectorAll('li').forEach(el => el.classList.remove('ring-1','ring-teal-500'));
+      btn.closest('li')?.classList.add('ring-1','ring-teal-500');
+      // close mobile sidebar
+      const overlay = document.getElementById('overlay');
+      if (overlay && !overlay.classList.contains('hidden')) toggleSidebar();
+    });
+  });
+
+  // kebab menus
+  function closeAllMenus(){ ul.querySelectorAll('[id^="menu-"]').forEach(m=>m.classList.add('hidden')); }
+  ul.querySelectorAll('[data-menu]').forEach(trigger=>{
+    trigger.addEventListener('click', e=>{
+      e.stopPropagation();
+      const id = trigger.getAttribute('data-menu');
+      const menu = document.getElementById(`menu-${id}`);
+      const open = menu && !menu.classList.contains('hidden');
+      closeAllMenus();
+      if (menu) menu.classList.toggle('hidden', open);
+    });
+  });
+  document.addEventListener('click', closeAllMenus, { once:true });
+
+  // actions
+  ul.querySelectorAll('[data-rename]').forEach(btn=>{
+    btn.addEventListener('click', async e=>{
+      e.stopPropagation();
+      const id = btn.getAttribute('data-rename');
+      const list = await apiJson('/api/chat/sessions/').catch(()=>[]);
+      const current = list.find(r=>String(r.id)===String(id))?.title || '';
+      const next = prompt('Rename chat', current);
+      if (!next || !next.trim()) return;
+      await fetch(`/api/chat/sessions/${id}/rename/`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-CSRFToken': (window.getCSRFToken?getCSRFToken():'')},
+        body: JSON.stringify({ title: next.trim() })
+      }).catch(()=>{});
+      refreshSessionList().catch(()=>{});
+    });
+  });
+  ul.querySelectorAll('[data-archive]').forEach(btn=>{
+    btn.addEventListener('click', async e=>{
+      e.stopPropagation();
+      const id = btn.getAttribute('data-archive');
+      await fetch(`/api/chat/sessions/${id}/archive/`, {
+        method:'POST',
+        headers:{'X-CSRFToken': (window.getCSRFToken?getCSRFToken():'')}
+      }).catch(()=>{});
+      refreshSessionList().catch(()=>{});
+    });
+  });
+  ul.querySelectorAll('[data-delete]').forEach(btn=>{
+    btn.addEventListener('click', async e=>{
+      e.stopPropagation();
+      const id = btn.getAttribute('data-delete');
+      if (!confirm('Delete this conversation? This cannot be undone.')) return;
+      await fetch(`/api/chat/sessions/${id}/delete/`, {
+        method:'POST',
+        headers:{'X-CSRFToken': (window.getCSRFToken?getCSRFToken():'')}
+      }).catch(()=>{});
+      if (String(localStorage.getItem('nm_session_id')) === String(id)) {
+        localStorage.removeItem('nm_session_id');
+      }
+      refreshSessionList().catch(()=>{});
+    });
+  });
+}
+
+
+
+async function openSession(id){
+  try {
+    const data = await apiJson(`/api/chat/sessions/${id}/`);
+    setSessionId(id);
+    const chatWindow = document.getElementById('chatWindow');
+    if (chatWindow) chatWindow.innerHTML = '';
+
+    // 🔒 Hide system messages from UI
+    const visible = (data.messages || []).filter(m => m.role === 'user' || m.role === 'assistant');
+
+    visible.forEach(m => appendRichBubble(m.content, m.role === 'user'));
+
+  } catch (e) {
+    console.warn(e);
+  }
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Build sidebar on load
+  refreshSessionList().catch(console.warn);
+
+  // Auto-open last session if any
+  const sid = getSessionId();
+  if (sid) {
+    openSession(sid).catch(()=>clearSessionId());
+  }
+});
+
+
 (() => {
   const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
   const micBtn = document.getElementById('micBtn');
@@ -1110,6 +1527,14 @@ form.addEventListener('submit', async (e) => {
     });
     const data = await res.json();
 
+        // Keep track of the session the server used/created
+    if (data && data.session_id) {
+      setSessionId(data.session_id);
+      // Update the sidebar timestamps/order
+      refreshSessionList().catch(()=>{});
+    }
+
+
     if (!res.ok || !data.success) {
       const msg = data?.errors ? JSON.stringify(data.errors) : 'Please check your inputs.';
       errBox.textContent = msg;
@@ -1400,25 +1825,34 @@ async function greetUser() {
 }
 
 async function newChat() {
-  const chatWindow = document.getElementById("chatWindow");
+  const chatWindow = document.getElementById('chatWindow');
   if (chatWindow) chatWindow.innerHTML = '';
-  clearPending();
-  try {
-    await fetch("/clear-session/", { method:"POST", headers:{ "X-CSRFToken": getCSRFToken(), "Content-Type":"application/json" }});
-    const res = await fetch("/api/user/settings/");
-    const data = await res.json();
-    const name = data.display_name || "there";
-    const greetings = [
-      `Hi ${name}, how can I help you today? 🌿`,
-      `Hello ${name}! What can I do for you today? 🤖`,
-      `Hey ${name}, I’m here for you. How are you feeling? 💬`,
-      `${name}, let’s figure things out together. What do you need today? 🧠`
-    ];
-    appendBubble(greetings[Math.floor(Math.random()*greetings.length)], false);
-  } catch {
-    appendBubble("Hi there! How can I help you today?", false);
+
+  // 1) Clear client + server sticky id
+  localStorage.removeItem('nm_session_id');
+  await fetch('/clear-session/', {
+    method: 'POST',
+    headers: { 'X-CSRFToken': (window.getCSRFToken ? getCSRFToken() : '') }
+  });
+
+  // 2) Mint a fresh DB session and make both sides point to it
+  const r = await fetch('/api/chat/sessions/new/', {
+    method: 'POST',
+    headers: { 'X-CSRFToken': (window.getCSRFToken ? getCSRFToken() : '') }
+  });
+  const data = await r.json();
+
+  if (data && data.session_id) {
+    localStorage.setItem('nm_session_id', String(data.session_id));
+    if (window.openSession) {
+      try { await openSession(Number(data.session_id)); } catch {}
+    }
   }
+
+  // 3) Friendly nudge
+  appendBubble('New chat started. What would you like to do?', false);
 }
+
 
 /* ---------- Pending attachments state ---------- */
 const pending = []; // {file: File, url?: string, kind: 'image'|'doc'}
@@ -1529,11 +1963,15 @@ async function sendChat() {
   }
 
   // payload
-  const formData = new FormData();
-  if (userMessage) formData.append("message", userMessage);
-  formData.append("tone", tone);
-  formData.append("lang", lang);
-  pending.forEach(p => formData.append("files[]", p.file, p.file.name));
+// payload
+const formData = new FormData();
+if (userMessage) formData.append("message", userMessage);
+formData.append("tone", tone);
+formData.append("lang", lang);
+const sidExisting = getSessionId();
+if (sidExisting) formData.append("session_id", sidExisting);   // 🔹 add this
+pending.forEach(p => formData.append("files[]", p.file, p.file.name));
+
 
   // clear composer
   if (input) input.value = "";
@@ -2121,6 +2559,33 @@ document.addEventListener('DOMContentLoaded', () => {
     //   || "PlainClinical";
   })();
 
+  const NEW_SESSION_ON_REFRESH = true; // true = start fresh on every reload; false = resume last session
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      if (NEW_SESSION_ON_REFRESH) {
+        // Force a fresh conversation after reload
+        localStorage.removeItem('nm_session_id'); // clears client "active session"
+        await fetch('/clear-session/', {
+          method: 'POST',
+          headers: { 'X-CSRFToken': (window.getCSRFToken ? getCSRFToken() : '') }
+        });
+        // You can optionally show a friendly hint in the chat window:
+        appendBubble('New chat started. What would you like to do?', false);
+      } else {
+        // Resume: try to reopen the last active session if present
+        const sid = localStorage.getItem('nm_session_id');
+        if (sid && window.openSession) {
+          try { await openSession(Number(sid)); } catch {}
+        }
+        // (Optional) else you could auto-select the most recent session:
+        // const list = await apiJson('/api/chat/sessions/');
+        // if (list.length) { localStorage.setItem('nm_session_id', String(list[0].id)); openSession(list[0].id); }
+      }
+    } catch (e) {
+      console.warn('Session init error:', e);
+    }
+  });
   
 
 </script>

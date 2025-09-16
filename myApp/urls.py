@@ -6,12 +6,25 @@ from django.views.generic import RedirectView
 from .views import LegalView, terms_redirect, privacy_redirect
 from .views import WarmLoginView 
 from django.urls import path, re_path
+
+from . import api_chat
+
 urlpatterns = [
     # Public Pages
     path('', views.landing_page, name='home'),
     path('signup/', views.signup_view, name='signup'),
 
+    path("api/chat/sessions/", api_chat.list_chat_sessions, name="chat_sessions_list"),
+    path("api/chat/sessions/<int:session_id>/", api_chat.get_chat_session, name="chat_session_detail"),
+    path("api/chat/sessions/new/", views.create_chat_session, name="chat_session_new"),
     # Auth Pages
+
+
+    path("api/chat/sessions/<int:pk>/rename/",  views.chat_session_rename,  name="chat_session_rename"),
+    path("api/chat/sessions/<int:pk>/archive/", views.chat_session_archive, name="chat_session_archive"),
+    path("api/chat/sessions/<int:pk>/delete/",  views.chat_session_delete,  name="chat_session_delete"),
+
+    
     path('login/', WarmLoginView.as_view(), name='login'),
     path("logout/", views.logout_view, name="logout"),
     # Authenticated Dashboard

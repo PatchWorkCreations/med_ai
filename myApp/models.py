@@ -103,12 +103,22 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"{self.display_name or self.user.username} Profile"
+from django.utils import timezone
 
 class ChatSession(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    messages = models.JSONField(default=list)
+    messages = models.JSONField(default=list)  # [{role, content, ts, meta?}]
     updated_at = models.DateTimeField(auto_now=True)
 
+    # 🔹 New (safe defaults)
+    title = models.CharField(max_length=200, blank=True, default="")
+    tone  = models.CharField(max_length=50, blank=True, default="PlainClinical")
+    lang  = models.CharField(max_length=10, blank=True, default="en-US")
+    created_at = models.DateTimeField(default=timezone.now, editable=False)
+    archived = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-updated_at']
 
 import uuid
 from django.db import models
