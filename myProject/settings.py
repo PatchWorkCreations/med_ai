@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-6_$3$%3_hxmh@la&^k7g%()ol5nwsc(ne9f#0^_f^lo^yp7-vp'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     "neuromedai.org", ".neuromedai.org",
@@ -206,26 +206,24 @@ SESSION_SAVE_EVERY_REQUEST = True
 
 import os
 import environ
+import os
 
-# Initialize django-environ
-env = environ.Env()
+# If you still use Django's send_mail elsewhere, keep it from tripping in prod:
+DEBUG = os.environ.get("DEBUG", "False").lower() in ("1","true","yes")
 
-# Load environment variables from .env file (if exists)
-environ.Env.read_env()
+# Not strictly required for Resend (we’ll call the HTTP API), but safe defaults:
+EMAIL_BACKEND = (
+    "django.core.mail.backends.console.EmailBackend" if DEBUG
+    else "django.core.mail.backends.dummy.EmailBackend"
+)
 
-# Function to fetch environment variables with fallback to os.getenv
-def get_env(var_name, default=None):
-    """
-    Fetch environment variable using django-environ first,
-    then fallback to os.getenv if not found.
-    """
-    return env(var_name, default=os.getenv(var_name, default))
+# Useful for emails you render or any fallback usage
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL") or os.environ.get("RESEND_FROM")
 
-# Email configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = get_env('EMAIL_HOST', default='smtp.gmail.com')
-EMAIL_PORT = int(get_env('EMAIL_PORT', default=587))
-EMAIL_USE_TLS = get_env('EMAIL_USE_TLS', default=True) in [True, 'True', 'true', 1, '1']
-EMAIL_HOST_USER = get_env('EMAIL_HOST_USER', default='iriseupgroupofcompanies@gmail.com')
-EMAIL_HOST_PASSWORD = get_env('EMAIL_HOST_PASSWORD')  # App password
-DEFAULT_FROM_EMAIL = get_env('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER)
+# Resend config (used by your utility function)
+RESEND = {
+    "API_KEY": os.environ.get("RESEND_API_KEY"),
+    "FROM": os.environ.get("RESEND_FROM"),
+    "REPLY_TO": os.environ.get("RESEND_REPLY_TO"),
+    "BASE_URL": os.environ.get("RESEND_BASE_URL", "https://api.resend.com"),
+}
