@@ -1229,20 +1229,40 @@ def speaking_view(request):
 from django.shortcuts import render, redirect
 from .forms import CustomSignupForm
 
-# myApp/views.py
+# views.py
+from django.contrib.auth import login, authenticate
+from django.conf import settings
+
 def signup_view(request):
     if request.method == "POST":
         form = CustomSignupForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            user = form.save()  # must set a real password inside the form!
 
-            # Ensure profile exists
+            # ensure profile exists
             profile, _ = Profile.objects.get_or_create(user=user)
-
-            # Capture IP from helper, country from middleware
             profile.signup_ip = get_client_ip(request)
             profile.signup_country = getattr(request, "country_code", None) or profile.signup_country
             profile.save()
+
+            # 🔑 authenticate then login
+            raw_pw = (
+                form.cleaned_data.get("password1")
+                or form.cleaned_data.get("password")
+                or form.cleaned_data.get("new_password1")
+            )
+            auth_user = None
+            if raw_pw:
+                # If your form uses email-as-username, adjust authenticate(...) accordingly
+                auth_user = authenticate(request, username=getattr(user, "username", user.email), password=raw_pw)
+
+            if auth_user is not None:
+                login(request, auth_user)
+            else:
+                # Fallback: if your form already hashed password and authenticate() didn’t work
+                # (e.g., email login backend), set backend explicitly.
+                user.backend = settings.AUTHENTICATION_BACKENDS[0]
+                login(request, user)
 
             resp = redirect("dashboard")
             resp.set_cookie("just_logged_in", "1", max_age=60, samesite="Lax", path="/")
