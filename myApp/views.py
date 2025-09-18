@@ -1228,24 +1228,24 @@ def speaking_view(request):
 
 from django.shortcuts import render, redirect
 from .forms import CustomSignupForm
-
 # views.py
 from django.contrib.auth import login, authenticate
-from django.conf import settings
+from django.urls import reverse
+from django.db import transaction
+
+
 
 def signup_view(request):
     if request.method == "POST":
         form = CustomSignupForm(request.POST)
         if form.is_valid():
-            user = form.save()  # must set a real password inside the form!
+            user = form.save()
 
-            # ensure profile exists
             profile, _ = Profile.objects.get_or_create(user=user)
             profile.signup_ip = get_client_ip(request)
             profile.signup_country = getattr(request, "country_code", None) or profile.signup_country
             profile.save()
 
-            # 🔑 authenticate then login
             raw_pw = (
                 form.cleaned_data.get("password1")
                 or form.cleaned_data.get("password")
@@ -1253,16 +1253,27 @@ def signup_view(request):
             )
             auth_user = None
             if raw_pw:
-                # If your form uses email-as-username, adjust authenticate(...) accordingly
-                auth_user = authenticate(request, username=getattr(user, "username", user.email), password=raw_pw)
+                auth_user = authenticate(
+                    request,
+                    username=getattr(user, "username", user.email),
+                    password=raw_pw,
+                )
 
             if auth_user is not None:
                 login(request, auth_user)
             else:
-                # Fallback: if your form already hashed password and authenticate() didn’t work
-                # (e.g., email login backend), set backend explicitly.
                 user.backend = settings.AUTHENTICATION_BACKENDS[0]
                 login(request, user)
+
+            # Build a fully-qualified login link for the email
+            login_url = request.build_absolute_uri(reverse("login"))
+
+            # Send welcome email AFTER the transaction commits (so user exists for sure)
+            def _send():
+                first_name = (getattr(user, "first_name", "") or user.get_username() or "there")
+                send_welcome_email(user.email, first_name, login_url)
+
+            transaction.on_commit(_send)
 
             resp = redirect("dashboard")
             resp.set_cookie("just_logged_in", "1", max_age=60, samesite="Lax", path="/")
@@ -1270,6 +1281,7 @@ def signup_view(request):
     else:
         form = CustomSignupForm()
     return render(request, "signup.html", {"form": form})
+
 
 
 
@@ -1957,3 +1969,112 @@ def book_demo(request):
         "email": data.get("email", ""),
     }
     return redirect(f"{reverse('landing')}?{urlencode(params)}#calendar")
+
+
+# emails.py (or wherever your email helpers live)
+from django.utils.html import escape
+
+def send_welcome_email(email: str, first_name: str, login_url: str) -> bool:
+    subject = "Welcome to NeuroMed AI Beta – You’re Helping Shape the Future 🌿"
+
+    # Plain text (fallback for clients that block HTML)
+    text_content = f"""Hi {first_name},
+
+Thank you for joining the NeuroMed AI Beta Testing Program! 💙
+
+You’re helping us build a tool that makes healthcare simpler, kinder, and easier to understand.
+
+Explore in beta:
+• Plain Mode – easy-to-understand explanations
+• Caregiver Mode – gentle, reassuring guidance
+• Faith Mode – encouragement and scripture-based comfort
+• Clinical Mode – structured, medical detail
+• Multiple Languages – for diverse families
+
+How to start:
+1) Log in: {login_url}
+2) Upload a medical record (PDF, Word, or text)
+3) Choose your tone
+4) Get your summary in seconds
+
+“Write the vision and make it plain.” – Habakkuk 2:2
+
+Your feedback is gold: hello@neuromedai.org
+
+With gratitude,
+The NeuroMed AI Team
+"""
+
+    # HTML version
+    html_content = f"""
+    <div style="font-family:Inter,Segoe UI,Arial,sans-serif;max-width:640px;margin:0 auto;padding:24px;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;">
+      <div style="text-align:center;margin-bottom:8px;">
+        <div style="font-size:18px;font-weight:700;color:#0f766e;">NeuroMed AI</div>
+        <div style="font-size:12px;color:#6b7280;">Welcome to the Beta</div>
+      </div>
+
+      <p style="font-size:14px;color:#374151;margin:16px 0;">
+        Hi {escape(first_name)},</p>
+      <p style="font-size:14px;color:#374151;margin:12px 0;">
+        Thank you for joining the <strong>NeuroMed AI Beta Testing Program</strong>! 💙
+        You’re stepping into the front row where technology meets compassion. By testing with us,
+        you’re helping build a tool that makes healthcare simpler, kinder, and easier to understand.
+      </p>
+
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;margin:16px 0;">
+        <div style="font-weight:700;color:#111827;margin-bottom:6px;">What you can explore in beta:</div>
+        <ul style="margin:8px 0 0 18px;color:#374151;font-size:14px;line-height:1.6;">
+          <li><strong>Plain Mode</strong> – easy-to-understand explanations</li>
+          <li><strong>Caregiver Mode</strong> – gentle, reassuring guidance</li>
+          <li><strong>Faith Mode</strong> – encouragement and scripture-based comfort</li>
+          <li><strong>Clinical Mode</strong> – structured, medical detail</li>
+          <li><strong>Multiple Languages</strong> – breaking barriers for diverse families</li>
+        </ul>
+      </div>
+
+      <div style="margin:18px 0;">
+        <div style="font-weight:700;color:#111827;margin-bottom:6px;">How to get started:</div>
+        <ol style="margin:8px 0 0 18px;color:#374151;font-size:14px;line-height:1.6;">
+          <li>Log in to your dashboard → <a href="{escape(login_url)}" style="color:#0ea5e9;text-decoration:underline;">Login</a></li>
+          <li>Upload a medical record (PDF, Word, or text)</li>
+          <li>Choose your tone</li>
+          <li>Get your summary in seconds</li>
+        </ol>
+      </div>
+
+      <div style="text-align:center;margin:24px 0;">
+        <a href="{escape(login_url)}"
+           style="display:inline-block;background:#0f766e;color:#ffffff;text-decoration:none;padding:12px 18px;border-radius:10px;font-weight:700;">
+          Start Now
+        </a>
+      </div>
+
+      <div style="font-size:13px;color:#374151;margin:16px 0;">
+        🌟 Beta Tester Trivia: “Compassion” comes from Latin <em>compati</em> — “to suffer with.”
+        That’s the heart of NeuroMed AI—standing with families so no one feels lost in healthcare again.
+      </div>
+
+      <p style="font-size:13px;color:#374151;margin:16px 0;">
+        During beta, you may notice small hiccups—that’s normal. Your feedback is gold. Share anytime at
+        <a href="mailto:hello@neuromedai.org" style="color:#0ea5e9;text-decoration:underline;">hello@neuromedai.org</a>.
+      </p>
+
+      <blockquote style="margin:16px 0;padding:12px 14px;border-left:4px solid #d1fae5;background:#f0fdfa;color:#065f46;font-size:13px;">
+        “Write the vision and make it plain.” – Habakkuk 2:2
+      </blockquote>
+
+      <p style="font-size:13px;color:#374151;margin:0;">With gratitude,<br/>The NeuroMed AI Team</p>
+    </div>
+    """
+
+    try:
+        return bool(send_via_resend(
+            to=email,
+            subject=subject,
+            text=text_content,
+            html=html_content,
+            fail_silently=True,  # don’t block signup flow
+        ))
+    except Exception:
+        log.exception("send_welcome_email failed")
+        return False
