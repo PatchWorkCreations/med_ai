@@ -213,6 +213,40 @@
     padding:4px 8px; border-radius:8px; width:100%;
   }
   .nm-rename-input:focus{ outline:none; box-shadow:0 0 0 2px rgba(40,146,109,.25); border-color:#28926D; }
+
+/* Geriatric accessibility zoom */
+/* Full-height shell; page itself never scrolls */
+#appShell { height: 100vh; height: 100svh; height: 100dvh; overflow: hidden; }
+section.flex-1 { min-height: 0; }
+#chatWindow { min-height: 0; overflow-y: auto; }
+
+/* Composer pinned at the bottom of the viewport */
+#composer { position: sticky; bottom: 0; z-index: 20; background: #fff; }
+
+/* Zoom: scale ONLY the main content area, not the sidebar */
+:root {
+  --nm-zoom: 1;
+  --composer-h: 84px; /* JS will update this */
+}
+
+#zoomScope {
+  transform-origin: top left;
+  transform: scale(var(--nm-zoom));
+  width: calc(100% / var(--nm-zoom));
+  padding-bottom: calc(var(--composer-h) + 12px); /* keep bottom UI visible */
+}
+
+/* Sidebar stays layout-stable */
+body.geriatric-zoom #sidebar { font-size: 1.05em; }
+
+/* Enable zoom when Geriatric */
+body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
+
+@media (max-width: 380px){
+  body.geriatric-zoom { --nm-zoom: 1.15; }
+}
+
+
 </style>
 
 
@@ -220,470 +254,512 @@
 </head>
 
 <body class="bg-white font-sans text-gray-800">
-<div id="appShell" class="w-full h-screen flex overflow-y-hidden">
-  <!-- Sidebar -->
-  <aside id="sidebar" class="w-[300px] md:w-[320px] glass border-r p-6 overflow-y-auto fixed inset-y-0 left-0 z-40 transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:z-auto md:flex flex-col shadow-xl">
-    <div class="flex items-center justify-between mb-6 border-b border-gray-200 pb-2">
-      <h2 class="text-2xl font-semibold text-gray-800 flex items-center gap-3">
-        <i class="fa-solid fa-clock-rotate-left text-[#236092] text-2xl"></i>
-        <span class="tracking-tight">Summary History</span>
-      </h2>
-      <div class="relative">
-        <button onclick="openSettingsModal()" class="text-gray-600 hover:text-[#236092] focus:outline-none">
-          <i class="fa-solid fa-user-circle text-2xl"></i>
-        </button>
-        <div id="settingsDropdown" class="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg hidden z-50 text-base">
-          <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700"><i class="fa-solid fa-user mr-2 text-gray-400"></i> Profile</a>
-          <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700"><i class="fa-solid fa-pen-to-square mr-2 text-gray-400"></i> Change Name</a>
-          <a href="{% url 'logout' %}" class="block px-4 py-2 hover:bg-gray-100 text-gray-700"><i class="fa-solid fa-right-from-bracket mr-2 text-gray-400"></i> Logout</a>
+  <div id="appShell" class="w-full h-screen flex overflow-y-hidden">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-[300px] md:w-[320px] glass border-r p-6 overflow-y-auto fixed inset-y-0 left-0 z-40 transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:z-auto md:flex flex-col shadow-xl">
+      <div class="flex items-center justify-between mb-6 border-b border-gray-200 pb-2">
+        <h2 class="text-2xl font-semibold text-gray-800 flex items-center gap-3">
+          <i class="fa-solid fa-clock-rotate-left text-[#236092] text-2xl"></i>
+          <span class="tracking-tight">Summary History</span>
+        </h2>
+        <div class="relative">
+          <button onclick="openSettingsModal()" class="text-gray-600 hover:text-[#236092] focus:outline-none">
+            <i class="fa-solid fa-user-circle text-2xl"></i>
+          </button>
+          <div id="settingsDropdown" class="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg hidden z-50 text-base">
+            <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700"><i class="fa-solid fa-user mr-2 text-gray-400"></i> Profile</a>
+            <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-gray-700"><i class="fa-solid fa-pen-to-square mr-2 text-gray-400"></i> Change Name</a>
+            <a href="{% url 'logout' %}" class="block px-4 py-2 hover:bg-gray-100 text-gray-700"><i class="fa-solid fa-right-from-bracket mr-2 text-gray-400"></i> Logout</a>
+          </div>
         </div>
       </div>
-    </div>
 
-    <button class="mb-4 w-full bg-[#236092] text-white text-base py-2 rounded-lg hover:bg-[#1B5A8E] transition" id="newChatBtn">
-      <i class="fa-solid fa-plus mr-2"></i>New Chat
-    </button>
-
-    <div class="mb-4 relative">
-      <input type="text" placeholder="Search summaries..." class="w-full px-3 py-2 text-base rounded-md bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#28926D]" />
-      <i class="fa-solid fa-magnifying-glass absolute right-3 top-2.5 text-gray-400 text-base"></i>
-    </div>
-
-        <!-- Sidebar list -->
-    <ul id="sessionList" class="space-y-4">
-      <!-- JS will populate -->
-    </ul>
-
-  </aside>
-
-  <!-- Main -->
-  <section class="flex-1 flex flex-col relative">
-    <!-- Header -->
-<header class="flex items-center justify-between px-6 py-4 border-b relative">
-  <!-- Left group: logo + title -->
-  <div class="flex items-center gap-2 relative group">
-    <i class="fa-solid fa-notes-medical text-[#236092] text-2xl"></i>
-    <h1 class="text-2xl font-bold text-gray-800 cursor-help">
-      NeuroMed <span class="text-[#236092]">AI</span>
-    </h1>
-
-    <!-- tooltip -->
-    <div class="absolute -bottom-12 left-0 z-10 w-max max-w-xs px-3 py-2 text-base text-white bg-gray-800 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none shadow-md">
-      NeuroMed AI simplifies complex medical records into compassionate, easy-to-understand summaries.
-    </div>
-  </div>
-
-  <!-- Right group -->
-  <div class="flex items-center gap-3">
-    <!-- Desktop language picker -->
-    <div class="hidden md:block">
-      <div class="relative">
-        <button id="langBtn"
-                class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#28926D]"
-                aria-haspopup="true" aria-expanded="false" aria-controls="langMenu" title="Language">
-          <i class="fa-solid fa-globe"></i>
-          <span id="langBtnLabel" class="text-sm text-gray-700">English</span>
-          <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
-        </button>
-
-        <!-- options injected by JS -->
-        <div id="langMenu"
-             class="hidden absolute right-0 mt-2 w-56 max-h-72 overflow-auto bg-white border rounded-lg shadow-lg z-50">
-        </div>
-      </div>
-    </div>
-
-    <!-- Mobile language picker -->
-    <div class="md:hidden">
-      <button id="mLangBtn"
-              class="px-3 py-2 rounded-lg border flex items-center justify-between bg-white active:scale-[.99] transition"
-              aria-haspopup="dialog" aria-expanded="false">
-        <span class="flex items-center gap-2">
-          <i class="fa-solid fa-globe"></i>
-          <span id="mLangBtnLabel">English</span>
-        </span>
-        <i class="fa-solid fa-caret-down opacity-70"></i>
+      <button class="mb-4 w-full bg-[#236092] text-white text-base py-2 rounded-lg hover:bg-[#1B5A8E] transition" id="newChatBtn">
+        <i class="fa-solid fa-plus mr-2"></i>New Chat
       </button>
-    </div>
 
-    <!-- Burger (mobile only) -->
-    <button id="burgerBtn" onclick="toggleSidebar()" class="md:hidden text-gray-600 text-2xl focus:outline-none">
-      <i class="fa-solid fa-bars"></i>
-    </button>
-  </div>
-</header>
-
-<!-- Mobile Language Bottom Sheet -->
-<div id="mLangMenu" class="fixed inset-0 z-50 hidden">
-  <!-- Backdrop -->
-  <button id="mLangBackdrop" class="absolute inset-0 bg-black/40" aria-label="Close language menu"></button>
-
-  <!-- Sheet -->
-  <div id="mLangPanel"
-       class="absolute inset-x-0 bottom-0 max-h-[70vh] overflow-hidden rounded-t-2xl bg-white shadow-2xl
-              translate-y-full transition-transform duration-200 ease-out">
-    <!-- Header -->
-    <div class="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between">
-      <div class="text-sm font-semibold">Choose language</div>
-      <button id="mLangClose" class="p-2 text-slate-500" aria-label="Close">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </div>
-
-    <!-- Search -->
-    <div class="p-3">
-      <label for="mLangSearch" class="sr-only">Search language</label>
-      <div class="relative">
-        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-        <input id="mLangSearch" type="text"
-               class="w-full pl-9 pr-3 py-2 border rounded-lg"
-               placeholder="Search…">
+      <div class="mb-4 relative">
+        <input type="text" placeholder="Search summaries..." class="w-full px-3 py-2 text-base rounded-md bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#28926D]" />
+        <i class="fa-solid fa-magnifying-glass absolute right-3 top-2.5 text-gray-400 text-base"></i>
       </div>
-    </div>
 
-    <!-- List -->
-    <div id="mLangList"
-         class="px-2 pb-4 overflow-y-auto"
-         style="max-height: calc(70vh - 96px); padding-bottom: calc(env(safe-area-inset-bottom) + 12px);">
-      <!-- options injected by JS -->
-    </div>
-  </div>
-</div>
+      <!-- Sidebar list -->
+      <ul id="sessionList" class="space-y-4">
+        <!-- JS will populate -->
+      </ul>
+    </aside>
 
+    <!-- Main -->
+<section class="flex-1 flex flex-col relative bg-white">
+  <div id="zoomScope" class="flex-1 flex flex-col min-h-0 bg-white">
+        <!-- Header -->
+        <header class="flex items-center justify-between px-6 py-4 border-b relative">
+          <!-- Left group: logo + title -->
+          <div class="flex items-center gap-2 relative group">
+            <i class="fa-solid fa-notes-medical text-[#236092] text-2xl"></i>
+            <h1 class="text-2xl font-bold text-gray-800 cursor-help">
+              NeuroMed <span class="text-[#236092]">AI</span>
+            </h1>
 
-    <!-- Mobile overlay -->
-    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-40 z-30 hidden md:hidden" onclick="toggleSidebar()"></div>
+            <!-- tooltip -->
+            <div class="absolute -bottom-12 left-0 z-10 w-max max-w-xs px-3 py-2 text-base text-white bg-gray-800 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none shadow-md">
+              NeuroMed AI simplifies complex medical records into compassionate, easy-to-understand summaries.
+            </div>
+          </div>
 
-    <!-- Chat Window -->
-    <div id="chatWindow" class="flex-1 px-6 py-4 overflow-y-auto text-base bg-gradient-to-br from-white to-gray-50 rounded-xl"></div>
+          <!-- Right group -->
+          <div class="flex items-center gap-3">
+            <!-- Desktop language picker -->
+            <div class="hidden md:block">
+              <div class="relative">
+                <button id="langBtn"
+                        class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#28926D]"
+                        aria-haspopup="true" aria-expanded="false" aria-controls="langMenu" title="Language">
+                  <i class="fa-solid fa-globe"></i>
+                  <span id="langBtnLabel" class="text-sm text-gray-700">English</span>
+                  <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
+                </button>
 
-    <!-- Tone Selector -->
-    <!-- Tone Selector -->
-<div id="toneBar" class="px-3 py-1 bg-[#fefaf7] text-gray-600 overflow-x-auto whitespace-nowrap">
-  <span class="font-semibold mr-2">Summary Tone:</span>
-  <label class="inline-flex items-center mr-3">
-    <input type="radio" name="tone" value="PlainClinical" checked>
-    <span class="ml-1">Balanced</span>
-  </label>
-  <label class="inline-flex items-center mr-3">
-    <input type="radio" name="tone" value="Caregiver">
-    <span class="ml-1">Caregiver</span>
-  </label>
-  <label class="inline-flex items-center mr-3">
-    <input type="radio" name="tone" value="Faith">
-    <span class="ml-1">Faith</span>
-  </label>
-  <label class="inline-flex items-center mr-3">
-    <input type="radio" name="tone" value="Clinical">
-    <span class="ml-1">Clinical</span>
-  </label>
-  
-  <label class="inline-flex items-center mr-3">
-    <input type="radio" name="tone" value="Geriatric">
-    <span class="ml-1">Geriatric</span>
-  </label>
-  <!-- New Emotional Support tone -->
-  <label class="inline-flex items-center mr-3">
-    <input type="radio" name="tone" value="EmotionalSupport">
-    <span class="ml-1">Emotional Support</span>
-  </label>
+                <!-- options injected by JS -->
+                <div id="langMenu"
+                     class="hidden absolute right-0 mt-2 w-56 max-h-72 overflow-auto bg-white border rounded-lg shadow-lg z-50">
+                </div>
+              </div>
+            </div>
 
-  
-  
-</div>
+            <!-- Mobile language trigger -->
+            <div class="md:hidden">
+              <button id="mLangBtn"
+                      class="px-3 py-2 rounded-lg border flex items-center justify-between bg-white active:scale-[.99] transition"
+                      aria-haspopup="dialog" aria-expanded="false">
+                <span class="flex items-center gap-2">
+                  <i class="fa-solid fa-globe"></i>
+                  <span id="mLangBtnLabel">English</span>
+                </span>
+                <i class="fa-solid fa-caret-down opacity-70"></i>
+              </button>
+            </div>
 
+            <!-- Burger (mobile only) -->
+            <button id="burgerBtn" onclick="toggleSidebar()" class="md:hidden text-gray-600 text-2xl focus:outline-none">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+          </div>
+        </header>
 
-
-    <!-- Composer -->
-    <div id="composer" class="border-t p-4 bg-white shadow-inner">
-      <!-- Pending attachments tray -->
-      <div id="pendingTray" class="hidden mb-3">
-        <div class="flex items-center justify-between mb-2">
-          <div class="text-sm text-gray-600"><i class="fa-solid fa-paperclip mr-2"></i>Pending attachments</div>
-          <button id="clearAllBtn" class="text-xs text-red-600 hover:underline">Clear all</button>
+        <div id="toneBar" class="px-3 py-1 bg-[#fefaf7] text-gray-600 overflow-x-auto whitespace-nowrap">
+          <span class="font-semibold mr-2">Summary Tone:</span>
+          <label class="inline-flex items-center mr-3">
+            <input type="radio" name="tone" value="PlainClinical" checked>
+            <span class="ml-1">Balanced</span>
+          </label>
+          <label class="inline-flex items-center mr-3">
+            <input type="radio" name="tone" value="Caregiver">
+            <span class="ml-1">Caregiver</span>
+          </label>
+          <label class="inline-flex items-center mr-3">
+            <input type="radio" name="tone" value="Faith">
+            <span class="ml-1">Faith</span>
+          </label>
+          <label class="inline-flex items-center mr-3">
+            <input type="radio" name="tone" value="Clinical">
+            <span class="ml-1">Clinical</span>
+          </label>
+          <label class="inline-flex items-center mr-3">
+            <input type="radio" name="tone" value="Geriatric">
+            <span class="ml-1">Geriatric</span>
+          </label>
+          <!-- New Emotional Support tone -->
+          <label class="inline-flex items-center mr-3">
+            <input type="radio" name="tone" value="EmotionalSupport">
+            <span class="ml-1">Emotional Support</span>
+          </label>
         </div>
-        <!-- NOTE: 2 columns by default for tiny phones -->
-        <div id="pendingGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3"></div>
-      </div>
 
-      <!-- Input row with dropzone -->
-      <div id="dropzone" class="dropzone rounded-xl p-3 flex items-center gap-2 overflow-hidden">
-        <!-- Add -->
-        <button id="addBtn" class="shrink-0 w-10 h-10 rounded-full bg-[#236092] hover:bg-[#1B5A8E] text-white flex items-center justify-center text-xl shadow-md" title="Add files">
-          <i class="fa-solid fa-plus"></i>
+        <!-- Chat Window -->
+        <div id="chatWindow" class="flex-1 px-6 py-4 overflow-y-auto text-base bg-gradient-to-br from-white to-gray-50 rounded-xl"></div>
+
+        <!-- Tone Selector -->
+        
+      </div><!-- /#zoomScope -->
+
+      <!-- Composer (INTENTIONALLY OUTSIDE zoomScope so it stays pinned) -->
+      <div id="composer" class="border-t p-4 bg-white shadow-inner">
+        <!-- Pending attachments tray -->
+        <div id="pendingTray" class="hidden mb-3">
+          <div class="flex items-center justify-between mb-2">
+            <div class="text-sm text-gray-600"><i class="fa-solid fa-paperclip mr-2"></i>Pending attachments</div>
+            <button id="clearAllBtn" class="text-xs text-red-600 hover:underline">Clear all</button>
+          </div>
+          <!-- NOTE: 2 columns by default for tiny phones -->
+          <div id="pendingGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3"></div>
+        </div>
+
+        <!-- Input row with dropzone -->
+        <div id="dropzone" class="dropzone rounded-xl p-3 flex items-center gap-2 overflow-hidden">
+          <!-- Add -->
+          <button id="addBtn" class="shrink-0 w-10 h-10 rounded-full bg-[#236092] hover:bg-[#1B5A8E] text-white flex items-center justify-center text-xl shadow-md" title="Add files">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+
+          <input type="file" id="fileInput" class="hidden" multiple
+                accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic" />
+
+          <!-- Text input -->
+          <input type="text" id="chatInput"
+                class="flex-1 min-w-0 px-4 py-2 text-base border rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-[#28926D]/40"
+                placeholder="Type your question… (attachments will send with this)" />
+
+          <!-- Mic -->
+          <button id="micBtn" class="shrink-0 w-10 h-10 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center hover:bg-gray-300" title="Dictate">
+            <i class="fa-solid fa-microphone"></i>
+          </button>
+
+          <!-- Send -->
+          <button id="sendBtn" type="button" class="shrink-0 w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shadow-md hover:bg-gray-900" title="Send">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+
+        <p class="mt-1 text-xs text-gray-500 pl-12">Tip: Drag & drop files here to stage them. They won’t send until you hit <b>Send</b>.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- Summary Modal -->
+  <div id="summaryModal" class="fixed inset-0 bg-black bg-opacity-40 hidden z-50 flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl relative p-8 ring-1 ring-gray-200">
+      <button onclick="closeModal()" class="absolute top-3 right-4 text-gray-400 hover:text-gray-800 text-2xl">&times;</button>
+      <div class="mb-4">
+        <h2 class="text-2xl font-bold text-[#236092] flex items-center gap-2">
+          <i class="fa-solid fa-brain text-[#236092] text-2xl"></i> Full Summary
+        </h2>
+        <p class="text-base text-gray-500">Here’s the complete AI-generated explanation.</p>
+      </div>
+      <div id="modalContent" class="text-gray-800 text-base leading-relaxed max-h-[60vh] overflow-y-auto space-y-4 prose prose-sm"></div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="fixed inset-0 bg-white bg-opacity-90 z-50 flex flex-col items-center justify-center text-center hidden">
+    <div class="animate-spin mb-4 text-[#236092] text-4xl"><i class="fa-solid fa-brain"></i></div>
+    <p class="text-2xl font-semibold text-gray-700">NeuroMed is thinking…</p>
+    <p class="text-base text-gray-500 mt-2 italic"><i class="fa-solid fa-brain text-[#236092] text-2xl"></i> Please hold the coffee ☕</p>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity duration-300">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8 relative ring-1 ring-gray-200 animate-fadeInUp">
+      <button onclick="closeSettingsModal()" class="absolute top-5 right-6 text-gray-400 hover:text-gray-600 text-2xl transition">&times;</button>
+      <div class="mb-6 flex items-center gap-3">
+        <i class="fa-solid fa-sliders text-2xl text-[#236092]"></i>
+        <h2 class="text-3xl font-bold text-gray-800 tracking-tight">Settings</h2>
+      </div>
+      <div class="mb-5">
+        <label for="displayName" class="block text-sm font-semibold text-gray-700 mb-1">Display Name</label>
+        <input type="text" id="displayName" placeholder="e.g. Maria Gregory" class="w-full px-4 py-3 border rounded-lg shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#28926D] bg-gray-50 transition" />
+      </div>
+      <div class="mb-5">
+        <label for="profession" class="block text-sm font-semibold text-gray-700 mb-1">Profession</label>
+        <input type="text" id="profession" placeholder="e.g. Healthcare Advocate, Tech Founder" class="w-full px-4 py-3 border rounded-lg shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#28926D] bg-gray-50 transition" />
+      </div>
+      <div class="mb-6 text-sm text-gray-500 italic">
+        <i class="fa-solid fa-image-portrait mr-2 text-gray-400"></i> Profile photo upload coming soon...
+      </div>
+      <div class="flex justify-between items-center mt-6">
+        <button onclick="saveSettings()" class="bg-[#236092] hover:bg-[#1B5A8E] text-white font-semibold px-6 py-2.5 rounded-full shadow-md transition flex items-center gap-2">
+          <i class="fa-solid fa-check-circle text-white text-lg"></i> Save Changes
         </button>
-
-        <input type="file" id="fileInput" class="hidden" multiple
-              accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic" />
-
-        <!-- Text input -->
-        <input type="text" id="chatInput"
-              class="flex-1 min-w-0 px-4 py-2 text-base border rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-[#28926D]/40"
-              placeholder="Type your question… (attachments will send with this)" />
-
-        <!-- Mic -->
-        <button id="micBtn" class="shrink-0 w-10 h-10 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center hover:bg-gray-300" title="Dictate">
-          <i class="fa-solid fa-microphone"></i>
-        </button>
-
-        <!-- Send -->
-        <button id="sendBtn" type="button" class="shrink-0 w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shadow-md hover:bg-gray-900" title="Send">
-          <i class="fa-solid fa-paper-plane"></i>
-        </button>
+        <button onclick="logoutUser()" class="text-sm text-red-600 hover:underline">Logout</button>
       </div>
-
-      <p class="mt-1 text-xs text-gray-500 pl-12">Tip: Drag & drop files here to stage them. They won’t send until you hit <b>Send</b>.</p>
-    </div>
-  </section>
-</div>
-
-<!-- Summary Modal -->
-<div id="summaryModal" class="fixed inset-0 bg-black bg-opacity-40 hidden z-50 flex items-center justify-center">
-  <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl relative p-8 ring-1 ring-gray-200">
-    <button onclick="closeModal()" class="absolute top-3 right-4 text-gray-400 hover:text-gray-800 text-2xl">&times;</button>
-    <div class="mb-4">
-      <h2 class="text-2xl font-bold text-[#236092] flex items-center gap-2">
-        <i class="fa-solid fa-brain text-[#236092] text-2xl"></i> Full Summary
-      </h2>
-      <p class="text-base text-gray-500">Here’s the complete AI-generated explanation.</p>
-    </div>
-    <div id="modalContent" class="text-gray-800 text-base leading-relaxed max-h-[60vh] overflow-y-auto space-y-4 prose prose-sm"></div>
-  </div>
-</div>
-
-<!-- Loading Overlay -->
-<div id="loadingOverlay" class="fixed inset-0 bg-white bg-opacity-90 z-50 flex flex-col items-center justify-center text-center hidden">
-  <div class="animate-spin mb-4 text-[#236092] text-4xl"><i class="fa-solid fa-brain"></i></div>
-  <p class="text-2xl font-semibold text-gray-700">NeuroMed is thinking…</p>
-  <p class="text-base text-gray-500 mt-2 italic"><i class="fa-solid fa-brain text-[#236092] text-2xl"></i> Please hold the coffee ☕</p>
-</div>
-
-<!-- Settings Modal -->
-<div id="settingsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity duration-300">
-  <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8 relative ring-1 ring-gray-200 animate-fadeInUp">
-    <button onclick="closeSettingsModal()" class="absolute top-5 right-6 text-gray-400 hover:text-gray-600 text-2xl transition">&times;</button>
-    <div class="mb-6 flex items-center gap-3">
-      <i class="fa-solid fa-sliders text-2xl text-[#236092]"></i>
-      <h2 class="text-3xl font-bold text-gray-800 tracking-tight">Settings</h2>
-    </div>
-    <div class="mb-5">
-      <label for="displayName" class="block text-sm font-semibold text-gray-700 mb-1">Display Name</label>
-      <input type="text" id="displayName" placeholder="e.g. Maria Gregory" class="w-full px-4 py-3 border rounded-lg shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#28926D] bg-gray-50 transition" />
-    </div>
-    <div class="mb-5">
-      <label for="profession" class="block text-sm font-semibold text-gray-700 mb-1">Profession</label>
-      <input type="text" id="profession" placeholder="e.g. Healthcare Advocate, Tech Founder" class="w-full px-4 py-3 border rounded-lg shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#28926D] bg-gray-50 transition" />
-    </div>
-    <div class="mb-6 text-sm text-gray-500 italic">
-      <i class="fa-solid fa-image-portrait mr-2 text-gray-400"></i> Profile photo upload coming soon...
-    </div>
-    <div class="flex justify-between items-center mt-6">
-      <button onclick="saveSettings()" class="bg-[#236092] hover:bg-[#1B5A8E] text-white font-semibold px-6 py-2.5 rounded-full shadow-md transition flex items-center gap-2">
-        <i class="fa-solid fa-check-circle text-white text-lg"></i> Save Changes
-      </button>
-      <button onclick="logoutUser()" class="text-sm text-red-600 hover:underline">Logout</button>
     </div>
   </div>
-</div>
 
-<!-- Rotated side tab (hidden on tiny phones) -->
-<button id="feedbackTab"
-  class="sm:flex fixed 
-         top-1/2 sm:top-1/2 top-[40%]
-         -translate-y-1/2 z-[9999]
-         bg-[#236092] hover:bg-[#1B5A8E] text-white shadow-lg
-         px-3 py-2 rounded-tl-md rounded-tr-md
-         transform -rotate-90 origin-bottom-right
-         whitespace-nowrap tracking-wide text-sm"
-  style="right: 10px;">
-  <i class="fa-solid fa-comment-dots mr-2 rotate-90"></i> Give feedback
-</button>
+  <!-- Rotated side tab (hidden on tiny phones) -->
+  <button id="feedbackTab"
+    class="sm:flex fixed 
+           top-1/2 sm:top-1/2 top-[40%]
+           -translate-y-1/2 z-[9999]
+           bg-[#236092] hover:bg-[#1B5A8E] text-white shadow-lg
+           px-3 py-2 rounded-tl-md rounded-tr-md
+           transform -rotate-90 origin-bottom-right
+           whitespace-nowrap tracking-wide text-sm"
+    style="right: 10px;">
+    <i class="fa-solid fa-comment-dots mr-2 rotate-90"></i> Give feedback
+  </button>
 
-<!-- Mobile FAB to open feedback (shows when side tab is hidden) -->
-
-
-<!-- Slide-over Panel -->
-<div id="feedbackPanel" class="fixed inset-y-0 right-0 w-full sm:w-[520px] z-[70] translate-x-full transition-transform duration-300">
-  <div class="h-full bg-white shadow-2xl border-l flex flex-col">
-    <!-- Header -->
-    <div class="px-5 py-4 border-b flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <i class="fa-solid fa-heart text-[#236092] text-xl"></i>
-        <h3 class="text-lg font-semibold">NeuroMed AI — Quick Feedback</h3>
-      </div>
-      <button id="feedbackClose" class="text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
-    </div>
-
-    <!-- Body -->
-    <form id="feedbackForm" class="px-5 py-4 overflow-y-auto space-y-4" enctype="multipart/form-data">
-      <p class="text-sm text-gray-600 -mt-1">
-        Thanks for trying NeuroMed AI! Please use <b>synthetic or public sample data</b> only — no Personal Health Information (PHI).
-      </p>
-
-      <!-- Consent -->
-      <label class="flex items-start gap-2 text-sm bg-gray-50 border rounded p-3">
-        <input type="checkbox" name="consent" required>
-        <span>I agree to share feedback to help improve the product and will not include Personal Health Information (PHI).</span>
-      </label>
-
-      <!-- What you tested -->
-      <div>
-        <label class="text-sm font-medium">What did you try today? (choose all that apply)</label>
-        <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="upload_summarize"> Upload → Summary</label>
-          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="multi_attachments"> Multiple attachments tray</label>
-          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="tone_selector"> Tone selector</label>
-          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="chat_qna"> Chat Q&amp;A</label>
-          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="summary_modal"> Full summary modal</label>
-          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="drag_drop"> Drag &amp; drop</label>
-          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="mic_dictation"> Voice dictation</label>
-          <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="settings_update"> Settings update</label>
+  <!-- Slide-over Panel -->
+  <div id="feedbackPanel" class="fixed inset-y-0 right-0 w-full sm:w-[520px] z-[70] translate-x-full transition-transform duration-300">
+    <div class="h-full bg-white shadow-2xl border-l flex flex-col">
+      <!-- Header -->
+      <div class="px-5 py-4 border-b flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <i class="fa-solid fa-heart text-[#236092] text-xl"></i>
+          <h3 class="text-lg font-semibold">NeuroMed AI — Quick Feedback</h3>
         </div>
+        <button id="feedbackClose" class="text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
       </div>
 
-      <!-- Profile -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label class="text-sm">Your role</label>
-          <select name="role" class="mt-1 w-full border rounded p-2" required>
-            <option value="">Select…</option>
-            <option value="caregiver">Caregiver</option>
-            <option value="patient">Patient</option>
-            <option value="clinician">Clinician</option>
-            <option value="student">Student</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-sm">Email (optional, for follow-up)</label>
-          <input name="email" type="email" class="mt-1 w-full border rounded p-2" placeholder="you@example.com">
-        </div>
-        <div>
-          <label class="text-sm">What kind of input did you use?</label>
-          <select name="input_type" class="mt-1 w-full border rounded p-2" required>
-            <option value="">Select…</option>
-            <option value="dummy">Text I wrote (dummy)</option>
-            <option value="synthetic">Synthetic sample from the app</option>
-            <option value="public">Public document (no PHI)</option>
-            <option value="other">Other (no PHI)</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-sm">Device</label>
-          <input name="device" class="mt-1 w-full border rounded p-2" placeholder="e.g., MacBook, iPhone, Windows PC">
-        </div>
-        <div>
-          <label class="text-sm">Browser</label>
-          <input name="browser" class="mt-1 w-full border rounded p-2" placeholder="e.g., Safari 17, Chrome 126">
-        </div>
-      </div>
-
-      <!-- Ratings -->
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="text-sm">Ease of use (1–5)</label>
-          <input name="ease" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2">
-        </div>
-        <div>
-          <label class="text-sm">Speed (1–5)</label>
-          <input name="speed" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2">
-        </div>
-        <div>
-          <label class="text-sm">Accuracy (1–5)</label>
-          <input name="accuracy" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2">
-        </div>
-        <div>
-          <label class="text-sm">Clarity (1–5)</label>
-          <input name="clarity" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2">
-        </div>
-      </div>
-
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="text-sm" for="nps">How likely are you to recommend NeuroMed AI? (0–10)</label>
-          <input id="nps" name="nps" type="number" min="0" max="10" class="mt-1 w-full border rounded p-2" required>
-          <div class="text-xs text-gray-500 mt-1">0 = Not at all likely • 10 = Extremely likely</div>
-        </div>
-        <label class="flex items-center gap-2 text-sm">
-          <input type="checkbox" name="allow_contact"> It’s okay to contact me about this feedback
-        </label>
-        <label class="flex items-center gap-2 text-sm">
-          <input type="checkbox" name="allow_anon" checked> Store my feedback anonymously
-        </label>
-      </div>
-
-      <!-- Open text + screenshot -->
-      <div>
-        <label class="text-sm">What worked well?</label>
-        <textarea name="pros" rows="2" class="w-full border rounded p-2" placeholder="What felt smooth or helpful?"></textarea>
-      </div>
-      <div>
-        <label class="text-sm">What can we improve?</label>
-        <textarea name="cons" rows="2" class="w-full border rounded p-2" placeholder="Any rough edges or missing pieces?"></textarea>
-      </div>
-      <div>
-        <label class="text-sm">Bugs or errors — steps to reproduce</label>
-        <textarea name="bugs" rows="2" class="w-full border rounded p-2" placeholder="1) Go to… 2) Click… 3) What happened…"></textarea>
-      </div>
-      <div>
-        <label class="text-sm">Screenshot (optional)</label>
-        <input type="file" name="screenshot" accept="image/*">
-      </div>
-
-      <!-- Submit -->
-      <div class="flex items-center justify-between pt-2">
-        <button type="submit" class="bg-[#236092] hover:bg-[#1B5A8E] text-white px-4 py-2 rounded">Submit feedback</button>
-      </div>
-
-      <div id="fbErrors" class="text-sm text-red-600 hidden"></div>
-    </form>
-  </div>
-</div>
-
-
-<!-- Toast -->
-<div id="fbToast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
-  <div class="bg-[#28926D] text-white px-4 py-2 rounded shadow">Thanks! Feedback received. 💜</div>
-</div>
-
-<!-- Success Modal -->
-<div id="fbSuccess"
-     class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/40 backdrop-blur-[1px]">
-  <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl ring-1 ring-gray-200 p-6 relative">
-    <button id="fbSuccessCloseX" class="absolute top-3 right-4 text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
-
-    <div class="flex items-start gap-3 mb-3">
-      <div class="shrink-0 rounded-full p-2 bg-[#28926D]/10 text-[#236092]">
-        <i class="fa-solid fa-check"></i>
-      </div>
-      <div>
-        <h3 class="text-xl font-semibold text-gray-800">Thanks for the feedback! 💜</h3>
-        <p id="fbSuccessMsg" class="text-sm text-gray-600 mt-1">
-          We’ve received your submission. Your input helps make NeuroMed AI kinder and sharper.
+      <!-- Body -->
+      <form id="feedbackForm" class="px-5 py-4 overflow-y-auto space-y-4" enctype="multipart/form-data">
+        <p class="text-sm text-gray-600 -mt-1">
+          Thanks for trying NeuroMed AI! Please use <b>synthetic or public sample data</b> only — no Personal Health Information (PHI).
         </p>
-      </div>
-    </div>
 
-    <div id="fbSuccessMeta" class="hidden text-xs text-gray-500 mb-4"></div>
+        <!-- Consent -->
+        <label class="flex items-start gap-2 text-sm bg-gray-50 border rounded p-3">
+          <input type="checkbox" name="consent" required>
+          <span>I agree to share feedback to help improve the product and will not include Personal Health Information (PHI).</span>
+        </label>
 
-    <div class="flex justify-end gap-2 mt-4">
-      <button id="fbSuccessAnother"
-              class="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">
-        Send another
-      </button>
-      <button id="fbSuccessClose"
-              class="px-4 py-2 rounded bg-[#236092] text-white hover:bg-[#1B5A8E]">
-        Done
-      </button>
+        <!-- What you tested -->
+        <div>
+          <label class="text-sm font-medium">What did you try today? (choose all that apply)</label>
+          <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+            <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="upload_summarize"> Upload → Summary</label>
+            <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="multi_attachments"> Multiple attachments tray</label>
+            <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="tone_selector"> Tone selector</label>
+            <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="chat_qna"> Chat Q&amp;A</label>
+            <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="summary_modal"> Full summary modal</label>
+            <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="drag_drop"> Drag &amp; drop</label>
+            <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="mic_dictation"> Voice dictation</label>
+            <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="settings_update"> Settings update</label>
+          </div>
+        </div>
+
+        <!-- Profile -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="text-sm">Your role</label>
+            <select name="role" class="mt-1 w-full border rounded p-2" required>
+              <option value="">Select…</option>
+              <option value="caregiver">Caregiver</option>
+              <option value="patient">Patient</option>
+              <option value="clinician">Clinician</option>
+              <option value="student">Student</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm">Email (optional, for follow-up)</label>
+            <input name="email" type="email" class="mt-1 w-full border rounded p-2" placeholder="you@example.com">
+          </div>
+          <div>
+            <label class="text-sm">What kind of input did you use?</label>
+            <select name="input_type" class="mt-1 w-full border rounded p-2" required>
+              <option value="">Select…</option>
+              <option value="dummy">Text I wrote (dummy)</option>
+              <option value="synthetic">Synthetic sample from the app</option>
+              <option value="public">Public document (no PHI)</option>
+              <option value="other">Other (no PHI)</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm">Device</label>
+            <input name="device" class="mt-1 w-full border rounded p-2" placeholder="e.g., MacBook, iPhone, Windows PC">
+          </div>
+          <div>
+            <label class="text-sm">Browser</label>
+            <input name="browser" class="mt-1 w-full border rounded p-2" placeholder="e.g., Safari 17, Chrome 126">
+          </div>
+        </div>
+
+        <!-- Ratings -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-sm">Ease of use (1–5)</label>
+            <input name="ease" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2">
+          </div>
+          <div>
+            <label class="text-sm">Speed (1–5)</label>
+            <input name="speed" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2">
+          </div>
+          <div>
+            <label class="text-sm">Accuracy (1–5)</label>
+            <input name="accuracy" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2">
+          </div>
+          <div>
+            <label class="text-sm">Clarity (1–5)</label>
+            <input name="clarity" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-sm" for="nps">How likely are you to recommend NeuroMed AI? (0–10)</label>
+            <input id="nps" name="nps" type="number" min="0" max="10" class="mt-1 w-full border rounded p-2" required>
+            <div class="text-xs text-gray-500 mt-1">0 = Not at all likely • 10 = Extremely likely</div>
+          </div>
+          <label class="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="allow_contact"> It’s okay to contact me about this feedback
+          </label>
+          <label class="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="allow_anon" checked> Store my feedback anonymously
+          </label>
+        </div>
+
+        <!-- Open text + screenshot -->
+        <div>
+          <label class="text-sm">What worked well?</label>
+          <textarea name="pros" rows="2" class="w-full border rounded p-2" placeholder="What felt smooth or helpful?"></textarea>
+        </div>
+        <div>
+          <label class="text-sm">What can we improve?</label>
+          <textarea name="cons" rows="2" class="w-full border rounded p-2" placeholder="Any rough edges or missing pieces?"></textarea>
+        </div>
+        <div>
+          <label class="text-sm">Bugs or errors — steps to reproduce</label>
+          <textarea name="bugs" rows="2" class="w-full border rounded p-2" placeholder="1) Go to… 2) Click… 3) What happened…"></textarea>
+        </div>
+        <div>
+          <label class="text-sm">Screenshot (optional)</label>
+          <input type="file" name="screenshot" accept="image/*">
+        </div>
+
+        <!-- Submit -->
+        <div class="flex items-center justify-between pt-2">
+          <button type="submit" class="bg-[#236092] hover:bg-[#1B5A8E] text-white px-4 py-2 rounded">Submit feedback</button>
+        </div>
+
+        <div id="fbErrors" class="text-sm text-red-600 hidden"></div>
+      </form>
     </div>
   </div>
-</div>
+
+  <!-- Toast -->
+  <div id="fbToast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
+    <div class="bg-[#28926D] text-white px-4 py-2 rounded shadow">Thanks! Feedback received. 💜</div>
+  </div>
+
+  <!-- Success Modal -->
+  <div id="fbSuccess"
+      class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/40 backdrop-blur-[1px]">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl ring-1 ring-gray-200 p-6 relative">
+      <button id="fbSuccessCloseX" class="absolute top-3 right-4 text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
+
+      <div class="flex items-start gap-3 mb-3">
+        <div class="shrink-0 rounded-full p-2 bg-[#28926D]/10 text-[#236092]">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold text-gray-800">Thanks for the feedback! 💜</h3>
+          <p id="fbSuccessMsg" class="text-sm text-gray-600 mt-1">
+            We’ve received your submission. Your input helps make NeuroMed AI kinder and sharper.
+          </p>
+        </div>
+      </div>
+
+      <div id="fbSuccessMeta" class="hidden text-xs text-gray-500 mb-4"></div>
+
+      <div class="flex justify-end gap-2 mt-4">
+        <button id="fbSuccessAnother"
+                class="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">
+          Send another
+        </button>
+        <button id="fbSuccessClose"
+                class="px-4 py-2 rounded bg-[#236092] text-white hover:bg-[#1B5A8E]">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Language Bottom Sheet (FIXED; must be outside #zoomScope) -->
+  <div id="mLangMenu" class="fixed inset-0 z-50 hidden">
+    <!-- Backdrop -->
+    <button id="mLangBackdrop" class="absolute inset-0 bg-black/40" aria-label="Close language menu"></button>
+
+    <!-- Sheet -->
+    <div id="mLangPanel"
+        class="absolute inset-x-0 bottom-0 max-h:[70vh] max-h-[70vh] overflow-hidden rounded-t-2xl bg-white shadow-2xl
+               translate-y-full transition-transform duration-200 ease-out">
+      <!-- Header -->
+      <div class="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between">
+        <div class="text-sm font-semibold">Choose language</div>
+        <button id="mLangClose" class="p-2 text-slate-500" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Search -->
+      <div class="p-3">
+        <label for="mLangSearch" class="sr-only">Search language</label>
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input id="mLangSearch" type="text"
+                class="w-full pl-9 pr-3 py-2 border rounded-lg"
+                placeholder="Search…">
+        </div>
+      </div>
+
+      <!-- List -->
+      <div id="mLangList"
+          class="px-2 pb-4 overflow-y-auto"
+          style="max-height: calc(70vh - 96px); padding-bottom: calc(env(safe-area-inset-bottom) + 12px);">
+        <!-- options injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile overlay (FIXED; must be outside #zoomScope) -->
+  <div id="overlay" class="fixed inset-0 bg-black bg-opacity-40 z-30 hidden md:hidden" onclick="toggleSidebar()"></div>
+</body>
+
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.3/dist/purify.min.js" defer></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
 <script>
+(() => {
+  const chatWindow = document.getElementById('chatWindow');
+  const composer   = document.getElementById('composer');
+
+  const debounce = (fn, ms = 80) => {
+    let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+  };
+
+  function updateComposerPadding(){
+    if (!chatWindow || !composer) return;
+    const h = Math.ceil(composer.getBoundingClientRect().height || 0);
+    chatWindow.style.paddingBottom = `calc(${h}px + 12px)`;          // so last bubble never hides
+    document.documentElement.style.setProperty('--composer-h', `${h}px`); // so zoomScope reserves space
+  }
+  window.updateComposerPadding = updateComposerPadding;
+
+  function applyZoomFromTone(){
+    const selected = document.querySelector('input[name="tone"]:checked')?.value;
+    const on = selected === 'Geriatric';
+    document.body.classList.toggle('geriatric-zoom', on);
+    if (on) localStorage.setItem('nm_zoom_mode', 'geriatric');
+    else    localStorage.removeItem('nm_zoom_mode');
+    requestAnimationFrame(updateComposerPadding);
+    setTimeout(updateComposerPadding, 120);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('input[name="tone"]').forEach(r =>
+      r.addEventListener('change', applyZoomFromTone)
+    );
+    if (localStorage.getItem('nm_zoom_mode') === 'geriatric') {
+      const g = document.querySelector('input[name="tone"][value="Geriatric"]');
+      if (g && !g.checked) g.checked = true;
+      applyZoomFromTone();
+    } else {
+      updateComposerPadding();
+    }
+  });
+
+  window.addEventListener('resize', debounce(updateComposerPadding, 80));
+  if (window.visualViewport) {
+    visualViewport.addEventListener('resize', debounce(updateComposerPadding, 80));
+  }
+
+  if (chatWindow) {
+    const mo = new MutationObserver(debounce(updateComposerPadding, 30));
+    mo.observe(chatWindow, { childList: true });
+  }
+})();
 
 (function(){
   // ---------- Elements ----------
@@ -1537,11 +1613,15 @@ async function greetUser() {
     const data = await res.json();
     const name = data.display_name || "there";
     const options = [
-      `Welcome, ${name}! Let’s get you started on understanding your records.`,
-      `Hi ${name}, ready to make sense of your medical documents?`,
-      `Glad you’re here, ${name}. Let’s take the first step together.`,
-      `${name}, I’m here to help simplify your health information—let’s begin.`,
-    ];
+  `Hi ${name} — how are you feeling today?`,
+  `Welcome, ${name}. What do you need help with: symptoms, results, or next steps?`,
+  `${name}, I’m here to help. Share a document and I’ll summarize it in plain language.`,
+  `Hey ${name}, got labs or notes? I can translate the medical jargon for you.`,
+  `Hello ${name}! Tell me what’s going on and we’ll make a plan together.`,
+  `${name}, your health matters. Want me to draft questions for your next appointment?`,
+  `Hi ${name}. On a scale of 1–10, how are you feeling today?`,
+  `Welcome back, ${name}. How can I support you right now?`
+];
     appendBubble(options[Math.floor(Math.random()*options.length)], false);
   } catch {
     appendBubble("Welcome back. Let’s take care of what matters most today.", false);
@@ -1562,7 +1642,7 @@ async function newChat() {
     localStorage.setItem('nm_session_id', String(data.session_id));
     if (window.openSession) { try { await openSession(Number(data.session_id)); } catch {} }
   }
-  appendBubble('I’m here to help - what would you like to do?', false);
+  appendBubble('I’m here to help. How are you feeling today, and what would you like to do—summarize records, explain results, or ask a health question?', false);
 }
 
 /* =========================
@@ -1907,7 +1987,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         credentials: 'include'
       }).catch(()=>{});
 
-      appendBubble('I’m here to help - what would you like to do?', false);
+      appendBubble('I’m here to help. How are you feeling today, and what would you like to do—summarize records, explain results, or ask a health question?', false);
     } else {
       const sid = getSessionId();
       if (sid) {
