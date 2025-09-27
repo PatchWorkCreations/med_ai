@@ -684,6 +684,199 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
 <script>
+
+(function(){
+  // ---------- Elements ----------
+  const tab       = document.getElementById('feedbackTab');
+  const panel     = document.getElementById('feedbackPanel');
+  const closeBtn  = document.getElementById('feedbackClose');
+  const form      = document.getElementById('feedbackForm');
+  const errBox    = document.getElementById('fbErrors');
+  const toast     = document.getElementById('fbToast');
+
+  // Success modal bits (optional, if present)
+  const okModal   = document.getElementById('fbSuccess');
+  const okClose   = document.getElementById('fbSuccessClose');
+  const okCloseX  = document.getElementById('fbSuccessCloseX');
+  const okAnother = document.getElementById('fbSuccessAnother');
+  const okMsg     = document.getElementById('fbSuccessMsg');
+  const okMeta    = document.getElementById('fbSuccessMeta');
+
+  // ---------- Backdrop ----------
+  let backdrop = null;
+  function ensureBackdrop(show){
+    if (show) {
+      if (!backdrop) {
+        backdrop = document.createElement('button');
+        backdrop.type = 'button';
+        backdrop.id = 'fbBackdrop';
+        backdrop.className = 'fixed inset-0 z-[60] bg-black/40';
+        backdrop.addEventListener('click', closeFeedback);
+        document.body.appendChild(backdrop);
+      }
+      backdrop.classList.remove('hidden');
+    } else {
+      backdrop?.classList.add('hidden');
+    }
+  }
+
+  // ---------- Open/Close ----------
+  function openFeedback(){
+    ensureBackdrop(true);
+    panel?.classList.remove('translate-x-full');
+    setTimeout(()=> panel?.querySelector('input,select,textarea,button')?.focus(), 60);
+  }
+  function closeFeedback(){
+    panel?.classList.add('translate-x-full');
+    ensureBackdrop(false);
+    if (errBox){ errBox.classList.add('hidden'); errBox.textContent = ''; }
+  }
+  window.closeFeedback = closeFeedback; // expose for your other code if needed
+
+  tab?.addEventListener('click', openFeedback);
+  closeBtn?.addEventListener('click', closeFeedback);
+  document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeFeedback(); });
+
+  // ---------- Tiny toast ----------
+  function showToast(msg='Thanks! Feedback received. 💜'){
+    if (!toast) return;
+    const box = toast.querySelector('div') || toast;
+    box.textContent = msg;
+    toast.classList.remove('hidden');
+    setTimeout(()=> toast.classList.add('hidden'), 2000);
+  }
+
+  // ---------- Helpers ----------
+  function getCSRFToken(){
+    const m = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
+    return m ? m.pop() : '';
+  }
+
+  function collectUseCase(){
+    const boxes = form?.querySelectorAll('input[name="use_case_multi"]:checked') || [];
+    return Array.from(boxes).map(b => b.value).join(', ');
+  }
+
+  function detectBrowserPretty() {
+    const ua = navigator.userAgent || '';
+    const rules = [
+      { name: 'Edge',    re: /(Edg|Edge)\/(\d+)/i },
+      { name: 'Chrome',  re: /(Chrome|Chromium)\/(\d+)/i },
+      { name: 'Firefox', re: /Firefox\/(\d+)/i },
+      { name: 'Safari',  re: /Version\/(\d+).+Safari/i },
+    ];
+    for (const r of rules) { const m = ua.match(r.re); if (m) return `${r.name} ${m[m.length - 1]}`; }
+    return ua ? ua.split(') ').pop() || 'Unknown' : 'Unknown';
+  }
+
+  function prefillMeta() {
+    if (!form) return;
+    const dev = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || 'Unknown';
+    const browserPretty = detectBrowserPretty();
+    const devInput = form.querySelector('input[name="device"]');
+    const brInput  = form.querySelector('input[name="browser"]');
+    if (devInput && !devInput.value) devInput.value = dev;
+    if (brInput  && !brInput.value)  brInput.value  = browserPretty;
+  }
+  document.addEventListener('DOMContentLoaded', prefillMeta);
+
+  // ---------- Success modal ----------
+  function openFbSuccess(data){
+    if (!okModal){ showToast(); return; }
+    okMeta?.classList.add('hidden');
+    if (okMsg) okMsg.textContent = 'We’ve received your submission. Your input helps make NeuroMed AI kinder and sharper.';
+    okModal.classList.remove('hidden');
+    okModal.classList.add('flex');
+  }
+  function closeOk(){ okModal?.classList.add('hidden'); okModal?.classList.remove('flex'); }
+  okClose?.addEventListener('click', closeOk);
+  okCloseX?.addEventListener('click', closeOk);
+  okAnother?.addEventListener('click', ()=>{ closeOk(); openFeedback(); });
+
+  // ---------- Submit feedback ----------
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!form) return;
+
+    // UI reset
+    errBox?.classList.add('hidden');
+    if (errBox) errBox.textContent = '';
+
+    // Build FormData (multipart)
+    const fd = new FormData(form);
+    fd.append('use_case', collectUseCase()); // consolidate checkboxes → single field
+
+    // Minimal validation to avoid server 400
+    const consent = fd.get('consent');
+    const nps     = Number(fd.get('nps'));
+    const role    = String(fd.get('role') || '');
+    const inputT  = String(fd.get('input_type') || '');
+
+    if (!consent)      return showError('Please confirm consent (no PHI).');
+    if (!Number.isFinite(nps) || nps < 0 || nps > 10) return showError('Please enter an NPS score from 0 to 10.');
+    if (!role)         return showError('Please select your role.');
+    if (!inputT)       return showError('Please select the input type.');
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalHTML = submitBtn ? submitBtn.innerHTML : '';
+    const setLoading = (on) => {
+      if (!submitBtn) return;
+      if (on) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Sending your feedback… hang tight';
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalHTML;
+      }
+    };
+
+    function showError(msg){
+      if (errBox){ errBox.textContent = msg; errBox.classList.remove('hidden'); }
+    }
+
+    setLoading(true);
+
+    try {
+      const endpoint = form.getAttribute('action') || '/beta/api/submit/';
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        body: fd,
+        credentials: 'include',
+        headers: { 'X-CSRFToken': getCSRFToken() } // don't set Content-Type for FormData
+      });
+
+      let data = null;
+      try { data = await res.json(); } catch { /* server might not return JSON on error */ }
+
+      if (!res.ok || (data && data.success === false)) {
+        const serverMsg = (data && (data.errors || data.detail || data.message)) || `Submit failed (${res.status}).`;
+        showError(typeof serverMsg === 'string' ? serverMsg : JSON.stringify(serverMsg));
+        setLoading(false);
+        return;
+      }
+
+      // Success
+      if (data && data.session_id && typeof window.setSessionId === 'function') {
+        setSessionId(data.session_id);
+        if (typeof window.refreshSessionList === 'function') {
+          window.refreshSessionList().catch(()=>{});
+        }
+      }
+
+      form.reset();
+      prefillMeta(); // repopulate device/browser if blank
+      setLoading(false);
+      closeFeedback();
+      openFbSuccess(data);
+
+    } catch (err) {
+      showError('Hi! It seems the connection is busy at the moment — give it another try in a few minutes. We appreciate your patience.');
+      setLoading(false);
+    }
+  });
+})();
+
 /* =========================
    Chat + Sessions + Compose
    (safe drop-in replacement)
