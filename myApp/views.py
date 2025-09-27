@@ -1573,7 +1573,7 @@ def send_otp_email(email: str, code: str, ttl_minutes: int = 10) -> bool:
     html_content = f"""
     <div style="font-family:Inter,Segoe UI,Arial,sans-serif;max-width:520px;margin:0 auto;padding:24px;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;">
       <div style="text-align:center;margin-bottom:8px;">
-        <div style="font-size:18px;font-weight:700;color:#0f766e;">NeuroMed AI</div>
+        <div style="font-size:18px;font-weight:700;color:#1B5A8E;">NeuroMed AI</div>
         <div style="font-size:12px;color:#6b7280;">Secure verification</div>
       </div>
       <p style="font-size:14px;color:#374151;margin:16px 0;">
@@ -2009,7 +2009,7 @@ The NeuroMed AI Team
     html_content = f"""
     <div style="font-family:Inter,Segoe UI,Arial,sans-serif;max-width:640px;margin:0 auto;padding:24px;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;">
       <div style="text-align:center;margin-bottom:8px;">
-        <div style="font-size:18px;font-weight:700;color:#0f766e;">NeuroMed AI</div>
+        <div style="font-size:18px;font-weight:700;color:#1B5A8E;">NeuroMed AI</div>
         <div style="font-size:12px;color:#6b7280;">Welcome to the Beta</div>
       </div>
 
@@ -2044,7 +2044,7 @@ The NeuroMed AI Team
 
       <div style="text-align:center;margin:24px 0;">
         <a href="{escape(login_url)}"
-           style="display:inline-block;background:#0f766e;color:#ffffff;text-decoration:none;padding:12px 18px;border-radius:10px;font-weight:700;">
+           style="display:inline-block;background:#1B5A8E;color:#ffffff;text-decoration:none;padding:12px 18px;border-radius:10px;font-weight:700;">
           Start Now
         </a>
       </div>

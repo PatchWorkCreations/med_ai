@@ -5,7 +5,7 @@
   <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
 
     <!-- Brand -->
-    <a href="/" class="text-2xl font-extrabold text-teal-600 tracking-tight hover:drop-shadow-sm transition">
+    <a href="/" class="text-2xl font-extrabold text-[#236092] tracking-tight hover:drop-shadow-sm transition">
       NeuroMed<span class="text-gray-700"> AI</span>
     </a>
 
@@ -29,7 +29,7 @@
     <div class="hidden lg:flex items-center gap-6 text-sm text-gray-700">
       {% if request.user.is_authenticated %}
       <nav class="space-x-5">
-        <a href="/dashboard/" class="hover:text-teal-600 hover:underline underline-offset-4 transition">Dashboard</a>
+        <a href="/dashboard/" class="hover:text-[#236092] hover:underline underline-offset-4 transition">Dashboard</a>
       </nav>
       <div class="flex items-center gap-4">
         <span class="font-medium text-gray-600">👋 Welcome, {{ request.user.first_name|default:request.user.username }}</span>
@@ -37,7 +37,7 @@
           {% csrf_token %}
           <button
             type="submit"
-            class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-1.5 rounded-md text-sm font-medium transition shadow"
+            class="bg-teal-600 hover:bg-[#1B5A8E] text-white px-4 py-1.5 rounded-md text-sm font-medium transition shadow"
           >
             Logout
           </button>
@@ -45,9 +45,9 @@
       </div>
       {% else %}
       <nav class="flex items-center gap-4">
-        <a href="{% url 'about' %}" class="hover:text-teal-600 transition">About</a>
-        <a href="{% url 'login' %}" class="px-3 py-1.5 bg-white border border-teal-600 text-teal-700 rounded-md hover:bg-teal-50 transition">Login</a>
-        <a href="{% url 'signup' %}" class="px-3 py-1.5 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition">Signup</a>
+        <a href="{% url 'about' %}" class="hover:text-[#236092] transition">About</a>
+        <a href="{% url 'login' %}" class="px-3 py-1.5 bg-white border border-teal-600 text-[#236092] rounded-md hover:bg-teal-50 transition">Login</a>
+        <a href="{% url 'signup' %}" class="px-3 py-1.5 bg-teal-600 text-white rounded-md hover:bg-[#1B5A8E] transition">Signup</a>
       </nav>
       {% endif %}
     </div>
@@ -56,23 +56,23 @@
   <!-- Mobile Nav -->
   <div x-show="open" x-cloak class="lg:hidden px-4 pb-4 space-y-4 text-sm text-gray-700">
     {% if request.user.is_authenticated %}
-    <a href="/dashboard/" class="block hover:text-teal-600 transition">Dashboard</a>
+    <a href="/dashboard/" class="block hover:text-[#236092] transition">Dashboard</a>
     <div class="border-t pt-2">
       <span class="block font-medium text-gray-600">👋 Welcome, {{ request.user.first_name|default:request.user.username }}</span>
       <form method="POST" action="{% url 'logout' %}" class="mt-2">
         {% csrf_token %}
         <button
           type="submit"
-          class="w-full bg-teal-600 hover:bg-teal-700 text-white py-2 rounded-md text-sm font-medium transition shadow"
+          class="w-full bg-teal-600 hover:bg-[#1B5A8E] text-white py-2 rounded-md text-sm font-medium transition shadow"
         >
           Logout
         </button>
       </form>
     </div>
     {% else %}
-    <a href="{% url 'about' %}" class="block hover:text-teal-600 transition">About</a>
-    <a href="{% url 'login' %}" class="block px-3 py-2 bg-white border border-teal-600 text-teal-700 rounded-md hover:bg-teal-50 transition">Login</a>
-    <a href="{% url 'signup' %}" class="block px-3 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition">Signup</a>
+    <a href="{% url 'about' %}" class="block hover:text-[#236092] transition">About</a>
+    <a href="{% url 'login' %}" class="block px-3 py-2 bg-white border border-teal-600 text-[#236092] rounded-md hover:bg-teal-50 transition">Login</a>
+    <a href="{% url 'signup' %}" class="block px-3 py-2 bg-teal-600 text-white rounded-md hover:bg-[#1B5A8E] transition">Signup</a>
     {% endif %}
   </div>
 </header>

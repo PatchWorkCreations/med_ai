@@ -9,239 +9,212 @@
   <link rel="apple-touch-icon" href="/static/pwa/icons/apple-touch-icon-180.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/static/pwa/icons/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/static/pwa/icons/favicon-16.png">
-  <meta name="theme-color" content="#0f766e">
+  <meta name="theme-color" content="#236092">
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-  <style>
-    body { background: linear-gradient(to right, #f5f7fa, #e4ebf5); }
-    .glass { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); }
+<style>
+  /* ----- Base surface/background ----- */
+  body { background: linear-gradient(to right, #f5f7fa, #e4ebf5); }
+  .glass { background:#ffffff; border:1px solid #e5e7eb; } /* light gray border */
 
-    .chat-bubble {
-      border-radius: 1.25rem; padding: 12px 18px; line-height: 1.6; font-size: 1rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,.05); max-width: 75%; white-space: pre-wrap; word-break: break-word;
-      animation: fadeInUp .25s ease;
+  /* ----- Chat bubbles (single source of truth) ----- */
+  .chat-bubble{
+    border-radius: 1.25rem;
+    padding: 12px 18px;
+    font-size: 15px;          /* unified with rich content */
+    line-height: 1.45;        /* unified with rich content */
+    max-width: 75%;
+    white-space: pre-wrap;
+    word-break: break-word;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    animation: fadeInUp .25s ease;
+  }
+  /* Inner typography utility used by JS-rendered content AND typing bubble */
+  .chat-rich{ font-size:15px; line-height:1.45; }
+
+  /* kill default paragraph spacing inside bubbles */
+  .chat-bubble p{ margin: .25rem 0; }
+  .chat-bubble p:first-child{ margin-top: 0; }
+  .chat-bubble p:last-child{  margin-bottom: 0; }
+  .chat-bubble > *:first-child{ margin-top:0 !important; }
+  .chat-bubble > *:last-child{  margin-bottom:0 !important; }
+
+  /* Sides: color + alignment ONLY (no padding/radius/width here to avoid overrides) */
+  .chat-user{
+    background-color:#dbeafe; color:#1f2937;
+    margin-left:auto; margin-right:0;     /* RIGHT side */
+  }
+  .chat-ai{
+    background-color:#ecfdf5; color:#1f2937;
+    margin-right:auto; margin-left:0;     /* LEFT side  */
+  }
+
+  /* ===== Ultra-compact AI markdown (AI bubbles only) ===== */
+.chat-ai.chat-bubble { white-space: normal; line-height: 1.40; padding: 10px 12px; }
+
+.chat-user.chat-bubble { white-space: normal; line-height: 1.40; padding: 10px 12px; }
+
+.chat-ai .md-prose { font-size: .98rem; line-height: 1.40; }
+.chat-ai .md-prose > :first-child { margin-top: 0 !important; }
+.chat-ai .md-prose > :last-child  { margin-bottom: 0 !important; }
+
+.chat-ai .md-prose h1,
+.chat-ai .md-prose h2,
+.chat-ai .md-prose h3,
+.chat-ai .md-prose h4 { margin: .22em 0 .14em !important; line-height: 1.18; }
+.chat-ai .md-prose h1 { font-size: 1.18rem; }
+.chat-ai .md-prose h2 { font-size: 1.08rem; }
+.chat-ai .md-prose h3 { font-size: 1.02rem; }
+.chat-ai .md-prose h4 { font-size: .98rem; }
+
+.chat-ai .md-prose p { margin: .12em 0 !important; }
+.chat-ai .md-prose p + p { margin-top: .10em !important; }
+.chat-ai .md-prose p:empty { display: none; }
+
+.chat-ai .md-prose :is(h1,h2,h3,h4) + :is(p,ul,ol,table,blockquote) { margin-top: .16em !important; }
+.chat-ai .md-prose :is(p,ul,ol,table,blockquote) + :is(h1,h2,h3,h4) { margin-top: .24em !important; }
+
+.chat-ai .md-prose ul, .chat-ai .md-prose ol { margin: .14em 0 .2em 1em !important; }
+.chat-ai .md-prose li { margin: .04em 0 !important; }
+
+.chat-ai .md-prose blockquote { border-left: 2px solid #e2e8f0; padding-left: .45rem; margin: .18em 0 !important; color: #475569; }
+
+.chat-ai .md-prose code { background:#0f172a0d; padding:.04rem .18rem; border-radius:.3rem; }
+.chat-ai .md-prose pre  { background:#0f172a0d; padding:.5rem; border-radius:.6rem; margin:.22rem 0 !important; }
+
+.chat-ai .md-prose table { width:100%; border-collapse: collapse; margin:.22rem 0 !important; font-size:.93rem; }
+.chat-ai .md-prose th, .chat-ai .md-prose td { border:1px solid #e2e8f0; padding:.28rem .4rem; }
+.chat-ai .md-prose thead th { background:#f8fafc; }
+
+
+
+
+  /* Hover / small UI polish */
+  .sidebar-link:hover{ background:#f0f0f0; transition:all .2s; }
+
+  /* Animations (single definition) */
+  @keyframes fadeInUp{ from{opacity:0; transform:translateY(20px)} to{opacity:1; transform:translateY(0)} }
+  .animate-fadeInUp{ animation: fadeInUp .35s ease-out; }
+  #loadingOverlay i{ animation:pulseFade 1.2s infinite ease-in-out; }
+  @keyframes pulseFade{ 0%,100%{opacity:.6; transform:scale(1)} 50%{opacity:1; transform:scale(1.1)} }
+  #chatWindow > div:first-child{ margin-top:0!important; margin-bottom:0!important; }
+
+  /* Composer */
+  .dropzone{ border:2px dashed rgba(0,0,0,.08); transition:.15s ease; }
+  .dropzone.dragover{ border-color:#28926D; background:rgba(40,146,109,.08); }
+  .thumb{ position:relative; border-radius:.75rem; border:1px solid rgba(0,0,0,.06); background:#fff; }
+  .thumb img{ display:block; width:100%; height:100%; object-fit:cover; border-radius:.65rem; }
+  .thumb-remove{
+    position:absolute; top:6px; right:6px; background:#111827; color:#fff;
+    border-radius:9999px; width:22px; height:22px; display:flex; align-items:center;
+    justify-content:center; font-size:.75rem;
+  }
+
+  /* Rotated side tab (hidden on tiny phones; see media queries) */
+  #feedbackTab{
+    position:fixed; top:50%; right:10px; transform:translateY(-50%) rotate(-90deg);
+    transform-origin:bottom right; background-color:#236092; color:#fff;
+    padding:.5rem 1rem; border-radius:.25rem .25rem 0 0; box-shadow:0 2px 8px rgba(0,0,0,.2);
+    z-index:9999; cursor:pointer; white-space:nowrap;
+  }
+  #feedbackTab:hover{ background-color:#1B5A8E; }
+  #feedbackTab:focus{ outline:none; }
+  #feedbackTab, #feedbackTab *{ pointer-events:auto; }
+
+  /* --- Core fixes: prevent right-edge clipping on tiny screens --- */
+  :where(header, #toneBar, #chatWindow, #dropzone, #composer, section.flex-1){
+    min-width:0 !important; max-width:100vw;
+  }
+  #toneBar{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+  /* iOS Safari 100vh fix */
+  @media (max-width:480px){
+    @supports (height:100dvh){
+      .h-screen{ height:100dvh; }
+    }
+  }
+
+  /* Hide rotated tab on small phones; rely on FAB */
+  @media (max-width:380px){ #feedbackTab{ display:none !important; } }
+
+  /* --- Tiny phone hardening (<= 320px) --- */
+  @media (max-width:320px){
+    html, body{ overflow-x:hidden; }
+
+    #sidebar{ width:88vw !important; padding:16px !important; }
+    header{ padding-left:12px !important; padding-right:12px !important; }
+    #chatWindow{ padding:10px 12px !important; }
+
+    .chat-bubble{
+      font-size:14px !important;
+      padding:8px 12px !important;
+      max-width:92% !important;
     }
 
-    /* User on the RIGHT */
-.chat-user {
-  background-color: #dbeafe;
-  color: #1f2937;
-  padding: 0.5rem 0.75rem;
-  border-radius: 1rem;
-  max-width: 75%;
-  margin-left: auto;    /* RIGHT side */
-  margin-right: 0;
-}
+    #toneBar{ font-size:12px !important; padding-left:8px !important; padding-right:12px !important; }
+    #toneBar label{ margin-right:8px !important; }
 
-/* AI on the LEFT */
-.chat-ai {
-  background-color: #ecfdf5;
-  color: #1f2937;
-  padding: 0.5rem 0.75rem;
-  border-radius: 1rem;
-  max-width: 75%;
-  margin-right: auto;   /* LEFT side */
-  margin-left: 0;
-}
+    #dropzone{ gap:6px !important; padding:8px !important; }
+    #addBtn, #micBtn, #sendBtn{ width:34px !important; height:34px !important; }
+    #addBtn i, #micBtn i, #sendBtn i{ font-size:13px !important; }
+    #chatInput{ font-size:13px !important; padding:8px 10px !important; min-width:0 !important; }
 
-
-    .sidebar-link:hover { background:#f0f0f0; transition:all .2s; }
-    @keyframes fadeInUp { from {opacity:0; transform:translateY(20px)} to {opacity:1; transform:translateY(0)} }
-    .animate-fadeInUp { animation: fadeInUp .35s ease-out; }
-    #loadingOverlay i { animation: pulseFade 1.2s infinite ease-in-out; }
-    @keyframes pulseFade { 0%,100%{opacity:.6; transform:scale(1)} 50%{opacity:1; transform:scale(1.1)} }
-    #chatWindow > div:first-child { margin-top:0!important; margin-bottom:0!important; }
-
-    /* Composer */
-    .dropzone { border: 2px dashed rgba(0,0,0,.08); transition: .15s ease; }
-    .dropzone.dragover { border-color: #0f766e; background: rgba(20,184,166,.06); }
-    .thumb { position: relative; border-radius: .75rem; border: 1px solid rgba(0,0,0,.06); background: #fff; }
-    .thumb img { display:block; width:100%; height:100%; object-fit:cover; border-radius:.65rem; }
-    .thumb-remove {
-      position:absolute; top:6px; right:6px; background:#111827; color:#fff; border-radius:9999px; width:22px; height:22px;
-      display:flex; align-items:center; justify-content:center; font-size:.75rem;
+    #composer{
+      position:sticky; bottom:env(safe-area-inset-bottom); z-index:30; background:#fff;
+      padding-bottom:calc(12px + env(safe-area-inset-bottom)) !important;
     }
 
-    /* Rotated side tab (hidden on tiny phones; see media queries) */
-    #feedbackTab {
-      position: fixed;
-      top: 50%;
-      right: 10px;
-      transform: translateY(-50%) rotate(-90deg);
-      transform-origin: bottom right;
-      background-color: #0d9488; /* teal-600 */
-      color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 0.25rem 0.25rem 0 0;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      z-index: 9999;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    #feedbackTab:hover { background-color: #0f766e; }
-    #feedbackTab:focus { outline: none; }
-    #feedbackTab, #feedbackTab * { pointer-events: auto; }
+    #feedbackPanel{ width:100% !important; }
+    #feedbackPanel .px-5{ padding-left:12px !important; padding-right:12px !important; }
 
-    /* --- Core fixes: prevent right-edge clipping on tiny screens --- */
-    /* Let key flex rows shrink and respect viewport width */
-    :where(header, #toneBar, #chatWindow, #dropzone, #composer, section.flex-1) {
-      min-width: 0 !important;
-      max-width: 100vw;
-    }
-    #toneBar { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    #summaryModal .p-8{ padding:16px !important; }
+    #summaryModal .text-2xl{ font-size:18px !important; }
+    #modalContent{ font-size:14px !important; }
+  }
 
-    /* Root container: hide vertical overflow only (allow horizontal to avoid hard clipping) */
-    /* iOS Safari 100vh fix */
-    @media (max-width: 480px) {
-      @supports (height: 100dvh) {
-        .h-screen { height: 100dvh; }
-      }
-    }
+  /* Slight boost just above 320 for consistency */
+  @media (max-width:340px){
+    header h1{ font-size:18px !important; }
+    header i.text-2xl{ font-size:18px !important; }
+    #chatInput{ font-size:13px !important; }
+    .chat-bubble{ max-width:94% !important; }
+  }
 
-    /* Hide rotated tab on small phones and rely on FAB */
-    @media (max-width: 380px) {
-      #feedbackTab { display: none !important; }
-    }
+  @media (max-width:360px){ #feedbackTab{ top:30% !important; } }
 
-    /* --- Tiny phone hardening (<= 320px) --- */
-    @media (max-width: 320px) {
-      html, body { overflow-x: hidden; }
+  /* ======= Spotlight Tour (no libs) ======= */
+  .nm-tour-overlay{ position:fixed; inset:0; z-index:10050; pointer-events:auto; }
+  .nm-tour-dim{ position:absolute; inset:0; background:rgba(0,0,0,.55); }
+  .nm-tour-hole{
+    position:absolute; border-radius:12px;
+    box-shadow:0 0 0 200vmax rgba(0,0,0,.55);
+    background:transparent; pointer-events:none;
+    transition:top .18s ease, left .18s ease, width .18s ease, height .18s ease;
+  }
+  .nm-tour-pop{ position:fixed; max-width:min(92vw, 340px); z-index:10051; }
+  @media (max-width:360px){ .nm-tour-pop{ max-width:min(92vw, 300px);} }
+  .nm-tour-sr-only{ position:absolute!important; left:-9999px!important; }
 
-      #sidebar { width: 88vw !important; padding: 16px !important; }
+  :root{ --kebab-space:36px; }
 
-      header { padding-left: 12px !important; padding-right: 12px !important; }
-      #chatWindow { padding: 10px 12px !important; }
-
-      .chat-bubble { 
-        font-size: 14px !important; 
-        padding: 8px 12px !important; 
-        max-width: 92% !important; 
-      }
-
-      #toneBar {
-        font-size: 12px !important;
-        padding-left: 8px !important;
-        padding-right: 12px !important; /* reduced now that side tab is hidden */
-      }
-      #toneBar label { margin-right: 8px !important; }
-
-      #dropzone { gap: 6px !important; padding: 8px !important; }
-      #addBtn, #micBtn, #sendBtn { width: 34px !important; height: 34px !important; }
-      #addBtn i, #micBtn i, #sendBtn i { font-size: 13px !important; }
-      #chatInput { font-size: 13px !important; padding: 8px 10px !important; min-width: 0 !important; }
-
-      #composer { 
-        position: sticky; 
-        bottom: env(safe-area-inset-bottom); 
-        z-index: 30; 
-        background: #fff; 
-        padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
-      }
-
-      /* Feedback slide-over: full width on 320 */
-      #feedbackPanel { width: 100% !important; }
-      #feedbackPanel .px-5 { padding-left: 12px !important; padding-right: 12px !important; }
-
-      #summaryModal .p-8 { padding: 16px !important; }
-      #summaryModal .text-2xl { font-size: 18px !important; }
-      #modalContent { font-size: 14px !important; }
-    }
-
-    /* Slight boost just above 320 for consistency */
-    @media (max-width: 340px) {
-      header h1 { font-size: 18px !important; }
-      header i.text-2xl { font-size: 18px !important; }
-      #chatInput { font-size: 13px !important; }
-      .chat-bubble { max-width: 94% !important; }
-    }
-
-    @media (max-width: 360px) {
-      /* side tab is hidden; no need for big right padding */
-      #feedbackTab { top: 30% !important; }
-    }
-
-
-    /*tutorial*/
-
-    /* === Spotlight Tour (no libs) === */
-.nm-tour-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 10050; /* above your 9999 stuff */
-  pointer-events: auto;
-}
-.nm-tour-dim {
-  position: absolute; inset: 0;
-  background: rgba(0,0,0,.55);
-}
-.nm-tour-hole {
-  position: absolute;
-  border-radius: 12px;
-  box-shadow: 0 0 0 200vmax rgba(0,0,0,.55); /* cut-out trick */
-  background: transparent;
-  pointer-events: none;
-  transition: top .18s ease, left .18s ease, width .18s ease, height .18s ease;
-}
-.nm-tour-pop {
-  position: fixed;
-  max-width: min(92vw, 340px);
-  z-index: 10051;
-}
-@media (max-width: 360px){ .nm-tour-pop { max-width: min(92vw, 300px);} }
-.nm-tour-sr-only { position:absolute!important; left:-9999px!important; }
-
-
-:root { --kebab-space: 36px; } /* reserve space on the right */
-
-/* card + ring need the same radius */
-.nm-card {
-  position: relative;
-  border-radius: 12px;         /* rounded corners */
-  background: #fff;
-}
-
-/* the full-width card button */
-.nm-row  { padding: 8px 10px; min-height: 44px; border-radius: 12px; }
-
-/* content: add right padding so chips/title never go under kebab */
-.nm-content { padding-right: var(--kebab-space); }
-
-.nm-title  { font-size: 14px; line-height: 1.25; font-weight: 600; color:#0f172a; }
-.nm-1line  { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-.nm-chip   { font-size:10px; line-height:1; padding:3px 6px; border-radius:9999px; white-space:nowrap; }
-
-/* chips: right-aligned under the title, nudged left a bit */
-.nm-chips {
-  margin-top: 4px;
-  display: flex;
-  gap: 6px;
-  justify-content: flex-end;
-  margin-right: calc(var(--kebab-space) + 4px);
-}
-
-/* kebab pinned to the upper-right, above the button */
-.nm-kebab {
-  position: absolute;
-  top: 6px; right: 6px;
-  z-index: 10;                /* <- ensure it's above the button */
-  padding: 6px;
-  border-radius: 8px;
-}
-.nm-kebab button { pointer-events: auto; }
-.nm-kebab:hover { background: #f1f5f9; }
-
-
-.nm-rename-input{
-    font-size:14px; font-weight:600; color:#0f172a;
-    border:1px solid #e2e8f0; background:#fff;
+  /* Cards / list */
+  .nm-card{ position:relative; border-radius:12px; background:#fff; }
+  .nm-row{  padding:8px 10px; min-height:44px; border-radius:12px; }
+  .nm-content{ padding-right:var(--kebab-space); }
+  .nm-title{ font-size:14px; line-height:1.25; font-weight:600; color:#0f172a; }
+  .nm-1line{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .nm-chip{ font-size:10px; line-height:1; padding:3px 6px; border-radius:9999px; white-space:nowrap; }
+  .nm-chips{ margin-top:4px; display:flex; gap:6px; justify-content:flex-end; margin-right:calc(var(--kebab-space) + 4px); }
+  .nm-kebab{ position:absolute; top:6px; right:6px; z-index:10; padding:6px; border-radius:8px; }
+  .nm-kebab button{ pointer-events:auto; }
+  .nm-kebab:hover{ background:#f1f5f9; }
+  .nm-rename-input{
+    font-size:14px; font-weight:600; color:#0f172a; border:1px solid #e2e8f0; background:#fff;
     padding:4px 8px; border-radius:8px; width:100%;
   }
-  .nm-rename-input:focus{
-    outline:none; box-shadow:0 0 0 2px rgba(20,184,166,.25);
-    border-color:#14b8a6;
-  }
-  </style>
+  .nm-rename-input:focus{ outline:none; box-shadow:0 0 0 2px rgba(40,146,109,.25); border-color:#28926D; }
+</style>
+
 
 
 </head>
@@ -252,11 +225,11 @@
   <aside id="sidebar" class="w-[300px] md:w-[320px] glass border-r p-6 overflow-y-auto fixed inset-y-0 left-0 z-40 transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:z-auto md:flex flex-col shadow-xl">
     <div class="flex items-center justify-between mb-6 border-b border-gray-200 pb-2">
       <h2 class="text-2xl font-semibold text-gray-800 flex items-center gap-3">
-        <i class="fa-solid fa-clock-rotate-left text-teal-600 text-2xl"></i>
+        <i class="fa-solid fa-clock-rotate-left text-[#236092] text-2xl"></i>
         <span class="tracking-tight">Summary History</span>
       </h2>
       <div class="relative">
-        <button onclick="openSettingsModal()" class="text-gray-600 hover:text-teal-600 focus:outline-none">
+        <button onclick="openSettingsModal()" class="text-gray-600 hover:text-[#236092] focus:outline-none">
           <i class="fa-solid fa-user-circle text-2xl"></i>
         </button>
         <div id="settingsDropdown" class="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg hidden z-50 text-base">
@@ -267,12 +240,12 @@
       </div>
     </div>
 
-    <button class="mb-4 w-full bg-teal-600 text-white text-base py-2 rounded-lg hover:bg-teal-700 transition" id="newChatBtn">
+    <button class="mb-4 w-full bg-[#236092] text-white text-base py-2 rounded-lg hover:bg-[#1B5A8E] transition" id="newChatBtn">
       <i class="fa-solid fa-plus mr-2"></i>New Chat
     </button>
 
     <div class="mb-4 relative">
-      <input type="text" placeholder="Search summaries..." class="w-full px-3 py-2 text-base rounded-md bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500" />
+      <input type="text" placeholder="Search summaries..." class="w-full px-3 py-2 text-base rounded-md bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#28926D]" />
       <i class="fa-solid fa-magnifying-glass absolute right-3 top-2.5 text-gray-400 text-base"></i>
     </div>
 
@@ -286,52 +259,59 @@
   <!-- Main -->
   <section class="flex-1 flex flex-col relative">
     <!-- Header -->
-    <header class="flex items-center justify-between px-6 py-4 border-b relative">
-      <div class="flex items-center gap-2 relative group">
-        <i class="fa-solid fa-notes-medical text-teal-600 text-2xl"></i>
-        <h1 class="text-2xl font-bold text-gray-800 cursor-help">
-          NeuroMed <span class="text-teal-600">AI</span>
-        </h1>
-      
-        <!-- tooltip -->
-        <div class="absolute -bottom-12 left-0 z-10 w-max max-w-xs px-3 py-2 text-base text-white bg-gray-800 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none shadow-md">
-          NeuroMed AI simplifies complex medical records into compassionate, easy-to-understand summaries.
-        </div>
-      
-        <!-- DESKTOP language picker (hidden on mobile; pairs with your mobile one) -->
-        <div class="hidden md:block ml-3">
-          <div class="relative">
-            <button id="langBtn"
-                    class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                    aria-haspopup="true" aria-expanded="false" aria-controls="langMenu" title="Language">
-              <i class="fa-solid fa-globe"></i>
-              <span id="langBtnLabel" class="text-sm text-gray-700">English</span>
-              <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
-            </button>
-      
-            <!-- options are injected by your JS buildLangMenu(...) -->
-            <div id="langMenu"
-                 class="hidden absolute right-0 mt-2 w-56 max-h-72 overflow-auto bg-white border rounded-lg shadow-lg z-50">
-            </div>
-          </div>
+<header class="flex items-center justify-between px-6 py-4 border-b relative">
+  <!-- Left group: logo + title -->
+  <div class="flex items-center gap-2 relative group">
+    <i class="fa-solid fa-notes-medical text-[#236092] text-2xl"></i>
+    <h1 class="text-2xl font-bold text-gray-800 cursor-help">
+      NeuroMed <span class="text-[#236092]">AI</span>
+    </h1>
+
+    <!-- tooltip -->
+    <div class="absolute -bottom-12 left-0 z-10 w-max max-w-xs px-3 py-2 text-base text-white bg-gray-800 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none shadow-md">
+      NeuroMed AI simplifies complex medical records into compassionate, easy-to-understand summaries.
+    </div>
+  </div>
+
+  <!-- Right group -->
+  <div class="flex items-center gap-3">
+    <!-- Desktop language picker -->
+    <div class="hidden md:block">
+      <div class="relative">
+        <button id="langBtn"
+                class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#28926D]"
+                aria-haspopup="true" aria-expanded="false" aria-controls="langMenu" title="Language">
+          <i class="fa-solid fa-globe"></i>
+          <span id="langBtnLabel" class="text-sm text-gray-700">English</span>
+          <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
+        </button>
+
+        <!-- options injected by JS -->
+        <div id="langMenu"
+             class="hidden absolute right-0 mt-2 w-56 max-h-72 overflow-auto bg-white border rounded-lg shadow-lg z-50">
         </div>
       </div>
-      
+    </div>
 
-      <div class="relative">
     <!-- Mobile language picker -->
-<!-- Mobile language trigger -->
-<div class="md:hidden">
-  <button id="mLangBtn"
-          class="w-full px-3 py-2 rounded-lg border flex items-center justify-between bg-white active:scale-[.99] transition"
-          aria-haspopup="dialog" aria-expanded="false">
-    <span class="flex items-center gap-2">
-      <i class="fa-solid fa-globe"></i>
-      <span id="mLangBtnLabel">English</span>
-    </span>
-    <i class="fa-solid fa-caret-down opacity-70"></i>
-  </button>
-</div>
+    <div class="md:hidden">
+      <button id="mLangBtn"
+              class="px-3 py-2 rounded-lg border flex items-center justify-between bg-white active:scale-[.99] transition"
+              aria-haspopup="dialog" aria-expanded="false">
+        <span class="flex items-center gap-2">
+          <i class="fa-solid fa-globe"></i>
+          <span id="mLangBtnLabel">English</span>
+        </span>
+        <i class="fa-solid fa-caret-down opacity-70"></i>
+      </button>
+    </div>
+
+    <!-- Burger (mobile only) -->
+    <button id="burgerBtn" onclick="toggleSidebar()" class="md:hidden text-gray-600 text-2xl focus:outline-none">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>
 
 <!-- Mobile Language Bottom Sheet -->
 <div id="mLangMenu" class="fixed inset-0 z-50 hidden">
@@ -370,15 +350,6 @@
   </div>
 </div>
 
-
-
-    <!-- Popover -->
-    
-    </div>
-      <button id="burgerBtn" onclick="toggleSidebar()" class="md:hidden text-gray-600 text-2xl focus:outline-none">
-        <i class="fa-solid fa-bars"></i>
-      </button>
-    </header>
 
     <!-- Mobile overlay -->
     <div id="overlay" class="fixed inset-0 bg-black bg-opacity-40 z-30 hidden md:hidden" onclick="toggleSidebar()"></div>
@@ -438,7 +409,7 @@
       <!-- Input row with dropzone -->
       <div id="dropzone" class="dropzone rounded-xl p-3 flex items-center gap-2 overflow-hidden">
         <!-- Add -->
-        <button id="addBtn" class="shrink-0 w-10 h-10 rounded-full bg-teal-600 hover:bg-teal-700 text-white flex items-center justify-center text-xl shadow-md" title="Add files">
+        <button id="addBtn" class="shrink-0 w-10 h-10 rounded-full bg-[#236092] hover:bg-[#1B5A8E] text-white flex items-center justify-center text-xl shadow-md" title="Add files">
           <i class="fa-solid fa-plus"></i>
         </button>
 
@@ -447,7 +418,7 @@
 
         <!-- Text input -->
         <input type="text" id="chatInput"
-              class="flex-1 min-w-0 px-4 py-2 text-base border rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
+              class="flex-1 min-w-0 px-4 py-2 text-base border rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-[#28926D]/40"
               placeholder="Type your question… (attachments will send with this)" />
 
         <!-- Mic -->
@@ -471,8 +442,8 @@
   <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl relative p-8 ring-1 ring-gray-200">
     <button onclick="closeModal()" class="absolute top-3 right-4 text-gray-400 hover:text-gray-800 text-2xl">&times;</button>
     <div class="mb-4">
-      <h2 class="text-2xl font-bold text-teal-700 flex items-center gap-2">
-        <i class="fa-solid fa-brain text-teal-600 text-2xl"></i> Full Summary
+      <h2 class="text-2xl font-bold text-[#236092] flex items-center gap-2">
+        <i class="fa-solid fa-brain text-[#236092] text-2xl"></i> Full Summary
       </h2>
       <p class="text-base text-gray-500">Here’s the complete AI-generated explanation.</p>
     </div>
@@ -482,9 +453,9 @@
 
 <!-- Loading Overlay -->
 <div id="loadingOverlay" class="fixed inset-0 bg-white bg-opacity-90 z-50 flex flex-col items-center justify-center text-center hidden">
-  <div class="animate-spin mb-4 text-teal-600 text-4xl"><i class="fa-solid fa-brain"></i></div>
+  <div class="animate-spin mb-4 text-[#236092] text-4xl"><i class="fa-solid fa-brain"></i></div>
   <p class="text-2xl font-semibold text-gray-700">NeuroMed is thinking…</p>
-  <p class="text-base text-gray-500 mt-2 italic"><i class="fa-solid fa-brain text-teal-600 text-2xl"></i> Please hold the coffee ☕</p>
+  <p class="text-base text-gray-500 mt-2 italic"><i class="fa-solid fa-brain text-[#236092] text-2xl"></i> Please hold the coffee ☕</p>
 </div>
 
 <!-- Settings Modal -->
@@ -492,22 +463,22 @@
   <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8 relative ring-1 ring-gray-200 animate-fadeInUp">
     <button onclick="closeSettingsModal()" class="absolute top-5 right-6 text-gray-400 hover:text-gray-600 text-2xl transition">&times;</button>
     <div class="mb-6 flex items-center gap-3">
-      <i class="fa-solid fa-sliders text-2xl text-teal-600"></i>
+      <i class="fa-solid fa-sliders text-2xl text-[#236092]"></i>
       <h2 class="text-3xl font-bold text-gray-800 tracking-tight">Settings</h2>
     </div>
     <div class="mb-5">
       <label for="displayName" class="block text-sm font-semibold text-gray-700 mb-1">Display Name</label>
-      <input type="text" id="displayName" placeholder="e.g. Maria Gregory" class="w-full px-4 py-3 border rounded-lg shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 bg-gray-50 transition" />
+      <input type="text" id="displayName" placeholder="e.g. Maria Gregory" class="w-full px-4 py-3 border rounded-lg shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#28926D] bg-gray-50 transition" />
     </div>
     <div class="mb-5">
       <label for="profession" class="block text-sm font-semibold text-gray-700 mb-1">Profession</label>
-      <input type="text" id="profession" placeholder="e.g. Healthcare Advocate, Tech Founder" class="w-full px-4 py-3 border rounded-lg shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 bg-gray-50 transition" />
+      <input type="text" id="profession" placeholder="e.g. Healthcare Advocate, Tech Founder" class="w-full px-4 py-3 border rounded-lg shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#28926D] bg-gray-50 transition" />
     </div>
     <div class="mb-6 text-sm text-gray-500 italic">
       <i class="fa-solid fa-image-portrait mr-2 text-gray-400"></i> Profile photo upload coming soon...
     </div>
     <div class="flex justify-between items-center mt-6">
-      <button onclick="saveSettings()" class="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-2.5 rounded-full shadow-md transition flex items-center gap-2">
+      <button onclick="saveSettings()" class="bg-[#236092] hover:bg-[#1B5A8E] text-white font-semibold px-6 py-2.5 rounded-full shadow-md transition flex items-center gap-2">
         <i class="fa-solid fa-check-circle text-white text-lg"></i> Save Changes
       </button>
       <button onclick="logoutUser()" class="text-sm text-red-600 hover:underline">Logout</button>
@@ -520,7 +491,7 @@
   class="sm:flex fixed 
          top-1/2 sm:top-1/2 top-[40%]
          -translate-y-1/2 z-[9999]
-         bg-teal-600 hover:bg-teal-700 text-white shadow-lg
+         bg-[#236092] hover:bg-[#1B5A8E] text-white shadow-lg
          px-3 py-2 rounded-tl-md rounded-tr-md
          transform -rotate-90 origin-bottom-right
          whitespace-nowrap tracking-wide text-sm"
@@ -537,7 +508,7 @@
     <!-- Header -->
     <div class="px-5 py-4 border-b flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <i class="fa-solid fa-heart text-teal-600 text-xl"></i>
+        <i class="fa-solid fa-heart text-[#236092] text-xl"></i>
         <h3 class="text-lg font-semibold">NeuroMed AI — Quick Feedback</h3>
       </div>
       <button id="feedbackClose" class="text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
@@ -661,7 +632,7 @@
 
       <!-- Submit -->
       <div class="flex items-center justify-between pt-2">
-        <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded">Submit feedback</button>
+        <button type="submit" class="bg-[#236092] hover:bg-[#1B5A8E] text-white px-4 py-2 rounded">Submit feedback</button>
       </div>
 
       <div id="fbErrors" class="text-sm text-red-600 hidden"></div>
@@ -672,7 +643,7 @@
 
 <!-- Toast -->
 <div id="fbToast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
-  <div class="bg-green-600 text-white px-4 py-2 rounded shadow">Thanks! Feedback received. 💜</div>
+  <div class="bg-[#28926D] text-white px-4 py-2 rounded shadow">Thanks! Feedback received. 💜</div>
 </div>
 
 <!-- Success Modal -->
@@ -682,7 +653,7 @@
     <button id="fbSuccessCloseX" class="absolute top-3 right-4 text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
 
     <div class="flex items-start gap-3 mb-3">
-      <div class="shrink-0 rounded-full p-2 bg-teal-100 text-teal-700">
+      <div class="shrink-0 rounded-full p-2 bg-[#28926D]/10 text-[#236092]">
         <i class="fa-solid fa-check"></i>
       </div>
       <div>
@@ -701,7 +672,7 @@
         Send another
       </button>
       <button id="fbSuccessClose"
-              class="px-4 py-2 rounded bg-teal-600 text-white hover:bg-teal-700">
+              class="px-4 py-2 rounded bg-[#236092] text-white hover:bg-[#1B5A8E]">
         Done
       </button>
     </div>
@@ -712,62 +683,13 @@
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.3/dist/purify.min.js" defer></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
-
 <script>
+/* =========================
+   Chat + Sessions + Compose
+   (safe drop-in replacement)
+   ========================= */
 
-async function startInlineRename(li, id){
-  const titleEl = li.querySelector('.nm-title');
-  if (!titleEl) return;
-
-  const current = (titleEl.textContent || '').trim();
-  const input = document.createElement('input');
-  input.type = 'text';
-  input.className = 'nm-rename-input';
-  input.value = current;
-  input.setAttribute('maxlength', '120');
-
-  // replace title with input
-  titleEl.replaceWith(input);
-  input.focus();
-  input.select();
-
-  let saved = false;
-  const done = async (commit) => {
-    if (saved) return;
-    saved = true;
-    const next = (commit ? input.value.trim() : current) || 'Untitled';
-
-    // swap back to <h3>
-    const h3 = document.createElement('h3');
-    h3.className = 'nm-title nm-1line';
-    h3.textContent = next;
-    input.replaceWith(h3);
-
-    // save if changed
-    if (commit && next !== current) {
-      try {
-        await apiPost(`/api/chat/sessions/${id}/rename/`, { title: next });
-        // refresh list to update ordering/timestamps if server bumps updated_at
-        await refreshSessionList();
-      } catch (e) {
-        // optional toast; revert UI if you prefer
-        console.warn('Rename failed', e);
-      }
-    }
-  };
-
-  // commit on Enter, cancel on Esc, commit on blur
-  input.addEventListener('keydown', async (e) => {
-    if (e.key === 'Enter') { e.preventDefault(); await done(true); }
-    if (e.key === 'Escape'){ e.preventDefault(); await done(false); }
-  });
-  input.addEventListener('blur', () => done(true));
-
-  // prevent click from bubbling to "open session" button
-  input.addEventListener('click', (e) => e.stopPropagation());
-}
-
-
+/* ——— Reusable helpers ——— */
 async function apiPost(url, data) {
   const opts = {
     method: 'POST',
@@ -783,113 +705,81 @@ async function apiPost(url, data) {
   return r.json();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const ul = document.getElementById('sessionList');
-  if (!ul) return;
-
-  // avoid double-binding if this code runs more than once
-  if (!ul.__nmBound) {
-    ul.addEventListener('click', async (e) => {
-      const btnMenu   = e.target.closest('[data-menu]');
-      const btnRename = e.target.closest('[data-rename]');
-      const btnArchive= e.target.closest('[data-archive]');
-      const btnDelete = e.target.closest('[data-delete]');
-      const titleClick = e.target.closest('.nm-title');
-
-      if (btnMenu) {
-        const id = btnMenu.getAttribute('data-menu');
-        const menu = document.getElementById(`menu-${id}`);
-        ul.querySelectorAll('[id^="menu-"]').forEach(m => { if (m !== menu) m.classList.add('hidden'); });
-        menu?.classList.toggle('hidden');
-        e.stopPropagation();
-        return;
-      }
-
-      if (btnRename) {
-        const id  = btnRename.getAttribute('data-rename');
-        const li  = btnRename.closest('.nm-card');
-        // close the popover
-        const menu = document.getElementById(`menu-${id}`);
-        menu && menu.classList.add('hidden');
-        // start inline edit
-        startInlineRename(li, id);
-        return;
-      }
-
-
-      if (btnArchive) {
-        const id = btnArchive.getAttribute('data-archive');
-        try {
-          const res = await apiPost(`/api/chat/sessions/${id}/archive/`);
-          const active = localStorage.getItem('nm_session_id');
-          if (active && String(active) === String(id) && res.archived) {
-            localStorage.removeItem('nm_session_id');
-            const cw = document.getElementById('chatWindow'); if (cw) cw.innerHTML = '';
-          }
-          await refreshSessionList();
-        } catch { alert('Archive failed.'); }
-        return;
-      }
-
-      if (btnDelete) {
-        const id = btnDelete.getAttribute('data-delete');
-        if (!confirm('Delete this chat? This cannot be undone.')) return;
-        try {
-          await apiPost(`/api/chat/sessions/${id}/delete/`);
-          const active = localStorage.getItem('nm_session_id');
-          if (active && String(active) === String(id)) {
-            localStorage.removeItem('nm_session_id');
-            const cw = document.getElementById('chatWindow'); if (cw) cw.innerHTML = '';
-          }
-          await refreshSessionList();
-        } catch { alert('Delete failed.'); }
-        return;
-      }
-
-      if (titleClick) {
-          e.preventDefault();
-          e.stopPropagation();
-          const li = titleClick.closest('.nm-card');
-          const id = li?.dataset.sid;
-          if (id) startInlineRename(li, id);
-          return;
-        }
-    });
-
-    // click outside closes any open kebab menus
-    document.addEventListener('click', (e) => {
-      const open = document.querySelector('#sessionList [id^="menu-"]:not(.hidden)');
-      if (open && !open.contains(e.target)) open.classList.add('hidden');
-    });
-
-    ul.__nmBound = true;
-  }
-});
-
-const SESSION_KEY = 'nm_session_id';
-
-function getSessionId(){ return localStorage.getItem(SESSION_KEY); }
-function setSessionId(id){ localStorage.setItem(SESSION_KEY, String(id)); }
-function clearSessionId(){ localStorage.removeItem(SESSION_KEY); }
-
-async function apiJson(url, opt={}){
-  const res = await fetch(url, { credentials:'include', ...opt });
+async function apiJson(url, opt={}) {
+  const res = await fetch(url, { credentials: 'include', ...opt });
   if (!res.ok) throw new Error(`${res.status}`);
   return res.json();
 }
 
-function fmtDate(s){
-  try { return new Date(s).toLocaleString(); } catch { return s; }
+function getCSRFToken(){
+  const m = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
+  return m ? m.pop() : '';
 }
-async function refreshSessionList() {
-  // super minimal look
-  const SHOW_MENU = true;   // set false to remove the kebab
 
+/* ——— Session id helpers ——— */
+const SESSION_KEY = 'nm_session_id';
+function getSessionId(){ return localStorage.getItem(SESSION_KEY); }
+function setSessionId(id){ localStorage.setItem(SESSION_KEY, String(id)); }
+function clearSessionId(){ localStorage.removeItem(SESSION_KEY); }
+
+/* =========================
+   Inline rename (unchanged)
+   ========================= */
+async function startInlineRename(li, id){
+  const titleEl = li.querySelector('.nm-title');
+  if (!titleEl) return;
+
+  const current = (titleEl.textContent || '').trim();
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'nm-rename-input';
+  input.value = current;
+  input.setAttribute('maxlength', '120');
+
+  titleEl.replaceWith(input);
+  input.focus();
+  input.select();
+
+  let saved = false;
+  const done = async (commit) => {
+    if (saved) return;
+    saved = true;
+    const next = (commit ? input.value.trim() : current) || 'Untitled';
+
+    const h3 = document.createElement('h3');
+    h3.className = 'nm-title nm-1line';
+    h3.textContent = next;
+    input.replaceWith(h3);
+
+    if (commit && next !== current) {
+      try {
+        await apiPost(`/api/chat/sessions/${id}/rename/`, { title: next });
+        await refreshSessionList();
+      } catch (e) {
+        console.warn('Rename failed', e);
+      }
+    }
+  };
+
+  input.addEventListener('keydown', async (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); await done(true); }
+    if (e.key === 'Escape'){ e.preventDefault(); await done(false); }
+  });
+  input.addEventListener('blur', () => done(true));
+  input.addEventListener('click', (e) => e.stopPropagation());
+}
+
+/* =========================
+   Sidebar list (unchanged)
+   ========================= */
+function fmtDate(s){ try { return new Date(s).toLocaleString(); } catch { return s; } }
+
+async function refreshSessionList() {
+  const SHOW_MENU = true;
   const ul = document.getElementById('sessionList');
   if (!ul) return;
 
-  // helpers
-  const escapeHtml = s => String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const escapeHtml = s => String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&gt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   const toneMeta = t => ({
     PlainClinical:['Balanced','bg-slate-100 text-slate-700'],
     Balanced:     ['Balanced','bg-slate-100 text-slate-700'],
@@ -901,7 +791,6 @@ async function refreshSessionList() {
   }[t] || ['Balanced','bg-slate-100 text-slate-700']);
   const langShort = c => (c || 'en-US').split('-')[0].toUpperCase();
 
-  // light skeleton
   ul.innerHTML = '';
   for (let i=0;i<3;i++){
     ul.insertAdjacentHTML('beforeend', `
@@ -911,12 +800,10 @@ async function refreshSessionList() {
     `);
   }
 
-  // fetch list
   let rows = [];
   try { rows = await apiJson('/api/chat/sessions/'); }
   catch { ul.innerHTML = `<li class="text-sm text-red-600">Could not load history.</li>`; return; }
 
-  // empty state
   if (!rows.length) {
     ul.innerHTML = `
       <li class="nm-card border border-dashed p-4 text-center bg-white/70 text-sm text-slate-600">
@@ -925,7 +812,6 @@ async function refreshSessionList() {
     return;
   }
 
-  // render compact cards
   const activeId = String(localStorage.getItem('nm_session_id') || '');
   ul.innerHTML = '';
 
@@ -934,20 +820,15 @@ async function refreshSessionList() {
     const isActive = String(s.id) === activeId;
 
     const li = document.createElement('li');
-    li.className = `nm-card border mb-2 rounded-xl ${isActive ? 'ring-1 ring-teal-500' : ''}`;
-    li.dataset.sid = s.id; // <-- add this
+    li.className = `nm-card border mb-2 rounded-xl ${isActive ? 'ring-1 ring-[#28926D]' : ''}`;
+    li.dataset.sid = s.id;
 
-li.innerHTML = `
+    li.innerHTML = `
   <button type="button" data-open-session="${s.id}" class="nm-row w-full flex items-start gap-2 text-left">
-    <!-- thin left accent -->
-    <div class="mt-0.5 h-6 w-1 rounded bg-teal-500/80"></div>
-
-    <!-- tiny icon -->
-    <div class="mt-0.5 h-6 w-6 rounded-md bg-slate-50 grid place-items-center text-teal-700 text-[11px]">
+    <div class="mt-0.5 h-6 w-1 rounded bg-[#28926D]/80"></div>
+    <div class="mt-0.5 h-6 w-6 rounded-md bg-slate-50 grid place-items-center text-[#236092] text-[11px]">
       <i class="fa-solid fa-brain"></i>
     </div>
-
-    <!-- content -->
     <div class="min-w-0 flex-1 nm-content">
       <div class="flex items-start">
         <h3 class="nm-title nm-1line" title="${escapeHtml(s.title || 'New chat')}">
@@ -960,8 +841,6 @@ li.innerHTML = `
       </div>
     </div>
   </button>
-
-  <!-- kebab lives OUTSIDE the button, absolute-positioned -->
   <div class="nm-kebab">
     <button class="rounded p-1.5 hover:bg-slate-100" aria-haspopup="true" data-menu="${s.id}">
       <i class="fa-solid fa-ellipsis-vertical text-slate-500"></i>
@@ -979,26 +858,21 @@ li.innerHTML = `
     </div>
   </div>
 `;
-
     ul.appendChild(li);
   }
 
-  // open handlers
   ul.querySelectorAll('[data-open-session]').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
       const id = btn.getAttribute('data-open-session');
       localStorage.setItem('nm_session_id', String(id));
       try { await openSession(id); } catch {}
-      // highlight active
-      ul.querySelectorAll('li').forEach(el => el.classList.remove('ring-1','ring-teal-500'));
-      btn.closest('li')?.classList.add('ring-1','ring-teal-500');
-      // close mobile sidebar
+      ul.querySelectorAll('li').forEach(el => el.classList.remove('ring-1','ring-[#28926D]'));
+      btn.closest('li')?.classList.add('ring-1','ring-[#28926D]');
       const overlay = document.getElementById('overlay');
       if (overlay && !overlay.classList.contains('hidden')) toggleSidebar();
     });
   });
 
-  // kebab menus
   function closeAllMenus(){ ul.querySelectorAll('[id^="menu-"]').forEach(m=>m.classList.add('hidden')); }
   ul.querySelectorAll('[data-menu]').forEach(trigger=>{
     trigger.addEventListener('click', e=>{
@@ -1012,7 +886,6 @@ li.innerHTML = `
   });
   document.addEventListener('click', closeAllMenus, { once:true });
 
-  // actions
   ul.querySelectorAll('[data-rename]').forEach(btn=>{
     btn.addEventListener('click', async e=>{
       e.stopPropagation();
@@ -1057,8 +930,9 @@ li.innerHTML = `
   });
 }
 
-
-
+/* =========================
+   Open a session (uses rich)
+   ========================= */
 async function openSession(id){
   try {
     const data = await apiJson(`/api/chat/sessions/${id}/`);
@@ -1066,11 +940,8 @@ async function openSession(id){
     const chatWindow = document.getElementById('chatWindow');
     if (chatWindow) chatWindow.innerHTML = '';
 
-    // 🔒 Hide system messages from UI
     const visible = (data.messages || []).filter(m => m.role === 'user' || m.role === 'assistant');
-
     visible.forEach(m => appendRichBubble(m.content, m.role === 'user'));
-
   } catch (e) {
     console.warn(e);
   }
@@ -1088,7 +959,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-
+/* =========================
+   Voice dictation (unchanged)
+   ========================= */
 (() => {
   const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
   const micBtn = document.getElementById('micBtn');
@@ -1096,11 +969,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let rec = null, listening = false;
 
   const IS_TRUSTED =
-    window.isSecureContext ||                         // real HTTPS
+    window.isSecureContext ||
     location.hostname === 'localhost' ||
     location.hostname === '127.0.0.1' ||
     location.hostname === '::1' ||
-    location.hostname.endsWith('.localhost');         // dev subdomains
+    location.hostname.endsWith('.localhost');
 
   function nmLangCode() {
     try {
@@ -1108,36 +981,6 @@ document.addEventListener('DOMContentLoaded', () => {
              navigator.language || 'en-US';
     } catch { return 'en-US'; }
   }
-
-  function flattenMarkdown(md){
-  if (!md) return '';
-  let s = String(md).trim();
-
-  // remove markdown headings like "# …", "## …", "### …"
-  s = s.replace(/^\s{0,3}#{1,6}\s+/gm, '');
-
-  // remove bold markers **…** (keep text)
-  s = s.replace(/\*\*(.*?)\*\*/g, '$1');
-
-  // strip horizontal rules (---, ___, ***)
-  s = s.replace(/^\s*([-*_])\1\1+\s*$/gm, '');
-
-  // unquote blockquotes
-  s = s.replace(/^\s*>\s?/gm, '');
-
-  // collapse 3+ blank lines → 1
-  s = s.replace(/\n{3,}/g, '\n\n');
-
-  return s;
-}
-
-function mdToHtml(md){
-  const flat = flattenMarkdown(md);
-  const raw  = (window.marked && typeof marked.parse === 'function')
-    ? marked.parse(flat, { gfm:true, breaks:false, headerIds:false })
-    : flat.replace(/\n/g, '<br>');
-  return (window.DOMPurify ? DOMPurify.sanitize(raw) : raw);
-}
 
   function startDictation() {
     if (!SpeechRec) { alert('Voice dictation needs a Chromium browser (Chrome/Edge).'); return; }
@@ -1151,12 +994,12 @@ function mdToHtml(md){
 
     rec.onstart = () => {
       listening = true;
-      micBtn.classList.add('bg-teal-600','text-white');
+      micBtn.classList.add('bg-[#236092]','text-white');
       micBtn.title = 'Listening… click to stop';
     };
     rec.onend = () => {
       listening = false;
-      micBtn.classList.remove('bg-teal-600','text-white');
+      micBtn.classList.remove('bg-[#236092]','text-white');
       micBtn.title = 'Dictate';
       rec = null;
     };
@@ -1176,221 +1019,124 @@ function mdToHtml(md){
 
     rec.start();
   }
-
-  // Bind once, within a user gesture context
   micBtn?.addEventListener('click', startDictation);
-
-  // tiny API if you ever want to trigger it elsewhere
   window.nmDictation = { start: startDictation, supported: !!SpeechRec, trusted: IS_TRUSTED };
 })();
-</script>
 
-<script>
-
-/* ---------- Language picker (shared with landing) ---------- */
-/* ---------------- Language selection (desktop dropdown + mobile sheet) ---------------- */
-
+/* =========================
+   Language picker (unchanged
+   API: window.__nmLang)
+   ========================= */
 const LANGUAGE_CHOICES = [
-  ['en-US','English'],
-  ['ja-JP','Japanese'],
-  ['es-ES','Spanish'],
-  ['fr-FR','French'],
-  ['de-DE','German'],
-  ['it-IT','Italian'],
-  ['pt-PT','Portuguese (Portugal)'],
-  ['pt-BR','Portuguese (Brazil)'],
-  ['ru-RU','Russian'],
-  ['zh-CN','Chinese (Simplified)'],
-  ['zh-TW','Chinese (Traditional)'],
-  ['ko-KR','Korean'],
-  ['ar-SA','Arabic (Saudi Arabia)'],
-  ['tr-TR','Turkish'],
-  ['nl-NL','Dutch'],
-  ['sv-SE','Swedish'],
-  ['pl-PL','Polish'],
-  ['da-DK','Danish'],
-  ['no-NO','Norwegian'],
-  ['fi-FI','Finnish'],
-  ['he-IL','Hebrew'],
-  ['th-TH','Thai'],
-  ['hi-IN','Hindi'],
-  ['cs-CZ','Czech'],
-  ['ro-RO','Romanian'],
-  ['hu-HU','Hungarian'],
-  ['sk-SK','Slovak'],
-  ['bg-BG','Bulgarian'],
-  ['uk-UA','Ukrainian'],
-  ['vi-VN','Vietnamese'],
-  ['id-ID','Indonesian'],
-  ['ms-MY','Malay'],
-  ['sr-RS','Serbian'],
-  ['hr-HR','Croatian'],
-  ['el-GR','Greek'],
-  ['lt-LT','Lithuanian'],
-  ['lv-LV','Latvian'],
-  ['et-EE','Estonian'],
-  ['sl-SI','Slovenian'],
-  ['is-IS','Icelandic'],
-  ['sq-AL','Albanian'],
-  ['mk-MK','Macedonian'],
-  ['bs-BA','Bosnian'],
-  ['ca-ES','Catalan'],
-  ['gl-ES','Galician'],
-  ['eu-ES','Basque'],
-  ['hy-AM','Armenian'],
-  ['fa-IR','Persian'],
-  ['sw-KE','Swahili'],
-  ['ta-IN','Tamil'],
-  ['te-IN','Telugu'],
-  ['kn-IN','Kannada'],
-  ['ml-IN','Malayalam'],
-  ['mr-IN','Marathi'],
-  ['pa-IN','Punjabi'],
-  ['gu-IN','Gujarati'],
-  ['or-IN','Odia'],
-  ['as-IN','Assamese'],
-  ['ne-NP','Nepali'],
-  ['si-LK','Sinhala'],
+  ['en-US','English'],['ja-JP','Japanese'],['es-ES','Spanish'],['fr-FR','French'],['de-DE','German'],
+  ['it-IT','Italian'],['pt-PT','Portuguese (Portugal)'],['pt-BR','Portuguese (Brazil)'],['ru-RU','Russian'],
+  ['zh-CN','Chinese (Simplified)'],['zh-TW','Chinese (Traditional)'],['ko-KR','Korean'],['ar-SA','Arabic (Saudi Arabia)'],
+  ['tr-TR','Turkish'],['nl-NL','Dutch'],['sv-SE','Swedish'],['pl-PL','Polish'],['da-DK','Danish'],['no-NO','Norwegian'],
+  ['fi-FI','Finnish'],['he-IL','Hebrew'],['th-TH','Thai'],['hi-IN','Hindi'],['cs-CZ','Czech'],['ro-RO','Romanian'],
+  ['hu-HU','Hungarian'],['sk-SK','Slovak'],['bg-BG','Bulgarian'],['uk-UA','Ukrainian'],['vi-VN','Vietnamese'],['id-ID','Indonesian'],
+  ['ms-MY','Malay'],['sr-RS','Serbian'],['hr-HR','Croatian'],['el-GR','Greek'],['lt-LT','Lithuanian'],['lv-LV','Latvian'],
+  ['et-EE','Estonian'],['sl-SI','Slovenian'],['is-IS','Icelandic'],['sq-AL','Albanian'],['mk-MK','Macedonian'],
+  ['bs-BA','Bosnian'],['ca-ES','Catalan'],['gl-ES','Galician'],['eu-ES','Basque'],['hy-AM','Armenian'],['fa-IR','Persian'],
+  ['sw-KE','Swahili'],['ta-IN','Tamil'],['te-IN','Telugu'],['kn-IN','Kannada'],['ml-IN','Malayalam'],['mr-IN','Marathi'],
+  ['pa-IN','Punjabi'],['gu-IN','Gujarati'],['or-IN','Odia'],['as-IN','Assamese'],['ne-NP','Nepali'],['si-LK','Sinhala'],
 ];
-
 function guessBrowserLang(){
   const nav = (navigator.languages && navigator.languages[0]) || navigator.language || 'en-US';
   return LANGUAGE_CHOICES.find(([code]) => code === nav) ? nav : 'en-US';
 }
 function loadLang(){ return localStorage.getItem('nm_lang') || guessBrowserLang(); }
 function saveLang(code){ localStorage.setItem('nm_lang', code); }
-
-function labelForLang(code){
-  const found = LANGUAGE_CHOICES.find(([c])=>c===code);
-  return found ? found[1] : code;
-}
-
-/* ---- Desktop dropdown builder ---- */
-function buildDesktopMenu(menuEl, onPick){
-  if (!menuEl) return;
-  menuEl.innerHTML = '';
-  LANGUAGE_CHOICES.forEach(([code, label]) => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center gap-2';
-    btn.dataset.lang = code;
-    btn.innerHTML = `
-      <span class="flex-1 truncate">${label}</span>
-      <span class="text-xs text-slate-500">${code}</span>`;
-    btn.addEventListener('click', () => onPick(code));
-    menuEl.appendChild(btn);
-  });
-}
-
-/* ---- Mobile bottom-sheet list builder ---- */
-function buildMobileLangList(listEl, selected, onPick){
-  if (!listEl) return;
-  listEl.innerHTML = '';
-  LANGUAGE_CHOICES.forEach(([code, label])=>{
-    const item = document.createElement('button');
-    item.type = 'button';
-    item.dataset.lang = code;
-    item.className = 'w-full px-4 py-3 mb-1 flex items-center gap-3 rounded-[10px] text-left hover:bg-slate-50';
-    item.innerHTML = `
-      <div class="min-w-0">
-        <div class="text-[15px] font-medium nm-lang-label truncate">${label}</div>
-        <div class="text-xs text-slate-500">${code}</div>
-      </div>
-      <i class="fa-solid fa-check ml-auto text-emerald-600 ${code===selected ? '' : 'hidden'}"></i>`;
-    item.addEventListener('click', () => onPick(code));
-    listEl.appendChild(item);
-  });
-}
-
-/* ---- UI helpers ---- */
+function labelForLang(code){ const found = LANGUAGE_CHOICES.find(([c])=>c===code); return found ? found[1] : code; }
 function toggleMenu(el, open){ if (el) el.classList.toggle('hidden', !open); }
-
 function applyLangUI(code){
   const label = labelForLang(code);
   const b1 = document.getElementById('langBtnLabel');
   const b2 = document.getElementById('mLangBtnLabel');
   if (b1) b1.textContent = label;
   if (b2) b2.textContent = label;
-
-  // Update checkmarks in mobile sheet if present
   document.querySelectorAll('#mLangList [data-lang]').forEach(el=>{
     el.querySelector('.fa-check')?.classList.toggle('hidden', el.dataset.lang !== code);
   });
-
   if (typeof showToast === 'function'){
-    showToast(`Language set: ${label}`, 'fa-solid fa-globe', 'text-teal-600');
+    showToast(`Language set: ${label}`, 'fa-solid fa-globe', 'text-[#236092]');
   }
 }
-
-/* ---- Mobile sheet open/close ---- */
-function openMobileLang(){
-  const menu  = document.getElementById('mLangMenu');
-  const panel = document.getElementById('mLangPanel');
-  if (!menu || !panel) return; // fallback if using old dropdown
-  menu.classList.remove('hidden');
-  requestAnimationFrame(()=> panel.classList.remove('translate-y-full'));
-  document.getElementById('mLangBtn')?.setAttribute('aria-expanded','true');
-  setTimeout(()=> document.getElementById('mLangSearch')?.focus(), 80);
-}
-function closeMobileLang(){
-  const menu  = document.getElementById('mLangMenu');
-  const panel = document.getElementById('mLangPanel');
-  if (!menu || !panel) return toggleMenu(menu, false);
-  panel.classList.add('translate-y-full');
-  setTimeout(()=> menu.classList.add('hidden'), 180);
-  document.getElementById('mLangBtn')?.setAttribute('aria-expanded','false');
-}
-
-/* ---- Init + wiring ---- */
 document.addEventListener('DOMContentLoaded', () => {
   const desktopBtn   = document.getElementById('langBtn');
   const desktopMenu  = document.getElementById('langMenu');
-
   const mobileBtn    = document.getElementById('mLangBtn');
-  const mobileMenu   = document.getElementById('mLangMenu');   // overlay (sheet root)
-  const mobilePanel  = document.getElementById('mLangPanel');  // sliding panel
-  const mobileList   = document.getElementById('mLangList');   // scrollable list
-  const mobileSearch = document.getElementById('mLangSearch'); // search input
+  const mobileMenu   = document.getElementById('mLangMenu');
+  const mobilePanel  = document.getElementById('mLangPanel');
+  const mobileList   = document.getElementById('mLangList');
+  const mobileSearch = document.getElementById('mLangSearch');
   const mobileClose  = document.getElementById('mLangClose');
   const mobileBack   = document.getElementById('mLangBackdrop');
 
-  const current = loadLang();
+  function buildDesktopMenu(menuEl, onPick){
+    if (!menuEl) return;
+    menuEl.innerHTML = '';
+    LANGUAGE_CHOICES.forEach(([code, label]) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center gap-2';
+      btn.dataset.lang = code;
+      btn.innerHTML = `<span class="flex-1 truncate">${label}</span>
+                       <span class="text-xs text-slate-500">${code}</span>`;
+      btn.addEventListener('click', () => onPick(code));
+      menuEl.appendChild(btn);
+    });
+  }
+  function buildMobileLangList(listEl, selected, onPick){
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    LANGUAGE_CHOICES.forEach(([code, label])=>{
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.dataset.lang = code;
+      item.className = 'w-full px-4 py-3 mb-1 flex items-center gap-3 rounded-[10px] text-left hover:bg-slate-50';
+      item.innerHTML = `
+        <div class="min-w-0">
+          <div class="text-[15px] font-medium nm-lang-label truncate">${label}</div>
+          <div class="text-xs text-slate-500">${code}</div>
+        </div>
+        <i class="fa-solid fa-check ml-auto text-emerald-600 ${code===selected ? '' : 'hidden'}"></i>`;
+      item.addEventListener('click', () => onPick(code));
+      listEl.appendChild(item);
+    });
+  }
 
-  // Build menus
+  const current = loadLang();
   buildDesktopMenu(desktopMenu, pickLang);
   if (mobileList) buildMobileLangList(mobileList, current, pickLang);
-
-  // Apply current label text
   applyLangUI(current);
 
   function pickLang(code){
-    saveLang(code);
-    applyLangUI(code);
-    // close any open surfaces
+    saveLang(code); applyLangUI(code);
     toggleMenu(desktopMenu, false);
-    closeMobileLang();
+    if (mobilePanel) { mobilePanel.classList.add('translate-y-full'); setTimeout(()=> mobileMenu?.classList.add('hidden'), 180); }
+    else toggleMenu(mobileMenu, false);
   }
 
-  // Desktop open/close
   desktopBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
     const isOpen = desktopMenu && !desktopMenu.classList.contains('hidden');
     toggleMenu(desktopMenu, !isOpen);
   });
-
-  // Mobile open (sheet) — if sheet markup exists use it, else toggle old dropdown
   mobileBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
-    if (mobilePanel) openMobileLang();
-    else {
+    if (mobilePanel){
+      mobileMenu?.classList.remove('hidden');
+      requestAnimationFrame(()=> mobilePanel.classList.remove('translate-y-full'));
+      mobileBtn.setAttribute('aria-expanded','true');
+      setTimeout(()=> mobileSearch?.focus(), 80);
+    } else {
       const isOpen = mobileMenu && !mobileMenu.classList.contains('hidden');
       toggleMenu(mobileMenu, !isOpen);
     }
   });
-  mobileBack?.addEventListener('click', closeMobileLang);
-  mobileClose?.addEventListener('click', closeMobileLang);
+  mobileBack?.addEventListener('click', ()=>{ mobilePanel?.classList.add('translate-y-full'); setTimeout(()=> mobileMenu?.classList.add('hidden'), 180); });
+  mobileClose?.addEventListener('click', ()=>{ mobilePanel?.classList.add('translate-y-full'); setTimeout(()=> mobileMenu?.classList.add('hidden'), 180); });
 
-  // Search filter (mobile)
   mobileSearch?.addEventListener('input', (e)=>{
     const q = (e.target.value || '').trim().toLowerCase();
     document.querySelectorAll('#mLangList [data-lang]').forEach(el=>{
@@ -1400,283 +1146,119 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Close on outside click / Esc
   document.addEventListener('click', (e) => {
     if (desktopMenu && !desktopMenu.contains(e.target) && e.target !== desktopBtn) toggleMenu(desktopMenu, false);
-    // mobile sheet closes only via backdrop/close; if using old dropdown, allow outside-click close:
     if (!mobilePanel && mobileMenu && !mobileMenu.contains(e.target) && e.target !== mobileBtn) toggleMenu(mobileMenu, false);
   });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape'){
-      toggleMenu(desktopMenu, false);
-      closeMobileLang();
-    }
+    if (e.key === 'Escape'){ toggleMenu(desktopMenu, false); if (mobilePanel){ mobilePanel.classList.add('translate-y-full'); setTimeout(()=> mobileMenu?.classList.add('hidden'), 180); } }
   });
 });
-
-// Expose for other scripts (sendChat/dictation)
 window.__nmLang = () => loadLang();
 
-/* ---------- Helpers ---------- */
-function getCSRFToken() {
-  const m = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
-  return m ? m.pop() : '';
+/* =========================
+   Markdown rendering
+   ========================= */
+
+/* 1) One-time style tweaks so headings/bold look right inside AI bubbles */
+(function injectAiMdStyles(){
+  if (document.getElementById('nm-ai-md-style')) return;
+  const css = `
+    .chat-ai .md-prose h1,.chat-ai .md-prose h2,.chat-ai .md-prose h3,.chat-ai .md-prose h4{font-weight:600;margin:.22em 0 .14em}
+    .chat-ai .md-prose h1{font-size:1.18rem}.chat-ai .md-prose h2{font-size:1.08rem}.chat-ai .md-prose h3{font-size:1.02rem}.chat-ai .md-prose h4{font-size:.98rem}
+    .chat-ai .md-prose strong,.chat-ai .md-prose b{font-weight:600}
+    .chat-ai .md-prose ul{list-style:disc;padding-left:1.5rem;margin:.18rem 0}.chat-ai .md-prose ol{list-style:decimal;padding-left:1.5rem;margin:.18rem 0}
+    .chat-ai .md-prose ol>li::marker{font-weight:700;color:#236092}
+    .chat-ai .md-prose blockquote{border-left:2px solid #e2e8f0;padding-left:.45rem;margin:.18em 0;color:#475569}
+    .chat-ai .md-prose table{width:100%;border-collapse:collapse;margin:.22rem 0;font-size:.93rem}
+    .chat-ai .md-prose th,.chat-ai .md-prose td{border:1px solid #e2e8f0;padding:.28rem .4rem}
+    .chat-ai .md-prose thead th{background:#f8fafc}
+  `;
+  const s = document.createElement('style');
+  s.id = 'nm-ai-md-style';
+  s.textContent = css;
+  document.head.appendChild(s);
+})();
+
+/* 2) Parse → sanitize → return a <div.md-prose> */
+function renderAssistantMarkdown(mdText){
+  const normalized = (mdText ?? '')
+    .trim()
+    .replace(/\r\n/g, '\n')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/\n\s*\n(?=\s*#{1,4}\s)/g, '\n')
+    .replace(/\n\s*\n(?=\s*([-*] |\d+\. ))/g, '\n');
+
+  const raw = marked.parse(normalized, { gfm:true, breaks:false, headerIds:false });
+  const safe = DOMPurify.sanitize(raw, { USE_PROFILES:{ html:true } });
+
+  const container = document.createElement('div');
+  container.className = 'md-prose';
+  container.innerHTML = safe;
+
+  container.querySelectorAll('p').forEach(p => { if (!p.textContent.trim()) p.remove(); });
+  container.querySelectorAll('a[href]').forEach(a => {
+    try{ const u = new URL(a.getAttribute('href'), location.href);
+      if (u.origin !== location.origin) a.target = '_blank', a.rel = 'noopener noreferrer';
+    }catch{}
+  });
+
+  return container;
 }
 
-/* Ensure external libs are ready (marked/DOMPurify/hljs) without blocking forever */
-async function ensureReady() {
-  const t0 = Date.now();
-  while (Date.now() - t0 < 800) {
-    if (window.marked && window.DOMPurify && window.hljs) break;
-    await new Promise(r => setTimeout(r, 50));
-  }
-}
-
-/* ---------- Feedback panel controls ---------- */
-const panel   = document.getElementById('feedbackPanel');
-const tabBtn  = document.getElementById('feedbackTab');
-const fabBtn  = document.getElementById('feedbackFab');
-const closeBtn= document.getElementById('feedbackClose');
-const form    = document.getElementById('feedbackForm');
-const toast   = document.getElementById('fbToast');
-const errBox  = document.getElementById('fbErrors');
-
-function openFeedback(){ panel.classList.remove('translate-x-full'); }
-function closeFeedback(){ panel.classList.add('translate-x-full'); }
-
-tabBtn?.addEventListener('click', openFeedback);
-fabBtn?.addEventListener('click', openFeedback);
-closeBtn?.addEventListener('click', closeFeedback);
-
-// ESC to close slide-over
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeFeedback(); });
-
-/* ---------- Success modal ---------- */
-const fbSuccess         = document.getElementById('fbSuccess');
-const fbSuccessMsg      = document.getElementById('fbSuccessMsg');
-const fbSuccessMeta     = document.getElementById('fbSuccessMeta');
-const fbSuccessClose    = document.getElementById('fbSuccessClose');
-const fbSuccessCloseX   = document.getElementById('fbSuccessCloseX');
-const fbSuccessAnother  = document.getElementById('fbSuccessAnother');
-
-function openFbSuccess(data){
-  if (data && (data.id || data.created_at)) {
-    fbSuccessMeta.classList.remove('hidden');
-    fbSuccessMeta.textContent = `Ref: ${data.id || '—'} • ${data.created_at || ''}`;
-  } else {
-    fbSuccessMeta.classList.add('hidden');
-    fbSuccessMeta.textContent = '';
-  }
-  fbSuccess.classList.remove('hidden');
-  fbSuccess.classList.add('flex');
-  document.body.classList.add('overflow-hidden'); // lock background scroll
-}
-
-function closeFbSuccess(){
-  fbSuccess.classList.add('hidden');
-  fbSuccess.classList.remove('flex');
-  document.body.classList.remove('overflow-hidden');
-}
-
-fbSuccessClose?.addEventListener('click', closeFbSuccess);
-fbSuccessCloseX?.addEventListener('click', closeFbSuccess);
-fbSuccess.addEventListener('click', (e) => {
-  if (e.target === fbSuccess) closeFbSuccess(); // click backdrop to close
-});
-document.addEventListener('keydown', (e) => {
-  if (!fbSuccess.classList.contains('hidden') && e.key === 'Escape') closeFbSuccess();
-});
-
-// "Send another" = reopen the panel
-fbSuccessAnother?.addEventListener('click', () => {
-  closeFbSuccess();
-  openFeedback();
-});
-
-/* ---------- Submit feedback ---------- */
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  errBox.classList.add('hidden');
-  errBox.textContent = '';
-
-  const fd = new FormData(form);
-  if (typeof collectUseCase === 'function') {
-    fd.append('use_case', collectUseCase());
-  }
-
-  const submitBtn = form.querySelector('button[type="submit"]');
-  const originalHTML = submitBtn ? submitBtn.innerHTML : '';
-  const setLoading = (on) => {
-    if (!submitBtn) return;
-    if (on) {
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Sending your feedback… hang tight';
+/* 3) Streaming effect: types words, then swaps to full Markdown node */
+function renderStreamingMarkdown(mdText, targetEl){
+  const node = renderAssistantMarkdown(mdText);
+  const words = node.innerText.split(/\s+/);
+  targetEl.innerHTML = '';
+  let i = 0;
+  const t = setInterval(()=>{
+    if (i < words.length){
+      targetEl.innerHTML += (i ? ' ' : '') + words[i++];
+      targetEl.scrollIntoView({ behavior:'smooth', block:'end' });
     } else {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = originalHTML;
+      clearInterval(t);
+      targetEl.replaceWith(node); // restore links/bold/etc.
     }
-  };
-
-  setLoading(true);
-
-  try {
-    const res = await fetch('/beta/api/submit/', {
-      method: 'POST',
-      headers: { 'X-CSRFToken': getCSRFToken() },
-      body: fd
-    });
-    const data = await res.json();
-
-        // Keep track of the session the server used/created
-    if (data && data.session_id) {
-      setSessionId(data.session_id);
-      // Update the sidebar timestamps/order
-      refreshSessionList().catch(()=>{});
-    }
-
-
-    if (!res.ok || !data.success) {
-      const msg = data?.errors ? JSON.stringify(data.errors) : 'Please check your inputs.';
-      errBox.textContent = msg;
-      errBox.classList.remove('hidden');
-      setLoading(false);
-      return;
-    }
-
-    form.reset();
-    if (typeof prefillMeta === 'function') prefillMeta();
-    setLoading(false);
-    closeFeedback();
-    openFbSuccess(data);
-  } catch (err) {
-    errBox.textContent = 'Hi! It seems the connection is busy at the moment — give it another try in a few minutes. We appreciate your patience.';
-    errBox.classList.remove('hidden');
-    setLoading(false);
-  }
-});
-
-/* ---------- Device/browser prefill ---------- */
-function detectBrowserPretty() {
-  const ua = navigator.userAgent || '';
-  const rules = [
-    { name: 'Edge',    re: /(Edg|Edge)\/(\d+)/i },
-    { name: 'Chrome',  re: /(Chrome|Chromium)\/(\d+)/i },
-    { name: 'Firefox', re: /Firefox\/(\d+)/i },
-    { name: 'Safari',  re: /Version\/(\d+).+Safari/i },
-  ];
-  for (const r of rules) { const m = ua.match(r.re); if (m) return `${r.name} ${m[m.length - 1]}`; }
-  return ua ? ua.split(') ').pop() || 'Unknown' : 'Unknown';
+  }, 35);
 }
-function prefillMeta() {
-  const form = document.getElementById('feedbackForm');
-  if (!form) return;
-  const dev = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || 'Unknown';
-  const browserPretty = detectBrowserPretty();
-  const devInput = form.querySelector('input[name="device"]');
-  const brInput  = form.querySelector('input[name="browser"]');
-  if (devInput && !devInput.value) devInput.value = dev;
-  if (brInput  && !brInput.value)  brInput.value  = browserPretty;
-}
-document.addEventListener('DOMContentLoaded', prefillMeta);
 
-/* ---------- Chat UI helpers ---------- */
-function closeModal(){ document.getElementById("summaryModal").classList.add("hidden"); }
+/* =========================
+   Chat UI bubble renderers
+   ========================= */
 
 function appendRichBubble(content, isUser = false) {
   const chatWindow = document.getElementById("chatWindow");
   if (!chatWindow) return;
 
   const wrap = document.createElement("div");
-  wrap.className = "w-full flex mb-1.5";
-
+  wrap.className = `w-full flex mb-2 ${isUser ? "justify-end" : "justify-start"}`;
 
   const bubble = document.createElement("div");
   bubble.className = `chat-bubble ${isUser ? "chat-user" : "chat-ai"}`;
+  bubble.setAttribute("role", "article");
+  bubble.setAttribute("aria-live", "polite");
 
   const rich = document.createElement("div");
-  rich.className = "leading-[1.45] text-[15px] space-y-0.5";
+  rich.className = isUser ? "" : "md-prose";
   rich.setAttribute("dir", "auto");
 
-  const asNode = content instanceof Node;
-  const text = asNode ? null : String(content ?? "");
+  // If it's a DOM node (attachments grid), append as-is
+  const asNode = !!(content && typeof content === "object" && ("nodeType" in content));
 
-  // --- helpers: strip headings + bold, then convert to HTML safely ---
-  const flattenMarkdown = (md) => {
-    if (!md) return "";
-    let s = String(md).trim();
-
-    // remove markdown headings like "# …", "## …", "### …"
-    s = s.replace(/^\s{0,3}#{1,6}\s+/gm, "");
-
-    // remove bold markers **…** (keep inner text)
-    s = s.replace(/\*\*(.*?)\*\*/g, "$1");
-
-    // strip horizontal rules (---, ___, ***)
-    s = s.replace(/^\s*([-*_])\1\1+\s*$/gm, "");
-
-    // collapse 3+ blank lines → 1
-    s = s.replace(/\n{3,}/g, "\n\n");
-
-    return s;
-  };
-
-  const mdToHtml = (md) => {
-    const flat = flattenMarkdown(md);
-    let rawHtml;
-    if (window.marked && typeof marked.parse === "function") {
-      rawHtml = marked.parse(flat, { gfm: true, breaks: false, headerIds: false });
-    } else {
-      rawHtml = flat
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/\n/g, "<br>");
-    }
-    return window.DOMPurify ? DOMPurify.sanitize(rawHtml) : rawHtml;
-  };
-  // -------------------------------------------------------------------
-
-  try {
+  if (isUser) {
+    // user: plain text (no markdown parsing)
+    if (asNode) rich.appendChild(content);
+    else rich.textContent = String(content ?? "");
+  } else {
+    // assistant: stream then swap to full markdown
     if (asNode) {
+      // rare case: assistant DOM node — just append
       rich.appendChild(content);
     } else {
-      const html = mdToHtml(text);
-      rich.innerHTML = html;
-
-      // styling hooks (unchanged)
-      rich.querySelectorAll("p").forEach(el => el.classList.add("text-gray-800"));
-      rich.querySelectorAll("h1,h2,h3,h4").forEach(el =>
-        el.classList.add("font-semibold","tracking-tight","text-gray-900","mt-2")
-      );
-      rich.querySelectorAll("h1").forEach(el => el.classList.add("text-xl"));
-      rich.querySelectorAll("h2").forEach(el => el.classList.add("text-lg"));
-      rich.querySelectorAll("h3,h4").forEach(el => el.classList.add("text-base"));
-      rich.querySelectorAll("ul").forEach(el => el.classList.add("list-disc","pl-5","space-y-0.5"));
-
-      rich.querySelectorAll("ol").forEach(el => el.classList.add("list-decimal","pl-5","space-y-0.5"));
-      rich.querySelectorAll("blockquote").forEach(el =>
-        el.classList.add("border-l-4","border-teal-500","pl-3","italic","text-gray-700","bg-teal-50/40","rounded-r")
-      );
-      rich.querySelectorAll("a").forEach(a => {
-        a.classList.add("text-teal-700","hover:underline","font-medium");
-        a.target = "_blank"; a.rel = "noopener noreferrer";
-      });
-      rich.querySelectorAll("p > code, li > code").forEach(code =>
-        code.classList.add("px-1.5","py-0.5","rounded","bg-gray-100","text-gray-900","text-[13px]")
-      );
-      rich.querySelectorAll("pre code").forEach(code =>
-        code.parentElement.classList.add("overflow-x-auto","rounded-lg","p-3","bg-gray-900","text-gray-100","text-sm")
-      );
-      rich.querySelectorAll("img").forEach(img => {
-        img.classList.add("rounded-lg","shadow-sm","max-w-full");
-        img.loading = "lazy";
-      });
-      if (window.hljs) {
-        rich.querySelectorAll("pre code").forEach(code => { try { hljs.highlightElement(code); } catch {} });
-      }
+      renderStreamingMarkdown(String(content || ''), rich);
     }
-  } catch {
-    rich.textContent = asNode ? "[Unsupported content]" : (text || "");
   }
 
   bubble.appendChild(rich);
@@ -1685,128 +1267,77 @@ function appendRichBubble(content, isUser = false) {
   chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
-
+// simple alias used elsewhere
 function appendBubble(message, isUser = false) { appendRichBubble(message, isUser); }
 
-/* ---------- Init ---------- */
-document.addEventListener("DOMContentLoaded", async () => {
-  await ensureReady();
-  const chatWindow = document.getElementById("chatWindow");
-  if (chatWindow && chatWindow.innerHTML.trim() === '') { greetUser(); }
 
-  // Summary modal openers (updated)
-  document.querySelectorAll(".open-summary-modal").forEach(btn => {
-    btn.addEventListener("click", function () {
-      const raw = this.dataset.summary || "";
+/* =========================
+   Sidebar: Session History
+   ========================= */
+async function refreshSessionList() {
+  const ul = document.getElementById('sessionList');
+  if (!ul) return;
 
-      // robust decode of Django's |escapejs content
-      let text = "";
-      try {
-        text = JSON.parse(
-          '"' +
-          raw
-            .replace(/\\/g, '\\\\')
-            .replace(/"/g, '\\"') +
-          '"'
-        );
-      } catch { text = raw; }
+  // quick skeleton placeholders
+  ul.innerHTML = '';
+  for (let i=0;i<3;i++){
+    ul.insertAdjacentHTML('beforeend', `
+      <li class="nm-card border bg-white p-2 mb-2">
+        <div class="h-4 w-32 bg-slate-200 rounded animate-pulse"></div>
+      </li>
+    `);
+  }
 
-      // strip headings + bold markers, collapse gaps
-      const flat = text
-        .replace(/^\s{0,3}#{1,6}\s+/gm, "")   // remove #, ##, …
-        .replace(/\*\*(.*?)\*\*/g, "$1")      // remove **bold**
-        .replace(/^\s*([-*_])\1\1+\s*$/gm, "")// strip hr
-        .replace(/\n{3,}/g, "\n\n");
+  let rows = [];
+  try { rows = await fetch('/api/chat/sessions/', { credentials:'include' }).then(r=>r.json()); }
+  catch { ul.innerHTML = `<li class="text-sm text-red-600">Could not load history.</li>`; return; }
 
-      // markdown → HTML (or plain fallback), then sanitize
-      let html;
-      if (window.marked && typeof marked.parse === "function") {
-        html = marked.parse(flat, { gfm: true, breaks: false, headerIds: false });
-      } else {
-        html = flat
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/\n/g, "<br>");
-      }
-      const safe = window.DOMPurify ? DOMPurify.sanitize(html) : html;
+  if (!rows.length) {
+    ul.innerHTML = `
+      <li class="nm-card border border-dashed p-4 text-center bg-white/70 text-sm text-slate-600">
+        No conversations yet
+      </li>`;
+    return;
+  }
 
-      // inject + style like chat bubbles
-      const target = document.getElementById("modalContent");
-      if (target) {
-        target.innerHTML = safe;
+  const activeId = String(localStorage.getItem('nm_session_id') || '');
+  ul.innerHTML = '';
 
-        target.querySelectorAll("p").forEach(el => el.classList.add("text-gray-800"));
-        target.querySelectorAll("h1,h2,h3,h4").forEach(el =>
-          el.classList.add("font-semibold","tracking-tight","text-gray-900","mt-2")
-        );
-        target.querySelectorAll("h1").forEach(el => el.classList.add("text-xl"));
-        target.querySelectorAll("h2").forEach(el => el.classList.add("text-lg"));
-        target.querySelectorAll("h3,h4").forEach(el => el.classList.add("text-base"));
-        target.querySelectorAll("ul").forEach(el => el.classList.add("list-disc","pl-5","space-y-1"));
-        target.querySelectorAll("ol").forEach(el => el.classList.add("list-decimal","pl-5","space-y-1"));
-        target.querySelectorAll("blockquote").forEach(el =>
-          el.classList.add("border-l-4","border-teal-500","pl-3","italic","text-gray-700","bg-teal-50/40","rounded-r")
-        );
-        target.querySelectorAll("a").forEach(a => {
-          a.classList.add("text-teal-700","hover:underline","font-medium");
-          a.target = "_blank"; a.rel = "noopener noreferrer";
-        });
-        target.querySelectorAll("p > code, li > code").forEach(code =>
-          code.classList.add("px-1.5","py-0.5","rounded","bg-gray-100","text-gray-900","text-[13px]")
-        );
-        target.querySelectorAll("pre code").forEach(code =>
-          code.parentElement.classList.add("overflow-x-auto","rounded-lg","p-3","bg-gray-900","text-gray-100","text-sm")
-        );
-        if (window.hljs) {
-          target.querySelectorAll("pre code").forEach(code => { try { hljs.highlightElement(code); } catch {} });
-        }
-      }
+  rows.forEach(s => {
+    const isActive = String(s.id) === activeId;
+    const li = document.createElement('li');
+    li.className = `nm-card border mb-2 rounded-xl ${isActive ? 'ring-1 ring-[#28926D]' : ''}`;
+    li.dataset.sid = s.id;
 
-      document.getElementById("summaryModal")?.classList.remove("hidden");
+    li.innerHTML = `
+      <button type="button" data-open-session="${s.id}" class="nm-row w-full flex items-start gap-2 text-left">
+        <div class="mt-0.5 h-6 w-1 rounded bg-[#28926D]/80"></div>
+        <div class="mt-0.5 h-6 w-6 rounded-md bg-slate-50 grid place-items-center text-[#236092] text-[11px]">
+          <i class="fa-solid fa-brain"></i>
+        </div>
+        <div class="min-w-0 flex-1 nm-content">
+          <h3 class="nm-title nm-1line">${s.title || 'New chat'}</h3>
+        </div>
+      </button>
+    `;
+    ul.appendChild(li);
+  });
+
+  // wire up click to open sessions
+  ul.querySelectorAll('[data-open-session]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.getAttribute('data-open-session');
+      localStorage.setItem('nm_session_id', String(id));
+      try { await openSession(id); } catch {}
+      ul.querySelectorAll('li').forEach(el => el.classList.remove('ring-1','ring-[#28926D]'));
+      btn.closest('li')?.classList.add('ring-1','ring-[#28926D]');
     });
   });
-});
+}
 
-
-
-  // New Chat
-  document.getElementById('newChatBtn')?.addEventListener('click', newChat);
-
-  // Search filter
-  const searchInput = document.querySelector('input[placeholder="Search summaries..."]');
-  searchInput?.addEventListener('input', function () {
-    const q = this.value.toLowerCase();
-    document.querySelectorAll('.sidebar-link').forEach(item => {
-      const filename = item.querySelector('p.text-white-800')?.innerText.toLowerCase() || '';
-      const text = item.querySelector('p.text-base')?.innerText.toLowerCase() || '';
-      item.style.display = (filename.includes(q) || text.includes(q)) ? 'block' : 'none';
-    });
-  });
-
-  // Composer controls
-  document.getElementById('addBtn').addEventListener('click', () => document.getElementById('fileInput').click());
-  document.getElementById('fileInput').addEventListener('change', e => {
-    if (e.target.files?.length) addFiles(e.target.files);
-    e.target.value = '';
-  });
-  document.getElementById('clearAllBtn').addEventListener('click', clearPending);
-
-
-
-  // Drag & drop
-  const dz = document.getElementById('dropzone');
-  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
-  dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
-  dz.addEventListener('drop', e => {
-    e.preventDefault(); dz.classList.remove('dragover');
-    if (e.dataTransfer?.files?.length) addFiles(e.dataTransfer.files);
-  });
-
-  // Enter to send
-  
-
-/* ---------- Greeting & new chat ---------- */
+/* =========================
+   Greeting & New Chat
+   ========================= */
 async function greetUser() {
   try {
     const res = await fetch("/api/user/settings/");
@@ -1828,38 +1359,28 @@ async function newChat() {
   const chatWindow = document.getElementById('chatWindow');
   if (chatWindow) chatWindow.innerHTML = '';
 
-  // 1) Clear client + server sticky id
   localStorage.removeItem('nm_session_id');
-  await fetch('/clear-session/', {
-    method: 'POST',
-    headers: { 'X-CSRFToken': (window.getCSRFToken ? getCSRFToken() : '') }
-  });
+  await fetch('/clear-session/', { method:'POST', headers:{ 'X-CSRFToken': getCSRFToken() } });
 
-  // 2) Mint a fresh DB session and make both sides point to it
-  const r = await fetch('/api/chat/sessions/new/', {
-    method: 'POST',
-    headers: { 'X-CSRFToken': (window.getCSRFToken ? getCSRFToken() : '') }
-  });
+  const r = await fetch('/api/chat/sessions/new/', { method:'POST', headers:{ 'X-CSRFToken': getCSRFToken() } });
   const data = await r.json();
 
   if (data && data.session_id) {
     localStorage.setItem('nm_session_id', String(data.session_id));
-    if (window.openSession) {
-      try { await openSession(Number(data.session_id)); } catch {}
-    }
+    if (window.openSession) { try { await openSession(Number(data.session_id)); } catch {} }
   }
-
-  // 3) Friendly nudge
-  appendBubble('New chat started. What would you like to do?', false);
+  appendBubble('I’m here to help - what would you like to do?', false);
 }
 
-
-/* ---------- Pending attachments state ---------- */
+/* =========================
+   Pending attachments tray
+   ========================= */
 const pending = []; // {file: File, url?: string, kind: 'image'|'doc'}
 const pendingTray = document.getElementById('pendingTray');
 const pendingGrid = document.getElementById('pendingGrid');
 
 function renderPending() {
+  if (!pendingTray || !pendingGrid) return;
   pendingGrid.innerHTML = '';
   if (pending.length === 0) { pendingTray.classList.add('hidden'); return; }
   pendingTray.classList.remove('hidden');
@@ -1893,7 +1414,6 @@ function renderPending() {
     pendingGrid.appendChild(cell);
   });
 }
-
 function addFiles(files) {
   [...files].forEach(f => {
     const isImage = /^image\//.test(f.type);
@@ -1903,7 +1423,6 @@ function addFiles(files) {
   });
   renderPending();
 }
-
 function removePending(index) {
   const item = pending[index];
   if (item?.url) URL.revokeObjectURL(item.url);
@@ -1916,8 +1435,9 @@ function clearPending() {
   renderPending();
 }
 
-/* ---------- Send chat (bundles text + pending files) ---------- */
-// bind safely (in case markup changes)
+/* =========================
+   Send chat (uses streaming)
+   ========================= */
 document.getElementById('sendBtn')?.addEventListener('click', sendChat);
 document.getElementById('chatInput')?.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
@@ -1937,10 +1457,9 @@ async function sendChat() {
     (typeof window.__nmLang === 'function' && window.__nmLang()) ||
     navigator.language || 'en-US';
 
-  // use your existing pending[] helpers
   if (!userMessage && pending.length === 0) return;
 
-  // render user bubble + staged attachments
+  // user bubble + attachments
   if (userMessage) appendBubble(userMessage, true);
   if (pending.length) {
     const gallery = document.createElement('div');
@@ -1963,15 +1482,13 @@ async function sendChat() {
   }
 
   // payload
-// payload
-const formData = new FormData();
-if (userMessage) formData.append("message", userMessage);
-formData.append("tone", tone);
-formData.append("lang", lang);
-const sidExisting = getSessionId();
-if (sidExisting) formData.append("session_id", sidExisting);   // 🔹 add this
-pending.forEach(p => formData.append("files[]", p.file, p.file.name));
-
+  const formData = new FormData();
+  if (userMessage) formData.append("message", userMessage);
+  formData.append("tone", tone);
+  formData.append("lang", lang);
+  const sidExisting = getSessionId();
+  if (sidExisting) formData.append("session_id", sidExisting);
+  pending.forEach(p => formData.append("files[]", p.file, p.file.name));
 
   // clear composer
   if (input) input.value = "";
@@ -1979,18 +1496,40 @@ pending.forEach(p => formData.append("files[]", p.file, p.file.name));
 
   // typing indicator
   const typingWrap = document.createElement("div");
-  typingWrap.className = "w-full flex mb-2 justify-start";
-  const typing = document.createElement("div");
-  typing.className = "chat-bubble chat-ai text-gray-500 italic";
-  typing.innerText = "Analyzing…";
-  typingWrap.appendChild(typing);
-  chatWindow.appendChild(typingWrap);
-  chatWindow.scrollTop = chatWindow.scrollHeight;
+typingWrap.className = "w-full flex mb-2 justify-start";
+
+const typing = document.createElement("div");
+typing.className = "chat-bubble chat-ai";
+
+const inner = document.createElement("div");
+inner.className = "text-gray-500 italic";
+inner.textContent = "Analyzing";
+
+typing.appendChild(inner);
+typingWrap.appendChild(typing);
+chatWindow.appendChild(typingWrap);
+chatWindow.scrollTop = chatWindow.scrollHeight;
+
+// Animate the dots
+let dotCount = 0;
+const maxDots = 3;
+const interval = setInterval(() => {
+  dotCount = (dotCount + 1) % (maxDots + 1);
+  inner.textContent = "Analyzing" + ".".repeat(dotCount);
+}, 500);
+
+// (Optional) if you want to stop the animation later when the real AI reply comes in:
+// clearInterval(interval);
+
 
   try {
     const API_SEND = "/api/send-chat/";
-const res = await fetch(API_SEND, { method:"POST", headers:{ "X-CSRFToken": getCSRFToken(), "Accept-Language": lang }, body: formData, credentials: "include" });
-
+    const res = await fetch(API_SEND, {
+      method:"POST",
+      headers:{ "X-CSRFToken": getCSRFToken(), "Accept-Language": lang },
+      body: formData,
+      credentials: "include"
+    });
 
     let data = null;
     try { data = await res.json(); } catch {}
@@ -1999,42 +1538,56 @@ const res = await fetch(API_SEND, { method:"POST", headers:{ "X-CSRFToken": getC
       throw new Error((data && (data.error || data.detail)) || `HTTP ${res.status}`);
     }
 
-    // replace typing with rich AI bubble
     typingWrap.remove();
     const reply = (data && data.reply) ? data.reply : "⚠️ No reply received.";
-    appendRichBubble(reply, false);
+    appendRichBubble(reply, false);   // ← streams + full markdown swap
   } catch (err) {
-    typing.classList.remove("italic","text-gray-500");
-    typing.classList.add("text-red-700","bg-red-100");
-    typing.innerText = "Hi! Our system is busy right now — please try again in a few minutes.";
+    inner.classList.remove("italic","text-gray-500");
+    inner.classList.add("text-red-700");
+    inner.textContent = "Hi! Our system is busy right now — please try again in a few minutes.";
   }
 }
 
-
-
-/* ---------- Sidebar / Settings ---------- */
+/* =========================
+   Basic layout / settings (unchanged)
+   ========================= */
 function toggleSidebar() {
   const sidebar = document.getElementById("sidebar");
   const overlay = document.getElementById("overlay");
   const isOpen = sidebar.classList.contains("translate-x-0");
-  if (isOpen) {
-    sidebar.classList.remove("translate-x-0");
-    sidebar.classList.add("-translate-x-full");
-    overlay.classList.add("hidden");
-  } else {
-    sidebar.classList.remove("-translate-x-full");
-    sidebar.classList.add("translate-x-0");
-    overlay.classList.remove("hidden");
+  if (isOpen) { sidebar.classList.remove("translate-x-0"); sidebar.classList.add("-translate-x-full"); overlay.classList.add("hidden"); }
+  else { sidebar.classList.remove("-translate-x-full"); sidebar.classList.add("translate-x-0"); overlay.classList.remove("hidden"); }
+}
+async function openSettingsModal() {
+  const modal = document.getElementById("settingsModal");
+  const nameEl = document.getElementById("displayName");
+  const profEl = document.getElementById("profession");
+
+  // 1) Open the modal first so the user sees something immediately
+  if (modal) { modal.classList.remove("hidden"); modal.classList.add("flex"); }
+
+  try {
+    const res = await fetch("/api/user/settings/", {
+      credentials: "include",
+      headers: { "Accept": "application/json" }
+    });
+
+    // If redirected to HTML (e.g., login), res.ok might still be true but JSON will fail.
+    const ct = res.headers.get("content-type") || "";
+    if (!res.ok || !ct.includes("application/json")) {
+      throw new Error(`Unexpected response (${res.status}); content-type=${ct}`);
+    }
+
+    const data = await res.json();
+
+    if (nameEl) nameEl.value = data.display_name || "";
+    if (profEl) profEl.value = data.profession || "";
+  } catch (err) {
+    console.warn("Settings fetch failed:", err);
+    // Leave fields blank; optionally show a small inline note/toast if you want.
   }
 }
-function openSettingsModal() {
-  fetch("/api/user/settings/").then(r=>r.json()).then(data=>{
-    document.getElementById("displayName").value = data.display_name || "";
-    document.getElementById("profession").value  = data.profession || "";
-    const modal = document.getElementById("settingsModal");
-    modal.classList.remove("hidden"); modal.classList.add("flex");
-  });
-}
+
 function saveSettings() {
   const name = document.getElementById("displayName").value.trim();
   const profession = document.getElementById("profession").value.trim();
@@ -2058,17 +1611,13 @@ function toggleSettingsMenu(){
   menu.classList.toggle("hidden"); menu.classList.toggle("block");
 }
 function logoutUser(){
-  fetch("{% url 'logout' %}", {
-    method: "POST",
-    headers: { "X-CSRFToken": getCSRFToken() }
-  }).then(() => {
-    window.location.href = "{% url 'login' %}";
-  }).catch(() => {
-    window.location.href = "{% url 'login' %}";
-  });
+  clearSessionId(); // <-- add this
+  fetch("{% url 'logout' %}", { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
+    .then(() => { window.location.href = "{% url 'login' %}"; })
+    .catch(() => { window.location.href = "{% url 'login' %}"; });
 }
 
-/* ---------- Layout padding sync ---------- */
+
 function updateComposerPadding() {
   const c = document.getElementById('composer');
   const w = document.getElementById('chatWindow');
@@ -2077,532 +1626,126 @@ function updateComposerPadding() {
   w.style.paddingBottom = `calc(${h}px + 12px)`;
 }
 
+/* =========================
+   Summary modal (now keeps bold/headings)
+   ========================= */
+function closeModal(){ document.getElementById("summaryModal").classList.add("hidden"); }
 
+document.addEventListener("DOMContentLoaded", async () => {
+  const chatWindow = document.getElementById("chatWindow");
+  if (chatWindow && chatWindow.innerHTML.trim() === '') { greetUser(); }
 
-(function(){
-  const KEY = 'nm_tour_done_v1';
+  document.querySelectorAll(".open-summary-modal").forEach(btn => {
+    btn.addEventListener("click", function () {
+      const raw = this.dataset.summary || "";
 
-  // Utils
-  const $ = s => document.querySelector(s);
-  const isMobile = () => window.matchMedia('(max-width: 540px)').matches;
-
-  // True visibility: displayed, sized, and on-screen (not off-canvas)
-  function isTrulyVisible(el){
-    if(!el) return false;
-    const cs = getComputedStyle(el);
-    if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) === 0) return false;
-    if (el.offsetWidth <= 0 || el.offsetHeight <= 0) return false;
-    const r = el.getBoundingClientRect();
-    const vw = window.innerWidth || document.documentElement.clientWidth;
-    const vh = window.innerHeight || document.documentElement.clientHeight;
-    return r.bottom > 0 && r.top < vh && r.right > 0 && r.left < vw;
-  }
-
-  // On mobile, prefer burger; on desktop, the actual New Chat button
-  const pickNewChatTarget = () => isMobile() ? $('#burgerBtn') : $('#newChatBtn');
-  // Feedback control can be a floating tab or a fab
-  const pickFeedbackButton = () => $('#feedbackFab') || $('#feedbackTab');
-
-  // --- Steps (mobile-aware)
-  const STEPS = [
-    {
-      selector: null,
-      title: "Welcome, beta testers! 🎉",
-      body: "NeuroMed turns messy medical docs into friendly summaries. Here’s a 30-second tour.",
-      placement: "center"
-    },
-    {
-      selector: pickNewChatTarget,
-      title: () => isMobile() ? "Open the menu" : "Start fresh",
-      body: () => isMobile()
-        ? "Tap the ☰ menu first. Inside, you’ll find <b>New Chat</b> to start a fresh thread."
-        : "Tap <b>New Chat</b> anytime to clear the thread and begin a new question.",
-    },
-    {
-      selector: "#dropzone",
-      title: "Upload or drop files",
-      body: "Click the plus to attach, or just drag & drop. I’ll read PDFs, images, and docs."
-    },
-    {
-      selector: "#toneBar",
-      title: "Pick a tone",
-      body: `
-        Choose how the AI speaks:
-        <ul class="list-disc pl-5 mt-1 space-y-1">
-          <li><b>Straight Talk</b> — neutral, clear, friendly.</li>
-          <li><b>Caregiver</b> — gentle, reassuring; may use a little Taglish warmth.</li>
-          <li><b>Faith</b> — hopeful and encouraging; may include a short verse/prayer.</li>
-          <li><b>Clinical</b> — concise, precise medical terminology. No fluff.</li>
-          <li><b>Emotional Support</b> — validating, comforting, focused on encouragement and next steps.</li>
-        </ul>
-
-        <div class="mt-2 text-xs text-slate-500">Tip: you can change the tone any time before sending.</div>
-        <div id="nmTonePreview" class="mt-3 rounded-lg border bg-slate-50 px-3 py-2 text-[13px] text-slate-700"></div>
-      `,
-      // (optional) live preview that follows the selected radio
-      onEnter: () => {
-        const samples = {
-          PlainClinical:   "I’ll explain your results in clear, friendly language.",
-          Caregiver:       "Let’s walk through this gently, step by step—kasama mo ’ko.",
-          Faith:           "Here’s what this means, and a note of hope to carry with you.",
-          Clinical:        "Findings: … Impression: … Recommendations: …",
-          Bilingual:       "Ito ang buod—then I’ll clarify in English where needed.",
-          Geriatric:       "We’ll go slowly, repeat key points, and keep it extra clear.",
-          Pediatric:       "Kid-friendly words, plus what parents can do today.",
-          EmotionalSupport:"I hear this may feel heavy. You’re not alone—here’s what it means and one gentle next step."
-        };
-
-        const preview = document.getElementById("nmTonePreview");
-        const update = () => {
-          const v = document.querySelector('#toneBar input[name="tone"]:checked')?.value || "Plain";
-          preview.textContent = `Example • ${v}: ${samples[v]}`;
-        };
-        document.querySelectorAll('#toneBar input[name="tone"]').forEach(r =>
-          r.addEventListener('change', update)
+      let text = "";
+      try {
+        text = JSON.parse(
+          '"' +
+          raw.replace(/\\/g, '\\\\').replace(/"/g, '\\"') +
+          '"'
         );
-        update();
+      } catch { text = raw; }
+
+      const node = renderAssistantMarkdown(text); // keep real markdown!
+      const target = document.getElementById("modalContent");
+      if (target) {
+        target.innerHTML = '';
+        target.appendChild(node);
       }
-    },
+      document.getElementById("summaryModal")?.classList.remove("hidden");
+    });
+  });
+});
 
-    {
-      selector: "#sendBtn",
-      title: "Ask away",
-      body: "Type your question and hit <b>Send</b>. You can also use the mic on supported browsers."
-    },
-    {
-      selector: pickFeedbackButton,
-      title: "Give quick feedback",
-      body: "Found something confusing? Open this to send thoughts (no PHI (Personal Health Information), please 💜)."
-    },
-    {
-      selector: null,
-      title: "You’re all set ✅",
-      body: "That’s it! Tap the <b>?</b> button anytime to replay this tour.",
-      placement: "center"
-    }
-  ];
+/* =========================
+   Page init bits you had (tour/install/etc.)
+   — keep as-is if you already include them elsewhere
+   ========================= */
 
-  // Create overlay once
-  function ensureOverlay(){
-    let el = document.getElementById('nmTour');
-    if (el) return el;
-    el = document.createElement('div');
-    el.id = 'nmTour';
-    el.className = 'nm-tour-overlay';
-    el.innerHTML = `
-      <div class="nm-tour-dim"></div>
-      <div id="nmHole" class="nm-tour-hole"></div>
-      <div id="nmPop" class="nm-tour-pop bg-white border rounded-2xl shadow-xl p-4 text-sm text-slate-800">
-        <div id="nmTitle" class="text-base font-semibold mb-1"></div>
-        <div id="nmBody" class="text-slate-600 mb-3"></div>
-        <div class="flex items-center justify-between gap-2">
-          <button id="nmSkip" class="px-3 py-1.5 rounded border text-slate-600 hover:bg-slate-50">Skip</button>
-          <div class="flex items-center gap-2">
-            <button id="nmPrev" class="px-3 py-1.5 rounded border text-slate-600 hover:bg-slate-50">Back</button>
-            <button id="nmNext" class="px-3 py-1.5 rounded bg-teal-600 text-white hover:bg-teal-700">Next</button>
-          </div>
-        </div>
-      </div>
-      <span id="nmA11y" class="nm-tour-sr-only" role="status" aria-live="polite"></span>
-    `;
-    document.body.appendChild(el);
-    return el;
-  }
+// New Chat
+document.getElementById('newChatBtn')?.addEventListener('click', newChat);
 
-  function place(step, idx){
-    const hole = $('#nmHole'), pop = $('#nmPop'), a11y = $('#nmA11y');
-    const target = typeof step.selector === 'function' ? step.selector() : (step.selector ? $(step.selector) : null);
+// Search filter in sidebar (unchanged)
+const searchInput = document.querySelector('input[placeholder="Search summaries..."]');
+searchInput?.addEventListener('input', function () {
+  const q = this.value.toLowerCase();
+  document.querySelectorAll('.sidebar-link').forEach(item => {
+    const filename = item.querySelector('p.text-white-800')?.innerText.toLowerCase() || '';
+    const text = item.querySelector('p.text-base')?.innerText.toLowerCase() || '';
+    item.style.display = (filename.includes(q) || text.includes(q)) ? 'block' : 'none';
+  });
+});
 
-    // Dynamic titles/bodies allowed
-    const title = typeof step.title === 'function' ? step.title() : (step.title || '');
-    const body  = typeof step.body  === 'function' ? step.body()  : (step.body  || '');
+// Composer controls (unchanged)
+document.getElementById('addBtn')?.addEventListener('click', () => document.getElementById('fileInput').click());
+document.getElementById('fileInput')?.addEventListener('change', e => {
+  if (e.target.files?.length) addFiles(e.target.files);
+  e.target.value = '';
+});
+document.getElementById('clearAllBtn')?.addEventListener('click', clearPending);
 
-    $('#nmTitle').innerText = title;
-    $('#nmBody').innerHTML  = body;
-    a11y.textContent = `Step ${idx+1}: ${title}`;
+// Drag & drop (unchanged)
+const dz = document.getElementById('dropzone');
+if (dz){
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('dragover');
+    if (e.dataTransfer?.files?.length) addFiles(e.dataTransfer.files);
+  });
+}
 
-    const pad = 8, vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0), vh = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+/* Resume or start fresh depending on your flag */
+const NEW_SESSION_ON_REFRESH = true;
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    await refreshSessionList().catch(console.warn);
 
-    // Centered card or hidden/offscren target → no hole, center pop
-    if (!target || !isTrulyVisible(target) || step.placement === 'center'){
-      hole.style.width = hole.style.height = '0px';
-      hole.style.top = hole.style.left = '-9999px';
-      pop.style.left = '50%'; pop.style.top = '50%'; pop.style.transform = 'translate(-50%, -50%)';
-      return;
-    }
+    const chatWindow = document.getElementById('chatWindow');
+    if (chatWindow) chatWindow.innerHTML = ''; // ensure we start clean
 
-    // Bring into view if possible
-    try { target.scrollIntoView({ block: 'center', inline: 'center', behavior: 'smooth' }); } catch {}
+    if (NEW_SESSION_ON_REFRESH) {
+      clearSessionId(); // <-- remove any old nm_session_id first
+      await fetch('/clear-session/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCSRFToken() },
+        credentials: 'include'
+      }).catch(()=>{});
 
-    const r = target.getBoundingClientRect();
-    const hTop = Math.max(6, r.top - pad);
-    const hLeft = Math.max(6, r.left - pad);
-    const hW = Math.min(vw - 12, r.width + pad*2);
-    const hH = Math.min(vh - 12, r.height + pad*2);
-
-    hole.style.top = hTop + 'px';
-    hole.style.left = hLeft + 'px';
-    hole.style.width = hW + 'px';
-    hole.style.height = hH + 'px';
-
-    // Popover placement: bottom → top → right → left → center
-    pop.style.transform = 'none';
-    const margin = 10;
-    const wantBottom = r.bottom + margin + pop.offsetHeight <= vh;
-    const wantTop    = r.top - margin - pop.offsetHeight >= 0;
-    const wantRight  = r.right + margin + Math.min(pop.offsetWidth, 340) <= vw;
-    const wantLeft   = r.left  - margin - Math.min(pop.offsetWidth, 340) >= 0;
-
-    if (wantBottom) {
-      pop.style.top = (r.bottom + margin) + 'px';
-      pop.style.left = clamp(r.left, 8, vw - pop.offsetWidth - 8) + 'px';
-    } else if (wantTop) {
-      pop.style.top = (r.top - pop.offsetHeight - margin) + 'px';
-      pop.style.left = clamp(r.left, 8, vw - pop.offsetWidth - 8) + 'px';
-    } else if (wantRight) {
-      pop.style.top = clamp(r.top, 8, vh - pop.offsetHeight - 8) + 'px';
-      pop.style.left = (r.right + margin) + 'px';
-    } else if (wantLeft) {
-      pop.style.top = clamp(r.top, 8, vh - pop.offsetHeight - 8) + 'px';
-      pop.style.left = (r.left - pop.offsetWidth - margin) + 'px';
+      appendBubble('I’m here to help - what would you like to do?', false);
     } else {
-      pop.style.left = '50%';
-      pop.style.top = '50%';
-      pop.style.transform = 'translate(-50%, -50%)';
-    }
-  }
-  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-
-  const Tour = {
-    i: 0, running: false,
-    start(force=false){
-      if (!force && localStorage.getItem(KEY)) return;
-      this.running = true; this.i = 0;
-      ensureOverlay().classList.remove('hidden');
-      this.bind(); this.goto(0);
-    },
-    end(done=false){
-      const ov = $('#nmTour'); if (ov) ov.classList.add('hidden');
-      this.unbind(); this.running = false;
-      if (done) localStorage.setItem(KEY, '1');
-    },
-    next(){
-      let j = this.i + 1;
-      while (j < STEPS.length){
-        const s = STEPS[j];
-        const el = typeof s.selector === 'function' ? s.selector() : (s.selector ? $(s.selector) : null);
-        if (!s.selector || isTrulyVisible(el)) break;
-        j++;
+      const sid = getSessionId();
+      if (sid) {
+        await openSession(sid).catch(() => clearSessionId());
+      } else {
+        await greetUser();
       }
-      if (j >= STEPS.length) return this.end(true);
-      this.goto(j);
-    },
-    prev(){
-      let j = this.i - 1;
-      while (j >= 0){
-        const s = STEPS[j];
-        const el = typeof s.selector === 'function' ? s.selector() : (s.selector ? $(s.selector) : null);
-        if (!s.selector || isTrulyVisible(el)) break;
-        j--;
-      }
-      if (j < 0) return;
-      this.goto(j);
-    },
-    goto(idx){ this.i = idx; requestAnimationFrame(()=> place(STEPS[this.i], this.i)); },
-    bind(){
-      window.addEventListener('resize', this.recalc, { passive:true });
-      window.addEventListener('scroll', this.recalc, { passive:true });
-      document.getElementById('nmNext').onclick = () => this.next();
-      document.getElementById('nmPrev').onclick = () => this.prev();
-      document.getElementById('nmSkip').onclick = () => this.end(false);
-      document.addEventListener('keydown', this.onKey);
-    },
-    unbind(){
-      window.removeEventListener('resize', this.recalc);
-      window.removeEventListener('scroll', this.recalc);
-      document.removeEventListener('keydown', this.onKey);
-    },
-    recalc: () => { if (Tour.running) place(STEPS[Tour.i], Tour.i); },
-    onKey(e){
-      if (!Tour.running) return;
-      if (e.key === 'Escape') Tour.end(false);
-      if (e.key === 'Enter' || e.key === ' ') Tour.next();
-      if (e.key === 'ArrowRight') Tour.next();
-      if (e.key === 'ArrowLeft') Tour.prev();
     }
-  };
-
-  // Helper button to replay the tour
-  function injectHelp(){
-    if (document.getElementById('nmTourHelp')) return;
-    const btn = document.createElement('button');
-    btn.id = 'nmTourHelp';
-    btn.className = "fixed left-3 bottom-[calc(env(safe-area-inset-bottom)+12px)] md:left-5 md:bottom-5 z-[10052] rounded-full w-10 h-10 bg-slate-900 text-white shadow-lg grid place-items-center";
-    btn.title = "Show quick tour"; btn.innerHTML = '<span class="sr-only">Help</span>?';
-    btn.onclick = () => Tour.start(true);
-    document.body.appendChild(btn);
-  }
-
-  function readCookie(k){
-  return document.cookie.split('; ').find(r => r.startsWith(k + '='))?.split('=')[1];
-}
-function deleteCookie(k){
-  document.cookie = `${k}=; Max-Age=0; path=/; samesite=Lax`;
-}
-function welcomeSource(){
-  const url = new URL(location.href);
-  if (url.searchParams.get('welcome') === '1') return 'qp';
-  if (readCookie('just_logged_in') === '1')   return 'cookie';
-  if (sessionStorage.getItem('nm_just_logged_in') === '1') return 'ss';
-  return null;
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  injectHelp();
-
-  const src = welcomeSource();
-  if (src) {
-    // Fire immediately on first page after login/signup
-    Tour.start(true);
-
-    // Clean up the flag so it’s one-shot
-    if (src === 'qp') {
-      const u = new URL(location.href);
-      u.searchParams.delete('welcome');
-      history.replaceState({}, '', u);
-    }
-    if (src === 'cookie') deleteCookie('just_logged_in');
-    if (src === 'ss') sessionStorage.removeItem('nm_just_logged_in');
-  } else {
-    // Fallback: show tour only if user hasn’t done it before
-    setTimeout(() => { Tour.start(false); }, 800);
+  } catch (e) {
+    console.warn('Session init error:', e);
   }
 });
 
-
-})();
-
-/** CENTERED INSTALL MODAL (2-minute delay) **/
-(function () {
-  const DISMISS_KEY = "nm_install_dismissed_v2";
-  const SHOWN_KEY   = "nm_install_shown_v2";   // avoid re-show per session
-  const DELAY_MS    = 120000;                   // 2 minutes
-
-  let deferredPrompt = null;
-  let timer = null;
-
-  // Minimal SW registration is still required for Android installability
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("/sw.js").catch(console.warn);
-    });
-  }
-
-  // Utility: create modal
-  function buildModal({ title, body, ctaLabel, onCta, showCancel = true }) {
-    const wrap = document.createElement("div");
-    wrap.id = "nmInstallModal";
-    wrap.className = "fixed inset-0 z-[10060] flex items-center justify-center";
-    wrap.setAttribute("role", "dialog");
-    wrap.setAttribute("aria-modal", "true");
-
-    wrap.innerHTML = `
-      <div class="absolute inset-0 bg-black/40 backdrop-blur-[1px]" data-close="1"></div>
-      <div class="relative bg-white w-[92vw] max-w-md rounded-2xl shadow-2xl ring-1 ring-gray-200 p-6 animate-fadeInUp">
-        <button class="absolute top-3 right-4 text-gray-400 hover:text-gray-700 text-2xl leading-none" aria-label="Close" data-close="1">&times;</button>
-        <div class="flex items-center gap-3 mb-3">
-          <div class="shrink-0 rounded-full p-2 bg-teal-100 text-teal-700">
-            <i class="fa-solid fa-mobile-screen"></i>
-          </div>
-          <h3 class="text-xl font-semibold text-gray-800">${title}</h3>
-        </div>
-        <p class="text-sm text-gray-600 mb-4">${body}</p>
-        <div class="flex justify-end gap-2 mt-2">
-          ${showCancel ? `<button class="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50" data-close="1">Not now</button>` : ""}
-          <button id="nmInstallCta" class="px-4 py-2 rounded bg-teal-600 text-white hover:bg-teal-700">${ctaLabel}</button>
-        </div>
-      </div>
-    `;
-
-    // Close handlers
-    function close() {
-      wrap.remove();
-      document.removeEventListener("keydown", onKey);
-    }
-    function onKey(e) { if (e.key === "Escape") close(); }
-
-    wrap.addEventListener("click", (e) => {
-      if (e.target.closest("[data-close]")) {
-        localStorage.setItem(DISMISS_KEY, "1"); // remember dismissal
-        close();
-      }
-    });
-
-    document.addEventListener("keydown", onKey);
-    document.body.appendChild(wrap);
-
-    // Focus the CTA for accessibility
-    setTimeout(() => document.getElementById("nmInstallCta")?.focus(), 0);
-
-    // Wire CTA
-    document.getElementById("nmInstallCta")?.addEventListener("click", async () => {
-      try { await onCta?.(); } finally { close(); }
-    });
-  }
-
-  // Android / Chrome: capture the event but delay showing UI
-  window.addEventListener("beforeinstallprompt", (e) => {
-    if (localStorage.getItem(DISMISS_KEY) === "1" || localStorage.getItem(SHOWN_KEY) === "1") return;
-    e.preventDefault();
-    deferredPrompt = e;
-
-    // Start the 2-minute timer only after we know install is eligible
-    timer = setTimeout(() => {
-      if (!deferredPrompt) return; // eligibility may have changed
-      localStorage.setItem(SHOWN_KEY, "1");
-      buildModal({
-        title: "Add NeuroMed to your Home Screen",
-        body: "Get faster access and a cleaner, app-like experience. Works even better on mobile.",
-        ctaLabel: "Install",
-        onCta: async () => {
-          deferredPrompt.prompt();
-          const { outcome } = await deferredPrompt.userChoice;
-          if (outcome === "dismissed") localStorage.setItem(DISMISS_KEY, "1");
-          deferredPrompt = null;
-        }
-      });
-    }, DELAY_MS);
-  });
-
-  // Thank-you + stop future prompts on this device once installed
-  window.addEventListener("appinstalled", () => {
-    localStorage.setItem(DISMISS_KEY, "1");
-    console.log("NeuroMed installed 🎉");
-  });
-
-  // iOS: show a guidance modal after 2 minutes (only if not already standalone)
-  document.addEventListener("DOMContentLoaded", () => {
-    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
-
-    if (!isIOS || isStandalone || localStorage.getItem(DISMISS_KEY) === "1" || localStorage.getItem(SHOWN_KEY) === "1") {
-      return;
-    }
-
-    setTimeout(() => {
-      localStorage.setItem(SHOWN_KEY, "1");
-      buildModal({
-        title: "Add NeuroMed to your Home Screen",
-        body: `On iPhone/iPad: Tap <b>Share</b> <span aria-hidden="true">⬆️</span> then <b>Add to Home Screen</b>.`,
-        ctaLabel: "Got it",
-        showCancel: false,
-        onCta: () => { localStorage.setItem(DISMISS_KEY, "1"); }
-      });
-    }, DELAY_MS);
-  });
-})();
-
-(function(){
-    
-
-
-    // open/close
-    function openMenu(){
-      menu.classList.remove('hidden');
-      btn.setAttribute('aria-expanded', 'true');
-      // focus first item
-      const first = menu.querySelector('.nm-lang-item');
-      first && first.focus();
-      // click outside to close
-      document.addEventListener('mousedown', onDocClick);
-      document.addEventListener('keydown', onKeyNav);
-    }
-    function closeMenu(){
-      menu.classList.add('hidden');
-      btn.setAttribute('aria-expanded', 'false');
-      document.removeEventListener('mousedown', onDocClick);
-      document.removeEventListener('keydown', onKeyNav);
-    }
-    function onDocClick(e){
-      if (!menu.contains(e.target) && !btn.contains(e.target)) closeMenu();
-    }
-    function onKeyNav(e){
-      if (e.key === 'Escape') { closeMenu(); btn.focus(); }
-      if (e.key === 'Tab')    { closeMenu(); } // simple trap-free close
-    }
-
-    btn?.addEventListener('click', () => {
-      menu.classList.contains('hidden') ? openMenu() : closeMenu();
-    });
-
-    // choose tone
-    menu.querySelectorAll('.nm-lang-item').forEach(el => {
-      el.addEventListener('click', () => {
-        const tone = el.getAttribute('data-tone');
-        setTone(tone);
-        closeMenu();
-      });
-    });
-
-    // make sendChat honor the globe selection first
-    const __origSendChat = window.sendChat;
-    window.sendChat = async function(){
-      window.__nmToneOverride = getTone();
-      return __origSendChat();
-    };
-
-    // also update FormData line inside sendChat if you haven’t yet:
-    // const tone = window.__nmToneOverride
-    //   || document.getElementById('toneSelect')?.value
-    //   || document.querySelector('input[name="tone"]:checked')?.value
-    //   || "PlainClinical";
-  })();
-
-  const NEW_SESSION_ON_REFRESH = true; // true = start fresh on every reload; false = resume last session
-
-  document.addEventListener('DOMContentLoaded', async () => {
-    try {
-      if (NEW_SESSION_ON_REFRESH) {
-        // Force a fresh conversation after reload
-        localStorage.removeItem('nm_session_id'); // clears client "active session"
-        await fetch('/clear-session/', {
-          method: 'POST',
-          headers: { 'X-CSRFToken': (window.getCSRFToken ? getCSRFToken() : '') }
-        });
-        // You can optionally show a friendly hint in the chat window:
-        appendBubble('New chat started. What would you like to do?', false);
-      } else {
-        // Resume: try to reopen the last active session if present
-        const sid = localStorage.getItem('nm_session_id');
-        if (sid && window.openSession) {
-          try { await openSession(Number(sid)); } catch {}
-        }
-        // (Optional) else you could auto-select the most recent session:
-        // const list = await apiJson('/api/chat/sessions/');
-        // if (list.length) { localStorage.setItem('nm_session_id', String(list[0].id)); openSession(list[0].id); }
-      }
-    } catch (e) {
-      console.warn('Session init error:', e);
-    }
-  });
-  
-
 </script>
+
+<!-- Keep your existing styles; these are just tiny extras -->
 <style>
   @keyframes fadeInUp { from {opacity:0; transform:translateY(12px)} to {opacity:1; transform:translateY(0)} }
   .animate-fadeInUp { animation: fadeInUp .22s ease-out; }
   .nm-lang-item.active { background:#f0fdfa; }
+</style>
 
-  </style>
 <script>
+  /* Service worker (unchanged) */
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
       navigator.serviceWorker.register("/sw.js").catch(console.warn);
     });
   }
+</script>
 
-  
-  </script>
   
 </body>
 </html>

@@ -8,7 +8,7 @@
   <link rel="apple-touch-icon" href="/static/pwa/icons/apple-touch-icon-180.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/static/pwa/icons/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/static/pwa/icons/favicon-16.png">
-  <meta name="theme-color" content="#0f766e">
+  <meta name="theme-color" content="#236092">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Markdown parser -->
@@ -76,7 +76,7 @@
 
 /* ---------- Base theme & layout ---------- */
 :root{
-  --brand:#0b3b36;
+  --brand:#236092;
   --font-scale: 1.125;              /* 18px base for readability */
   --line-scale: 1.08;
   --max-ch: 68ch;
@@ -117,7 +117,7 @@ body{ background:#f6f8fb; line-height: calc(1.55 * var(--line-scale)); letter-sp
 #suggestionsList.compact > .suggestion:nth-child(n+4){ display:none; }
 
 #uploadBtn,#micBtn,#sendBtn{ min-width:44px; min-height:44px; }
-:focus-visible{ outline:3px solid #10b981; outline-offset:2px; border-radius:.5rem; }
+:focus-visible{ outline:3px solid #236092; outline-offset:2px; border-radius:.5rem; }
 
 /* dropzone clearer for elders */
 .dropwrap{ border:2px dashed #cbd5e1; border-radius:16px; background:#fff; }
@@ -145,7 +145,7 @@ body{ background:#f6f8fb; line-height: calc(1.55 * var(--line-scale)); letter-sp
 #nmBody{ color:#475569; font-size:.95rem; line-height:1.55; }
 #nmPop .btn{ padding:.45rem .85rem; border-radius:10px; font-weight:600; }
 #nmPop .btn-text{ color:#475569; background:transparent; border:1px solid rgba(2,6,23,.08); }
-#nmPop .btn-primary{ color:#fff; background:#0f766e; border:1px solid #0d6e67; }
+#nmPop .btn-primary{ color:#fff; background:#236092; border:1px solid #0d6e67; }
 .nm-tour-sr-only{ position:absolute!important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 #nmTourHelp{ position:fixed; left:12px; bottom:12px; z-index:10052; width:44px; height:44px; border-radius:9999px; display:grid; place-items:center; font-weight:700; background:#0f172a; color:#fff; box-shadow:0 8px 20px rgba(2,6,23,.22); }
 #nmTourHelp:hover{ filter:brightness(1.05); }
@@ -190,7 +190,7 @@ body{ background:#f6f8fb; line-height: calc(1.55 * var(--line-scale)); letter-sp
     <div class="max-w-6xl mx-auto px-5 py-3 flex items-center justify-between">
       <!-- Brand -->
       <a href="/" class="flex items-center gap-3">
-        <i class="fa-solid fa-heart-pulse text-teal-600 text-xl" aria-hidden="true"></i>
+        <i class="fa-solid fa-heart-pulse text-[#236092] text-xl" aria-hidden="true"></i>
         <span class="font-semibold tracking-tight">NeuroMed.ai</span>
       </a>
 
@@ -279,7 +279,7 @@ body{ background:#f6f8fb; line-height: calc(1.55 * var(--line-scale)); letter-sp
         Upload a note, lab, or script — get clear next steps.
       </p>
       <div class="mt-4 flex flex-col sm:flex-row gap-3 justify-center">
-        <button id="ctaUpload" class="px-5 py-3 rounded-xl bg-teal-600 text-white hover:bg-teal-700">
+        <button id="ctaUpload" class="px-5 py-3 rounded-xl bg-[#236092] text-white hover:bg-[#1B5A8E]">
           Upload a file
         </button>
         <button id="ctaDemo" class="px-5 py-3 rounded-xl border hover:bg-slate-50">
@@ -300,7 +300,7 @@ body{ background:#f6f8fb; line-height: calc(1.55 * var(--line-scale)); letter-sp
       <i class="fa-solid fa-hands-holding-child text-amber-700"></i><span>Caregiver</span>
     </button>
     <button data-mode="PlainClinical" class="mode-chip justify-center text-sm" aria-pressed="false">
-      <i class="fa-regular fa-message text-teal-600"></i><span>Balanced</span>
+      <i class="fa-regular fa-message text-[#236092]"></i><span>Balanced</span>
     </button>
     <button data-mode="Clinical" class="mode-chip justify-center text-sm" aria-pressed="false">
       <i class="fa-solid fa-stethoscope text-slate-800"></i><span>Clinical</span>
@@ -310,7 +310,7 @@ body{ background:#f6f8fb; line-height: calc(1.55 * var(--line-scale)); letter-sp
     </button>
     
     <button data-mode="Geriatric" class="mode-chip justify-center text-sm" aria-pressed="false">
-      <i class="fa-solid fa-person-cane text-emerald-700"></i><span>Geriatric</span>
+      <i class="fa-solid fa-person-cane text-[#28926D]"></i><span>Geriatric</span>
     </button>
     <!-- New / extra category fits naturally -->
     <button data-mode="EmotionalSupport" class="mode-chip justify-center text-sm" aria-pressed="false">
@@ -328,7 +328,7 @@ body{ background:#f6f8fb; line-height: calc(1.55 * var(--line-scale)); letter-sp
   <button id="modePickerBtn"
           class="w-full rounded-xl border bg-white px-3 py-2.5 flex items-center justify-between shadow-sm active:scale-[.99] transition">
     <span class="flex items-center gap-2">
-      <i id="modePickerIcon" class="fa-regular fa-message text-teal-600"></i>
+      <i id="modePickerIcon" class="fa-regular fa-message text-[#236092]"></i>
       <span id="modePickerLabel" class="text-sm font-medium">Caregiver</span>
     </span>
     <span class="text-slate-400"><i class="fa-solid fa-sliders"></i></span>
@@ -368,17 +368,17 @@ body{ background:#f6f8fb; line-height: calc(1.55 * var(--line-scale)); letter-sp
             <div class="text-[15px] font-medium">Caregiver</div>
             <div class="text-xs text-slate-500 truncate">Gentle, practical steps</div>
           </div>
-          <i class="fa-solid fa-check ml-auto text-emerald-600 hidden"></i>
+          <i class="fa-solid fa-check ml-auto text-[#28926D] hidden"></i>
         </button>
 
         <button class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 text-left"
                 data-mode="PlainClinical">
-          <i class="fa-regular fa-message text-teal-600"></i>
+          <i class="fa-regular fa-message text-[#236092]"></i>
           <div class="min-w-0">
             <div class="text-[15px] font-medium">Balanced</div>
             <div class="text-xs text-slate-500 truncate">Clear + calm explanations</div>
           </div>
-          <i class="fa-solid fa-check ml-auto text-emerald-600 hidden"></i>
+          <i class="fa-solid fa-check ml-auto text-[#28926D] hidden"></i>
         </button>
 
         <button class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 text-left"
@@ -388,7 +388,7 @@ body{ background:#f6f8fb; line-height: calc(1.55 * var(--line-scale)); letter-sp
             <div class="text-[15px] font-medium">Clinical</div>
             <div class="text-xs text-slate-500 truncate">Concise & technical</div>
           </div>
-          <i class="fa-solid fa-check ml-auto text-emerald-600 hidden"></i>
+          <i class="fa-solid fa-check ml-auto text-[#28926D] hidden"></i>
         </button>
 
         <button class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 text-left"
@@ -398,19 +398,19 @@ body{ background:#f6f8fb; line-height: calc(1.55 * var(--line-scale)); letter-sp
             <div class="text-[15px] font-medium">Faith</div>
             <div class="text-xs text-slate-500 truncate">Guidance with encouragement</div>
           </div>
-          <i class="fa-solid fa-check ml-auto text-emerald-600 hidden"></i>
+          <i class="fa-solid fa-check ml-auto text-[#28926D] hidden"></i>
         </button>
 
         
 
         <button class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 text-left"
                 data-mode="Geriatric">
-          <i class="fa-solid fa-person-cane text-emerald-700"></i>
+          <i class="fa-solid fa-person-cane text-[#28926D]"></i>
           <div class="min-w-0">
             <div class="text-[15px] font-medium">Geriatric</div>
             <div class="text-xs text-slate-500 truncate">Larger text, simpler steps</div>
           </div>
-          <i class="fa-solid fa-check ml-auto text-emerald-600 hidden"></i>
+          <i class="fa-solid fa-check ml-auto text-[#28926D] hidden"></i>
         </button>
 
         <button class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 text-left"
@@ -420,7 +420,7 @@ body{ background:#f6f8fb; line-height: calc(1.55 * var(--line-scale)); letter-sp
           <div class="text-[15px] font-medium">Emotional Support</div>
           <div class="text-xs text-slate-500 truncate">Validating, calm & gentle</div>
         </div>
-        <i class="fa-solid fa-check ml-auto text-emerald-600 hidden"></i>
+        <i class="fa-solid fa-check ml-auto text-[#28926D] hidden"></i>
       </button>
 
       </div>
@@ -486,7 +486,7 @@ Hi! Upload a file or ask a question. I’ll turn it into clear next steps.
                 </button>
               </div>
 
-              <div id="dropHint" class="pointer-events-none hidden absolute inset-0 rounded-xl ring-2 ring-emerald-600/50 bg-emerald-50/50 grid place-items-center text-emerald-900 text-sm font-medium">
+              <div id="dropHint" class="pointer-events-none hidden absolute inset-0 rounded-xl ring-2 ring-[#28926D]/50 bg-[#28926D]/10 grid place-items-center text-[#1F4E3E] text-sm font-medium">
                 Drop your file to attach
               </div>
             </div>
@@ -507,7 +507,7 @@ Hi! Upload a file or ask a question. I’ll turn it into clear next steps.
   <!-- Toast -->
   <div id="toast" class="toast fixed top-4 right-4 z-[60] hidden">
     <div class="bg-white border shadow-lg rounded-xl px-3 py-2 text-sm flex items-center gap-2">
-      <i id="toastIcon" class="fa-regular fa-message text-teal-600" aria-hidden="true"></i>
+      <i id="toastIcon" class="fa-regular fa-message text-[#236092]" aria-hidden="true"></i>
       <span id="toastText" class="text-slate-800">Mode set</span>
     </div>
   </div>
@@ -521,7 +521,7 @@ Hi! Upload a file or ask a question. I’ll turn it into clear next steps.
       <div class="font-semibold">Like this summary?</div>
       <p class="text-sm text-slate-600 mt-1">Create a free account to keep your history and download PDFs.</p>
       <div class="mt-3 flex gap-2">
-        <a href="/signup" class="px-3 py-1.5 rounded-lg bg-teal-600 text-white text-sm">Create free account</a>
+        <a href="/signup" class="px-3 py-1.5 rounded-lg bg-[#236092] text-white text-sm">Create free account</a>
         <button class="px-3 py-1.5 rounded-lg border text-sm" onclick="document.getElementById('postResultInvite').classList.add('hidden')">Not now</button>
       </div>
     </div>
@@ -633,7 +633,7 @@ function applyLangUI(code){
   if (b2) b2.textContent = label;
   // Optional toast:
   if (typeof showToast === 'function'){
-    showToast(`Language set: ${label}`, 'fa-solid fa-globe', 'text-teal-600');
+    showToast(`Language set: ${label}`, 'fa-solid fa-globe', 'text-[#236092]');
   }
 }
 
@@ -882,8 +882,8 @@ function appendBubble({ message, isUser=false, timestamp=new Date() }) {
     });
 
     function selectMode(btn){
-      $$('#modeGroup button').forEach(b => { b.setAttribute('aria-pressed','false'); b.classList.remove('ring','ring-emerald-600'); });
-      btn.setAttribute('aria-pressed','true'); btn.classList.add('ring','ring-emerald-600');
+      $$('#modeGroup button').forEach(b => { b.setAttribute('aria-pressed','false'); b.classList.remove('ring','ring-[#28926D]'); });
+      btn.setAttribute('aria-pressed','true'); btn.classList.add('ring','ring-[#28926D]');
       const mode = btn.dataset.mode;
       saveMode(mode);
       applyModeUI(mode);
@@ -893,7 +893,7 @@ function appendBubble({ message, isUser=false, timestamp=new Date() }) {
     const MODE_META = {
   'PlainClinical': { 
     icon: 'fa-regular fa-message', 
-    color: 'text-teal-600', 
+    color: 'text-[#236092]', 
     intro: "Hi there! You're in Balanced Mode. I can help you with clear explanations and add clinician notes when useful." 
   },
   'Caregiver': { 
@@ -928,7 +928,7 @@ Your expertise leads; I make the information faster, sharper, and more usable.
 
   'Geriatric': { 
     icon: 'fa-solid fa-person-cane', 
-    color: 'text-emerald-700', 
+    color: 'text-[#28926D]', 
     intro: "Hi there! You're in Geriatric Mode. I can explain things in simpler steps with clarity, tailored for older adults." 
   },
   'EmotionalSupport': { 
@@ -1202,7 +1202,7 @@ typing.appendChild(node);
       try{
         const r = await fetch('/api/share/latest', { method:'POST', credentials:'include' });
         const j = await r.json();
-        if(j?.url){ await navigator.clipboard.writeText(j.url); showToast('Share link copied', 'fa-regular fa-copy', 'text-teal-600'); }
+        if(j?.url){ await navigator.clipboard.writeText(j.url); showToast('Share link copied', 'fa-regular fa-copy', 'text-[#236092]'); }
         track('export_clicked', {type:'share'});
       }catch(e){
         showToast('Could not create link', 'fa-regular fa-circle-xmark', 'text-red-600');
@@ -1683,11 +1683,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const MODE_ICON = {
     'Caregiver':     'fa-solid fa-hands-holding-child text-amber-700',
-    'PlainClinical': 'fa-regular fa-message text-teal-600',
+    'PlainClinical': 'fa-regular fa-message text-[#236092]',
     'Clinical':      'fa-solid fa-stethoscope text-slate-800',
     'Faith':         'fa-solid fa-hands-praying text-indigo-700',
     
-    'Geriatric':     'fa-solid fa-person-cane text-emerald-700',
+    'Geriatric':     'fa-solid fa-person-cane text-[#28926D]',
     'EmotionalSupport': 'fa-solid fa-heart text-rose-700'
   };
 
@@ -1700,7 +1700,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateTrigger(mode){
     if (!iconEl || !labelEl) return;
-    iconEl.className = MODE_ICON[mode] || 'fa-regular fa-message text-teal-600';
+    iconEl.className = MODE_ICON[mode] || 'fa-regular fa-message text-[#236092]';
     labelEl.textContent = labelFor(mode);
     // reflect on hidden select for a11y state
     const sel = document.getElementById('modeSelect');
@@ -1752,8 +1752,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       updateTrigger(mode);
       // subtle haptic-esque feedback
-      item.classList.add('bg-emerald-50');
-      setTimeout(() => item.classList.remove('bg-emerald-50'), 180);
+      item.classList.add('bg-[#28926D]/10');
+      setTimeout(() => item.classList.remove('bg-[#28926D]/10'), 180);
     });
   });
 
@@ -1790,7 +1790,7 @@ document.addEventListener('DOMContentLoaded', () => {
      class="fixed inset-0 z-[80] hidden items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
   <div class="w-full max-w-md rounded-2xl bg-white shadow-2xl border p-5">
     <div class="flex items-center gap-3 mb-2">
-      <i class="fa-solid fa-heart-pulse text-teal-600 text-xl"></i>
+      <i class="fa-solid fa-heart-pulse text-[#236092] text-xl"></i>
       <h2 class="text-lg font-semibold">✨ Welcome to NeuroMed AI!</h2>
     </div>
     <p class="text-sm text-slate-700">
@@ -1803,7 +1803,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </ul>
 
     <a href="/signup"
-       class="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-medium py-2.5">
+       class="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#236092] hover:bg-[#1B5A8E] text-white font-medium py-2.5">
       👉 Create Account <span class="text-xs opacity-90">(fast & free)</span>
     </a>
 

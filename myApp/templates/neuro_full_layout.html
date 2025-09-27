@@ -17,8 +17,8 @@
   <aside class="w-1/4 bg-gray-100 border-r p-4">
     <h2 class="text-md font-semibold text-gray-700 mb-4">History/Summaries</h2>
     <ul id="summaryList" class="space-y-2 text-sm text-gray-600 overflow-y-auto h-full">
-      <li class="cursor-pointer hover:text-teal-600">Summary 1</li>
-      <li class="cursor-pointer hover:text-teal-600">Summary 2</li>
+      <li class="cursor-pointer hover:text-[#236092]">Summary 1</li>
+      <li class="cursor-pointer hover:text-[#236092]">Summary 2</li>
     </ul>
   </aside>
 
@@ -28,10 +28,10 @@
     <!-- HEADER -->
     <header class="flex items-center justify-between px-4 py-3 border-b">
       <div class="flex items-center gap-2">
-        <i class="fa-solid fa-notes-medical text-teal-600 text-xl"></i>
-        <h1 class="text-lg font-bold text-gray-800">NeuroMed <span class="text-teal-600">AI</span></h1>
+        <i class="fa-solid fa-notes-medical text-[#236092] text-xl"></i>
+        <h1 class="text-lg font-bold text-gray-800">NeuroMed <span class="text-[#236092]">AI</span></h1>
       </div>
-      <i class="fa-solid fa-lightbulb text-teal-600 text-lg cursor-pointer" title="Smart tips & tools"></i>
+      <i class="fa-solid fa-lightbulb text-[#236092] text-lg cursor-pointer" title="Smart tips & tools"></i>
     </header>
 
     <!-- CHAT MESSAGES -->
@@ -108,18 +108,18 @@ function startDictation() {
   recognition.lang = 'en-US';
 
   recognition.onstart = () => {
-    micBtn.classList.add("ring", "ring-teal-500");
+    micBtn.classList.add("ring", "ring-[#28926D]");
     micBtn.title = "Listening...";
   };
 
   recognition.onerror = (event) => {
-    micBtn.classList.remove("ring", "ring-teal-500");
+    micBtn.classList.remove("ring", "ring-[#28926D]");
     micBtn.title = "Speak your message";
     alert("Speech recognition error: " + event.error);
   };
 
   recognition.onend = () => {
-    micBtn.classList.remove("ring", "ring-teal-500");
+    micBtn.classList.remove("ring", "ring-[#28926D]");
     micBtn.title = "Speak your message";
   };
 
