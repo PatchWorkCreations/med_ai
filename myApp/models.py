@@ -67,6 +67,14 @@ LANGUAGE_CHOICES = [
     ]
 
 class MedicalSummary(models.Model):
+    CARE_CHOICES = [
+        ("hospital", "Hospital/Discharge"),
+        ("ambulatory", "Ambulatory/Clinic"),
+        ("urgent", "Urgent Care"),
+    ]
+    care_setting = models.CharField(
+        max_length=16, choices=CARE_CHOICES, default="hospital", db_index=True
+    )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="summaries")
     uploaded_filename = models.CharField(max_length=255)
     tone = models.CharField(max_length=50)
@@ -76,7 +84,6 @@ class MedicalSummary(models.Model):
 
     class Meta:
         ordering = ['-created_at']
-
 
 
 from django.db import models
@@ -320,5 +327,3 @@ class Encounter(OrgOwnedModel):
     def __str__(self):
         return f"[{self.org.slug}] Encounter #{self.id} – {self.reason}"
 
-# Tip: next, migrate your other PHI models (Document, Task, Appointment, Claim,
-# Message, MedicalSummary) to inherit OrgOwnedModel the same way.

@@ -246,6 +246,35 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
   body.geriatric-zoom { --nm-zoom: 1.15; }
 }
 
+/* Care-setting accents for AI bubbles */
+.chat-ai.ai-hospital   { background: #f0f5ff; border-left: 4px solid #2563eb; } /* indigo-blue */
+.chat-ai.ai-ambulatory { background: #f0fdfa; border-left: 4px solid #10b981; } /* teal/emerald */
+.chat-ai.ai-urgent     { background: #fff7ed; border-left: 4px solid #f97316; } /* orange */
+
+/* Setting chip */
+.setting-chip {
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-size: 12px; line-height: 1; font-weight: 600;
+  padding: 4px 8px; border-radius: 9999px; margin-bottom: 6px;
+  color: #0f172a;
+}
+.setting-chip.hospital   { background: #e0e7ff; color: #1e3a8a; }   /* indigo-ish */
+.setting-chip.ambulatory { background: #d1fae5; color: #065f46; }   /* emerald-ish */
+.setting-chip.urgent     { background: #ffedd5; color: #9a3412; }   /* orange-ish */
+
+.setting-chip i { font-size: 12px; }
+
+.tone-chip {
+  display:inline-flex; align-items:center; gap:.4rem;
+  font-size:12px; line-height:1; font-weight:600;
+  padding:4px 8px; border-radius:9999px; margin-bottom:6px; margin-right:6px;
+}
+.tone-balanced{ background:#e2e8f0; color:#334155; }
+.tone-caregiver{ background:#ffe4e6; color:#9f1239; }
+.tone-faith{ background:#e0e7ff; color:#3730a3; }
+.tone-clinical{ background:#fef9c3; color:#92400e; }
+.tone-geriatric{ background:#dcfce7; color:#065f46; }
+.tone-support{ background:#ede9fe; color:#6d28d9; }
 
 </style>
 
@@ -330,16 +359,16 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
 
             <!-- Mobile language trigger -->
             <div class="md:hidden">
-              <button id="mLangBtn"
-                      class="px-3 py-2 rounded-lg border flex items-center justify-between bg-white active:scale-[.99] transition"
-                      aria-haspopup="dialog" aria-expanded="false">
-                <span class="flex items-center gap-2">
-                  <i class="fa-solid fa-globe"></i>
-                  <span id="mLangBtnLabel">English</span>
-                </span>
-                <i class="fa-solid fa-caret-down opacity-70"></i>
-              </button>
-            </div>
+  <button id="mLangBtn"
+        class="px-3 py-2 rounded-lg border flex items-center gap-3 bg-white active:scale-[.99] transition"
+        aria-haspopup="dialog" aria-expanded="false">
+  <i class="fa-solid fa-globe"></i>
+  <span id="mLangBtnLabel">English</span>
+  <i class="fa-solid fa-caret-down opacity-70"></i>
+</button>
+
+</div>
+
 
             <!-- Burger (mobile only) -->
             <button id="burgerBtn" onclick="toggleSidebar()" class="md:hidden text-gray-600 text-2xl focus:outline-none">
@@ -348,34 +377,35 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
           </div>
         </header>
 
-        <div id="toneBar" class="px-3 py-1 bg-[#fefaf7] text-gray-600 overflow-x-auto whitespace-nowrap">
-          <span class="font-semibold mr-2">Summary Tone:</span>
-          <label class="inline-flex items-center mr-3">
-            <input type="radio" name="tone" value="PlainClinical" checked>
-            <span class="ml-1">Balanced</span>
-          </label>
-          <label class="inline-flex items-center mr-3">
-            <input type="radio" name="tone" value="Caregiver">
-            <span class="ml-1">Caregiver</span>
-          </label>
-          <label class="inline-flex items-center mr-3">
-            <input type="radio" name="tone" value="Faith">
-            <span class="ml-1">Faith</span>
-          </label>
-          <label class="inline-flex items-center mr-3">
-            <input type="radio" name="tone" value="Clinical">
-            <span class="ml-1">Clinical</span>
-          </label>
-          <label class="inline-flex items-center mr-3">
-            <input type="radio" name="tone" value="Geriatric">
-            <span class="ml-1">Geriatric</span>
-          </label>
-          <!-- New Emotional Support tone -->
-          <label class="inline-flex items-center mr-3">
-            <input type="radio" name="tone" value="EmotionalSupport">
-            <span class="ml-1">Emotional Support</span>
-          </label>
-        </div>
+      <div id="toneBar"
+     class="px-3 py-1 bg-[#fefaf7] text-gray-600
+            flex flex-wrap items-center gap-x-3 gap-y-2">
+
+  <!-- Group 1: Tone -->
+  <div class="flex items-center flex-wrap gap-x-3 gap-y-1">
+    <span class="font-semibold">Summary Tone:</span>
+
+    <label class="inline-flex items-center"><input type="radio" name="tone" value="PlainClinical" checked><span class="ml-1">Balanced</span></label>
+    <label class="inline-flex items-center"><input type="radio" name="tone" value="Caregiver"><span class="ml-1">Caregiver</span></label>
+    <label class="inline-flex items-center"><input type="radio" name="tone" value="Faith"><span class="ml-1">Faith</span></label>
+    <label class="inline-flex items-center"><input type="radio" name="tone" value="Clinical"><span class="ml-1">Clinical</span></label>
+    <label class="inline-flex items-center"><input type="radio" name="tone" value="Geriatric"><span class="ml-1">Geriatric</span></label>
+    <label class="inline-flex items-center"><input type="radio" name="tone" value="EmotionalSupport"><span class="ml-1">Emotional Support</span></label>
+  </div>
+
+  <!-- Responsive line break: full width on small, zero width on sm+ -->
+  <span class="basis-full sm:basis-0 h-0"></span>
+
+  <!-- Group 2: Care Setting -->
+  <div class="flex items-center flex-wrap gap-x-3 gap-y-1">
+    <span class="font-semibold">Care Setting:</span>
+
+    <label class="inline-flex items-center"><input type="radio" name="care_setting" value="hospital" checked><span class="ml-1">Hospital</span></label>
+    <label class="inline-flex items-center"><input type="radio" name="care_setting" value="ambulatory"><span class="ml-1">Ambulatory</span></label>
+    <label class="inline-flex items-center"><input type="radio" name="care_setting" value="urgent"><span class="ml-1">Urgent</span></label>
+  </div>
+</div>
+
 
         <!-- Chat Window -->
         <div id="chatWindow" class="flex-1 px-6 py-4 overflow-y-auto text-base bg-gradient-to-br from-white to-gray-50 rounded-xl"></div>
@@ -1211,7 +1241,7 @@ async function openSession(id){
     if (chatWindow) chatWindow.innerHTML = '';
 
     const visible = (data.messages || []).filter(m => m.role === 'user' || m.role === 'assistant');
-    visible.forEach(m => appendRichBubble(m.content, m.role === 'user'));
+    visible.forEach(m => appendRichBubble(m.content, m.role === 'user', true)); 
   } catch (e) {
     console.warn(e);
   }
@@ -1498,7 +1528,17 @@ function renderStreamingMarkdown(mdText, targetEl){
    Chat UI bubble renderers
    ========================= */
 
-function appendRichBubble(content, isUser = false) {
+function careLabel(c){
+  return c === 'urgent' ? 'Urgent Care'
+       : c === 'ambulatory' ? 'Clinic / Ambulatory'
+       : 'Hospital';
+}
+function careIcon(c){
+  return c === 'urgent' ? 'fa-triangle-exclamation'
+       : c === 'ambulatory' ? 'fa-stethoscope'
+       : 'fa-hospital';
+}
+function appendRichBubble(content, isUser = false, isHistory = false) {
   const chatWindow = document.getElementById("chatWindow");
   if (!chatWindow) return;
 
@@ -1510,32 +1550,99 @@ function appendRichBubble(content, isUser = false) {
   bubble.setAttribute("role", "article");
   bubble.setAttribute("aria-live", "polite");
 
+  // decorate AI bubbles with tone + care
+  if (!isUser) {
+    const care = (typeof window.__nmCareSetting === 'function') ? window.__nmCareSetting() : 'hospital';
+    bubble.classList.add(`ai-${care}`);
+
+    const toneFromUI  = document.querySelector('input[name="tone"]:checked')?.value || null;
+    const toneFromMem = (typeof window.__nmTone === 'function') ? window.__nmTone() : null;
+    const toneVal  = toneFromUI || toneFromMem || 'PlainClinical';
+    const toneNorm = (toneVal === 'PlainClinical') ? 'Balanced' : toneVal;
+
+    const toneClass = {
+      Balanced:'tone-balanced', Caregiver:'tone-caregiver', Faith:'tone-faith',
+      Clinical:'tone-clinical', Geriatric:'tone-geriatric', EmotionalSupport:'tone-support'
+    }[toneNorm] || 'tone-balanced';
+
+    const toneChip = document.createElement('div');
+    toneChip.className = `tone-chip ${toneClass}`;
+    toneChip.innerHTML = `<i class="fa-solid fa-feather-pointed"></i> ${toneNorm}`;
+    bubble.appendChild(toneChip);
+
+    const chip = document.createElement('div');
+    chip.className = `setting-chip ${care}`;
+    chip.innerHTML = `<i class="fa-solid ${careIcon(care)}"></i> ${careLabel(care)}`;
+    bubble.appendChild(chip);
+  }
+
+  // --- Content node ---
   const rich = document.createElement("div");
   rich.className = isUser ? "" : "md-prose";
   rich.setAttribute("dir", "auto");
 
-  // If it's a DOM node (attachments grid), append as-is
-  const asNode = !!(content && typeof content === "object" && ("nodeType" in content));
-
   if (isUser) {
-    // user: plain text (no markdown parsing)
+    const asNode = !!(content && typeof content === "object" && ("nodeType" in content));
     if (asNode) rich.appendChild(content);
     else rich.textContent = String(content ?? "");
+    bubble.appendChild(rich);                  // ✅ append for user messages
   } else {
-    // assistant: stream then swap to full markdown
-    if (asNode) {
-      // rare case: assistant DOM node — just append
-      rich.appendChild(content);
+    if (isHistory) {
+      const node = renderAssistantMarkdown(String(content || ''));
+      bubble.appendChild(node);               // ✅ render immediately for history
     } else {
       renderStreamingMarkdown(String(content || ''), rich);
+      bubble.appendChild(rich);               // ✅ stream for live replies
     }
   }
 
-  bubble.appendChild(rich);
   wrap.appendChild(bubble);
   chatWindow.appendChild(wrap);
   chatWindow.scrollTop = chatWindow.scrollHeight;
 }
+
+
+
+
+function updateBubbleChips() {
+  const toneVal = document.querySelector('input[name="tone"]:checked')?.value || 'PlainClinical';
+  const toneNorm = (toneVal === 'PlainClinical') ? 'Balanced' : toneVal;
+
+  const toneClass = {
+    Balanced: 'tone-balanced',
+    Caregiver: 'tone-caregiver',
+    Faith: 'tone-faith',
+    Clinical: 'tone-clinical',
+    Geriatric: 'tone-geriatric',
+    EmotionalSupport: 'tone-support'
+  }[toneNorm] || 'tone-balanced';
+
+  const care = document.querySelector('input[name="care_setting"]:checked')?.value || 'hospital';
+
+  // Update all tone chips
+  document.querySelectorAll('.tone-chip').forEach(chip => {
+    chip.className = `tone-chip ${toneClass}`;
+    chip.innerHTML = `<i class="fa-solid fa-feather-pointed"></i> ${toneNorm}`;
+  });
+
+  // Update all care chips
+  document.querySelectorAll('.setting-chip').forEach(chip => {
+    chip.className = `setting-chip ${care}`;
+    chip.innerHTML = `<i class="fa-solid ${careIcon(care)}"></i> ${careLabel(care)}`;
+  });
+
+  // Update AI bubble care background accent
+  document.querySelectorAll('.chat-ai').forEach(b => {
+    b.classList.remove('ai-hospital','ai-ambulatory','ai-urgent');
+    b.classList.add(`ai-${care}`);
+  });
+}
+
+document.querySelectorAll('input[name="tone"],input[name="care_setting"]').forEach(r=>{
+  r.addEventListener('change', updateBubbleChips);
+});
+
+
 
 // simple alias used elsewhere
 function appendBubble(message, isUser = false) { appendRichBubble(message, isUser); }
@@ -1722,14 +1829,25 @@ async function sendChat() {
   const chatWindow = document.getElementById("chatWindow");
   const userMessage = (input?.value || '').trim();
 
-  const tone =
+  // --- tone normalization ---
+  let toneRaw =
     window.__nmToneOverride ||
-    document.querySelector('input[name="tone"]:checked')?.value ||
+    (typeof window.__nmTone === 'function' ? window.__nmTone() :
+      document.querySelector('input[name="tone"]:checked')?.value) ||
     "PlainClinical";
 
+  // Normalize "PlainClinical" into "Balanced"
+  const tone = (toneRaw === "PlainClinical") ? "Balanced" : toneRaw;
+
+  // --- language detection ---
   const lang =
     (typeof window.__nmLang === 'function' && window.__nmLang()) ||
     navigator.language || 'en-US';
+
+  // --- care setting ---
+  const care = (typeof window.__nmCareSetting === 'function')
+    ? window.__nmCareSetting()
+    : loadCareSetting();
 
   if (!userMessage && pending.length === 0) return;
 
@@ -1755,11 +1873,13 @@ async function sendChat() {
     appendRichBubble(gallery, true);
   }
 
-  // payload
+  // --- payload ---
   const formData = new FormData();
   if (userMessage) formData.append("message", userMessage);
-  formData.append("tone", tone);
+  formData.append("tone", tone);              // ✅ tone appended
   formData.append("lang", lang);
+  formData.append("care_setting", care);      // ✅ care appended
+
   const sidExisting = getSessionId();
   if (sidExisting) formData.append("session_id", sidExisting);
   pending.forEach(p => formData.append("files[]", p.file, p.file.name));
@@ -1770,37 +1890,33 @@ async function sendChat() {
 
   // typing indicator
   const typingWrap = document.createElement("div");
-typingWrap.className = "w-full flex mb-2 justify-start";
+  typingWrap.className = "w-full flex mb-2 justify-start";
 
-const typing = document.createElement("div");
-typing.className = "chat-bubble chat-ai";
+  const typing = document.createElement("div");
+  typing.className = "chat-bubble chat-ai";
 
-const inner = document.createElement("div");
-inner.className = "text-gray-500 italic";
-inner.textContent = "Analyzing";
+  const inner = document.createElement("div");
+  inner.className = "text-gray-500 italic";
+  inner.textContent = "Analyzing";
 
-typing.appendChild(inner);
-typingWrap.appendChild(typing);
-chatWindow.appendChild(typingWrap);
-chatWindow.scrollTop = chatWindow.scrollHeight;
+  typing.appendChild(inner);
+  typingWrap.appendChild(typing);
+  chatWindow.appendChild(typingWrap);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
 
-// Animate the dots
-let dotCount = 0;
-const maxDots = 3;
-const interval = setInterval(() => {
-  dotCount = (dotCount + 1) % (maxDots + 1);
-  inner.textContent = "Analyzing" + ".".repeat(dotCount);
-}, 500);
-
-// (Optional) if you want to stop the animation later when the real AI reply comes in:
-// clearInterval(interval);
-
+  // Animate the dots
+  let dotCount = 0;
+  const maxDots = 3;
+  const interval = setInterval(() => {
+    dotCount = (dotCount + 1) % (maxDots + 1);
+    inner.textContent = "Analyzing" + ".".repeat(dotCount);
+  }, 500);
 
   try {
     const API_SEND = "/api/send-chat/";
     const res = await fetch(API_SEND, {
-      method:"POST",
-      headers:{ "X-CSRFToken": getCSRFToken(), "Accept-Language": lang },
+      method: "POST",
+      headers: { "X-CSRFToken": getCSRFToken(), "Accept-Language": lang },
       body: formData,
       credentials: "include"
     });
@@ -1812,11 +1928,13 @@ const interval = setInterval(() => {
       throw new Error((data && (data.error || data.detail)) || `HTTP ${res.status}`);
     }
 
+    clearInterval(interval);   // stop animation when reply comes
     typingWrap.remove();
     const reply = (data && data.reply) ? data.reply : "⚠️ No reply received.";
     appendRichBubble(reply, false);   // ← streams + full markdown swap
   } catch (err) {
-    inner.classList.remove("italic","text-gray-500");
+    clearInterval(interval);
+    inner.classList.remove("italic", "text-gray-500");
     inner.classList.add("text-red-700");
     inner.textContent = "Hi! Our system is busy right now — please try again in a few minutes.";
   }
@@ -1899,6 +2017,30 @@ function updateComposerPadding() {
   const h = Math.ceil(c.getBoundingClientRect().height || 0);
   w.style.paddingBottom = `calc(${h}px + 12px)`;
 }
+
+// ---- Care Setting helpers (persisted in localStorage) ----
+function loadCareSetting() {
+  const v = localStorage.getItem('nm_care_setting');
+  return (v === 'hospital' || v === 'ambulatory' || v === 'urgent') ? v : 'hospital';
+}
+function saveCareSetting(v) {
+  if (v === 'hospital' || v === 'ambulatory' || v === 'urgent') {
+    localStorage.setItem('nm_care_setting', v);
+  }
+}
+function bindCareSettingUI() {
+  const current = loadCareSetting();
+  const el = document.querySelector(`input[name="care_setting"][value="${current}"]`);
+  if (el && !el.checked) el.checked = true;
+  document.querySelectorAll('input[name="care_setting"]').forEach(r => {
+    r.addEventListener('change', e => saveCareSetting(e.target.value));
+  });
+}
+document.addEventListener('DOMContentLoaded', bindCareSettingUI);
+
+// Optional: expose to other scripts if needed
+window.__nmCareSetting = () => loadCareSetting();
+
 
 /* =========================
    Summary modal (now keeps bold/headings)

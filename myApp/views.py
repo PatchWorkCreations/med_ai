@@ -368,10 +368,10 @@ PROMPT_TEMPLATES = {
 }
 
 
+
 def normalize_tone(tone: str | None) -> str:
     """
-    Normalize tone names. Supports dynamic forms like BilingualEsEn, BilingualJaEn, etc.,
-    and an 'Auto' mode. Defaults to PlainClinical.
+    Normalize tone names. Defaults to PlainClinical if not matched.
     """
     if not tone:
         return "PlainClinical"
@@ -382,37 +382,87 @@ def normalize_tone(tone: str | None) -> str:
     if key:
         return key
 
-    # dynamic bilingual variants (e.g., BilingualEsEn, BilingualJaEn, BilingualKoEn, BilingualArEn)
-    if _parse_bilingual_code(t):
-        return t  # keep exact so get_system_prompt can handle it
-
-    # explicit Auto
-    if t.lower() == "auto":
-        return "Auto"
-
     # legacy aliases
-    if t.lower() in {"plain", "science", "default"}:
+    if t.lower() in {"plain", "science", "default", "balanced"}:
         return "PlainClinical"
 
     return "PlainClinical"
 
 
-
 def get_system_prompt(tone: str | None) -> str:
+    """
+    Return the base tone-specific system prompt.
+    """
     t = normalize_tone(tone)
-
-    # Dynamic bilingual (Bilingual??En)
-    code = _parse_bilingual_code(t)
-    if code:
-        lang = BILINGUAL_LANGS.get(code, code)
-        return make_bilingual_prompt(lang)
-
-    # Auto-detect + English recap
-    if t == "Auto":
-        return AUTO_PROMPT
-
     return PROMPT_TEMPLATES.get(t, PROMPT_TEMPLATES["PlainClinical"])
 
+
+def get_setting_prompt(base_prompt: str, care_setting: str) -> str:
+    """
+    Append care-setting context onto the tone base prompt.
+    """
+    care = (care_setting or "hospital").lower()
+    if care == "ambulatory":
+        extra = (
+            "Context: Ambulatory/Outpatient visit.\n"
+            "Start the reply with a one-line setting banner exactly like:\n"
+            "[Clinic Follow-Up]\n\n"
+            "Then write in these sections:\n"
+            "Clinic Snapshot – 3–5 bullets.\n"
+            "Today’s Plan – 3–6 bullets.\n"
+            "What to Watch – 2–4 bullets.\n"
+            "Close with a short, conversational handoff."
+        )
+    elif care == "urgent":
+        extra = (
+            "Context: Urgent Care.\n"
+            "Start the reply with a one-line setting banner exactly like:\n"
+            "[Urgent Care Triage]\n\n"
+            "Then write in these sections:\n"
+            "Quick Triage Card – 5–7 bullets.\n"
+            "Immediate Steps – 3–5 bullets.\n"
+            "Return / ER Criteria – 3–5 bullets.\n"
+            "Close with a short, calm, action-first message."
+        )
+    else:
+        extra = (
+            "Context: Inpatient/Hospital/Discharge handoff.\n"
+            "Start the reply with a one-line setting banner exactly like:\n"
+            "[Inpatient / Discharge Handoff]\n\n"
+            "Then write in these sections:\n"
+            "Handoff Highlights – 3–6 bullets.\n"
+            "Discharge Plan – 3–6 bullets.\n"
+            "Safety & Red Flags – 2–4 bullets.\n"
+            "For Clinicians – 1–4 concise points if relevant.\n"
+            "Close with a warm line that invites follow-up."
+        )
+    return f"{base_prompt}\n\n{extra}"
+
+
+VALID_SETTINGS = {"hospital", "ambulatory", "urgent"}
+def norm_setting(val: str | None) -> str:
+    v = (val or "hospital").lower().strip()
+    return v if v in VALID_SETTINGS else "hospital"
+
+
+
+
+
+def _append_urgent_triage(summary_text: str, raw_text: str) -> str:
+    # Naive pulls; your future version can parse vitals from raw_text
+    lines = [
+        "🚑 Quick Triage Card",
+        "• Allergies: (if listed) ",
+        "• Current Meds: (key meds/anticoagulants if present) ",
+        "• Recent Encounters: (ED/hospital last 30–90d if present) ",
+        "• Red Flags Mentioned: (chest pain, stroke signs, SOB, uncontrolled bleeding, severe dehydration, etc.)",
+        "• Immediate Next Steps: (e.g., ECG if chest pain; wound care; fluids; observe; referral) ",
+        "• Return/ER If: (worsening pain, fever >38.5°C, new neuro deficits, fainting, etc.)",
+    ]
+    card = "\n".join(lines)
+    if "Quick Triage Card" not in summary_text:
+        return f"{summary_text}\n\n{card}"
+    return summary_text
 
 
 VISION_FORMAT_PROMPT = (
@@ -510,15 +560,18 @@ log = logging.getLogger(__name__)
 def summarize_medical_record(request):
     uploaded_file = request.FILES.get("file")
     tone = normalize_tone(request.data.get("tone") or request.session.get("tone") or "PlainClinical")
+    care_setting = norm_setting(request.data.get("care_setting"))
     request.session["tone"] = tone
+    request.session["care_setting"] = care_setting
 
 
-    # Friendly validation messages (no negative/error-y phrasing)
     if not uploaded_file:
         return Response({"message": "Please attach a file to continue."}, status=400)
 
     file_name = (uploaded_file.name or "").lower()
-    system_prompt = get_system_prompt(tone)
+    base = get_system_prompt(tone)
+    system_prompt = get_setting_prompt(base, care_setting)
+
 
     try:
         # ---------- Images
@@ -543,6 +596,7 @@ def summarize_medical_record(request):
                 tone=tone,
                 raw_text="(Image file)",
                 summary=summary,
+                care_setting=care_setting,
             )
 
             # Persist to session for chat context
@@ -840,13 +894,11 @@ def _ai_title(user_message: str, files, reply: str, lang: str = "en-US", max_len
 @permission_classes([AllowAny])
 @parser_classes([MultiPartParser, FormParser])
 def send_chat(request):
-    """
-    Chat endpoint with tone/lang, file support, DB persistence, and server-sticky session.
-    """
-    # --- Tone
     raw_tone = request.data.get("tone") or request.session.get("tone") or "PlainClinical"
     tone = normalize_tone(raw_tone)
+    care_setting = norm_setting(request.data.get("care_setting") or request.session.get("care_setting"))
     request.session["tone"] = tone
+    request.session["care_setting"] = care_setting
 
     # --- Language
     lang = request.data.get("lang")
@@ -863,7 +915,7 @@ def send_chat(request):
 
     # --- System prompt
     base_prompt = get_system_prompt(tone)
-    system_prompt = f"{base_prompt}\n\n(Always respond in {lang} unless explicitly told otherwise.)"
+    system_prompt = get_setting_prompt(base_prompt, care_setting) + f"\n\n(Always respond in {lang} unless told otherwise.)"
 
     # --- Inputs
     user_message = (request.data.get("message") or "").strip()
@@ -1290,10 +1342,14 @@ def signup_view(request):
 # =============================
 from django.contrib.auth.decorators import login_required
 
-@login_required(login_url='/login/')
+@login_required
 def dashboard(request):
-    summaries = MedicalSummary.objects.filter(user=request.user).order_by("-created_at")
-    return render(request, "dashboard.html", {"summaries": summaries})
+    care = norm_setting(request.GET.get("care_setting"))
+    qs = MedicalSummary.objects.filter(user=request.user).order_by("-created_at")
+    if request.GET.get("care_setting"):  # apply only if explicitly filtered
+        qs = qs.filter(care_setting=care)
+    return render(request, "dashboard.html", {"summaries": qs, "selected_care": care})
+
 
 @login_required
 def get_user_settings(request):
