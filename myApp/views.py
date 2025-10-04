@@ -261,6 +261,20 @@ def _classify_mode(user_message: str, has_files: bool, session: dict) -> tuple[s
     return "EXPLAIN", ""
 
 
+def build_system_prompt(tone: str, care_setting: str | None, faith_setting: str | None, lang: str) -> str:
+    base = get_system_prompt(tone)
+
+    if tone in ("Clinical", "Caregiver") and care_setting:
+        full = get_setting_prompt(base, care_setting)
+    elif tone == "Faith" and faith_setting:
+        full = get_faith_prompt(base, faith_setting)
+    else:
+        full = base
+
+    return f"{full}\n\n(Always respond in {lang} unless told otherwise.)"
+
+
+
 PROMPT_TEMPLATES = {
     "PlainClinical": (
         "You are NeuroMed, a warm but precise medical guide.\n"
@@ -885,7 +899,27 @@ def _ai_title(user_message: str, files, reply: str, lang: str = "en-US", max_len
         return _derive_title(user_message=user_message, files=files, reply=reply, max_len=max_len)
 
 
+VALID_FAITH_SETTINGS = {"general", "christian", "muslim", "hindu", "buddhist", "jewish"}
 
+def norm_faith_setting(val: str | None) -> str:
+    v = (val or "general").lower().strip()
+    return v if v in VALID_FAITH_SETTINGS else "general"
+
+def get_faith_prompt(base_prompt: str, faith_setting: str) -> str:
+    if faith_setting == "christian":
+        extra = "When closing, you may include a short Bible verse or prayer of comfort."
+    elif faith_setting == "muslim":
+        extra = "Frame with compassion; you may include a short dua or Quran verse if appropriate."
+    elif faith_setting == "hindu":
+        extra = "Offer gentle health guidance; you may weave in wisdom from the Bhagavad Gita or Hindu teachings."
+    elif faith_setting == "buddhist":
+        extra = "Respond calmly, you may include mindful phrases or teachings from the Dharma."
+    elif faith_setting == "jewish":
+        extra = "You may close with a short line of hope or wisdom from Jewish tradition."
+    else:  # general
+        extra = "Keep tone faith-friendly, spiritual, and encouraging without a specific tradition."
+
+    return f"{base_prompt}\n\nFaith context: {extra}"
 
 # ---------- main: send_chat (db persistence + sticky session) ----------
 
@@ -898,7 +932,25 @@ def send_chat(request):
     tone = normalize_tone(raw_tone)
     care_setting = norm_setting(request.data.get("care_setting") or request.session.get("care_setting"))
     request.session["tone"] = tone
-    request.session["care_setting"] = care_setting
+    faith_setting = None
+    care_setting = None
+    if tone in ("Clinical", "Caregiver"):
+        care_setting = norm_setting(
+            request.data.get("care_setting") or request.session.get("care_setting")
+        )
+        request.session["care_setting"] = care_setting
+        request.session.pop("faith_setting", None)
+
+    elif tone == "Faith":
+        faith_setting = norm_faith_setting(
+            request.data.get("faith_setting") or request.session.get("faith_setting")
+        )
+        request.session["faith_setting"] = faith_setting
+        request.session.pop("care_setting", None)
+
+    else:
+        request.session.pop("care_setting", None)
+        request.session.pop("faith_setting", None)
 
     # --- Language
     lang = request.data.get("lang")
@@ -915,7 +967,15 @@ def send_chat(request):
 
     # --- System prompt
     base_prompt = get_system_prompt(tone)
-    system_prompt = get_setting_prompt(base_prompt, care_setting) + f"\n\n(Always respond in {lang} unless told otherwise.)"
+
+    if tone == "Faith" and faith_setting:
+        system_prompt = get_faith_prompt(base_prompt, faith_setting)
+    elif tone in ("Clinical", "Caregiver"):
+        system_prompt = get_setting_prompt(base_prompt, care_setting)
+    else:
+        system_prompt = base_prompt
+
+
 
     # --- Inputs
     user_message = (request.data.get("message") or "").strip()

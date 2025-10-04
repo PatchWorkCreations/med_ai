@@ -34,8 +34,9 @@ urlpatterns = [
     path("api/summarize/", views.summarize_medical_record, name="summarize"),
     path("api/smart-suggestions/", views.smart_suggestions, name="smart_suggestions"),
     path("api/answer-question/", views.answer_question, name="answer_question"),
-    path("send-chat/", views.send_chat),              # alias
-    path("api/send-chat/", views.send_chat),
+    path("send-chat/", views.send_chat, name="send_chat"),
+    path("api/send-chat/", views.send_chat, name="send_chat_api"),
+    path("api/send_chat/", views.send_chat, name="send_chat_api_underscore"),  # alias for frontend underscore
 
 
      path('about/', views.about_page, name='about'),

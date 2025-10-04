@@ -263,6 +263,8 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
 .setting-chip.urgent     { background: #ffedd5; color: #9a3412; }   /* orange-ish */
 
 .setting-chip i { font-size: 12px; }
+.setting-chip.faith { background:#ede9fe; color:#5b21b6; } /* purple-ish */
+
 
 .tone-chip {
   display:inline-flex; align-items:center; gap:.4rem;
@@ -275,6 +277,33 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
 .tone-clinical{ background:#fef9c3; color:#92400e; }
 .tone-geriatric{ background:#dcfce7; color:#065f46; }
 .tone-support{ background:#ede9fe; color:#6d28d9; }
+
+
+.typing-dots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  height: 1em;
+}
+
+.typing-dots span {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+  animation: typing-bounce 1.4s infinite;
+}
+
+.typing-dots span:nth-child(1) { animation-delay: 0s;   }
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing-bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40%           { transform: translateY(-4px); opacity: 1; }
+}
 
 </style>
 
@@ -400,13 +429,46 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
   <span class="basis-full sm:basis-0 h-0"></span>
 
   <!-- Group 2: Care Setting -->
-  <div class="flex items-center flex-wrap gap-x-3 gap-y-1">
+  <div id="careGroup" class="flex items-center flex-wrap gap-x-3 gap-y-1">
     <span class="font-semibold">Care Setting:</span>
 
     <label class="inline-flex items-center"><input type="radio" name="care_setting" value="hospital" checked><span class="ml-1">Hospital</span></label>
     <label class="inline-flex items-center"><input type="radio" name="care_setting" value="ambulatory"><span class="ml-1">Ambulatory</span></label>
     <label class="inline-flex items-center"><input type="radio" name="care_setting" value="urgent"><span class="ml-1">Urgent</span></label>
   </div>
+  
+
+  <!-- Faith sub-selector -->
+<div id="faithGroup" class="hidden mt-3">
+  <p class="text-xs font-semibold text-gray-600 mb-1">Faith Tradition</p>
+  <div class="flex flex-wrap gap-3 text-sm">
+    <label class="inline-flex items-center gap-1 cursor-pointer">
+      <input type="radio" name="faith_setting" value="general" checked>
+      <span>General</span>
+    </label>
+    <label class="inline-flex items-center gap-1 cursor-pointer">
+      <input type="radio" name="faith_setting" value="christian">
+      <span>Christian</span>
+    </label>
+    <label class="inline-flex items-center gap-1 cursor-pointer">
+      <input type="radio" name="faith_setting" value="muslim">
+      <span>Muslim</span>
+    </label>
+    <label class="inline-flex items-center gap-1 cursor-pointer">
+      <input type="radio" name="faith_setting" value="hindu">
+      <span>Hindu</span>
+    </label>
+    <label class="inline-flex items-center gap-1 cursor-pointer">
+      <input type="radio" name="faith_setting" value="buddhist">
+      <span>Buddhist</span>
+    </label>
+    <label class="inline-flex items-center gap-1 cursor-pointer">
+      <input type="radio" name="faith_setting" value="jewish">
+      <span>Jewish</span>
+    </label>
+  </div>
+</div>
+
 </div>
 
 
@@ -745,6 +807,9 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
 <script>
+
+  
+  
 (() => {
   const chatWindow = document.getElementById('chatWindow');
   const composer   = document.getElementById('composer');
@@ -1526,7 +1591,6 @@ function renderStreamingMarkdown(mdText, targetEl){
     }
   }, 35);
 }
-
 /* =========================
    Chat UI bubble renderers
    ========================= */
@@ -1541,10 +1605,69 @@ function careIcon(c){
        : c === 'ambulatory' ? 'fa-stethoscope'
        : 'fa-hospital';
 }
+
+/* ---------- Markdown helpers (AI content) ---------- */
+function renderAssistantMarkdown(mdText){
+  const normalized = (mdText ?? '')
+    .trim()
+    .replace(/\r\n/g, '\n')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n');
+  const raw = marked.parse(normalized, { gfm:true, breaks:false, headerIds:false });
+  const safe = DOMPurify.sanitize(raw, { USE_PROFILES:{ html:true } });
+
+  const container = document.createElement('div');
+  container.className = 'md-prose';
+  container.innerHTML = safe;
+
+  container.querySelectorAll('p').forEach(p => { if (!p.textContent.trim()) p.remove(); });
+  container.querySelectorAll('a[href]').forEach(a => {
+    try{ const u = new URL(a.getAttribute('href'), location.href);
+      if (u.origin !== location.origin) a.target = '_blank', a.rel = 'noopener noreferrer';
+    }catch{}
+  });
+  return container;
+}
+
+function renderStreamingMarkdown(mdText, targetEl){
+  const node = renderAssistantMarkdown(mdText);
+  const words = node.innerText.split(/\s+/).filter(Boolean);
+  targetEl.innerHTML = '';
+  let i = 0;
+  const t = setInterval(()=>{
+    if (i < words.length){
+      targetEl.innerHTML += (i ? ' ' : '') + words[i++];
+      targetEl.scrollIntoView({ behavior:'smooth', block:'end' });
+    } else {
+      clearInterval(t);
+      targetEl.replaceWith(node);
+      // kick off code highlight if present
+      if (window.hljs) document.querySelectorAll('pre code').forEach(b=>hljs.highlightElement(b));
+    }
+  }, 35);
+}
+
+/* ---------- Append bubble (user vs AI) ---------- */
 function appendRichBubble(content, isUser = false, isHistory = false) {
   const chatWindow = document.getElementById("chatWindow");
   if (!chatWindow) return;
 
+  // ---- Tone / Care / Faith computed ONCE so scope is correct ----
+  const toneRaw =
+    (typeof window.__nmToneOverride === 'string' && window.__nmToneOverride) ||
+    document.querySelector('input[name="tone"]:checked')?.value ||
+    'PlainClinical';
+  const toneNorm = (toneRaw === 'PlainClinical') ? 'Balanced' : toneRaw;
+
+  const care = (typeof window.__nmCareSetting === 'function')
+    ? window.__nmCareSetting()
+    : (localStorage.getItem('nm_care_setting') || 'hospital');
+
+  const faith = (typeof window.__nmFaithSetting === 'function')
+    ? window.__nmFaithSetting()
+    : (localStorage.getItem('nm_faith_setting') || 'general');
+
+  // ---- Shell ----
   const wrap = document.createElement("div");
   wrap.className = `w-full flex mb-2 ${isUser ? "justify-end" : "justify-start"}`;
 
@@ -1553,16 +1676,9 @@ function appendRichBubble(content, isUser = false, isHistory = false) {
   bubble.setAttribute("role", "article");
   bubble.setAttribute("aria-live", "polite");
 
-  // decorate AI bubbles with tone + care
+  // ---- Chips (assistant only) ----
   if (!isUser) {
-    const care = (typeof window.__nmCareSetting === 'function') ? window.__nmCareSetting() : 'hospital';
-    bubble.classList.add(`ai-${care}`);
-
-    const toneFromUI  = document.querySelector('input[name="tone"]:checked')?.value || null;
-    const toneFromMem = (typeof window.__nmTone === 'function') ? window.__nmTone() : null;
-    const toneVal  = toneFromUI || toneFromMem || 'PlainClinical';
-    const toneNorm = (toneVal === 'PlainClinical') ? 'Balanced' : toneVal;
-
+    // Tone chip
     const toneClass = {
       Balanced:'tone-balanced', Caregiver:'tone-caregiver', Faith:'tone-faith',
       Clinical:'tone-clinical', Geriatric:'tone-geriatric', EmotionalSupport:'tone-support'
@@ -1573,29 +1689,45 @@ function appendRichBubble(content, isUser = false, isHistory = false) {
     toneChip.innerHTML = `<i class="fa-solid fa-feather-pointed"></i> ${toneNorm}`;
     bubble.appendChild(toneChip);
 
-    const chip = document.createElement('div');
-    chip.className = `setting-chip ${care}`;
-    chip.innerHTML = `<i class="fa-solid ${careIcon(care)}"></i> ${careLabel(care)}`;
-    bubble.appendChild(chip);
+    // Care chip (only for Caregiver / Clinical)
+    if (typeof toneAllowsCare === 'function' ? toneAllowsCare(toneNorm) : (toneNorm === 'Caregiver' || toneNorm === 'Clinical')) {
+      bubble.classList.add(`ai-${care}`);
+      const chip = document.createElement('div');
+      chip.className = `setting-chip ${care}`;
+      const icon = care === 'urgent' ? 'fa-triangle-exclamation' : (care === 'ambulatory' ? 'fa-stethoscope' : 'fa-hospital');
+      const label = care === 'urgent' ? 'Urgent Care' : (care === 'ambulatory' ? 'Clinic / Ambulatory' : 'Hospital');
+      chip.innerHTML = `<i class="fa-solid ${icon}"></i> ${label}`;
+      bubble.appendChild(chip);
+    }
+
+    // Faith chip (only when tone is Faith and a specific faith is chosen)
+    if (toneNorm === 'Faith' && faith && faith !== 'general') {
+      const faithChip = document.createElement('div');
+      faithChip.className = 'setting-chip faith';
+      faithChip.innerHTML = `<i class="fa-solid fa-hands-praying"></i> ${faith.charAt(0).toUpperCase() + faith.slice(1)}`;
+      bubble.appendChild(faithChip);
+    }
   }
 
-  // --- Content node ---
-  const rich = document.createElement("div");
-  rich.className = isUser ? "" : "md-prose";
-  rich.setAttribute("dir", "auto");
-
+  // ---- Content ----
   if (isUser) {
-    const asNode = !!(content && typeof content === "object" && ("nodeType" in content));
-    if (asNode) rich.appendChild(content);
-    else rich.textContent = String(content ?? "");
-    bubble.appendChild(rich);                  // ✅ append for user messages
-  } else {
-    if (isHistory) {
-      const node = renderAssistantMarkdown(String(content || ''));
-      bubble.appendChild(node);               // ✅ render immediately for history
+    // If a DOM node was passed (e.g., attachments gallery), append it directly
+    if (content instanceof Node) {
+      bubble.appendChild(content);
     } else {
+      const div = document.createElement('div');
+      div.textContent = String(content ?? "");
+      bubble.appendChild(div);
+    }
+  } else {
+    // Assistant: render markdown, with streaming for live replies
+    if (isHistory) {
+      bubble.appendChild(renderAssistantMarkdown(String(content || '')));
+    } else {
+      const rich = document.createElement('div');
+      rich.className = 'md-prose';
       renderStreamingMarkdown(String(content || ''), rich);
-      bubble.appendChild(rich);               // ✅ stream for live replies
+      bubble.appendChild(rich);
     }
   }
 
@@ -1605,46 +1737,69 @@ function appendRichBubble(content, isUser = false, isHistory = false) {
 }
 
 
-
-
+/* ---------- Update chips/backgrounds when selectors change ---------- */
 function updateBubbleChips() {
   const toneVal = document.querySelector('input[name="tone"]:checked')?.value || 'PlainClinical';
   const toneNorm = (toneVal === 'PlainClinical') ? 'Balanced' : toneVal;
+  const care = (typeof window.__nmCareSetting === 'function') ? window.__nmCareSetting() : (localStorage.getItem('nm_care_setting') || 'hospital');
+  const faith = (typeof window.__nmFaithSetting === 'function') ? window.__nmFaithSetting() : (localStorage.getItem('nm_faith_setting') || 'general');
 
   const toneClass = {
-    Balanced: 'tone-balanced',
-    Caregiver: 'tone-caregiver',
-    Faith: 'tone-faith',
-    Clinical: 'tone-clinical',
-    Geriatric: 'tone-geriatric',
-    EmotionalSupport: 'tone-support'
+    Balanced:'tone-balanced', Caregiver:'tone-caregiver', Faith:'tone-faith',
+    Clinical:'tone-clinical', Geriatric:'tone-geriatric', EmotionalSupport:'tone-support'
   }[toneNorm] || 'tone-balanced';
 
-  const care = document.querySelector('input[name="care_setting"]:checked')?.value || 'hospital';
-
-  // Update all tone chips
-  document.querySelectorAll('.tone-chip').forEach(chip => {
+  // Tone chip text & class
+  document.querySelectorAll('.chat-ai .tone-chip').forEach(chip => {
     chip.className = `tone-chip ${toneClass}`;
     chip.innerHTML = `<i class="fa-solid fa-feather-pointed"></i> ${toneNorm}`;
   });
 
-  // Update all care chips
-  document.querySelectorAll('.setting-chip').forEach(chip => {
-    chip.className = `setting-chip ${care}`;
-    chip.innerHTML = `<i class="fa-solid ${careIcon(care)}"></i> ${careLabel(care)}`;
-  });
-
-  // Update AI bubble care background accent
+  // Care chips & bubble backgrounds
+  const careAllowed = (typeof toneAllowsCare === 'function') ? toneAllowsCare(toneNorm) : (toneNorm === 'Caregiver' || toneNorm === 'Clinical');
   document.querySelectorAll('.chat-ai').forEach(b => {
     b.classList.remove('ai-hospital','ai-ambulatory','ai-urgent');
-    b.classList.add(`ai-${care}`);
+
+    // Remove any old care chips
+    b.querySelectorAll('.setting-chip:not(.faith)').forEach(ch => ch.remove());
+
+    if (careAllowed) {
+      b.classList.add(`ai-${care}`);
+      const chip = document.createElement('div');
+      chip.className = `setting-chip ${care}`;
+      const icon = care === 'urgent' ? 'fa-triangle-exclamation' : (care === 'ambulatory' ? 'fa-stethoscope' : 'fa-hospital');
+      const label = care === 'urgent' ? 'Urgent Care' : (care === 'ambulatory' ? 'Clinic / Ambulatory' : 'Hospital');
+      chip.innerHTML = `<i class="fa-solid ${icon}"></i> ${label}`;
+      // insert before markdown so chips appear at top
+      b.insertBefore(chip, b.querySelector('.md-prose') || b.firstChild);
+    }
   });
+
+  // Faith chip toggle/update
+  document.querySelectorAll('.chat-ai').forEach(b => {
+    // Remove old faith chips
+    b.querySelectorAll('.setting-chip.faith').forEach(ch => ch.remove());
+
+    if (toneNorm === 'Faith' && faith && faith !== 'general') {
+      const chip = document.createElement('div');
+      chip.className = 'setting-chip faith';
+      chip.innerHTML = `<i class="fa-solid fa-hands-praying"></i> ${faith.charAt(0).toUpperCase() + faith.slice(1)}`;
+      b.insertBefore(chip, b.querySelector('.md-prose') || b.firstChild);
+    }
+  });
+
+  toggleCareGroupVisibility?.(); // keep your UI in sync
 }
+
+function appendChatBubble(role, textOrNode, isHistory=false) {
+  const isUser = role === 'user';
+  appendRichBubble(textOrNode, isUser, isHistory);
+}
+
 
 document.querySelectorAll('input[name="tone"],input[name="care_setting"]').forEach(r=>{
   r.addEventListener('change', updateBubbleChips);
 });
-
 
 
 // simple alias used elsewhere
@@ -1824,124 +1979,141 @@ function clearPending() {
    ========================= */
 document.getElementById('sendBtn')?.addEventListener('click', sendChat);
 document.getElementById('chatInput')?.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+  if (e.key === 'Enter' && !e.shiftKey) { 
+    e.preventDefault(); 
+    sendChat(); 
+  }
 });
+// define once globally
+// define globally once
+let chatLocked = false;
 
 async function sendChat() {
-  const input = document.getElementById("chatInput");
-  const chatWindow = document.getElementById("chatWindow");
-  const userMessage = (input?.value || '').trim();
+  if (chatLocked) return;
+  chatLocked = true;
 
-  // --- tone normalization ---
-  let toneRaw =
-    window.__nmToneOverride ||
-    (typeof window.__nmTone === 'function' ? window.__nmTone() :
-      document.querySelector('input[name="tone"]:checked')?.value) ||
-    "PlainClinical";
+  const inputEl = document.getElementById('chatInput');
+  const text = (inputEl?.value || '').trim();
+  const files = Array.isArray(window.pending) ? window.pending : [];
 
-  // Normalize "PlainClinical" into "Balanced"
-  const tone = (toneRaw === "PlainClinical") ? "Balanced" : toneRaw;
-
-  // --- language detection ---
-  const lang =
-    (typeof window.__nmLang === 'function' && window.__nmLang()) ||
-    navigator.language || 'en-US';
-
-  // --- care setting ---
-  const care = (typeof window.__nmCareSetting === 'function')
-    ? window.__nmCareSetting()
-    : loadCareSetting();
-
-  if (!userMessage && pending.length === 0) return;
-
-  // user bubble + attachments
-  if (userMessage) appendBubble(userMessage, true);
-  if (pending.length) {
-    const gallery = document.createElement('div');
-    gallery.className = 'grid grid-cols-2 sm:grid-cols-3 gap-2';
-    pending.forEach(item => {
-      const card = document.createElement('div');
-      card.className = 'border rounded-lg overflow-hidden';
-      if (item.kind === 'image') {
-        const img = document.createElement('img');
-        img.src = item.url; img.alt = item.file.name;
-        img.className = 'block w-full h-28 object-cover';
-        card.appendChild(img);
-      } else {
-        card.className += ' p-3 flex items-center gap-2 text-sm';
-        card.innerHTML = `<i class="fa-solid fa-file-lines"></i><span class="truncate">${item.file.name}</span>`;
-      }
-      gallery.appendChild(card);
-    });
-    appendRichBubble(gallery, true);
+  // don't send empty
+  if (!text && files.length === 0) { 
+    chatLocked = false; 
+    return; 
   }
 
-  // --- payload ---
-  const formData = new FormData();
-  if (userMessage) formData.append("message", userMessage);
-  formData.append("tone", tone);              // ✅ tone appended
-  formData.append("lang", lang);
-  formData.append("care_setting", care);      // ✅ care appended
+  // show user's message immediately
+  if (text) appendChatBubble('user', text);
 
-  const sidExisting = getSessionId();
-  if (sidExisting) formData.append("session_id", sidExisting);
-  pending.forEach(p => formData.append("files[]", p.file, p.file.name));
+  // show typing bubble (assistant is "thinking…")
+  const chatWindow = document.getElementById("chatWindow");
+  let typingWrap;
+  if (chatWindow) {
+    typingWrap = document.createElement("div");
+    typingWrap.className = "w-full flex mb-2 justify-start";
+    typingWrap.id = "typingBubble";
 
-  // clear composer
-  if (input) input.value = "";
-  clearPending();
+    const typing = document.createElement("div");
+    typing.className = "chat-bubble chat-ai flex items-center gap-2";
+    typing.innerHTML = `
+  <div class="typing-dots text-gray-600 dark:text-gray-300">
+    <span></span><span></span><span></span>
+  </div>
+  <span class="ml-2 text-xs text-gray-500">NeuroMed is typing…</span>
+`;
 
-  // typing indicator
-  const typingWrap = document.createElement("div");
-  typingWrap.className = "w-full flex mb-2 justify-start";
 
-  const typing = document.createElement("div");
-  typing.className = "chat-bubble chat-ai";
-
-  const inner = document.createElement("div");
-  inner.className = "text-gray-500 italic";
-  inner.textContent = "Analyzing";
-
-  typing.appendChild(inner);
-  typingWrap.appendChild(typing);
-  chatWindow.appendChild(typingWrap);
-  chatWindow.scrollTop = chatWindow.scrollHeight;
-
-  // Animate the dots
-  let dotCount = 0;
-  const maxDots = 3;
-  const interval = setInterval(() => {
-    dotCount = (dotCount + 1) % (maxDots + 1);
-    inner.textContent = "Analyzing" + ".".repeat(dotCount);
-  }, 500);
+    typingWrap.appendChild(typing);
+    chatWindow.appendChild(typingWrap);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+  }
 
   try {
-    const API_SEND = "/api/send-chat/";
-    const res = await fetch(API_SEND, {
-      method: "POST",
-      headers: { "X-CSRFToken": getCSRFToken(), "Accept-Language": lang },
+    const tone  = document.querySelector('input[name="tone"]:checked')?.value || 'PlainClinical';
+    const lang  = localStorage.getItem('nm_lang') || 'en-US';
+    const care  = (typeof window.__nmCareSetting  === 'function')
+      ? window.__nmCareSetting()
+      : (localStorage.getItem('nm_care_setting') || 'hospital');
+    const faith = (typeof window.__nmFaithSetting === 'function')
+      ? window.__nmFaithSetting()
+      : (localStorage.getItem('nm_faith_setting') || 'general');
+
+    // build payload
+    const formData = new FormData();
+    if (text) formData.append('message', text);
+    formData.append('tone', tone);
+    formData.append('lang', lang);
+    formData.append('care_setting', care);
+    formData.append('faith_setting', faith);
+
+    const sidExisting = localStorage.getItem('nm_session_id');
+    if (sidExisting) formData.append('session_id', sidExisting);
+
+    files.forEach(p => formData.append('files[]', p.file, p.file.name));
+
+    // 🔑 include CSRF
+    const csrftoken = getCookie('csrftoken');
+
+    const res  = await fetch('/api/send-chat/', { 
+      method: 'POST', 
+      headers: { "X-CSRFToken": csrftoken },
       body: formData,
       credentials: "include"
     });
 
-    let data = null;
-    try { data = await res.json(); } catch {}
-
-    if (!res.ok) {
-      throw new Error((data && (data.error || data.detail)) || `HTTP ${res.status}`);
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      const text = await res.text();
+      console.error("Non-JSON response:", text);
+      throw new Error("Bad JSON response from server");
     }
 
-    clearInterval(interval);   // stop animation when reply comes
-    typingWrap.remove();
-    const reply = (data && data.reply) ? data.reply : "⚠️ No reply received.";
-    appendRichBubble(reply, false);   // ← streams + full markdown swap
+    if (!res.ok) throw new Error(data.detail || data.message || 'Failed');
+
+    if (data.session_id) localStorage.setItem('nm_session_id', data.session_id);
+
+    // remove typing bubble
+    document.getElementById("typingBubble")?.remove();
+
+    appendChatBubble('assistant', data.reply);
+
+    // clear UI after success
+    if (inputEl) inputEl.value = '';
+    if (files.length) clearPending();
+
+    return data;
   } catch (err) {
-    clearInterval(interval);
-    inner.classList.remove("italic", "text-gray-500");
-    inner.classList.add("text-red-700");
-    inner.textContent = "Hi! Our system is busy right now — please try again in a few minutes.";
+    console.error('sendChat failed', err);
+
+    // remove typing bubble if error
+    document.getElementById("typingBubble")?.remove();
+
+    appendChatBubble('assistant', '⚠️ Sorry, something went wrong. Please try again.');
+  } finally {
+    chatLocked = false;
   }
 }
+
+// helper: get CSRF token from cookies
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+
+
 
 /* =========================
    Basic layout / settings (unchanged)
@@ -2043,6 +2215,86 @@ document.addEventListener('DOMContentLoaded', bindCareSettingUI);
 
 // Optional: expose to other scripts if needed
 window.__nmCareSetting = () => loadCareSetting();
+// ——— Tone gating for Care Setting ———
+function toneAllowsCare(toneValRaw) {
+  const tone = (toneValRaw === 'PlainClinical') ? 'Balanced' : toneValRaw;
+  // Only show care context for these tones
+  return tone === 'Caregiver' || tone === 'Clinical';
+}
+
+function loadFaithSetting() {
+  const v = localStorage.getItem('nm_faith_setting');
+  // whitelist; fallback to 'general'
+  return ['general','christian','muslim','hindu','buddhist','jewish'].includes(v) ? v : 'general';
+}
+function saveFaithSetting(v) {
+  if (['general','christian','muslim','hindu','buddhist','jewish'].includes(v)) {
+    localStorage.setItem('nm_faith_setting', v);
+    updateBubbleChips(); // re-draw chips immediately
+  }
+}
+function bindFaithSettingUI() {
+  const current = loadFaithSetting();
+  const el = document.querySelector(`input[name="faith_setting"][value="${current}"]`);
+  if (el && !el.checked) el.checked = true;
+
+  document.querySelectorAll('input[name="faith_setting"]').forEach(r => {
+    r.addEventListener('change', e => {
+      saveFaithSetting(e.target.value);
+      updateBubbleChips();   // refresh chips immediately
+    });
+  });
+}
+document.addEventListener('DOMContentLoaded', bindFaithSettingUI);
+
+
+// expose for other code
+window.__nmFaithSetting = () => loadFaithSetting();
+
+
+function currentTone() {
+  return document.querySelector('input[name="tone"]:checked')?.value || 'PlainClinical';
+}
+
+function toggleSubgroups() {
+  const tone = document.querySelector('input[name="tone"]:checked')?.value || 'PlainClinical';
+  const careGroup  = document.getElementById('careGroup');
+  const faithGroup = document.getElementById('faithGroup');
+
+  const show = (el, on) => {
+    if (!el) return;
+    el.classList.toggle('hidden', !on); // <-- key change
+    el.style.display = '';               // keep clean; rely on class
+  };
+
+  show(careGroup,  tone === 'Caregiver' || tone === 'Clinical');
+  show(faithGroup, tone === 'Faith');
+}
+
+
+function toggleCareGroupVisibility() {
+  // Reuse your existing logic
+  toggleSubgroups();
+}
+
+
+
+document.addEventListener('DOMContentLoaded', toggleSubgroups);
+document.querySelectorAll('input[name="tone"]').forEach(r => {
+  r.addEventListener('change', () => {
+    toggleSubgroups();
+    updateBubbleChips();
+  });
+});
+
+document.addEventListener('DOMContentLoaded', toggleCareGroupVisibility);
+document.querySelectorAll('input[name="tone"]').forEach(r => {
+  r.addEventListener('change', () => {
+    toggleCareGroupVisibility();
+    updateBubbleChips();
+  });
+});
+
 
 
 /* =========================
