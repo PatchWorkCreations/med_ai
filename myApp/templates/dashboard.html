@@ -1994,7 +1994,7 @@ async function sendChat() {
 
   const inputEl = document.getElementById('chatInput');
   const text = (inputEl?.value || '').trim();
-  const files = Array.isArray(window.pending) ? window.pending : [];
+  const files = Array.isArray(pending) ? pending : [];
 
   // don't send empty
   if (!text && files.length === 0) { 
@@ -2002,8 +2002,51 @@ async function sendChat() {
     return; 
   }
 
-  // show user's message immediately
-  if (text) appendChatBubble('user', text);
+  // show user's message immediately (with files if present)
+  if (text || files.length > 0) {
+    const userMessageContent = document.createElement('div');
+    
+    // Add text if present
+    if (text) {
+      const textDiv = document.createElement('div');
+      textDiv.textContent = text;
+      if (files.length > 0) textDiv.className = 'mb-2';
+      userMessageContent.appendChild(textDiv);
+    }
+    
+    // Add files preview if present
+    if (files.length > 0) {
+      const filesContainer = document.createElement('div');
+      filesContainer.className = text ? 'flex flex-wrap gap-2 mt-2' : 'flex flex-wrap gap-2';
+      
+      files.forEach(item => {
+        const filePreview = document.createElement('div');
+        filePreview.className = 'flex items-center gap-2 bg-white/20 rounded-lg px-3 py-2 text-sm';
+        
+        if (item.kind === 'image' && item.url) {
+          const img = document.createElement('img');
+          img.src = item.url;
+          img.className = 'w-12 h-12 object-cover rounded';
+          filePreview.appendChild(img);
+        } else {
+          const icon = document.createElement('i');
+          icon.className = 'fa-solid fa-file-lines text-lg';
+          filePreview.appendChild(icon);
+        }
+        
+        const fileName = document.createElement('span');
+        fileName.textContent = item.file.name;
+        fileName.className = 'max-w-[150px] truncate';
+        filePreview.appendChild(fileName);
+        
+        filesContainer.appendChild(filePreview);
+      });
+      
+      userMessageContent.appendChild(filesContainer);
+    }
+    
+    appendChatBubble('user', userMessageContent);
+  }
 
   // show typing bubble (assistant is "thinking…")
   const chatWindow = document.getElementById("chatWindow");
