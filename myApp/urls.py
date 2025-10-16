@@ -24,7 +24,7 @@ urlpatterns = [
     path("api/chat/sessions/<int:pk>/archive/", views.chat_session_archive, name="chat_session_archive"),
     path("api/chat/sessions/<int:pk>/delete/",  views.chat_session_delete,  name="chat_session_delete"),
 
-    
+    path('api/login/', views.api_login, name='api_login'),
     path('login/', WarmLoginView.as_view(), name='login'),
     path("logout/", views.logout_view, name="logout"),
     # Authenticated Dashboard

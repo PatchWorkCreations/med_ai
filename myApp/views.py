@@ -1888,6 +1888,11 @@ from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from .forms import EmailAuthenticationForm
 
 # myApp/views.py
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.http import JsonResponse
+import json
+
 class WarmLoginView(DjangoLoginView):
     template_name = "login.html"
     redirect_authenticated_user = True
@@ -1904,12 +1909,11 @@ class WarmLoginView(DjangoLoginView):
                 profile.last_login_country = getattr(self.request, "country_code", None) or profile.last_login_country
                 profile.save()
         except Exception:
-            # Don’t block login if telemetry fails
+            # Don't block login if telemetry fails
             pass
 
         resp.set_cookie("just_logged_in", "1", max_age=60, samesite="Lax", path="/")
         return resp
-
 
     def get_success_url(self):
         url = super().get_success_url() or str(self.success_url)
@@ -1919,6 +1923,120 @@ class WarmLoginView(DjangoLoginView):
         qs = parse_qs(parts[4]); qs.setdefault("welcome", ["1"])
         parts[4] = urlencode(qs, doseq=True)
         return urlunparse(parts)
+
+    def post(self, request, *args, **kwargs):
+        # Handle API requests (JSON)
+        if request.content_type == 'application/json':
+            try:
+                data = json.loads(request.body)
+                email = data.get('email')
+                password = data.get('password')
+                
+                if not email or not password:
+                    return JsonResponse({'error': 'Email and password required'}, status=400)
+                
+                # Authenticate user
+                from django.contrib.auth import authenticate
+                user = authenticate(request, username=email, password=password)
+                
+                if user and user.is_active:
+                    from django.contrib.auth import login
+                    login(request, user)
+                    
+                    # Update profile
+                    try:
+                        profile, _ = Profile.objects.get_or_create(user=user)
+                        profile.last_login_ip = get_client_ip(request)
+                        profile.last_login_country = getattr(request, "country_code", None) or profile.last_login_country
+                        profile.save()
+                    except Exception:
+                        pass
+                    
+                    # Return user data for iOS app
+                    return JsonResponse({
+                        'id': user.id,
+                        'username': user.username,
+                        'email': user.email,
+                        'first_name': user.first_name,
+                        'last_name': user.last_name,
+                        'date_joined': user.date_joined.isoformat(),
+                        'last_login': user.last_login.isoformat() if user.last_login else None,
+                        'is_active': user.is_active,
+                        'is_staff': user.is_staff,
+                        'is_superuser': user.is_superuser,
+                        'profile': {
+                            'profession': profile.profession,
+                            'display_name': profile.display_name,
+                            'language': profile.language,
+                            'signup_ip': profile.signup_ip,
+                            'last_login_ip': profile.last_login_ip,
+                            'signup_country': profile.signup_country,
+                            'last_login_country': profile.last_login_country,
+                        } if hasattr(user, 'profile') else None
+                    })
+                else:
+                    return JsonResponse({'error': 'Invalid credentials'}, status=401)
+                    
+            except json.JSONDecodeError:
+                return JsonResponse({'error': 'Invalid JSON'}, status=400)
+            except Exception as e:
+                return JsonResponse({'error': str(e)}, status=500)
+        
+        # Handle regular form requests (web browser)
+        return super().post(request, *args, **kwargs)
+
+# In your views.py
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
+
+@csrf_exempt
+def api_login(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            email = data.get('email')
+            password = data.get('password')
+            
+            if not email or not password:
+                return JsonResponse({'error': 'Email and password required'}, status=400)
+            
+            from django.contrib.auth import authenticate, login
+            user = authenticate(request, username=email, password=password)
+            
+            if user and user.is_active:
+                login(request, user)
+                
+                # Update profile
+                try:
+                    profile, _ = Profile.objects.get_or_create(user=user)
+                    profile.last_login_ip = get_client_ip(request)
+                    profile.last_login_country = getattr(request, "country_code", None) or profile.last_login_country
+                    profile.save()
+                except Exception:
+                    pass
+                
+                return JsonResponse({
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'date_joined': user.date_joined.isoformat(),
+                    'last_login': user.last_login.isoformat() if user.last_login else None,
+                    'is_active': user.is_active,
+                    'is_staff': user.is_staff,
+                    'is_superuser': user.is_superuser,
+                })
+            else:
+                return JsonResponse({'error': 'Invalid credentials'}, status=401)
+                
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
     
 # views.py (if you don’t already have these)
 from rest_framework.decorators import api_view, permission_classes
