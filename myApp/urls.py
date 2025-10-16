@@ -67,6 +67,7 @@ urlpatterns = [
     path("password/reset/", views.reset_password, name="password_reset_otp"),
 
     path("api/auth/status/", views.auth_status, name="auth_status"),
+    path("api/csrf/", views.get_csrf_token, name="get_csrf_token"),
     path("api/track", views.track_event, name="track_event"),
 
     path("landing/", views.landing, name="landing"),

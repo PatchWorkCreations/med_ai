@@ -203,6 +203,12 @@ CSRF_COOKIE_SECURE = False         # True only in HTTPS
 SESSION_COOKIE_AGE = 15 * 60       # 15 minutes is plenty for reset
 SESSION_SAVE_EVERY_REQUEST = True
 
+# CSRF settings for iOS/mobile app
+CSRF_COOKIE_HTTPONLY = False       # Allow JavaScript/native apps to read the cookie
+CSRF_COOKIE_SAMESITE = 'Lax'       # 'None' if you need cross-site requests (requires HTTPS)
+CSRF_COOKIE_NAME = 'csrftoken'     # Default name, explicit for clarity
+CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'  # Default header name Django expects
+
 
 import os
 import environ

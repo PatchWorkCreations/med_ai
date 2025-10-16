@@ -1931,6 +1931,20 @@ from django.http import JsonResponse
 def auth_status(request):
     return JsonResponse({"authenticated": bool(request.user.is_authenticated)})
 
+from django.middleware.csrf import get_token
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def get_csrf_token(request):
+    """
+    Endpoint to get CSRF token for iOS/mobile apps.
+    Returns the token in both cookie and response body.
+    """
+    csrf_token = get_token(request)
+    return JsonResponse({
+        "csrfToken": csrf_token,
+        "detail": "CSRF cookie set"
+    })
+
 from django.views.decorators.csrf import csrf_exempt
 @csrf_exempt
 @api_view(["POST"])
