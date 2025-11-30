@@ -1749,7 +1749,7 @@ def forgot_password(request):
             except Exception:
                 pass  # ultra-defensive; wrapper already swallows & logs
 
-            messages.success(request, "If the email exists, we’ve sent a 6-digit code. Please check your inbox.")
+            messages.success(request, f"We've sent a 6-digit code to {mask_email(email)}. Please check your inbox (and spam folder).")
             return redirect("password_otp")
     else:
         form = ForgotPasswordForm()
@@ -1761,14 +1761,16 @@ def resend_otp(request):
     if request.method != "POST":
         return redirect("password_otp")
 
-    email = (request.POST.get("email") or "").lower().strip()
+    # Use email from session if available, otherwise from POST
+    email = request.session.get("pwreset_email") or (request.POST.get("email") or "").lower().strip()
     if not email:
-        messages.error(request, "Please enter your email to resend the code.")
-        return redirect("password_otp")
+        messages.error(request, "Your session expired. Please start over.")
+        return redirect("password_forgot")
 
     cooldown_key = _otp_resend_key(email)
     if cache.get(cooldown_key):
-        messages.error(request, "Please wait a moment before requesting another code.")
+        remaining = cache.ttl(cooldown_key) or OTP_RESEND_SECONDS
+        messages.error(request, f"Please wait {remaining} seconds before requesting another code.")
         return redirect("password_otp")
 
     data = cache.get(_otp_key(email))
@@ -1785,7 +1787,7 @@ def resend_otp(request):
         pass
 
     cache.set(cooldown_key, True, OTP_RESEND_SECONDS)
-    messages.success(request, "We’ve sent another code if the email exists. Please check your inbox.")
+    messages.success(request, f"We've sent another code to {mask_email(email)}. Please check your inbox.")
     return redirect("password_otp")
 
 def verify_otp(request):
@@ -1793,8 +1795,17 @@ def verify_otp(request):
     Step 2: Verify the code. If valid, allow setting new password.
     Never reveal whether the email is registered.
     """
+    # Get email from session if available
+    session_email = request.session.get("pwreset_email")
+    session_email_masked = request.session.get("pwreset_email_masked")
+    
     if request.method == "POST":
-        form = OTPForm(request.POST)
+        # Merge POST data with session email if email not in POST
+        post_data = request.POST.copy()
+        if session_email and not post_data.get("email"):
+            post_data["email"] = session_email
+        form = OTPForm(post_data)
+        
         if form.is_valid():
             email = form.cleaned_data["email"]
             code  = form.cleaned_data["code"]
@@ -1803,24 +1814,40 @@ def verify_otp(request):
             attempts = cache.get(_otp_attempts_key(email), 0)
 
             if data is None:
-                messages.error(request, "Code expired or invalid. Please request a new one.")
-                return redirect("password_forgot")
+                messages.error(request, "This code has expired. Please click 'Resend code' to get a new one, or start over.")
+                # Keep form with email pre-filled
+                if session_email:
+                    form = OTPForm(initial={"email": session_email})
+                return render(request, "account/password_otp.html", {
+                    "form": form,
+                    "email_masked": session_email_masked
+                })
 
             if attempts >= 5:
-                messages.error(request, "Too many attempts. Please request a new code.")
-                cache.delete(_otp_key(email)); cache.delete(_otp_attempts_key(email))
+                messages.error(request, "Too many incorrect attempts. For security, please request a new code.")
+                cache.delete(_otp_key(email))
+                cache.delete(_otp_attempts_key(email))
                 return redirect("password_forgot")
 
             if code != data.get("code"):
+                remaining_attempts = 5 - (attempts + 1)
                 cache.set(_otp_attempts_key(email), attempts + 1, OTP_TTL_SECONDS)
-                messages.error(request, "Incorrect code. Please try again.")
-                return render(request, "account/password_otp.html", {"form": form})
+                if remaining_attempts > 0:
+                    messages.error(request, f"Incorrect code. You have {remaining_attempts} attempt{'s' if remaining_attempts > 1 else ''} remaining.")
+                else:
+                    messages.error(request, "Incorrect code. Too many attempts. Please request a new code.")
+                return render(request, "account/password_otp.html", {
+                    "form": form,
+                    "email_masked": session_email_masked
+                })
 
             # OTP OK → clear and continue
             user = User.objects.filter(email__iexact=email).first()
-            cache.delete(_otp_key(email)); cache.delete(_otp_attempts_key(email))
+            cache.delete(_otp_key(email))
+            cache.delete(_otp_attempts_key(email))
 
             request.session["pwreset_email"] = email
+            request.session["pwreset_email_masked"] = mask_email(email)
             request.session.set_expiry(15 * 60)
             request.session.modified = True
 
@@ -1828,15 +1855,30 @@ def verify_otp(request):
                 request.session["pwreset_user_id"] = user.id
                 request.session.set_expiry(15 * 60)
                 request.session.modified = True
+                messages.success(request, "Code verified! Now create your new password.")
                 return redirect("password_reset_otp")
             else:
-                # Keep UX consistent w/o enumeration
-                messages.success(request, "Code verified. If this email is registered, you can now set a new password.")
-                return render(request, "account/password_otp.html", {"form": form})
+                # User verified OTP but email not registered - suggest signup
+                messages.info(request, "This email isn't registered with an account. Would you like to sign up instead?")
+                # Clear session and redirect to signup
+                request.session.pop("pwreset_email", None)
+                request.session.pop("pwreset_email_masked", None)
+                from django.urls import reverse
+                return redirect(f"{reverse('signup')}?email={email}")
     else:
-        form = OTPForm()
+        # Pre-fill email from session
+        if session_email:
+            form = OTPForm(initial={"email": session_email})
+        else:
+            form = OTPForm()
+            # If no session email, redirect to start
+            messages.info(request, "Please enter your email to receive a reset code.")
+            return redirect("password_forgot")
 
-    return render(request, "account/password_otp.html", {"form": form})
+    return render(request, "account/password_otp.html", {
+        "form": form,
+        "email_masked": session_email_masked
+    })
 
 def reset_password(request):
     """
@@ -1844,27 +1886,32 @@ def reset_password(request):
     """
     user_id = request.session.get("pwreset_user_id")
     user    = User.objects.filter(id=user_id).first() if user_id else None
+    email_masked = request.session.get("pwreset_email_masked")
 
     if request.method == "POST":
         if not user:
-            messages.error(request, "Your reset session expired (or the email isn’t registered). Please request a new code.")
+            messages.error(request, "Your reset session has expired. Please start over and request a new code.")
             return redirect("password_forgot")
 
         form = OTPSetPasswordForm(user, request.POST)
         if form.is_valid():
             form.save()
             login(request, user)
-            for k in ("pwreset_user_id", "pwreset_email"):
+            # Clear all reset-related session data
+            for k in ("pwreset_user_id", "pwreset_email", "pwreset_email_masked"):
                 request.session.pop(k, None)
-            messages.success(request, "Password updated successfully.")
+            messages.success(request, "Password updated successfully! You're now signed in.")
             return redirect(f"{DASHBOARD_URL}?changed=1")
     else:
         if not user:
-            messages.error(request, "Your reset session expired (or the email isn’t registered). Please request a new code.")
+            messages.error(request, "Your reset session has expired. Please start over and request a new code.")
             return redirect("password_forgot")
         form = OTPSetPasswordForm(user)
 
-    return render(request, "account/password_reset_otp.html", {"form": form})
+    return render(request, "account/password_reset_otp.html", {
+        "form": form,
+        "email_masked": email_masked
+    })
 
 
 # views.py
