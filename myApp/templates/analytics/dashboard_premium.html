@@ -1,0 +1,1485 @@
+{% extends "analytics/base.html" %}
+{% load static %}
+
+{% block title %}Website Analytics Dashboard{% endblock %}
+
+{% block content %}
+<!-- Premium Header with Gradient -->
+<div class="relative mb-8 overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-br from-emerald-500 via-blue-500 to-purple-600 opacity-10"></div>
+  <div class="relative bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+    <div class="flex flex-wrap items-center justify-between gap-6">
+      <!-- Left: Title and Period -->
+      <div>
+        <h1 class="text-4xl font-extrabold bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+          Analytics Dashboard
+        </h1>
+        <p class="text-gray-600 text-sm">Comprehensive insights into your website performance</p>
+      </div>
+      
+      <!-- Right: Controls -->
+      <div class="flex flex-wrap items-center gap-4">
+        <!-- Date Range -->
+        <div class="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-200">
+          <i class="fa-solid fa-calendar text-gray-500"></i>
+          <select id="period-select" class="bg-transparent border-0 text-sm font-medium text-gray-700 focus:ring-0 focus:outline-none cursor-pointer">
+            <option value="today" {% if period == 'today' %}selected{% endif %}>Today</option>
+            <option value="yesterday" {% if period == 'yesterday' %}selected{% endif %}>Yesterday</option>
+            <option value="7d" {% if period == '7d' %}selected{% endif %}>Last 7 days</option>
+            <option value="30d" {% if period == '30d' %}selected{% endif %}>Last 30 days</option>
+            <option value="custom" {% if period == 'custom' %}selected{% endif %}>Custom Range</option>
+          </select>
+        </div>
+        
+        <!-- Custom Date Range -->
+        <div id="custom-date-range" class="{% if period != 'custom' %}hidden{% endif %} flex items-center gap-2 bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-200">
+          <input type="date" id="start-date" value="{{ start_date|date:'Y-m-d' }}" class="bg-transparent border-0 text-sm focus:ring-0 focus:outline-none cursor-pointer">
+          <span class="text-gray-400">→</span>
+          <input type="date" id="end-date" value="{{ end_date|date:'Y-m-d' }}" class="bg-transparent border-0 text-sm focus:ring-0 focus:outline-none cursor-pointer">
+        </div>
+        
+        <!-- Comparison Toggle -->
+        <label class="flex items-center gap-2 bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
+          <input type="checkbox" id="compare-toggle" class="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
+          <span class="text-sm font-medium text-gray-700">Compare</span>
+        </label>
+        
+        <!-- Action Buttons -->
+        <button onclick="refreshData()" class="px-4 py-2.5 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 flex items-center gap-2 transition shadow-sm hover:shadow">
+          <i class="fa-solid fa-rotate text-gray-500"></i> Refresh
+        </button>
+        <div class="flex gap-2">
+          <button onclick="exportReport('pdf')" class="px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2 transition shadow-lg hover:shadow-xl">
+            <i class="fa-solid fa-file-pdf"></i> PDF
+          </button>
+          <button onclick="exportReport('csv')" class="px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2 transition shadow-lg hover:shadow-xl">
+            <i class="fa-solid fa-file-csv"></i> CSV
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Daily Summary Panel (Premium Style) -->
+{% if period == 'today' %}
+<div class="relative mb-8 overflow-hidden rounded-2xl shadow-xl">
+  <div class="absolute inset-0 bg-gradient-to-br from-emerald-400 via-blue-400 to-purple-500"></div>
+  <div class="relative bg-white/95 backdrop-blur-sm p-8 border border-white/20">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-3xl font-bold text-gray-900 mb-1">
+          <i class="fa-solid fa-sparkles mr-3 text-emerald-600"></i>Today's Performance
+        </h2>
+        <p class="text-gray-600">{{ today|date:"F j, Y" }}</p>
+      </div>
+      <button onclick="generateDailyReport()" class="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition flex items-center gap-2">
+        <i class="fa-solid fa-file-lines"></i> Generate Daily Report
+      </button>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-5 border border-emerald-200 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <i class="fa-solid fa-users text-2xl text-emerald-600"></i>
+        </div>
+        <div class="text-3xl font-extrabold text-emerald-900 mb-1">{{ today_visitors }}</div>
+        <div class="text-sm font-medium text-emerald-700">Visitors</div>
+      </div>
+      <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <i class="fa-solid fa-eye text-2xl text-blue-600"></i>
+        </div>
+        <div class="text-3xl font-extrabold text-blue-900 mb-1">{{ today_pageviews }}</div>
+        <div class="text-sm font-medium text-blue-700">Page Views</div>
+      </div>
+      <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-5 border border-purple-200 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <i class="fa-solid fa-user-plus text-2xl text-purple-600"></i>
+        </div>
+        <div class="text-3xl font-extrabold text-purple-900 mb-1">{{ today_signups }}</div>
+        <div class="text-sm font-medium text-purple-700">New Signups</div>
+      </div>
+      <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-5 border border-indigo-200 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <i class="fa-solid fa-sign-in-alt text-2xl text-indigo-600"></i>
+        </div>
+        <div class="text-3xl font-extrabold text-indigo-900 mb-1">{{ today_signins }}</div>
+        <div class="text-sm font-medium text-indigo-700">Logins</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Premium Summary Cards with Sparklines -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+  <!-- Visitors Card -->
+  <div class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 overflow-hidden">
+    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-400/20 to-transparent rounded-bl-full"></div>
+    <div class="relative p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+          <i class="fa-solid fa-users text-white text-xl"></i>
+        </div>
+        {% if visitors_change is not None %}
+        <div class="flex items-center gap-1 px-2.5 py-1 rounded-lg {% if visitors_change >= 0 %}bg-emerald-50 text-emerald-700{% else %}bg-red-50 text-red-700{% endif %}">
+          <i class="fa-solid fa-arrow-{% if visitors_change >= 0 %}up{% else %}down{% endif %} text-xs"></i>
+          <span class="text-xs font-bold">{{ visitors_change|floatformat:1 }}%</span>
+        </div>
+        {% endif %}
+      </div>
+      <div class="mb-2">
+        <div class="text-4xl font-extrabold text-gray-900 mb-1">{{ unique_visitors|default:0 }}</div>
+        <div class="text-sm font-medium text-gray-500">Unique Visitors</div>
+      </div>
+      <div class="mt-4 h-12">
+        <canvas id="visitors-sparkline"></canvas>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Page Views Card -->
+  <div class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 overflow-hidden">
+    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-transparent rounded-bl-full"></div>
+    <div class="relative p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+          <i class="fa-solid fa-eye text-white text-xl"></i>
+        </div>
+        {% if page_views_change is not None %}
+        <div class="flex items-center gap-1 px-2.5 py-1 rounded-lg {% if page_views_change >= 0 %}bg-emerald-50 text-emerald-700{% else %}bg-red-50 text-red-700{% endif %}">
+          <i class="fa-solid fa-arrow-{% if page_views_change >= 0 %}up{% else %}down{% endif %} text-xs"></i>
+          <span class="text-xs font-bold">{{ page_views_change|floatformat:1 }}%</span>
+        </div>
+        {% endif %}
+      </div>
+      <div class="mb-2">
+        <div class="text-4xl font-extrabold text-gray-900 mb-1">{{ page_views|default:0 }}</div>
+        <div class="text-sm font-medium text-gray-500">Page Views</div>
+      </div>
+      <div class="mt-4 h-12">
+        <canvas id="pageviews-sparkline"></canvas>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Signups Card -->
+  <div class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 overflow-hidden">
+    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-400/20 to-transparent rounded-bl-full"></div>
+    <div class="relative p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+          <i class="fa-solid fa-user-plus text-white text-xl"></i>
+        </div>
+        {% if signups_change is not None %}
+        <div class="flex items-center gap-1 px-2.5 py-1 rounded-lg {% if signups_change >= 0 %}bg-emerald-50 text-emerald-700{% else %}bg-red-50 text-red-700{% endif %}">
+          <i class="fa-solid fa-arrow-{% if signups_change >= 0 %}up{% else %}down{% endif %} text-xs"></i>
+          <span class="text-xs font-bold">{{ signups_change|floatformat:1 }}%</span>
+        </div>
+        {% endif %}
+      </div>
+      <div class="mb-2">
+        <div class="text-4xl font-extrabold text-gray-900 mb-1">{{ signups_actual|default:0 }}</div>
+        <div class="text-sm font-medium text-gray-500">New Signups</div>
+      </div>
+      <div class="mt-4 h-12">
+        <canvas id="signups-sparkline"></canvas>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Signins Card -->
+  <div class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 overflow-hidden">
+    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-400/20 to-transparent rounded-bl-full"></div>
+    <div class="relative p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+          <i class="fa-solid fa-sign-in-alt text-white text-xl"></i>
+        </div>
+        {% if signins_change is not None %}
+        <div class="flex items-center gap-1 px-2.5 py-1 rounded-lg {% if signins_change >= 0 %}bg-emerald-50 text-emerald-700{% else %}bg-red-50 text-red-700{% endif %}">
+          <i class="fa-solid fa-arrow-{% if signins_change >= 0 %}up{% else %}down{% endif %} text-xs"></i>
+          <span class="text-xs font-bold">{{ signins_change|floatformat:1 }}%</span>
+        </div>
+        {% endif %}
+      </div>
+      <div class="mb-2">
+        <div class="text-4xl font-extrabold text-gray-900 mb-1">{{ signins|default:0 }}</div>
+        <div class="text-sm font-medium text-gray-500">User Signins</div>
+      </div>
+      <div class="mt-4 h-12">
+        <canvas id="signins-sparkline"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Additional Premium KPI Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <!-- Active Users -->
+  <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl shadow-xl p-6 text-white overflow-hidden relative">
+    <div class="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20"></div>
+    <div class="relative">
+      <div class="flex items-center justify-between mb-4">
+        <i class="fa-solid fa-user-check text-3xl text-white/90"></i>
+      </div>
+      <div class="text-4xl font-extrabold mb-1">{{ active_users|default:0 }}</div>
+      <div class="text-emerald-100 text-sm font-medium">Active Users (DAU)</div>
+    </div>
+  </div>
+  
+  <!-- Conversion Rate -->
+  <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-xl p-6 text-white overflow-hidden relative">
+    <div class="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20"></div>
+    <div class="relative">
+      <div class="flex items-center justify-between mb-4">
+        <i class="fa-solid fa-percent text-3xl text-white/90"></i>
+      </div>
+      <div class="text-4xl font-extrabold mb-1">{{ conversion_rate|default:0 }}%</div>
+      <div class="text-blue-100 text-sm font-medium">Conversion Rate</div>
+    </div>
+  </div>
+  
+  <!-- Bounce Rate -->
+  <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl shadow-xl p-6 text-white overflow-hidden relative">
+    <div class="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20"></div>
+    <div class="relative">
+      <div class="flex items-center justify-between mb-4">
+        <i class="fa-solid fa-arrow-right text-3xl text-white/90"></i>
+      </div>
+      <div class="text-4xl font-extrabold mb-1">{{ bounce_rate|default:0 }}%</div>
+      <div class="text-orange-100 text-sm font-medium">Bounce Rate</div>
+    </div>
+  </div>
+</div>
+
+<!-- Premium Time Series Charts -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+  <!-- Visitors Chart -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-xl font-bold text-gray-900">Visitors Over Time</h3>
+      <div class="flex items-center gap-2">
+        <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+        <span class="text-sm text-gray-600">Current</span>
+        {% if comparison_enabled %}
+        <div class="w-3 h-3 rounded-full bg-gray-400 ml-3"></div>
+        <span class="text-sm text-gray-600">Previous</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="h-64">
+      <canvas id="visitors-chart"></canvas>
+    </div>
+  </div>
+  
+  <!-- Page Views Chart -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-xl font-bold text-gray-900">Page Views Over Time</h3>
+    </div>
+    <div class="h-64">
+      <canvas id="pageviews-chart"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+  <!-- Signups Chart -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-xl font-bold text-gray-900">Signups Over Time</h3>
+    </div>
+    <div class="h-64">
+      <canvas id="signups-chart"></canvas>
+    </div>
+  </div>
+  
+  <!-- Signins Chart -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-xl font-bold text-gray-900">Signins Over Time</h3>
+    </div>
+    <div class="h-64">
+      <canvas id="signins-chart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Premium Breakdown Charts -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+  <!-- Device Breakdown -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+    <h3 class="text-xl font-bold text-gray-900 mb-6">Device Types</h3>
+    <div class="h-64">
+      <canvas id="device-chart"></canvas>
+    </div>
+  </div>
+  
+  <!-- Browser Breakdown -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+    <h3 class="text-xl font-bold text-gray-900 mb-6">Browsers</h3>
+    <div class="h-64">
+      <canvas id="browser-chart"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+  <!-- Traffic Sources -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+    <h3 class="text-xl font-bold text-gray-900 mb-6">Traffic Sources</h3>
+    <div class="h-64">
+      <canvas id="traffic-sources-chart"></canvas>
+    </div>
+  </div>
+  
+  <!-- Operating Systems -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+    <h3 class="text-xl font-bold text-gray-900 mb-6">Operating Systems</h3>
+    <div class="h-64">
+      <canvas id="os-chart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Premium Bar Charts -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+  <!-- Popular Pages -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+    <h3 class="text-xl font-bold text-gray-900 mb-6">Popular Pages</h3>
+    <div class="h-64">
+      <canvas id="popular-pages-chart"></canvas>
+    </div>
+  </div>
+  
+  <!-- Hourly Activity -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+    <h3 class="text-xl font-bold text-gray-900 mb-6">Activity by Hour</h3>
+    <div class="h-64">
+      <canvas id="hourly-activity-chart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Premium Conversion Funnel -->
+<div class="bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-xl p-8 border border-gray-100 mb-8">
+  <h3 class="text-2xl font-bold text-gray-900 mb-6">Conversion Funnel</h3>
+  <div class="space-y-6">
+    <div class="flex items-center gap-6">
+      <div class="w-40 text-sm font-semibold text-gray-700">Visitors</div>
+      <div class="flex-1">
+        <div class="bg-gray-200 rounded-full h-12 relative overflow-hidden shadow-inner">
+          <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 h-12 rounded-full flex items-center justify-end pr-6 shadow-lg" style="width: 100%">
+            <span class="text-white text-sm font-bold">{{ funnel_visitors }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="w-24 text-sm font-bold text-gray-900 text-right">100%</div>
+    </div>
+    
+    <div class="flex items-center gap-6">
+      <div class="w-40 text-sm font-semibold text-gray-700">Signups</div>
+      <div class="flex-1">
+        <div class="bg-gray-200 rounded-full h-12 relative overflow-hidden shadow-inner">
+          <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-12 rounded-full flex items-center justify-end pr-6 shadow-lg" style="width: {{ visitor_to_signup_rate }}%">
+            <span class="text-white text-sm font-bold">{{ funnel_signups }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="w-24 text-sm font-bold text-gray-900 text-right">{{ visitor_to_signup_rate }}%</div>
+    </div>
+    
+    <div class="flex items-center gap-6">
+      <div class="w-40 text-sm font-semibold text-gray-700">Logins</div>
+      <div class="flex-1">
+        <div class="bg-gray-200 rounded-full h-12 relative overflow-hidden shadow-inner">
+          <div class="bg-gradient-to-r from-purple-500 to-purple-600 h-12 rounded-full flex items-center justify-end pr-6 shadow-lg" style="width: {{ overall_conversion_rate }}%">
+            <span class="text-white text-sm font-bold">{{ funnel_logins }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="w-24 text-sm font-bold text-gray-900 text-right">{{ overall_conversion_rate }}%</div>
+    </div>
+  </div>
+</div>
+
+<!-- Session Analytics & Geographic -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+  <!-- Session Metrics -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+    <h3 class="text-xl font-bold text-gray-900 mb-6">Session Analytics</h3>
+    <div class="space-y-4">
+      <div class="flex justify-between items-center p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-clock text-blue-600"></i>
+          </div>
+          <span class="text-gray-700 font-medium">Total Sessions</span>
+        </div>
+        <span class="text-2xl font-bold text-gray-900">{{ total_sessions }}</span>
+      </div>
+      <div class="flex justify-between items-center p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-hourglass-half text-emerald-600"></i>
+          </div>
+          <span class="text-gray-700 font-medium">Avg Duration</span>
+        </div>
+        <span class="text-2xl font-bold text-gray-900">{{ avg_session_duration|floatformat:0 }}s</span>
+      </div>
+      <div class="flex justify-between items-center p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-file text-purple-600"></i>
+          </div>
+          <span class="text-gray-700 font-medium">Avg Pages/Session</span>
+        </div>
+        <span class="text-2xl font-bold text-gray-900">{{ avg_pages_per_session|floatformat:1 }}</span>
+      </div>
+      <div class="grid grid-cols-2 gap-4 mt-4">
+        <div class="p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200">
+          <div class="text-sm text-emerald-700 font-medium mb-1">New Visitors</div>
+          <div class="text-2xl font-bold text-emerald-900">{{ new_visitors }}</div>
+        </div>
+        <div class="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+          <div class="text-sm text-blue-700 font-medium mb-1">Returning</div>
+          <div class="text-2xl font-bold text-blue-900">{{ returning_visitors }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Top Countries -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+    <h3 class="text-xl font-bold text-gray-900 mb-6">Top Countries</h3>
+    <div class="space-y-3 max-h-96 overflow-y-auto">
+      {% for country in country_breakdown %}
+      <div class="flex justify-between items-center p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:shadow-md transition">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+            {{ country.country|default:"?"|slice:":2"|upper }}
+          </div>
+          <span class="text-gray-900 font-medium">{{ country.country|default:"Unknown" }}</span>
+        </div>
+        <span class="text-xl font-bold text-gray-900">{{ country.count }}</span>
+      </div>
+      {% empty %}
+      <p class="text-gray-500 text-sm text-center py-8">No country data available</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- User Directory - Clickable & Downloadable -->
+<div class="bg-gradient-to-br from-slate-50 to-gray-50 rounded-2xl shadow-xl p-8 border border-slate-100 mb-8">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+      <i class="fa-solid fa-users text-slate-600"></i>
+      User Directory
+    </h2>
+    <div class="flex items-center gap-3">
+      <input 
+        type="text" 
+        id="user-search" 
+        placeholder="Search users..." 
+        class="px-4 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+      >
+      <button 
+        onclick="exportUsers('csv')" 
+        class="px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2 transition shadow-lg hover:shadow-xl"
+      >
+        <i class="fa-solid fa-file-csv"></i> Export CSV
+      </button>
+      <button 
+        onclick="exportUsers('pdf')" 
+        class="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2 transition shadow-lg hover:shadow-xl"
+      >
+        <i class="fa-solid fa-file-pdf"></i> Export PDF
+      </button>
+    </div>
+  </div>
+  
+  <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm" id="user-table">
+        <thead class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+          <tr>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200" onclick="sortTable(0)">
+              Name <i class="fa-solid fa-sort ml-1"></i>
+            </th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200" onclick="sortTable(1)">
+              Email <i class="fa-solid fa-sort ml-1"></i>
+            </th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200" onclick="sortTable(2)">
+              Profession <i class="fa-solid fa-sort ml-1"></i>
+            </th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200" onclick="sortTable(3)">
+              Signup Date <i class="fa-solid fa-sort ml-1"></i>
+            </th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200" onclick="sortTable(4)">
+              Last Login <i class="fa-solid fa-sort ml-1"></i>
+            </th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              Activity
+            </th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              Status
+            </th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200" id="user-table-body">
+          {% for user in user_list %}
+          <tr class="hover:bg-gray-50 transition cursor-pointer" onclick="showUserDetails({{ user.id }})" data-user-id="{{ user.id }}">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-sm mr-3">
+                  {{ user.display_name|default:user.username|first|upper }}
+                </div>
+                <div>
+                  <div class="font-semibold text-gray-900">
+                    {{ user.display_name|default:user.first_name|default:user.username }}
+                    {% if user.last_name %} {{ user.last_name }}{% endif %}
+                  </div>
+                  <div class="text-xs text-gray-500">@{{ user.username }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-gray-900">{{ user.email }}</div>
+              {% if user.signup_country %}
+              <div class="text-xs text-gray-500">📍 {{ user.signup_country }}</div>
+              {% endif %}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                {{ user.profession|default:"—" }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-gray-600">
+              {{ user.signup_date|date:"M d, Y" }}
+              <div class="text-xs text-gray-400">{{ user.signup_date|timesince }} ago</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-gray-600">
+              {% if user.last_login %}
+                {{ user.last_login|date:"M d, Y" }}
+                <div class="text-xs text-gray-400">{{ user.last_login|timesince }} ago</div>
+              {% else %}
+                <span class="text-gray-400">Never</span>
+              {% endif %}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center gap-4 text-xs">
+                <div class="text-center">
+                  <div class="font-bold text-indigo-600">{{ user.total_summaries }}</div>
+                  <div class="text-gray-500">Summaries</div>
+                </div>
+                <div class="text-center">
+                  <div class="font-bold text-purple-600">{{ user.total_chat_sessions }}</div>
+                  <div class="text-gray-500">Chats</div>
+                </div>
+                <div class="text-center">
+                  <div class="font-bold text-emerald-600">{{ user.total_signins }}</div>
+                  <div class="text-gray-500">Logins</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              {% if user.is_active %}
+                <span class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-medium">Active</span>
+              {% else %}
+                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">Inactive</span>
+              {% endif %}
+              {% if user.is_staff %}
+                <span class="ml-2 px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">Staff</span>
+              {% endif %}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <button 
+                onclick="event.stopPropagation(); showUserDetails({{ user.id }})" 
+                class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-medium transition"
+              >
+                View Details
+              </button>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+              <i class="fa-solid fa-users text-4xl text-gray-300 mb-3 block"></i>
+              No users found
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+      <div class="text-sm text-gray-600">
+        Showing <span id="user-count">{{ user_list|length }}</span> of {{ total_users|default:0 }} users
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="previousPage()" class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Previous</button>
+        <span class="px-3 py-1.5 text-sm text-gray-700">Page <span id="current-page">1</span></span>
+        <button onclick="nextPage()" class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- User Details Modal -->
+<div id="user-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="sticky top-0 bg-gradient-to-r from-emerald-500 to-blue-600 px-6 py-4 rounded-t-2xl flex items-center justify-between">
+      <h3 class="text-xl font-bold text-white">User Details</h3>
+      <button onclick="closeUserModal()" class="text-white hover:text-gray-200">
+        <i class="fa-solid fa-times text-xl"></i>
+      </button>
+    </div>
+    <div class="p-6" id="user-modal-content">
+      <!-- Content will be loaded here -->
+    </div>
+  </div>
+</div>
+
+<!-- Recent Activity & Security -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+  <!-- Recent Visitors -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+    <h3 class="text-xl font-bold text-gray-900 mb-6">Recent Visitors</h3>
+    <div class="space-y-3 max-h-80 overflow-y-auto">
+      {% for visitor in recent_visitors %}
+      <div class="p-3 bg-gray-50 rounded-xl border border-gray-100 hover:bg-gray-100 transition">
+        <div class="flex items-start justify-between">
+          <div class="flex-1 min-w-0">
+            <div class="font-medium text-gray-900 truncate text-sm">{{ visitor.path|truncatechars:35 }}</div>
+            <div class="text-xs text-gray-500 mt-1">{{ visitor.ip_address }}</div>
+            {% if visitor.is_unique %}
+            <span class="inline-block mt-1 text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-medium">New</span>
+            {% endif %}
+          </div>
+          <span class="text-xs text-gray-400 ml-2 whitespace-nowrap">{{ visitor.created_at|timesince }} ago</span>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-gray-500 text-sm text-center py-8">No recent visitors</p>
+      {% endfor %}
+    </div>
+  </div>
+  
+  <!-- Recent Signups -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+    <h3 class="text-xl font-bold text-gray-900 mb-6">Recent Signups</h3>
+    <div class="space-y-3 max-h-80 overflow-y-auto">
+      {% for signup in recent_signups %}
+      <div class="p-3 bg-gradient-to-r from-purple-50 to-white rounded-xl border border-purple-100 hover:shadow-md transition">
+        <div class="flex items-start justify-between">
+          <div class="flex-1 min-w-0">
+            <div class="font-semibold text-gray-900 truncate">{{ signup.user.username }}</div>
+            <div class="text-xs text-gray-500 mt-1 truncate">{{ signup.user.email }}</div>
+            {% if signup.ip_address %}
+            <div class="text-xs text-gray-400 mt-1">{{ signup.ip_address }}</div>
+            {% endif %}
+          </div>
+          <span class="text-xs text-gray-400 ml-2 whitespace-nowrap">{{ signup.created_at|timesince }} ago</span>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-gray-500 text-sm text-center py-8">No recent signups</p>
+      {% endfor %}
+    </div>
+  </div>
+  
+  <!-- Security Alerts -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+    <h3 class="text-xl font-bold text-gray-900 mb-6">Security Monitor</h3>
+    <div class="space-y-4">
+      <div class="p-4 {% if failed_logins_today > 0 %}bg-red-50 border-2 border-red-200{% else %}bg-emerald-50 border-2 border-emerald-200{% endif %} rounded-xl">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-semibold {% if failed_logins_today > 0 %}text-red-900{% else %}text-emerald-900{% endif %}">Failed Logins (Today)</span>
+          <i class="fa-solid fa-{% if failed_logins_today > 0 %}exclamation-triangle{% else %}shield-check{% endif %} text-{% if failed_logins_today > 0 %}red{% else %}emerald{% endif %}-600"></i>
+        </div>
+        <div class="text-3xl font-extrabold {% if failed_logins_today > 0 %}text-red-700{% else %}text-emerald-700{% endif %}">
+          {{ failed_logins_today }}
+        </div>
+      </div>
+      <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-semibold text-gray-700">Failed Logins (Period)</span>
+        </div>
+        <div class="text-3xl font-extrabold {% if failed_logins > 0 %}text-orange-700{% else %}text-gray-700{% endif %}">
+          {{ failed_logins }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-gradient@latest/dist/chartjs-plugin-gradient.min.js"></script>
+
+<script>
+// Chart data from Django (already JSON strings, use directly)
+const dailyStats = {{ daily_stats_json|safe }};
+const prevDailyStats = {{ prev_daily_stats_json|safe }};
+const deviceData = {{ device_breakdown_json|safe }};
+const browserData = {{ browser_breakdown_json|safe }};
+const osData = {{ os_breakdown_json|safe }};
+const trafficSourcesData = {{ traffic_sources_json|safe }};
+const popularPagesData = {{ popular_pages_json|safe }};
+const hourlyActivityData = {{ hourly_activity_json|safe }};
+
+// Medical AI Analytics Data - removed (no data available)
+
+// Premium Chart.js configuration
+Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+Chart.defaults.font.size = 13;
+Chart.defaults.color = '#6B7280';
+Chart.defaults.plugins.legend.display = true;
+Chart.defaults.plugins.legend.position = 'bottom';
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.padding = 15;
+Chart.defaults.plugins.legend.labels.font.weight = '600';
+
+// Premium gradient colors
+const gradients = {
+  emerald: ['#10B981', '#059669'],
+  blue: ['#3B82F6', '#2563EB'],
+  purple: ['#9333EA', '#7C3AED'],
+  indigo: ['#6366F1', '#4F46E5'],
+  orange: ['#F59E0B', '#D97706'],
+};
+
+function createGradient(ctx, color1, color2) {
+  const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+  gradient.addColorStop(0, color1);
+  gradient.addColorStop(1, color2);
+  return gradient;
+}
+
+// Premium sparklines
+function createSparkline(canvasId, data, color) {
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return;
+  
+  const gradient = createGradient(ctx, color + '80', color + '20');
+  
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.map(() => ''),
+      datasets: [{
+        data: data,
+        borderColor: color,
+        backgroundColor: gradient,
+        borderWidth: 2.5,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false }
+      },
+      scales: {
+        x: { display: false, grid: { display: false } },
+        y: { display: false, grid: { display: false } }
+      },
+      interaction: { intersect: false }
+    }
+  });
+}
+
+// Create sparklines (with safety checks)
+if (dailyStats && dailyStats.length > 0) {
+  createSparkline('visitors-sparkline', dailyStats.map(d => d.visitors || 0), '#10B981');
+  createSparkline('pageviews-sparkline', dailyStats.map(d => d.page_views || 0), '#3B82F6');
+  createSparkline('signups-sparkline', dailyStats.map(d => d.signups || 0), '#9333EA');
+  createSparkline('signins-sparkline', dailyStats.map(d => d.signins || 0), '#6366F1');
+} else {
+  // Create empty sparklines if no data
+  createSparkline('visitors-sparkline', [0], '#10B981');
+  createSparkline('pageviews-sparkline', [0], '#3B82F6');
+  createSparkline('signups-sparkline', [0], '#9333EA');
+  createSparkline('signins-sparkline', [0], '#6366F1');
+}
+
+// Premium time series charts
+function createTimeSeriesChart(canvasId, label, dataKey, color, prevData = null) {
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return;
+  
+  // Safety check for data
+  if (!dailyStats || dailyStats.length === 0) {
+    // Create empty chart
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: label,
+          data: [],
+          borderColor: color,
+          backgroundColor: color + '20',
+          borderWidth: 3,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true, position: 'top' },
+          tooltip: { enabled: true }
+        },
+        scales: {
+          x: { grid: { display: false } },
+          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }
+        }
+      }
+    });
+    return;
+  }
+  
+  const gradient = createGradient(ctx, color + '80', color + '10');
+  
+  const datasets = [{
+    label: label,
+    data: dailyStats.map(d => d[dataKey] || 0),
+    borderColor: color,
+    backgroundColor: gradient,
+    borderWidth: 3,
+    fill: true,
+    tension: 0.4,
+    pointRadius: 0,
+    pointHoverRadius: 6,
+    pointHoverBorderWidth: 3,
+    pointHoverBackgroundColor: color,
+    pointHoverBorderColor: '#fff'
+  }];
+  
+  if (prevData && prevData.length > 0) {
+    datasets.push({
+      label: 'Previous Period',
+      data: prevData.map(d => d[dataKey] || 0),
+      borderColor: '#9CA3AF',
+      borderWidth: 2,
+      borderDash: [8, 4],
+      fill: false,
+      tension: 0.4,
+      pointRadius: 0,
+      pointHoverRadius: 5
+    });
+  }
+  
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: dailyStats.map(d => d.date_display || d.date),
+      datasets: datasets
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { 
+          display: true, 
+          position: 'top',
+          labels: {
+            usePointStyle: true,
+            padding: 20,
+            font: { size: 12, weight: '600' }
+          }
+        },
+        tooltip: { 
+          mode: 'index', 
+          intersect: false,
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          padding: 12,
+          titleFont: { size: 14, weight: '600' },
+          bodyFont: { size: 13 },
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          cornerRadius: 8
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false, drawBorder: false },
+          ticks: { font: { size: 11 }, color: '#9CA3AF' }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false },
+          ticks: { font: { size: 11 }, color: '#9CA3AF' }
+        }
+      }
+    }
+  });
+}
+
+// Create time series charts (with safety checks)
+if (dailyStats && dailyStats.length > 0) {
+  createTimeSeriesChart('visitors-chart', 'Visitors', 'visitors', '#10B981', prevDailyStats);
+  createTimeSeriesChart('pageviews-chart', 'Page Views', 'page_views', '#3B82F6', prevDailyStats);
+  createTimeSeriesChart('signups-chart', 'Signups', 'signups', '#9333EA', prevDailyStats);
+  createTimeSeriesChart('signins-chart', 'Signins', 'signins', '#6366F1', prevDailyStats);
+}
+
+// Premium pie/donut charts
+function createPieChart(canvasId, data, colors) {
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return;
+  
+  // Handle empty data
+  if (!data || data.length === 0) {
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['No Data'],
+        datasets: [{
+          data: [1],
+          backgroundColor: ['#E5E7EB'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: false }
+        }
+      }
+    });
+    return;
+  }
+  
+  const chartColors = colors || ['#10B981', '#3B82F6', '#9333EA', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#06B6D4', '#84CC16'];
+  
+  // Transform data to chart format
+  const labels = data.map(d => {
+    // Handle different data structures
+    if (d.device_type) return d.device_type;
+    if (d.browser) return d.browser;
+    if (d.os) return d.os;
+    if (d.source) return d.source;
+    if (d.care_setting) return d.care_setting;
+    if (d.tone) return d.tone;
+    if (d.profession) return d.profession;
+    if (d.language) return d.language;
+    return 'Unknown';
+  });
+  
+  const values = data.map(d => d.count || d.visitors || 0);
+  
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: values,
+        backgroundColor: chartColors.slice(0, data.length),
+        borderWidth: 0,
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { 
+          position: 'bottom',
+          labels: {
+            padding: 15,
+            font: { size: 12, weight: '600' },
+            usePointStyle: true,
+            pointStyle: 'circle'
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          padding: 12,
+          cornerRadius: 8,
+          callbacks: {
+            label: function(context) {
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              if (total === 0) return context.label + ': 0';
+              const percentage = ((context.parsed / total) * 100).toFixed(1);
+              return `${context.label}: ${context.parsed} (${percentage}%)`;
+            }
+          }
+        }
+      },
+      cutout: '60%'
+    }
+  });
+}
+
+// Create pie charts (with safety checks)
+if (deviceData && deviceData.length > 0) {
+  createPieChart('device-chart', deviceData, ['#10B981', '#3B82F6', '#9333EA']);
+} else {
+  createPieChart('device-chart', [], ['#10B981', '#3B82F6', '#9333EA']);
+}
+
+if (browserData && browserData.length > 0) {
+  createPieChart('browser-chart', browserData);
+} else {
+  createPieChart('browser-chart', []);
+}
+
+if (osData && osData.length > 0) {
+  createPieChart('os-chart', osData);
+} else {
+  createPieChart('os-chart', []);
+}
+
+if (trafficSourcesData && trafficSourcesData.length > 0) {
+  createPieChart('traffic-sources-chart', trafficSourcesData, ['#10B981', '#3B82F6', '#9333EA', '#F59E0B', '#EF4444']);
+} else {
+  createPieChart('traffic-sources-chart', [], ['#10B981', '#3B82F6', '#9333EA', '#F59E0B', '#EF4444']);
+}
+
+// Premium bar charts
+function createBarChart(canvasId, label, data, color) {
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return;
+  
+  // Handle empty data
+  if (!data || data.length === 0) {
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [{
+          label: label,
+          data: [],
+          backgroundColor: color + '40',
+          borderColor: color,
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: false }
+        },
+        scales: {
+          x: { grid: { display: false } },
+          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }
+        }
+      }
+    });
+    return;
+  }
+  
+  // Transform data for bar chart
+  const labels = data.map(d => {
+    if (d.path) return d.path.length > 30 ? d.path.substring(0, 30) + '...' : d.path;
+    if (d.hour_display) return d.hour_display;
+    if (d.hour !== undefined) return `${d.hour}:00`;
+    return '';
+  }).slice(0, 10);
+  
+  const values = data.map(d => d.views || d.visitors || d.count || 0).slice(0, 10);
+  
+  const gradient = createGradient(ctx, color, color + '80');
+  
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: label,
+        data: values,
+        backgroundColor: gradient,
+        borderColor: color,
+        borderWidth: 0,
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          padding: 12,
+          cornerRadius: 8
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false, drawBorder: false },
+          ticks: { font: { size: 11 }, color: '#9CA3AF', maxRotation: 45, minRotation: 45 }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false },
+          ticks: { font: { size: 11 }, color: '#9CA3AF' }
+        }
+      }
+    }
+  });
+}
+
+// Create bar charts (with safety checks)
+if (popularPagesData && popularPagesData.length > 0) {
+  createBarChart('popular-pages-chart', 'Views', popularPagesData, '#3B82F6');
+} else {
+  createBarChart('popular-pages-chart', 'Views', [], '#3B82F6');
+}
+
+if (hourlyActivityData && hourlyActivityData.length > 0) {
+  createBarChart('hourly-activity-chart', 'Visitors', hourlyActivityData, '#10B981');
+} else {
+  createBarChart('hourly-activity-chart', 'Visitors', [], '#10B981');
+}
+
+// User Directory Functionality
+const userListData = {{ user_list_json|safe }};
+let currentPage = 1;
+const itemsPerPage = 20;
+let sortColumn = -1;
+let sortDirection = 'asc';
+
+// Search functionality
+document.getElementById('user-search')?.addEventListener('input', function(e) {
+  const searchTerm = e.target.value.toLowerCase();
+  const rows = document.querySelectorAll('#user-table-body tr');
+  let visibleCount = 0;
+  
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    if (text.includes(searchTerm)) {
+      row.style.display = '';
+      visibleCount++;
+    } else {
+      row.style.display = 'none';
+    }
+  });
+  
+  document.getElementById('user-count').textContent = visibleCount;
+});
+
+// Sort table
+function sortTable(columnIndex) {
+  const tbody = document.getElementById('user-table-body');
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  
+  if (sortColumn === columnIndex) {
+    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortColumn = columnIndex;
+    sortDirection = 'asc';
+  }
+  
+  rows.sort((a, b) => {
+    const aText = a.cells[columnIndex].textContent.trim();
+    const bText = b.cells[columnIndex].textContent.trim();
+    
+    // Try to parse as date
+    const aDate = new Date(aText);
+    const bDate = new Date(bText);
+    if (!isNaN(aDate) && !isNaN(bDate)) {
+      return sortDirection === 'asc' ? aDate - bDate : bDate - aDate;
+    }
+    
+    // Compare as strings
+    if (sortDirection === 'asc') {
+      return aText.localeCompare(bText);
+    } else {
+      return bText.localeCompare(aText);
+    }
+  });
+  
+  rows.forEach(row => tbody.appendChild(row));
+}
+
+// Pagination
+function nextPage() {
+  const totalPages = Math.ceil(userListData.length / itemsPerPage);
+  if (currentPage < totalPages) {
+    currentPage++;
+    renderPage();
+  }
+}
+
+function previousPage() {
+  if (currentPage > 1) {
+    currentPage--;
+    renderPage();
+  }
+}
+
+function renderPage() {
+  const start = (currentPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  const rows = document.querySelectorAll('#user-table-body tr');
+  
+  rows.forEach((row, index) => {
+    if (index >= start && index < end) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+  
+  document.getElementById('current-page').textContent = currentPage;
+}
+
+// Show user details modal
+function showUserDetails(userId) {
+  const user = userListData.find(u => u.id === userId);
+  if (!user) return;
+  
+  const modal = document.getElementById('user-modal');
+  const content = document.getElementById('user-modal-content');
+  
+  content.innerHTML = `
+    <div class="space-y-6">
+      <div class="flex items-center gap-4 pb-4 border-b">
+        <div class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-2xl">
+          ${(user.display_name || user.username || 'U').charAt(0).toUpperCase()}
+        </div>
+        <div>
+          <h4 class="text-2xl font-bold text-gray-900">${user.display_name || user.first_name || user.username} ${user.last_name || ''}</h4>
+          <p class="text-gray-600">@${user.username}</p>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-2 gap-4">
+        <div class="p-4 bg-gray-50 rounded-xl">
+          <div class="text-xs text-gray-500 mb-1">Email</div>
+          <div class="font-semibold text-gray-900">${user.email}</div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl">
+          <div class="text-xs text-gray-500 mb-1">Profession</div>
+          <div class="font-semibold text-gray-900">${user.profession || '—'}</div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl">
+          <div class="text-xs text-gray-500 mb-1">Language</div>
+          <div class="font-semibold text-gray-900">${user.language || 'en-US'}</div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl">
+          <div class="text-xs text-gray-500 mb-1">Status</div>
+          <div class="font-semibold">
+            ${user.is_active ? '<span class="text-emerald-600">Active</span>' : '<span class="text-gray-600">Inactive</span>'}
+            ${user.is_staff ? '<span class="ml-2 text-purple-600">Staff</span>' : ''}
+          </div>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-3 gap-4">
+        <div class="p-4 bg-indigo-50 rounded-xl text-center">
+          <div class="text-3xl font-bold text-indigo-600">${user.total_summaries || 0}</div>
+          <div class="text-sm text-gray-600">Summaries</div>
+        </div>
+        <div class="p-4 bg-purple-50 rounded-xl text-center">
+          <div class="text-3xl font-bold text-purple-600">${user.total_chat_sessions || 0}</div>
+          <div class="text-sm text-gray-600">Chat Sessions</div>
+        </div>
+        <div class="p-4 bg-emerald-50 rounded-xl text-center">
+          <div class="text-3xl font-bold text-emerald-600">${user.total_signins || 0}</div>
+          <div class="text-sm text-gray-600">Total Logins</div>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-2 gap-4">
+        <div class="p-4 bg-blue-50 rounded-xl">
+          <div class="text-xs text-gray-500 mb-1">Signup Date</div>
+          <div class="font-semibold text-gray-900">${new Date(user.signup_date).toLocaleDateString()}</div>
+          ${user.signup_ip ? `<div class="text-xs text-gray-500 mt-1">IP: ${user.signup_ip}</div>` : ''}
+          ${user.signup_country ? `<div class="text-xs text-gray-500">Country: ${user.signup_country}</div>` : ''}
+        </div>
+        <div class="p-4 bg-blue-50 rounded-xl">
+          <div class="text-xs text-gray-500 mb-1">Last Login</div>
+          <div class="font-semibold text-gray-900">${user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}</div>
+          ${user.last_login_ip ? `<div class="text-xs text-gray-500 mt-1">IP: ${user.last_login_ip}</div>` : ''}
+          ${user.last_login_country ? `<div class="text-xs text-gray-500">Country: ${user.last_login_country}</div>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+  
+  modal.classList.remove('hidden');
+}
+
+function closeUserModal() {
+  document.getElementById('user-modal').classList.add('hidden');
+}
+
+// Close modal on outside click
+document.getElementById('user-modal')?.addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeUserModal();
+  }
+});
+
+// Export users
+function exportUsers(format) {
+  const period = document.getElementById('period-select')?.value || '30d';
+  window.location.href = `{% url 'analytics_export' %}?export=users_${format}&period=${period}`;
+}
+
+// Initialize pagination
+if (userListData && userListData.length > 0) {
+  renderPage();
+}
+
+// Medical AI charts removed - no data available yet
+
+// Period selector - show/hide custom date range
+document.getElementById('period-select')?.addEventListener('change', function() {
+  const period = this.value;
+  const customRangeDiv = document.getElementById('custom-date-range');
+  
+  if (period === 'custom') {
+    // Show custom date range inputs
+    if (customRangeDiv) {
+      customRangeDiv.classList.remove('hidden');
+    }
+    // Don't auto-update, wait for user to select dates
+  } else {
+    // Hide custom date range inputs
+    if (customRangeDiv) {
+      customRangeDiv.classList.add('hidden');
+    }
+    // Auto-update dashboard for preset periods
+    updateDashboard(period);
+  }
+});
+
+// Comparison toggle
+document.getElementById('compare-toggle')?.addEventListener('change', function() {
+  updateDashboard();
+});
+
+// Update dashboard function
+function updateDashboard(period = null) {
+  const selectedPeriod = period || document.getElementById('period-select')?.value;
+  const compare = document.getElementById('compare-toggle')?.checked;
+  let url = `?period=${selectedPeriod}`;
+  
+  if (compare) {
+    url += '&compare=true';
+  }
+  
+  if (selectedPeriod === 'custom') {
+    const start = document.getElementById('start-date')?.value;
+    const end = document.getElementById('end-date')?.value;
+    if (start && end) {
+      url += `&start=${start}&end=${end}`;
+    }
+  }
+  
+  window.location.href = url;
+}
+
+// Export functions
+function exportReport(format) {
+  const period = document.getElementById('period-select')?.value || '7d';
+  window.location.href = `{% url 'analytics' %}?export=${format}&period=${period}`;
+}
+
+function generateDailyReport() {
+  window.location.href = `{% url 'analytics' %}?export=daily&period=today`;
+}
+
+function refreshData() {
+  window.location.reload();
+}
+
+// Custom date range handlers - update when both dates are selected
+let startDateSet = false;
+let endDateSet = false;
+
+document.getElementById('start-date')?.addEventListener('change', function() {
+  startDateSet = true;
+  // Only update if both dates are set
+  if (endDateSet && this.value && document.getElementById('end-date')?.value) {
+    updateDashboard('custom');
+  }
+});
+
+document.getElementById('end-date')?.addEventListener('change', function() {
+  endDateSet = true;
+  // Only update if both dates are set
+  if (startDateSet && this.value && document.getElementById('start-date')?.value) {
+    updateDashboard('custom');
+  }
+});
+
+// Also add a "Go" button for custom range
+const customRangeDiv = document.getElementById('custom-date-range');
+if (customRangeDiv && !customRangeDiv.querySelector('.custom-go-btn')) {
+  const goButton = document.createElement('button');
+  goButton.className = 'px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-lg text-sm font-semibold transition shadow-lg hover:shadow-xl ml-2 custom-go-btn';
+  goButton.innerHTML = '<i class="fa-solid fa-arrow-right"></i>';
+  goButton.onclick = function() {
+    updateDashboard('custom');
+  };
+  customRangeDiv.appendChild(goButton);
+}
+</script>
+
+<style>
+/* Premium animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.group {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* Smooth scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Hover effects */
+.group:hover {
+  transform: translateY(-2px);
+}
+</style>
+
+{% endblock %}
+

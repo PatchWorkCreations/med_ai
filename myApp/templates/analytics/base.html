@@ -1,0 +1,109 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>{% block title %}Website Analytics{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+
+  <style>
+    html, body {
+      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+    }
+    
+    /* Premium scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(to bottom, #10b981, #3b82f6);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(to bottom, #059669, #2563eb);
+    }
+    
+    /* Smooth animations */
+    * {
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+  <!-- Premium Navigation Bar -->
+  <nav class="bg-white/95 backdrop-blur-sm shadow-lg border-b border-gray-100 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <a href="{% url 'analytics' %}" class="flex items-center space-x-3 group">
+            <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition">
+              <i class="fa-solid fa-chart-line text-white text-lg"></i>
+            </div>
+            <div>
+              <span class="text-xl font-extrabold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">Website Analytics</span>
+              <p class="text-xs text-gray-500 -mt-1">Premium Dashboard</p>
+            </div>
+          </a>
+        </div>
+        <div class="flex items-center space-x-4">
+          {% if user.is_authenticated %}
+            <div class="flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-xl border border-gray-200">
+              <div class="w-8 h-8 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-xs">
+                {{ user.username|first|upper }}
+              </div>
+              <span class="text-sm font-medium text-gray-700">Welcome, {{ user.username }}</span>
+            </div>
+            <a href="{% url 'dashboard' %}" class="px-4 py-2 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 transition shadow-sm hover:shadow">
+              <i class="fa-solid fa-arrow-left mr-2"></i> Dashboard
+            </a>
+            <a href="{% url 'logout' %}" class="px-4 py-2 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 transition shadow-sm hover:shadow">
+              <i class="fa-solid fa-sign-out-alt mr-2"></i> Logout
+            </a>
+          {% else %}
+            <a href="{% url 'login' %}" class="px-4 py-2 bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-600 hover:to-blue-700 text-white rounded-xl text-sm font-semibold shadow-lg hover:shadow-xl transition">Login</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    {% if messages %}
+      <div class="mb-6 space-y-2">
+        {% for message in messages %}
+          <div class="rounded-lg border p-3 text-sm
+                      {% if message.tags == 'error' %}border-red-300 bg-red-50 text-red-800
+                      {% elif message.tags == 'success' %}border-green-300 bg-green-50 text-green-800
+                      {% else %}border-gray-200 bg-white text-gray-700{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-gray-200 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="text-center text-sm text-gray-500">
+        <p>&copy; {% now "Y" %} Website Analytics Dashboard. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
+

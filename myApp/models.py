@@ -327,3 +327,192 @@ class Encounter(OrgOwnedModel):
     def __str__(self):
         return f"[{self.org.slug}] Encounter #{self.id} – {self.reason}"
 
+
+# ---------------------------------------------------------------------
+# Website Activity Tracking Models
+# ---------------------------------------------------------------------
+from django.utils import timezone
+from datetime import timedelta
+
+class Visitor(models.Model):
+    """Track website visitors and page views"""
+    ip_address = models.GenericIPAddressField()
+    user_agent = models.TextField(blank=True)
+    referer = models.URLField(blank=True)
+    path = models.CharField(max_length=500)
+    method = models.CharField(max_length=10, default='GET')
+    session_key = models.CharField(max_length=100, blank=True)
+    is_unique = models.BooleanField(default=True, help_text="First visit from this IP in 24 hours")
+    
+    # Enhanced tracking fields
+    country = models.CharField(max_length=2, blank=True, help_text="Country code (e.g., US, UK)")
+    city = models.CharField(max_length=100, blank=True)
+    device_type = models.CharField(max_length=20, blank=True, choices=[
+        ('desktop', 'Desktop'),
+        ('mobile', 'Mobile'),
+        ('tablet', 'Tablet'),
+        ('other', 'Other'),
+    ])
+    browser = models.CharField(max_length=50, blank=True, help_text="Browser name (Chrome, Firefox, etc.)")
+    os = models.CharField(max_length=50, blank=True, help_text="Operating system")
+    utm_source = models.CharField(max_length=100, blank=True)
+    utm_medium = models.CharField(max_length=100, blank=True)
+    utm_campaign = models.CharField(max_length=100, blank=True)
+    utm_term = models.CharField(max_length=100, blank=True)
+    utm_content = models.CharField(max_length=100, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['-created_at']),
+            models.Index(fields=['ip_address', 'created_at']),
+            models.Index(fields=['path', 'created_at']),
+        ]
+        verbose_name = "Visitor"
+        verbose_name_plural = "Visitors"
+    
+    def __str__(self):
+        return f"{self.ip_address} - {self.path} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+
+class UserSignup(models.Model):
+    """Track user signups/registrations"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='signup_record')
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    user_agent = models.TextField(blank=True)
+    referer = models.URLField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "User Signup"
+        verbose_name_plural = "User Signups"
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+
+class UserSignin(models.Model):
+    """Track user login activity"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='signin_records')
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    user_agent = models.TextField(blank=True)
+    success = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['-created_at']),
+            models.Index(fields=['user', '-created_at']),
+        ]
+        verbose_name = "User Signin"
+        verbose_name_plural = "User Signins"
+    
+    def __str__(self):
+        status = "Success" if self.success else "Failed"
+        return f"{self.user.username} - {status} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+
+class PageView(models.Model):
+    """Track individual page views with more detail"""
+    visitor = models.ForeignKey(Visitor, on_delete=models.CASCADE, related_name='page_views', null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    path = models.CharField(max_length=500)
+    page_title = models.CharField(max_length=200, blank=True)
+    duration = models.IntegerField(default=0, help_text="Time spent on page in seconds")
+    
+    # Enhanced tracking fields
+    referer = models.URLField(blank=True, help_text="Referrer URL")
+    exit_page = models.BooleanField(default=False, help_text="Is this an exit page?")
+    entry_page = models.BooleanField(default=False, help_text="Is this an entry page?")
+    scroll_depth = models.IntegerField(default=0, help_text="Scroll percentage (0-100)")
+    time_on_page = models.IntegerField(default=0, help_text="Time on page in seconds")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['-created_at']),
+            models.Index(fields=['path', '-created_at']),
+        ]
+        verbose_name = "Page View"
+        verbose_name_plural = "Page Views"
+    
+    def __str__(self):
+        return f"{self.path} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+
+class Session(models.Model):
+    """Track user sessions for analytics"""
+    visitor = models.ForeignKey(Visitor, on_delete=models.CASCADE, related_name='sessions', null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    session_id = models.CharField(max_length=100, db_index=True, help_text="Custom session identifier")
+    started_at = models.DateTimeField(auto_now_add=True)
+    ended_at = models.DateTimeField(null=True, blank=True)
+    duration = models.IntegerField(default=0, help_text="Session duration in seconds")
+    page_count = models.IntegerField(default=0, help_text="Number of pages viewed")
+    is_bounce = models.BooleanField(default=False, help_text="Single page visit")
+    referer = models.URLField(blank=True)
+    entry_page = models.CharField(max_length=500, blank=True)
+    exit_page = models.CharField(max_length=500, blank=True)
+    
+    class Meta:
+        ordering = ['-started_at']
+        indexes = [
+            models.Index(fields=['-started_at']),
+            models.Index(fields=['session_id']),
+        ]
+        verbose_name = "Session"
+        verbose_name_plural = "Sessions"
+    
+    def __str__(self):
+        return f"Session {self.session_id} - {self.started_at.strftime('%Y-%m-%d %H:%M')}"
+
+
+class Event(models.Model):
+    """Track custom events (clicks, downloads, etc.)"""
+    visitor = models.ForeignKey(Visitor, on_delete=models.CASCADE, related_name='events', null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    session = models.ForeignKey(Session, on_delete=models.SET_NULL, null=True, blank=True)
+    event_type = models.CharField(max_length=50, db_index=True, help_text="click, download, submit, etc.")
+    event_name = models.CharField(max_length=100, help_text="Name of the event")
+    properties = models.JSONField(default=dict, blank=True, help_text="Additional event properties")
+    path = models.CharField(max_length=500, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['-created_at']),
+            models.Index(fields=['event_type', '-created_at']),
+        ]
+        verbose_name = "Event"
+        verbose_name_plural = "Events"
+    
+    def __str__(self):
+        return f"{self.event_name} ({self.event_type}) - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+
+class Campaign(models.Model):
+    """Track marketing campaigns"""
+    name = models.CharField(max_length=100)
+    utm_source = models.CharField(max_length=100)
+    utm_medium = models.CharField(max_length=100)
+    utm_campaign = models.CharField(max_length=100, unique=True)
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-start_date']
+        verbose_name = "Campaign"
+        verbose_name_plural = "Campaigns"
+    
+    def __str__(self):
+        return f"{self.name} ({self.utm_campaign})"

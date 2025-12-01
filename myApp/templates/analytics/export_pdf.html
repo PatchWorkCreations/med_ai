@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analytics Report - {{ start_date }} to {{ end_date }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        h1 { color: #0b3b36; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #0b3b36; color: white; }
+        .summary { background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>Analytics Report</h1>
+    <p><strong>Period:</strong> {{ start_date }} to {{ end_date }}</p>
+    <p><strong>Generated:</strong> {{ exported_at|date:"Y-m-d H:i:s" }}</p>
+    
+    <div class="summary">
+        <h2>Summary</h2>
+        <p><strong>Unique Visitors:</strong> {{ data.unique_visitors }}</p>
+        <p><strong>Page Views:</strong> {{ data.page_views }}</p>
+        <p><strong>Signups:</strong> {{ data.signups }}</p>
+        <p><strong>Signins:</strong> {{ data.signins }}</p>
+        <p><strong>Active Users:</strong> {{ data.active_users }}</p>
+        <p><strong>Conversion Rate:</strong> {{ data.conversion_rate }}%</p>
+        <p><strong>Bounce Rate:</strong> {{ data.bounce_rate }}%</p>
+    </div>
+    
+    <h2>Daily Statistics</h2>
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>Visitors</th>
+            <th>Page Views</th>
+            <th>Signups</th>
+            <th>Signins</th>
+        </tr>
+        {% for stat in data.daily_stats %}
+        <tr>
+            <td>{{ stat.date }}</td>
+            <td>{{ stat.visitors }}</td>
+            <td>{{ stat.page_views }}</td>
+            <td>{{ stat.signups }}</td>
+            <td>{{ stat.signins }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+    <h2>Top Pages</h2>
+    <table>
+        <tr>
+            <th>Page</th>
+            <th>Views</th>
+        </tr>
+        {% for page in data.popular_pages|slice:":10" %}
+        <tr>
+            <td>{{ page.path }}</td>
+            <td>{{ page.views }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
+

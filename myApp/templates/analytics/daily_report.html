@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Daily Report - {{ date }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        h1 { color: #0b3b36; border-bottom: 3px solid #0b3b36; padding-bottom: 10px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 20px 0; }
+        .summary-card { background: #f5f5f5; padding: 15px; border-radius: 5px; text-align: center; }
+        .summary-card h3 { margin: 0; font-size: 32px; color: #0b3b36; }
+        .summary-card p { margin: 5px 0 0 0; color: #666; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #0b3b36; color: white; }
+        .section { margin: 30px 0; }
+        .section h2 { color: #0b3b36; border-bottom: 2px solid #0b3b36; padding-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Daily Analytics Report</h1>
+    <p><strong>Date:</strong> {{ date|date:"F j, Y" }}</p>
+    <p><strong>Generated:</strong> {{ exported_at|date:"Y-m-d H:i:s" }}</p>
+    
+    <div class="summary-grid">
+        <div class="summary-card">
+            <h3>{{ data.today_visitors }}</h3>
+            <p>Visitors</p>
+        </div>
+        <div class="summary-card">
+            <h3>{{ data.today_pageviews }}</h3>
+            <p>Page Views</p>
+        </div>
+        <div class="summary-card">
+            <h3>{{ data.today_signups }}</h3>
+            <p>New Signups</p>
+        </div>
+        <div class="summary-card">
+            <h3>{{ data.today_signins }}</h3>
+            <p>Logins</p>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Top Pages Today</h2>
+        <table>
+            <tr>
+                <th>Page</th>
+                <th>Views</th>
+            </tr>
+            {% for page in data.today_top_pages %}
+            <tr>
+                <td>{{ page.path }}</td>
+                <td>{{ page.views }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    
+    <div class="section">
+        <h2>Traffic Sources</h2>
+        <table>
+            <tr>
+                <th>Source</th>
+                <th>Visitors</th>
+            </tr>
+            {% for source, count in data.today_traffic_sources.items %}
+            <tr>
+                <td>{{ source|title }}</td>
+                <td>{{ count }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    
+    <div class="section">
+        <h2>Key Insights</h2>
+        <ul>
+            <li>Total unique visitors: {{ data.today_visitors }}</li>
+            <li>Total page views: {{ data.today_pageviews }}</li>
+            <li>New user signups: {{ data.today_signups }}</li>
+            <li>User logins: {{ data.today_signins }}</li>
+            {% if data.failed_logins_today > 0 %}
+            <li><strong>Security Alert:</strong> {{ data.failed_logins_today }} failed login attempts</li>
+            {% endif %}
+        </ul>
+    </div>
+</body>
+</html>
+

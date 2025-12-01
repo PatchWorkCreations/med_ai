@@ -62,6 +62,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'myProject.middleware.BusyModeMiddleware',
+    'myApp.middleware.VisitorTrackingMiddleware',  # Track website visitors
     'myApp.middleware.CurrentOrgByHostMiddleware',
     'myApp.middleware.EnforceOrgMembershipMiddleware',
     'myApp.middleware.CountryMiddleware',

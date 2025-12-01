@@ -1,0 +1,270 @@
+{% extends "analytics/base.html" %}
+
+{% block title %}Website Analytics Dashboard{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+  <h1 class="text-4xl font-bold text-gray-900 mb-2">Website Analytics</h1>
+  <p class="text-gray-600">Track visitors, signups, signins, and page views</p>
+</div>
+
+<!-- Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+  <!-- Total Visitors -->
+  <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+    <div class="flex items-center justify-between mb-4">
+      <i class="fa-solid fa-users text-3xl text-emerald-600"></i>
+      <span class="text-sm text-gray-500">Total</span>
+    </div>
+    <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ total_visitors|default:0 }}</h3>
+    <p class="text-gray-600 text-sm">Total Visitors</p>
+    <div class="mt-4 pt-4 border-t border-gray-200">
+      <div class="flex justify-between text-xs">
+        <span class="text-gray-500">Today:</span>
+        <span class="font-semibold text-gray-900">{{ unique_visitors_today }}</span>
+      </div>
+      <div class="flex justify-between text-xs mt-1">
+        <span class="text-gray-500">Last 7 days:</span>
+        <span class="font-semibold text-gray-900">{{ unique_visitors_7d }}</span>
+      </div>
+      <div class="flex justify-between text-xs mt-1">
+        <span class="text-gray-500">Last 30 days:</span>
+        <span class="font-semibold text-gray-900">{{ unique_visitors_30d }}</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Total Page Views -->
+  <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+    <div class="flex items-center justify-between mb-4">
+      <i class="fa-solid fa-eye text-3xl text-blue-600"></i>
+      <span class="text-sm text-gray-500">Total</span>
+    </div>
+    <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ total_page_views|default:0 }}</h3>
+    <p class="text-gray-600 text-sm">Page Views</p>
+    <div class="mt-4 pt-4 border-t border-gray-200">
+      <div class="flex justify-between text-xs">
+        <span class="text-gray-500">Today:</span>
+        <span class="font-semibold text-gray-900">{{ page_views_today }}</span>
+      </div>
+      <div class="flex justify-between text-xs mt-1">
+        <span class="text-gray-500">Last 7 days:</span>
+        <span class="font-semibold text-gray-900">{{ page_views_7d }}</span>
+      </div>
+      <div class="flex justify-between text-xs mt-1">
+        <span class="text-gray-500">Last 30 days:</span>
+        <span class="font-semibold text-gray-900">{{ page_views_30d }}</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Total Signups -->
+  <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+    <div class="flex items-center justify-between mb-4">
+      <i class="fa-solid fa-user-plus text-3xl text-purple-600"></i>
+      <span class="text-sm text-gray-500">Total</span>
+    </div>
+    <div class="mb-2">
+      <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ total_signups_actual|default:0 }}</h3>
+      <p class="text-gray-600 text-sm">Total Users</p>
+      {% if total_signups_actual != total_signups %}
+      <p class="text-xs text-amber-600 mt-1">
+        <i class="fa-solid fa-info-circle mr-1"></i>
+        Tracked: {{ total_signups|default:0 }} of {{ total_signups_actual|default:0 }} users
+      </p>
+      {% endif %}
+    </div>
+    <div class="mt-4 pt-4 border-t border-gray-200">
+      <div class="flex justify-between text-xs">
+        <span class="text-gray-500">Today:</span>
+        <span class="font-semibold text-gray-900">
+          {{ signups_today_actual|default:0 }}
+          {% if signups_today_actual != signups_today %}
+          <span class="text-amber-600">(tracked: {{ signups_today }})</span>
+          {% endif %}
+        </span>
+      </div>
+      <div class="flex justify-between text-xs mt-1">
+        <span class="text-gray-500">Last 7 days:</span>
+        <span class="font-semibold text-gray-900">
+          {{ signups_7d_actual|default:0 }}
+          {% if signups_7d_actual != signups_7d %}
+          <span class="text-amber-600">(tracked: {{ signups_7d }})</span>
+          {% endif %}
+        </span>
+      </div>
+      <div class="flex justify-between text-xs mt-1">
+        <span class="text-gray-500">Last 30 days:</span>
+        <span class="font-semibold text-gray-900">
+          {{ signups_30d_actual|default:0 }}
+          {% if signups_30d_actual != signups_30d %}
+          <span class="text-amber-600">(tracked: {{ signups_30d }})</span>
+          {% endif %}
+        </span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Total Signins -->
+  <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+    <div class="flex items-center justify-between mb-4">
+      <i class="fa-solid fa-sign-in-alt text-3xl text-indigo-600"></i>
+      <span class="text-sm text-gray-500">Total</span>
+    </div>
+    <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ total_signins|default:0 }}</h3>
+    <p class="text-gray-600 text-sm">User Signins</p>
+    <div class="mt-4 pt-4 border-t border-gray-200">
+      <div class="flex justify-between text-xs">
+        <span class="text-gray-500">Today:</span>
+        <span class="font-semibold text-gray-900">{{ signins_today }}</span>
+      </div>
+      <div class="flex justify-between text-xs mt-1">
+        <span class="text-gray-500">Last 7 days:</span>
+        <span class="font-semibold text-gray-900">{{ signins_7d }}</span>
+      </div>
+      <div class="flex justify-between text-xs mt-1">
+        <span class="text-gray-500">Last 30 days:</span>
+        <span class="font-semibold text-gray-900">{{ signins_30d }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Info Alert for Backfilling -->
+{% if total_signups_actual != total_signups %}
+<div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-8">
+  <div class="flex items-start">
+    <i class="fa-solid fa-info-circle text-blue-600 text-xl mr-3 mt-0.5"></i>
+    <div class="flex-1">
+      <p class="font-semibold text-blue-900 mb-1">Historical Data Notice</p>
+      <p class="text-sm text-blue-800 mb-2">
+        You have {{ total_signups_actual }} total users, but only {{ total_signups }} are tracked in analytics. 
+        This is because tracking was just enabled. To backfill historical signup data, run:
+      </p>
+      <code class="block bg-blue-100 px-3 py-2 rounded text-xs text-blue-900 font-mono">
+        python manage.py backfill_analytics
+      </code>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Security Alert Card -->
+{% if failed_logins_today > 0 %}
+<div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-8">
+  <div class="flex items-center">
+    <i class="fa-solid fa-exclamation-triangle text-yellow-600 text-xl mr-3"></i>
+    <div>
+      <p class="font-semibold text-yellow-900">Security Alert</p>
+      <p class="text-sm text-yellow-800">There were {{ failed_logins_today }} failed login attempt(s) today.</p>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Popular Pages -->
+<div class="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-200">
+  <h2 class="text-2xl font-bold text-gray-900 mb-4">Popular Pages (Last 7 Days)</h2>
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Page</th>
+          <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Views</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        {% for page in popular_pages %}
+        <tr class="hover:bg-gray-50">
+          <td class="px-4 py-3 text-sm text-gray-900">{{ page.path }}</td>
+          <td class="px-4 py-3 text-sm text-gray-600 text-right">{{ page.views }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="2" class="px-4 py-8 text-center text-gray-500">No page views yet</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <!-- Recent Visitors -->
+  <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+    <h2 class="text-xl font-bold text-gray-900 mb-4">Recent Visitors</h2>
+    <div class="space-y-3 max-h-96 overflow-y-auto">
+      {% for visitor in recent_visitors %}
+      <div class="border-b border-gray-100 pb-3 last:border-0">
+        <div class="flex justify-between items-start">
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-gray-900 truncate">{{ visitor.path|truncatechars:40 }}</p>
+            <p class="text-xs text-gray-500 mt-1">{{ visitor.ip_address }}</p>
+            {% if visitor.is_unique %}
+            <span class="inline-block mt-1 text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">New</span>
+            {% endif %}
+          </div>
+          <span class="text-xs text-gray-400 ml-2 whitespace-nowrap">{{ visitor.created_at|timesince }} ago</span>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-sm text-gray-500">No visitors yet</p>
+      {% endfor %}
+    </div>
+  </div>
+  
+  <!-- Recent Signups -->
+  <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+    <h2 class="text-xl font-bold text-gray-900 mb-4">Recent Signups</h2>
+    <div class="space-y-3 max-h-96 overflow-y-auto">
+      {% for signup in recent_signups %}
+      <div class="border-b border-gray-100 pb-3 last:border-0">
+        <div class="flex justify-between items-start">
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-gray-900 truncate">{{ signup.user.username }}</p>
+            <p class="text-xs text-gray-500 mt-1 truncate">{{ signup.user.email }}</p>
+            {% if signup.ip_address %}
+            <p class="text-xs text-gray-400 mt-1">{{ signup.ip_address }}</p>
+            {% endif %}
+          </div>
+          <span class="text-xs text-gray-400 ml-2 whitespace-nowrap">{{ signup.created_at|timesince }} ago</span>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-sm text-gray-500">No signups yet</p>
+      {% endfor %}
+    </div>
+  </div>
+  
+  <!-- Recent Signins -->
+  <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+    <h2 class="text-xl font-bold text-gray-900 mb-4">Recent Signins</h2>
+    <div class="space-y-3 max-h-96 overflow-y-auto">
+      {% for signin in recent_signins %}
+      <div class="border-b border-gray-100 pb-3 last:border-0">
+        <div class="flex justify-between items-start">
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-gray-900 truncate">
+              {{ signin.user.username }}
+              {% if not signin.success %}
+              <span class="inline-block ml-2 text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700">Failed</span>
+              {% else %}
+              <span class="inline-block ml-2 text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">Success</span>
+              {% endif %}
+            </p>
+            {% if signin.ip_address %}
+            <p class="text-xs text-gray-500 mt-1">{{ signin.ip_address }}</p>
+            {% endif %}
+          </div>
+          <span class="text-xs text-gray-400 ml-2 whitespace-nowrap">{{ signin.created_at|timesince }} ago</span>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-sm text-gray-500">No signins yet</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+

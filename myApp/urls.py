@@ -29,6 +29,8 @@ urlpatterns = [
     path("logout/", views.logout_view, name="logout"),
     # Authenticated Dashboard
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('dashboard/analytics/', views.analytics_dashboard, name='analytics'),
+    path('dashboard/analytics/export/', views.analytics_export, name='analytics_export'),
 
     # API Endpoints
     path("api/summarize/", views.summarize_medical_record, name="summarize"),

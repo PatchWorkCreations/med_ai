@@ -1357,6 +1357,17 @@ def signup_view(request):
             profile.signup_ip = get_client_ip(request)
             profile.signup_country = getattr(request, "country_code", None) or profile.signup_country
             profile.save()
+            
+            # Track user signup
+            from .models import UserSignup
+            UserSignup.objects.get_or_create(
+                user=user,
+                defaults={
+                    'ip_address': get_client_ip(request),
+                    'user_agent': request.META.get('HTTP_USER_AGENT', ''),
+                    'referer': request.META.get('HTTP_REFERER', '')
+                }
+            )
 
             raw_pw = (
                 form.cleaned_data.get("password1")
@@ -1409,6 +1420,466 @@ def dashboard(request):
     if request.GET.get("care_setting"):  # apply only if explicitly filtered
         qs = qs.filter(care_setting=care)
     return render(request, "dashboard.html", {"summaries": qs, "selected_care": care})
+
+
+@login_required
+def analytics_dashboard(request):
+    """Enhanced analytics dashboard with comprehensive metrics"""
+    from django.db.models import Count, Sum, Q, Avg, Max, Min
+    from django.utils import timezone
+    from datetime import timedelta, datetime
+    from .models import Visitor, UserSignup, UserSignin, PageView, Session, Event
+    from .analytics_utils import categorize_referer
+    from django.contrib.auth import get_user_model
+    import json
+    
+    User = get_user_model()
+    
+    # Only staff can view analytics
+    if not request.user.is_staff:
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("You do not have permission to view analytics.")
+    
+    # Date range handling
+    now = timezone.now()
+    today = now.date()
+    
+    # Get date range from request
+    period = request.GET.get('period', '7d')
+    if period == 'today':
+        start_date = today
+        end_date = today
+        days = 1
+    elif period == 'yesterday':
+        start_date = today - timedelta(days=1)
+        end_date = start_date
+        days = 1
+    elif period == '7d':
+        start_date = today - timedelta(days=7)
+        end_date = today
+        days = 7
+    elif period == '30d':
+        start_date = today - timedelta(days=30)
+        end_date = today
+        days = 30
+    elif period == 'custom':
+        try:
+            start_date = datetime.strptime(request.GET.get('start', ''), '%Y-%m-%d').date()
+            end_date = datetime.strptime(request.GET.get('end', ''), '%Y-%m-%d').date()
+            days = (end_date - start_date).days + 1
+        except:
+            start_date = today - timedelta(days=7)
+            end_date = today
+            days = 7
+    else:
+        start_date = today - timedelta(days=7)
+        end_date = today
+        days = 7
+    
+    # Comparison period (previous period)
+    comparison_enabled = request.GET.get('compare', 'false') == 'true'
+    period_days = (end_date - start_date).days + 1
+    prev_start_date = start_date - timedelta(days=period_days)
+    prev_end_date = start_date - timedelta(days=1)
+    
+    # Base querysets for current period
+    visitor_qs = Visitor.objects.filter(created_at__date__gte=start_date, created_at__date__lte=end_date)
+    pageview_qs = PageView.objects.filter(created_at__date__gte=start_date, created_at__date__lte=end_date)
+    signup_qs = UserSignup.objects.filter(created_at__date__gte=start_date, created_at__date__lte=end_date)
+    signin_qs = UserSignin.objects.filter(created_at__date__gte=start_date, created_at__date__lte=end_date)
+    
+    # Use the comprehensive analytics calculation module
+    from .analytics_views import get_analytics_data
+    
+    context = get_analytics_data(
+        request=request,
+        start_date=start_date,
+        end_date=end_date,
+        prev_start_date=prev_start_date if comparison_enabled else None,
+        prev_end_date=prev_end_date if comparison_enabled else None,
+        comparison_enabled=comparison_enabled
+    )
+    
+    # Add period and comparison info
+    context['period'] = period
+    context['today'] = today
+    
+    # Add totals for reference
+    from .models import Visitor, PageView, UserSignup, UserSignin
+    context['total_visitors_all_time'] = Visitor.objects.count()
+    context['total_page_views_all_time'] = PageView.objects.count()
+    context['total_signups_all_time'] = UserSignup.objects.count()
+    context['total_users_all_time'] = User.objects.count()
+    context['total_signins_all_time'] = UserSignin.objects.filter(success=True).count()
+    
+    # Serialize data for JavaScript (convert QuerySets to lists)
+    import json
+    from django.core.serializers.json import DjangoJSONEncoder
+    
+    # Convert to JSON strings for safe template rendering
+    context['daily_stats_json'] = json.dumps(context.get('daily_stats', []), cls=DjangoJSONEncoder)
+    context['prev_daily_stats_json'] = json.dumps(context.get('prev_daily_stats', []), cls=DjangoJSONEncoder)
+    context['device_breakdown_json'] = json.dumps(list(context.get('device_breakdown', [])), cls=DjangoJSONEncoder)
+    context['browser_breakdown_json'] = json.dumps(list(context.get('browser_breakdown', [])), cls=DjangoJSONEncoder)
+    context['os_breakdown_json'] = json.dumps(list(context.get('os_breakdown', [])), cls=DjangoJSONEncoder)
+    context['traffic_sources_json'] = json.dumps(context.get('traffic_sources', []), cls=DjangoJSONEncoder)
+    context['popular_pages_json'] = json.dumps(list(context.get('popular_pages', [])), cls=DjangoJSONEncoder)
+    context['hourly_activity_json'] = json.dumps(context.get('hourly_activity', []), cls=DjangoJSONEncoder)
+    
+    # Serialize user list for JavaScript
+    context['user_list_json'] = json.dumps(context.get('user_list', []), cls=DjangoJSONEncoder)
+    
+    # Serialize medical analytics data
+    context['daily_summaries_json'] = json.dumps(context.get('daily_summaries', []), cls=DjangoJSONEncoder)
+    context['daily_chat_sessions_json'] = json.dumps(context.get('daily_chat_sessions', []), cls=DjangoJSONEncoder)
+    context['care_setting_breakdown_json'] = json.dumps(list(context.get('care_setting_breakdown', [])), cls=DjangoJSONEncoder)
+    context['tone_breakdown_json'] = json.dumps(list(context.get('tone_breakdown', [])), cls=DjangoJSONEncoder)
+    context['profession_breakdown_json'] = json.dumps(list(context.get('profession_breakdown', [])), cls=DjangoJSONEncoder)
+    context['language_breakdown_json'] = json.dumps(list(context.get('language_breakdown', [])), cls=DjangoJSONEncoder)
+    context['satisfaction_metrics_json'] = json.dumps(context.get('satisfaction_metrics', {}), cls=DjangoJSONEncoder)
+    
+    return render(request, 'analytics/dashboard_premium.html', context)
+
+
+@login_required
+def analytics_export(request):
+    """Export analytics data as PDF or CSV"""
+    from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
+    from django.db.models import Count
+    from .models import Visitor, PageView, UserSignup, UserSignin
+    from .analytics_views import get_analytics_data
+    from django.utils import timezone
+    from datetime import timedelta, datetime
+    import csv
+    import json
+    
+    # Only staff can export
+    if not request.user.is_staff:
+        return HttpResponseForbidden("You do not have permission to export analytics.")
+    
+    export_format = request.GET.get('export', 'csv')
+    
+    # Handle user export
+    if 'users_' in export_format:
+        format_type = export_format.replace('users_', '')
+        return export_users_list(request, format_type)
+    period = request.GET.get('period', '7d')
+    today = timezone.now().date()
+    
+    # Handle user export
+    if 'users_' in export_format:
+        format_type = export_format.replace('users_', '')
+        return export_users_list(request, format_type)
+    
+    # Determine date range
+    if period == 'today':
+        start_date = today
+        end_date = today
+    elif period == 'yesterday':
+        start_date = today - timedelta(days=1)
+        end_date = start_date
+    elif period == '7d':
+        start_date = today - timedelta(days=7)
+        end_date = today
+    elif period == '30d':
+        start_date = today - timedelta(days=30)
+        end_date = today
+    elif period == 'custom':
+        try:
+            start_date = datetime.strptime(request.GET.get('start', ''), '%Y-%m-%d').date()
+            end_date = datetime.strptime(request.GET.get('end', ''), '%Y-%m-%d').date()
+        except:
+            start_date = today - timedelta(days=7)
+            end_date = today
+    else:
+        start_date = today - timedelta(days=7)
+        end_date = today
+    
+    # Get analytics data
+    from .analytics_views import get_analytics_data
+    data = get_analytics_data(
+        request=request,
+        start_date=start_date,
+        end_date=end_date,
+        comparison_enabled=False
+    )
+    
+    if export_format == 'csv':
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="analytics_{start_date}_{end_date}.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow(['Metric', 'Value'])
+        writer.writerow(['Period', f'{start_date} to {end_date}'])
+        writer.writerow(['Unique Visitors', data['unique_visitors']])
+        writer.writerow(['Page Views', data['page_views']])
+        writer.writerow(['Signups', data['signups']])
+        writer.writerow(['Signins', data['signins']])
+        writer.writerow(['Active Users', data['active_users']])
+        writer.writerow(['Conversion Rate', f"{data['conversion_rate']}%"])
+        writer.writerow(['Bounce Rate', f"{data['bounce_rate']}%"])
+        writer.writerow([])
+        writer.writerow(['Daily Stats'])
+        writer.writerow(['Date', 'Visitors', 'Page Views', 'Signups', 'Signins'])
+        for stat in data['daily_stats']:
+            writer.writerow([
+                stat['date'],
+                stat['visitors'],
+                stat['page_views'],
+                stat['signups'],
+                stat['signins']
+            ])
+        
+        return response
+    
+    elif export_format == 'pdf':
+        # For PDF, we'll return a simple HTML that can be printed/saved as PDF
+        # In production, you'd use a library like WeasyPrint or ReportLab
+        from django.template.loader import render_to_string
+        html_content = render_to_string('analytics/export_pdf.html', {
+            'data': data,
+            'start_date': start_date,
+            'end_date': end_date,
+            'exported_at': timezone.now()
+        })
+        response = HttpResponse(html_content, content_type='text/html')
+        response['Content-Disposition'] = f'attachment; filename="analytics_report_{start_date}_{end_date}.html"'
+        return response
+    
+    elif export_format == 'daily':
+        # Daily report - comprehensive one-page summary
+        from django.template.loader import render_to_string
+        html_content = render_to_string('analytics/daily_report.html', {
+            'data': data,
+            'date': today,
+            'exported_at': timezone.now()
+        })
+        response = HttpResponse(html_content, content_type='text/html')
+        response['Content-Disposition'] = f'attachment; filename="daily_report_{today}.html"'
+        return response
+    
+    return JsonResponse({'error': 'Invalid export format'}, status=400)
+
+
+@login_required
+def export_users_list(request, format_type='csv'):
+    """Export user list as CSV or PDF"""
+    from django.http import HttpResponse, HttpResponseForbidden
+    from django.contrib.auth import get_user_model
+    from .models import Profile
+    from django.db.models import Count, Max, Q
+    import csv
+    from django.utils import timezone
+    import logging
+    
+    logger = logging.getLogger(__name__)
+    logger.info(f"Export users called with format_type: {format_type}")
+    
+    # Only staff can export
+    if not request.user.is_staff:
+        return HttpResponseForbidden("You do not have permission to export user data.")
+    
+    User = get_user_model()
+    
+    # Get all users with stats
+    users = User.objects.select_related('profile').annotate(
+        total_summaries=Count('summaries', distinct=True),
+        total_chat_sessions=Count('chatsession', distinct=True),
+        total_signins=Count('signin_records', filter=Q(signin_records__success=True), distinct=True),
+        last_signin=Max('signin_records__created_at', filter=Q(signin_records__success=True))
+    ).order_by('-date_joined')
+    
+    logger.info(f"Processing export with format_type: '{format_type}' (type: {type(format_type)})")
+    
+    # Debug: Print what we received
+    print(f"DEBUG: format_type = '{format_type}', type = {type(format_type)}")
+    
+    if format_type == 'csv':
+        logger.info("Generating CSV export")
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="users_export_{timezone.now().strftime("%Y%m%d")}.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow([
+            'Username', 'Email', 'Display Name', 'First Name', 'Last Name',
+            'Profession', 'Language', 'Signup Date', 'Last Login', 'Total Signins',
+            'Total Summaries', 'Total Chat Sessions', 'Status', 'Is Staff',
+            'Signup IP', 'Signup Country', 'Last Login IP', 'Last Login Country'
+        ])
+        
+        for user in users:
+            profile = getattr(user, 'profile', None)
+            writer.writerow([
+                user.username,
+                user.email,
+                profile.display_name if profile else '',
+                user.first_name or '',
+                user.last_name or '',
+                profile.profession if profile else '',
+                profile.language if profile else 'en-US',
+                user.date_joined.strftime('%Y-%m-%d %H:%M:%S'),
+                user.last_login.strftime('%Y-%m-%d %H:%M:%S') if user.last_login else '',
+                user.total_signins or 0,
+                user.total_summaries or 0,
+                user.total_chat_sessions or 0,
+                'Active' if user.is_active else 'Inactive',
+                'Yes' if user.is_staff else 'No',
+                profile.signup_ip if profile else '',
+                profile.signup_country if profile else '',
+                profile.last_login_ip if profile else '',
+                profile.last_login_country if profile else '',
+            ])
+        
+        return response
+    
+    elif format_type == 'pdf':
+        print("DEBUG: Entering PDF generation block")
+        logger.info("PDF format detected, attempting PDF generation with ReportLab")
+        try:
+            from reportlab.lib.pagesizes import letter, A4
+            logger.info("ReportLab imported successfully")
+            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib import colors
+            from reportlab.lib.units import inch
+            from io import BytesIO
+            
+            buffer = BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
+            elements = []
+            styles = getSampleStyleSheet()
+            
+            # Custom styles
+            title_style = ParagraphStyle(
+                'CustomTitle',
+                parent=styles['Heading1'],
+                fontSize=24,
+                textColor=colors.HexColor('#059669'),
+                spaceAfter=30,
+                alignment=1  # Center
+            )
+            
+            # Title
+            title = Paragraph("User Directory Export", title_style)
+            elements.append(title)
+            
+            # Summary info
+            summary_text = f"<b>Export Date:</b> {timezone.now().strftime('%B %d, %Y at %H:%M')}<br/>"
+            summary_text += f"<b>Total Users:</b> {users.count()}<br/>"
+            summary_text += f"<b>Users in Report:</b> {min(users.count(), 100)}"
+            summary = Paragraph(summary_text, styles['Normal'])
+            elements.append(summary)
+            elements.append(Spacer(1, 20))
+            
+            # Table data
+            data = [['Username', 'Email', 'Name', 'Profession', 'Signup', 'Status', 'Activity']]
+            
+            # Limit to 100 users for PDF
+            users_list = list(users[:100])
+            
+            for user in users_list:
+                profile = getattr(user, 'profile', None)
+                
+                # Safely get display name
+                display_name = ''
+                if profile:
+                    display_name = profile.display_name or ''
+                
+                # Build name safely
+                first_part = display_name or user.first_name or user.username
+                last_part = user.last_name or ''
+                name = f"{first_part} {last_part}".strip()
+                if len(name) > 20:
+                    name = name[:17] + "..."
+                
+                activity = f"S:{user.total_summaries or 0} C:{user.total_chat_sessions or 0} L:{user.total_signins or 0}"
+                status = 'Active' if user.is_active else 'Inactive'
+                if user.is_staff:
+                    status += ' (Staff)'
+                
+                # Safely get profession
+                profession = '—'
+                if profile and profile.profession:
+                    profession = profile.profession[:15]
+                
+                data.append([
+                    user.username[:18] if len(user.username) > 18 else user.username,
+                    user.email[:25] if len(user.email) > 25 else user.email,
+                    name[:20] if len(name) > 20 else name,
+                    profession,
+                    user.date_joined.strftime('%Y-%m-%d'),
+                    status[:15],
+                    activity
+                ])
+            
+            # Create table
+            table = Table(data, colWidths=[1*inch, 2*inch, 1.5*inch, 1*inch, 0.8*inch, 1*inch, 1.2*inch])
+            table.setStyle(TableStyle([
+                # Header row
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#374151')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 9),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('TOPPADDING', (0, 0), (-1, 0), 12),
+                
+                # Data rows
+                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, -1), 8),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F9FAFB')]),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 6),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                ('TOPPADDING', (0, 1), (-1, -1), 8),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
+            ]))
+            
+            elements.append(table)
+            
+            # Footer
+            elements.append(Spacer(1, 20))
+            footer_text = f"Generated on {timezone.now().strftime('%B %d, %Y at %H:%M')} | NeuroMed AI Analytics Dashboard"
+            footer = Paragraph(footer_text, styles['Normal'])
+            elements.append(footer)
+            
+            # Build PDF
+            doc.build(elements)
+            
+            # Get PDF value
+            pdf = buffer.getvalue()
+            buffer.close()
+            
+            # Create response
+            logger.info(f"PDF generated successfully, size: {len(pdf)} bytes")
+            response = HttpResponse(pdf, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="users_export_{timezone.now().strftime("%Y%m%d")}.pdf"'
+            return response
+            
+        except ImportError as e:
+            # ReportLab not installed
+            logger.error(f"ReportLab import error: {str(e)}")
+            from django.http import HttpResponse
+            return HttpResponse(f"ReportLab not installed. Error: {str(e)}. Please install: pip install reportlab", status=500)
+        except Exception as e:
+            # If PDF generation fails, show error with details
+            import traceback
+            error_details = traceback.format_exc()
+            logger.error(f"PDF export error: {str(e)}")
+            logger.error(error_details)
+            from django.http import HttpResponse
+            # Return error message so user knows what went wrong
+            return HttpResponse(
+                f"PDF generation failed: {str(e)}\n\nDetails:\n{error_details}", 
+                content_type='text/plain',
+                status=500
+            )
+    
+    logger.warning(f"Invalid export format: '{format_type}'. Expected 'csv' or 'pdf'")
+    return HttpResponse(f"Invalid export format: '{format_type}'. Expected 'csv' or 'pdf'.", status=400)
 
 
 @login_required
@@ -1725,12 +2196,19 @@ def send_otp_email(email: str, code: str, ttl_minutes: int = 10) -> bool:
 def forgot_password(request):
     """
     Step 1: Ask for email, generate 6-digit OTP, store in cache, email it.
-    We never reveal whether the email exists.
+    Only sends OTP if the email exists in the database.
     """
     if request.method == "POST":
         form = ForgotPasswordForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data["email"]
+            
+            # Check if user exists in database
+            user = User.objects.filter(email__iexact=email).first()
+            if not user:
+                messages.error(request, "This email address isn't registered. Please check your email or sign up for a new account.")
+                return render(request, "account/password_forgot.html", {"form": form})
+            
             code  = _generate_code()
 
             # Save OTP + attempts in cache
@@ -1765,6 +2243,12 @@ def resend_otp(request):
     email = request.session.get("pwreset_email") or (request.POST.get("email") or "").lower().strip()
     if not email:
         messages.error(request, "Your session expired. Please start over.")
+        return redirect("password_forgot")
+
+    # Check if user exists in database
+    user = User.objects.filter(email__iexact=email).first()
+    if not user:
+        messages.error(request, "This email address isn't registered. Please check your email or sign up for a new account.")
         return redirect("password_forgot")
 
     cooldown_key = _otp_resend_key(email)
@@ -1955,6 +2439,15 @@ class WarmLoginView(DjangoLoginView):
                 profile.last_login_ip = get_client_ip(self.request)
                 profile.last_login_country = getattr(self.request, "country_code", None) or profile.last_login_country
                 profile.save()
+                
+                # Track successful signin
+                from .models import UserSignin
+                UserSignin.objects.create(
+                    user=user,
+                    ip_address=get_client_ip(self.request),
+                    user_agent=self.request.META.get('HTTP_USER_AGENT', ''),
+                    success=True
+                )
         except Exception:
             # Don't block login if telemetry fails
             pass
@@ -1996,6 +2489,15 @@ class WarmLoginView(DjangoLoginView):
                         profile.last_login_ip = get_client_ip(request)
                         profile.last_login_country = getattr(request, "country_code", None) or profile.last_login_country
                         profile.save()
+                        
+                        # Track successful signin
+                        from .models import UserSignin
+                        UserSignin.objects.create(
+                            user=user,
+                            ip_address=get_client_ip(request),
+                            user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                            success=True
+                        )
                     except Exception:
                         pass
                     
@@ -2022,6 +2524,24 @@ class WarmLoginView(DjangoLoginView):
                         } if hasattr(user, 'profile') else None
                     })
                 else:
+                    # Track failed login attempt
+                    try:
+                        from .models import UserSignin, User
+                        from django.contrib.auth import get_user_model
+                        User = get_user_model()
+                        try:
+                            failed_user = User.objects.get(email=email)
+                            UserSignin.objects.create(
+                                user=failed_user,
+                                ip_address=get_client_ip(request),
+                                user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                                success=False
+                            )
+                        except User.DoesNotExist:
+                            pass  # User doesn't exist, can't track
+                    except Exception:
+                        pass  # Don't block error response if tracking fails
+                    
                     return JsonResponse({'error': 'Invalid credentials'}, status=401)
                     
             except json.JSONDecodeError:
@@ -2060,6 +2580,15 @@ def api_login(request):
                     profile.last_login_ip = get_client_ip(request)
                     profile.last_login_country = getattr(request, "country_code", None) or profile.last_login_country
                     profile.save()
+                    
+                    # Track successful signin
+                    from .models import UserSignin
+                    UserSignin.objects.create(
+                        user=user,
+                        ip_address=get_client_ip(request),
+                        user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                        success=True
+                    )
                 except Exception:
                     pass
                 
@@ -2076,6 +2605,24 @@ def api_login(request):
                     'is_superuser': user.is_superuser,
                 })
             else:
+                # Track failed login attempt
+                try:
+                    from .models import UserSignin, User
+                    from django.contrib.auth import get_user_model
+                    User = get_user_model()
+                    try:
+                        failed_user = User.objects.get(email=email)
+                        UserSignin.objects.create(
+                            user=failed_user,
+                            ip_address=get_client_ip(request),
+                            user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                            success=False
+                        )
+                    except User.DoesNotExist:
+                        pass  # User doesn't exist, can't track
+                except Exception:
+                    pass  # Don't block error response if tracking fails
+                
                 return JsonResponse({'error': 'Invalid credentials'}, status=401)
                 
         except json.JSONDecodeError:

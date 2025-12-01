@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users Export - {{ exported_at|date:"Y-m-d" }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #059669;
+            border-bottom: 3px solid #10B981;
+            padding-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th {
+            background: linear-gradient(to bottom, #374151, #4B5563);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+        tr:nth-child(even) {
+            background-color: #F9FAFB;
+        }
+        tr:hover {
+            background-color: #F3F4F6;
+        }
+        .status-active {
+            color: #059669;
+            font-weight: bold;
+        }
+        .status-inactive {
+            color: #6B7280;
+        }
+        .staff-badge {
+            background: #9333EA;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        .summary {
+            background: #ECFDF5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        @media print {
+            body { margin: 0; }
+            @page { margin: 1cm; }
+        }
+    </style>
+</head>
+<body>
+    <h1>User Directory Export</h1>
+    
+    <div class="summary">
+        <strong>Export Date:</strong> {{ exported_at|date:"F d, Y H:i" }}<br>
+        <strong>Total Users:</strong> {{ total_users }}<br>
+        <strong>Users in Report:</strong> {{ users|length }}
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Display Name</th>
+                <th>Profession</th>
+                <th>Language</th>
+                <th>Signup Date</th>
+                <th>Last Login</th>
+                <th>Summaries</th>
+                <th>Chats</th>
+                <th>Logins</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td><strong>{{ user.username }}</strong></td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.profile.display_name|default:"—" }}</td>
+                <td>{{ user.profile.profession|default:"—" }}</td>
+                <td>{{ user.profile.language|default:"en-US" }}</td>
+                <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                <td>{% if user.last_login %}{{ user.last_login|date:"M d, Y" }}{% else %}Never{% endif %}</td>
+                <td style="text-align: center;">{{ user.total_summaries|default:0 }}</td>
+                <td style="text-align: center;">{{ user.total_chat_sessions|default:0 }}</td>
+                <td style="text-align: center;">{{ user.total_signins|default:0 }}</td>
+                <td>
+                    {% if user.is_active %}
+                        <span class="status-active">Active</span>
+                    {% else %}
+                        <span class="status-inactive">Inactive</span>
+                    {% endif %}
+                    {% if user.is_staff %}
+                        <span class="staff-badge">Staff</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="11" style="text-align: center; padding: 40px; color: #6B7280;">
+                    No users found
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #E5E7EB; color: #6B7280; font-size: 12px; text-align: center;">
+        Generated on {{ exported_at|date:"F d, Y \a\t H:i" }} | NeuroMed AI Analytics Dashboard
+    </div>
+</body>
+</html>
+

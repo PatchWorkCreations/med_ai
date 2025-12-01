@@ -216,3 +216,99 @@ class CountryMiddleware(MiddlewareMixin):
 
         # 5) Final fallback
         request.country_code = DEFAULT_COUNTRY
+
+
+# ---------------------------------------------------------------------
+# Visitor Tracking Middleware
+# ---------------------------------------------------------------------
+from django.utils import timezone
+from datetime import timedelta
+from .models import Visitor, PageView
+from .analytics_utils import parse_user_agent, parse_utm_params, get_country_from_request, categorize_referer
+
+class VisitorTrackingMiddleware:
+    """Middleware to track website visitors with enhanced analytics"""
+    
+    def __init__(self, get_response):
+        self.get_response = get_response
+    
+    def __call__(self, request):
+        # Skip tracking for admin and dashboard pages (optional - you can remove this if you want to track everything)
+        if request.path.startswith('/admin/'):
+            return self.get_response(request)
+        
+        # Skip tracking for static files
+        if any(request.path.startswith(prefix) for prefix in ['/static/', '/media/']):
+            return self.get_response(request)
+        
+        # Get visitor info
+        ip_address = self.get_client_ip(request)
+        user_agent = request.META.get('HTTP_USER_AGENT', '')
+        referer = request.META.get('HTTP_REFERER', '')
+        path = request.path
+        method = request.method
+        session_key = request.session.session_key or ''
+        
+        # Parse user agent
+        ua_data = parse_user_agent(user_agent)
+        
+        # Get country
+        country = get_country_from_request(request)
+        
+        # Extract UTM parameters from referer or current URL
+        current_url = request.build_absolute_uri()
+        utm_data = parse_utm_params(referer) or parse_utm_params(current_url)
+        
+        # Check if this is a unique visitor (first visit from this IP in last 24 hours)
+        is_unique = not Visitor.objects.filter(
+            ip_address=ip_address,
+            created_at__gte=timezone.now() - timedelta(hours=24)
+        ).exists()
+        
+        # Create visitor record with enhanced data
+        visitor = Visitor.objects.create(
+            ip_address=ip_address,
+            user_agent=user_agent,
+            referer=referer,
+            path=path,
+            method=method,
+            session_key=session_key,
+            is_unique=is_unique,
+            country=country or '',
+            device_type=ua_data.get('device_type', 'desktop'),
+            browser=ua_data.get('browser', 'Unknown'),
+            os=ua_data.get('os', 'Unknown'),
+            utm_source=utm_data.get('utm_source', ''),
+            utm_medium=utm_data.get('utm_medium', ''),
+            utm_campaign=utm_data.get('utm_campaign', ''),
+            utm_term=utm_data.get('utm_term', ''),
+            utm_content=utm_data.get('utm_content', ''),
+        )
+        
+        # Determine if this is an entry page (first page in session)
+        is_entry = not PageView.objects.filter(
+            visitor__session_key=session_key,
+            created_at__gte=timezone.now() - timedelta(hours=1)
+        ).exists() if session_key else True
+        
+        # Create page view record
+        PageView.objects.create(
+            visitor=visitor,
+            user=request.user if request.user.is_authenticated else None,
+            path=path,
+            page_title='',  # Can be set via JavaScript
+            referer=referer,
+            entry_page=is_entry,
+        )
+        
+        response = self.get_response(request)
+        return response
+    
+    def get_client_ip(self, request):
+        """Get client IP address"""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0].strip()
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
