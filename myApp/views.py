@@ -2967,37 +2967,49 @@ def google_oauth_login(request):
     # Build clean redirect URI (force HTTPS in production, remove query params)
     callback_path = reverse('google_oauth_callback')
     
-    # Get the host and normalize (keep www if present)
+    # Get the host - check multiple sources for accuracy
     host = request.get_host()
+    
+    # Handle X-Forwarded-Host if behind proxy (Railway, etc.)
+    if not settings.DEBUG:
+        forwarded_host = request.META.get('HTTP_X_FORWARDED_HOST')
+        if forwarded_host:
+            host = forwarded_host.split(',')[0].strip()
+    
     # Remove port if present
     if ':' in host:
         host = host.split(':')[0]
     
-    # Ensure www prefix for consistency (keep www if present, add if not)
-    if not host.startswith('www.'):
-        # Add www prefix for production domains (not localhost)
-        if not settings.DEBUG and host not in ('localhost', '127.0.0.1'):
+    # Normalize host - ensure www for production
+    host = host.lower().strip()
+    if not settings.DEBUG and host not in ('localhost', '127.0.0.1'):
+        # For production, ensure www prefix
+        if not host.startswith('www.'):
             host = f"www.{host}"
     
-    # Build redirect URI
+    # Build redirect URI - HARDCODE for production to match Google Console exactly
     if settings.DEBUG:
-        # Development: use request's scheme and port
+        # Development: dynamic based on request
         scheme = request.scheme
         port = request.get_port()
         if port and port not in (80, 443):
             redirect_uri = f"{scheme}://{host}:{port}{callback_path}"
         else:
             redirect_uri = f"{scheme}://{host}{callback_path}"
+        # Remove any query parameters
+        if '?' in redirect_uri:
+            redirect_uri = redirect_uri.split('?')[0]
+        redirect_uri = redirect_uri.rstrip('/') + '/'
     else:
-        # Production: always use HTTPS, no port, with www
-        redirect_uri = f"https://{host}{callback_path}"
+        # Production: HARDCODE to match Google Console exactly
+        # This eliminates any host detection or normalization issues
+        redirect_uri = "https://www.neuromedai.org/auth/google/callback/"
     
-    # Remove any query parameters that might have been added
-    if '?' in redirect_uri:
-        redirect_uri = redirect_uri.split('?')[0]
-    
-    # Ensure trailing slash (match Google Console exactly)
-    redirect_uri = redirect_uri.rstrip('/') + '/'
+    # Log for debugging - use print for Railway logs visibility
+    import logging
+    log = logging.getLogger(__name__)
+    log.error(f"[GOOGLE_OAUTH] redirect_uri being sent: {redirect_uri}")
+    print(f"[GOOGLE_OAUTH] redirect_uri being sent: {redirect_uri}", flush=True)
     params = {
         'client_id': google_client_id,
         'redirect_uri': redirect_uri,
@@ -3038,35 +3050,49 @@ def google_oauth_callback(request):
     # Exchange code for access token (build clean redirect URI - must match exactly)
     callback_path = reverse('google_oauth_callback')
     
-    # Get the host and normalize (keep www if present, same logic as google_oauth_login)
+    # Get the host - check multiple sources for accuracy (same logic as google_oauth_login)
     host = request.get_host()
+    
+    # Handle X-Forwarded-Host if behind proxy (Railway, etc.)
+    if not settings.DEBUG:
+        forwarded_host = request.META.get('HTTP_X_FORWARDED_HOST')
+        if forwarded_host:
+            host = forwarded_host.split(',')[0].strip()
+    
+    # Remove port if present
     if ':' in host:
         host = host.split(':')[0]
     
-    # Ensure www prefix for consistency (keep www if present, add if not)
-    if not host.startswith('www.'):
-        # Add www prefix for production domains (not localhost)
-        if not settings.DEBUG and host not in ('localhost', '127.0.0.1'):
+    # Normalize host - ensure www for production
+    host = host.lower().strip()
+    if not settings.DEBUG and host not in ('localhost', '127.0.0.1'):
+        # For production, ensure www prefix
+        if not host.startswith('www.'):
             host = f"www.{host}"
     
-    # Build redirect URI (must match exactly what's in Google Console)
+    # Build redirect URI - HARDCODE for production to match Google Console exactly
     if settings.DEBUG:
+        # Development: dynamic based on request
         scheme = request.scheme
         port = request.get_port()
         if port and port not in (80, 443):
             redirect_uri = f"{scheme}://{host}:{port}{callback_path}"
         else:
             redirect_uri = f"{scheme}://{host}{callback_path}"
+        # Remove any query parameters
+        if '?' in redirect_uri:
+            redirect_uri = redirect_uri.split('?')[0]
+        redirect_uri = redirect_uri.rstrip('/') + '/'
     else:
-        # Production: always use HTTPS, no port, with www
-        redirect_uri = f"https://{host}{callback_path}"
+        # Production: HARDCODE to match Google Console exactly
+        # This eliminates any host detection or normalization issues
+        redirect_uri = "https://www.neuromedai.org/auth/google/callback/"
     
-    # Remove any query parameters
-    if '?' in redirect_uri:
-        redirect_uri = redirect_uri.split('?')[0]
-    
-    # Ensure trailing slash (match Google Console exactly)
-    redirect_uri = redirect_uri.rstrip('/') + '/'
+    # Log for debugging - use print for Railway logs visibility
+    import logging
+    log = logging.getLogger(__name__)
+    log.error(f"[GOOGLE_OAUTH_CALLBACK] redirect_uri: {redirect_uri}")
+    print(f"[GOOGLE_OAUTH_CALLBACK] redirect_uri: {redirect_uri}", flush=True)
     token_data = {
         'code': code,
         'client_id': google_client_id,
