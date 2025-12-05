@@ -1,5 +1,7 @@
 # myApp/utils.py
 from typing import Tuple, Optional
+import random
+import string
 
 def get_client_ip(request) -> str:
     """
@@ -28,3 +30,18 @@ def get_country_from_request(request) -> Optional[str]:
         if val and len(val) == 2:
             return val.upper()
     return None
+
+def generate_referral_code(length=8) -> str:
+    """
+    Generate a unique referral code for users.
+    Format: Mix of uppercase letters and numbers (e.g., "A3B7C9D2")
+    Ensures uniqueness by checking against existing codes.
+    """
+    from .models import Profile
+    
+    while True:
+        # Generate code with uppercase letters and digits
+        code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
+        # Check if code already exists
+        if not Profile.objects.filter(personal_referral_code=code).exists():
+            return code

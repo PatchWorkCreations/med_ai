@@ -27,6 +27,9 @@ urlpatterns = [
     path('api/login/', views.api_login, name='api_login'),
     path('login/', WarmLoginView.as_view(), name='login'),
     path("logout/", views.logout_view, name="logout"),
+    # Google OAuth
+    path('auth/google/', views.google_oauth_login, name='google_oauth_login'),
+    path('auth/google/callback/', views.google_oauth_callback, name='google_oauth_callback'),
     # Authenticated Dashboard
     path('dashboard/', views.dashboard, name='dashboard'),
     path('dashboard/analytics/', views.analytics_dashboard, name='analytics'),

@@ -1356,6 +1356,25 @@ def signup_view(request):
             profile, _ = Profile.objects.get_or_create(user=user)
             profile.signup_ip = get_client_ip(request)
             profile.signup_country = getattr(request, "country_code", None) or profile.signup_country
+            
+            # Process referral code (if entered)
+            referral_code_entered = form.cleaned_data.get("referral_code", "").strip().upper()
+            if referral_code_entered:
+                # Try to find the user who owns this referral code
+                try:
+                    referring_profile = Profile.objects.select_related('user').get(
+                        personal_referral_code=referral_code_entered
+                    )
+                    profile.referred_by = referring_profile.user
+                except Profile.DoesNotExist:
+                    # Invalid referral code - silently ignore (don't block signup)
+                    pass
+            
+            # Generate personal referral code for new user
+            from .utils import generate_referral_code
+            if not profile.personal_referral_code:
+                profile.personal_referral_code = generate_referral_code()
+            
             profile.save()
             
             # Track user signup
@@ -2920,3 +2939,178 @@ The NeuroMed AI Team
     except Exception:
         log.exception("send_welcome_email failed")
         return False
+
+
+# =============================
+#       GOOGLE OAUTH
+# =============================
+import secrets
+from urllib.parse import urlencode, parse_qs, urlparse
+from django.http import HttpResponseRedirect, HttpResponseBadRequest
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+def google_oauth_login(request):
+    """
+    Initiates Google OAuth flow by redirecting to Google's authorization page.
+    """
+    google_client_id = getattr(settings, 'GOOGLE_OAUTH_CLIENT_ID', None)
+    if not google_client_id:
+        return HttpResponseBadRequest("Google OAuth is not configured. Please contact support.")
+    
+    # Generate state token for CSRF protection
+    state = secrets.token_urlsafe(32)
+    request.session['google_oauth_state'] = state
+    request.session['google_oauth_next'] = request.GET.get('next', '/dashboard/')
+    
+    # Build Google OAuth URL
+    redirect_uri = request.build_absolute_uri(reverse('google_oauth_callback'))
+    params = {
+        'client_id': google_client_id,
+        'redirect_uri': redirect_uri,
+        'response_type': 'code',
+        'scope': 'openid email profile',
+        'state': state,
+        'access_type': 'online',
+        'prompt': 'select_account',
+    }
+    
+    auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urlencode(params)}"
+    return HttpResponseRedirect(auth_url)
+
+
+def google_oauth_callback(request):
+    """
+    Handles Google OAuth callback and creates/logs in user.
+    """
+    # Verify state token
+    state = request.GET.get('state')
+    stored_state = request.session.pop('google_oauth_state', None)
+    next_url = request.session.pop('google_oauth_next', '/dashboard/')
+    
+    if not state or state != stored_state:
+        return HttpResponseBadRequest("Invalid state parameter. Please try again.")
+    
+    code = request.GET.get('code')
+    if not code:
+        error = request.GET.get('error', 'Unknown error')
+        return HttpResponseBadRequest(f"OAuth error: {error}")
+    
+    google_client_id = getattr(settings, 'GOOGLE_OAUTH_CLIENT_ID', None)
+    google_client_secret = getattr(settings, 'GOOGLE_OAUTH_CLIENT_SECRET', None)
+    
+    if not google_client_id or not google_client_secret:
+        return HttpResponseBadRequest("Google OAuth is not configured.")
+    
+    # Exchange code for access token
+    redirect_uri = request.build_absolute_uri(reverse('google_oauth_callback'))
+    token_data = {
+        'code': code,
+        'client_id': google_client_id,
+        'client_secret': google_client_secret,
+        'redirect_uri': redirect_uri,
+        'grant_type': 'authorization_code',
+    }
+    
+    try:
+        token_response = requests.post(
+            'https://oauth2.googleapis.com/token',
+            data=token_data,
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            timeout=10
+        )
+        token_response.raise_for_status()
+        token_json = token_response.json()
+        access_token = token_json.get('access_token')
+        
+        if not access_token:
+            return HttpResponseBadRequest("Failed to obtain access token.")
+        
+        # Get user info from Google
+        user_info_response = requests.get(
+            'https://www.googleapis.com/oauth2/v2/userinfo',
+            headers={'Authorization': f'Bearer {access_token}'},
+            timeout=10
+        )
+        user_info_response.raise_for_status()
+        user_info = user_info_response.json()
+        
+        email = user_info.get('email')
+        if not email:
+            return HttpResponseBadRequest("Email not provided by Google.")
+        
+        # Get or create user (case-insensitive email lookup)
+        email_lower = email.lower()
+        user = User.objects.filter(email__iexact=email_lower).first()
+        created = False
+        
+        if not user:
+            # Create new user
+            base_username = email_lower.split('@')[0]
+            username = base_username
+            # Ensure username is unique
+            counter = 1
+            while User.objects.filter(username=username).exists():
+                username = f"{base_username}_{counter}"
+                counter += 1
+            
+            user = User.objects.create(
+                email=email_lower,
+                username=username,
+                first_name=user_info.get('given_name', ''),
+                last_name=user_info.get('family_name', ''),
+            )
+            created = True
+        
+        # Update user info if they already exist
+        if not created:
+            if not user.first_name and user_info.get('given_name'):
+                user.first_name = user_info.get('given_name')
+            if not user.last_name and user_info.get('family_name'):
+                user.last_name = user_info.get('family_name')
+            user.save()
+        
+        # Create or update profile
+        profile, _ = Profile.objects.get_or_create(user=user)
+        if created:
+            profile.signup_ip = get_client_ip(request)
+            profile.signup_country = getattr(request, "country_code", None)
+            # Generate referral code for new users
+            from .utils import generate_referral_code
+            if not profile.personal_referral_code:
+                profile.personal_referral_code = generate_referral_code()
+            
+            # Track user signup
+            from .models import UserSignup
+            UserSignup.objects.get_or_create(
+                user=user,
+                defaults={
+                    'ip_address': get_client_ip(request),
+                    'user_agent': request.META.get('HTTP_USER_AGENT', ''),
+                    'referer': request.META.get('HTTP_REFERER', '')
+                }
+            )
+            
+            # Send welcome email for new users
+            login_url = request.build_absolute_uri(reverse("login"))
+            def _send():
+                first_name = (getattr(user, "first_name", "") or user.get_username() or "there")
+                send_welcome_email(user.email, first_name, login_url)
+            transaction.on_commit(_send)
+        
+        # Log the user in
+        user.backend = settings.AUTHENTICATION_BACKENDS[0]
+        login(request, user)
+        
+        # Redirect to dashboard or next URL
+        resp = redirect(next_url)
+        resp.set_cookie("just_logged_in", "1", max_age=60, samesite="Lax", path="/")
+        return resp
+        
+    except requests.RequestException as e:
+        log.exception("Google OAuth error")
+        return HttpResponseBadRequest(f"OAuth error: {str(e)}")
+    except Exception as e:
+        log.exception("Unexpected error in Google OAuth")
+        return HttpResponseBadRequest(f"An error occurred: {str(e)}")

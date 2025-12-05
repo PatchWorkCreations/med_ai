@@ -43,6 +43,13 @@ class CustomSignupForm(UserCreationForm):
     last_name  = forms.CharField(max_length=150, required=True)
     # Optional field saved into Profile (NOT on User)
     profession = forms.CharField(max_length=100, required=False)
+    # Referral code entered by user (optional)
+    referral_code = forms.CharField(
+        max_length=20,
+        required=False,
+        label="Referral Code",
+        help_text="(optional) Enter a referral code if you have one"
+    )
 
     class Meta(UserCreationForm.Meta):
         model = User

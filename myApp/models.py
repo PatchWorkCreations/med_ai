@@ -108,6 +108,23 @@ class Profile(models.Model):
     signup_country = models.CharField(max_length=2, blank=True, null=True)     # e.g. "PH"
     last_login_country = models.CharField(max_length=2, blank=True, null=True) # e.g. "PH"
 
+    # Referral code system
+    personal_referral_code = models.CharField(
+        max_length=20,
+        unique=True,
+        blank=True,
+        null=True,
+        help_text="User's personal referral code that they can share with others"
+    )
+    referred_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='referrals',
+        help_text="User who referred this account (via referral code)"
+    )
+
     def __str__(self):
         return f"{self.display_name or self.user.username} Profile"
 from django.utils import timezone

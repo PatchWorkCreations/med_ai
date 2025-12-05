@@ -234,3 +234,11 @@ RESEND = {
     "REPLY_TO": os.environ.get("RESEND_REPLY_TO"),
     "BASE_URL": os.environ.get("RESEND_BASE_URL", "https://api.resend.com"),
 }
+
+# Google OAuth Configuration
+# Get these from: https://console.cloud.google.com/apis/credentials
+# After creating OAuth 2.0 Client ID, add to .env file:
+# GOOGLE_OAUTH_CLIENT_ID=your-client-id.apps.googleusercontent.com
+# GOOGLE_OAUTH_CLIENT_SECRET=your-client-secret
+GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "")
+GOOGLE_OAUTH_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET", "")
