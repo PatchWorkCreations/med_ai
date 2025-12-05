@@ -2964,8 +2964,40 @@ def google_oauth_login(request):
     request.session['google_oauth_state'] = state
     request.session['google_oauth_next'] = request.GET.get('next', '/dashboard/')
     
-    # Build Google OAuth URL
-    redirect_uri = request.build_absolute_uri(reverse('google_oauth_callback'))
+    # Build clean redirect URI (force HTTPS in production, remove query params)
+    callback_path = reverse('google_oauth_callback')
+    
+    # Get the host and normalize (keep www if present)
+    host = request.get_host()
+    # Remove port if present
+    if ':' in host:
+        host = host.split(':')[0]
+    
+    # Ensure www prefix for consistency (keep www if present, add if not)
+    if not host.startswith('www.'):
+        # Add www prefix for production domains (not localhost)
+        if not settings.DEBUG and host not in ('localhost', '127.0.0.1'):
+            host = f"www.{host}"
+    
+    # Build redirect URI
+    if settings.DEBUG:
+        # Development: use request's scheme and port
+        scheme = request.scheme
+        port = request.get_port()
+        if port and port not in (80, 443):
+            redirect_uri = f"{scheme}://{host}:{port}{callback_path}"
+        else:
+            redirect_uri = f"{scheme}://{host}{callback_path}"
+    else:
+        # Production: always use HTTPS, no port, with www
+        redirect_uri = f"https://{host}{callback_path}"
+    
+    # Remove any query parameters that might have been added
+    if '?' in redirect_uri:
+        redirect_uri = redirect_uri.split('?')[0]
+    
+    # Ensure trailing slash (match Google Console exactly)
+    redirect_uri = redirect_uri.rstrip('/') + '/'
     params = {
         'client_id': google_client_id,
         'redirect_uri': redirect_uri,
@@ -3003,8 +3035,38 @@ def google_oauth_callback(request):
     if not google_client_id or not google_client_secret:
         return HttpResponseBadRequest("Google OAuth is not configured.")
     
-    # Exchange code for access token
-    redirect_uri = request.build_absolute_uri(reverse('google_oauth_callback'))
+    # Exchange code for access token (build clean redirect URI - must match exactly)
+    callback_path = reverse('google_oauth_callback')
+    
+    # Get the host and normalize (keep www if present, same logic as google_oauth_login)
+    host = request.get_host()
+    if ':' in host:
+        host = host.split(':')[0]
+    
+    # Ensure www prefix for consistency (keep www if present, add if not)
+    if not host.startswith('www.'):
+        # Add www prefix for production domains (not localhost)
+        if not settings.DEBUG and host not in ('localhost', '127.0.0.1'):
+            host = f"www.{host}"
+    
+    # Build redirect URI (must match exactly what's in Google Console)
+    if settings.DEBUG:
+        scheme = request.scheme
+        port = request.get_port()
+        if port and port not in (80, 443):
+            redirect_uri = f"{scheme}://{host}:{port}{callback_path}"
+        else:
+            redirect_uri = f"{scheme}://{host}{callback_path}"
+    else:
+        # Production: always use HTTPS, no port, with www
+        redirect_uri = f"https://{host}{callback_path}"
+    
+    # Remove any query parameters
+    if '?' in redirect_uri:
+        redirect_uri = redirect_uri.split('?')[0]
+    
+    # Ensure trailing slash (match Google Console exactly)
+    redirect_uri = redirect_uri.rstrip('/') + '/'
     token_data = {
         'code': code,
         'client_id': google_client_id,
