@@ -1422,7 +1422,10 @@ def signup_view(request):
             return resp
     else:
         form = CustomSignupForm()
-    return render(request, "signup.html", {"form": form})
+    return render(request, "signup.html", {
+        "form": form,
+        "GOOGLE_OAUTH_ENABLED": getattr(settings, 'GOOGLE_OAUTH_ENABLED', True)
+    })
 
 
 
@@ -2444,6 +2447,10 @@ from django.http import JsonResponse
 import json
 
 class WarmLoginView(DjangoLoginView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['GOOGLE_OAUTH_ENABLED'] = getattr(settings, 'GOOGLE_OAUTH_ENABLED', True)
+        return context
     template_name = "login.html"
     redirect_authenticated_user = True
     success_url = reverse_lazy("dashboard")
@@ -2955,6 +2962,10 @@ def google_oauth_login(request):
     """
     Initiates Google OAuth flow by redirecting to Google's authorization page.
     """
+    # Check if Google OAuth is enabled
+    if not getattr(settings, 'GOOGLE_OAUTH_ENABLED', True):
+        return HttpResponseBadRequest("Google OAuth is currently disabled. Please use email/password signup.")
+    
     google_client_id = getattr(settings, 'GOOGLE_OAUTH_CLIENT_ID', None)
     if not google_client_id:
         return HttpResponseBadRequest("Google OAuth is not configured. Please contact support.")

@@ -242,3 +242,8 @@ RESEND = {
 # GOOGLE_OAUTH_CLIENT_SECRET=your-client-secret
 GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "")
 GOOGLE_OAUTH_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET", "")
+# Enable/disable Google OAuth (set to "true" to enable, "false" to disable)
+# Set to "false" in production until OAuth app verification is complete
+# Local: GOOGLE_OAUTH_ENABLED=true
+# Production: GOOGLE_OAUTH_ENABLED=false (until verified)
+GOOGLE_OAUTH_ENABLED = os.getenv("GOOGLE_OAUTH_ENABLED", "true").lower() in ("true", "1", "yes")

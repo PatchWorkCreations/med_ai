@@ -149,6 +149,7 @@
           </div>
         </form>
 
+        {% if GOOGLE_OAUTH_ENABLED %}
         <!-- Divider -->
         <div class="md:col-span-2 flex items-center my-4">
           <div class="flex-1 border-t border-slate-200"></div>
@@ -168,6 +169,7 @@
             Continue with Google
           </a>
         </div>
+        {% endif %}
 
         <div class="mt-6 border-t pt-4 text-sm text-center text-slate-500">
           Already have an account?

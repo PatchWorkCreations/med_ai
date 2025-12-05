@@ -71,6 +71,7 @@
       <a href="{% url 'password_forgot' %}" class="text-[#236092] hover:underline">Forgot password?</a>
     </p>
 
+    {% if GOOGLE_OAUTH_ENABLED %}
     <!-- Divider -->
     <div class="flex items-center my-4">
       <div class="flex-1 border-t border-gray-200"></div>
@@ -88,6 +89,7 @@
       </svg>
       Continue with Google
     </a>
+    {% endif %}
 
     <!-- Divider -->
     <div class="border-t pt-4 text-sm text-center text-gray-500">
