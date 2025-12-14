@@ -33,6 +33,7 @@ ALLOWED_IMAGE_EXTS = (".jpg", ".jpeg", ".png", ".heic", ".webp")
 USER_MEDIA_SUBDIR = getattr(settings, "USER_MEDIA_SUBDIR", "user_media")
 SESSION_IMAGE_INDEX = "known_images"  # {lower_filename: relative_path_from_MEDIA_ROOT}
 MAX_INDEXED_IMAGES = 100
+MAX_FILES_PER_UPLOAD = 15  # Allow up to 15 files (more than required 10)
 
 # views.py (top)
 from django.utils import timezone
@@ -558,6 +559,89 @@ def extract_contextual_medical_insights_from_image(file_path: str, tone: str = "
     return rewrite.choices[0].message.content.strip()
 
 # =============================
+#  MULTI-IMAGE VISION INTERPRETATION
+# =============================
+def extract_contextual_medical_insights_from_multiple_images(file_paths: list[str], tone: str = "PlainClinical") -> str:
+    """
+    Process multiple medical images together in a single API call.
+    This allows the AI to see all images in context and provide comprehensive analysis.
+    """
+    if not file_paths:
+        return ""
+    
+    if len(file_paths) == 1:
+        # Fall back to single image processing for consistency
+        return extract_contextual_medical_insights_from_image(file_paths[0], tone=tone)
+    
+    system_prompt = get_system_prompt(tone) + VISION_FORMAT_PROMPT
+    
+    # Prepare all images for the API call
+    content_parts = [
+        {"type": "text", "text": f"Please analyze these {len(file_paths)} medical images together. Provide a comprehensive interpretation that considers all images in context. Identify any patterns, relationships, or connections between the images. For each image, note what it shows, and then provide an overall assessment that considers all images together."}
+    ]
+    
+    # Add all images to the content
+    for i, file_path in enumerate(file_paths, 1):
+        try:
+            image_b64 = preprocess_image_for_vision_api(file_path)
+            data_uri = f"data:image/png;base64,{image_b64}"
+            content_parts.append({
+                "type": "text",
+                "text": f"\n--- Image {i} of {len(file_paths)} ---"
+            })
+            content_parts.append({
+                "type": "image_url",
+                "image_url": {"url": data_uri}
+            })
+        except Exception as e:
+            log.warning(f"Failed to process image {i}: {e}")
+            continue
+    
+    if len(content_parts) == 1:  # Only the text prompt, no images processed
+        return "Failed to process the provided images."
+    
+    # First pass: interpret all images together
+    try:
+        resp = client.chat.completions.create(
+            model="gpt-4o",
+            temperature=0.4,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": content_parts}
+            ],
+        )
+        raw = resp.choices[0].message.content.strip()
+    except Exception as e:
+        log.error(f"Multi-image vision API call failed: {e}")
+        # Fallback: process images individually and combine
+        individual_summaries = []
+        for file_path in file_paths:
+            try:
+                summary = extract_contextual_medical_insights_from_image(file_path, tone=tone)
+                individual_summaries.append(summary)
+            except Exception:
+                continue
+        if individual_summaries:
+            raw = "\n\n".join([f"Image {i+1}:\n{summary}" for i, summary in enumerate(individual_summaries)])
+        else:
+            return "Failed to process any of the provided images."
+    
+    # Second pass: humanize/tone polish
+    try:
+        rewrite = client.chat.completions.create(
+            model="gpt-4o",
+            temperature=0.3,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"Rewrite warmly, clearly, and confidently—keep all details and maintain the comprehensive analysis across all images:\n\n{raw}"},
+            ],
+        )
+        return rewrite.choices[0].message.content.strip()
+    except Exception as e:
+        log.warning(f"Multi-image rewrite failed, using raw response: {e}")
+        return raw
+
+# =============================
 #  SUMMARIZE (PDF/DOCX/TXT/IMG)
 # =============================
 from rest_framework.decorators import api_view, permission_classes, parser_classes
@@ -982,6 +1066,14 @@ def send_chat(request):
     files = request.FILES.getlist("files[]")
     if not files and "file" in request.FILES:
         files = [request.FILES["file"]]
+    
+    # Validate file count
+    if len(files) > MAX_FILES_PER_UPLOAD:
+        return JsonResponse({
+            "reply": f"Too many files. Maximum {MAX_FILES_PER_UPLOAD} files allowed per upload.",
+            "error": "MAX_FILES_EXCEEDED"
+        }, status=400)
+    
     has_files = bool(files)
 
     # --- Mode header
@@ -1027,12 +1119,104 @@ def send_chat(request):
             chat_history.insert(1, {"role": "system", "content": header})
 
     # --- Process files → combined_context
-    combined_sections = []
+    # Separate images from other files
+    image_files = []
+    other_files = []
     for f in files:
+        fname_lower = f.name.lower()
+        if fname_lower.endswith(ALLOWED_IMAGE_EXTS):
+            image_files.append(f)
+        else:
+            other_files.append(f)
+    
+    combined_sections = []
+    
+    # Process multiple images together if there are 2+ images
+    if len(image_files) >= 2:
+        # Process all images together for better context understanding
+        image_paths = []
+        temp_paths_to_cleanup = []
+        
+        try:
+            for img_file in image_files:
+                # Save to temp file first (file objects can only be read once)
+                with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(img_file.name)[1]) as tmp:
+                    for chunk in img_file.chunks():
+                        tmp.write(chunk)
+                    temp_path = tmp.name
+                
+                # Try to save a copy to user media (read from temp file)
+                stored_path = None
+                try:
+                    if request is not None and request.user.is_authenticated:
+                        # Reopen the temp file to save a copy
+                        with open(temp_path, 'rb') as temp_file:
+                            # Create a file-like object for _save_copy_to_user_media
+                            from django.core.files import File
+                            django_file = File(temp_file, name=img_file.name)
+                            stored_path = _save_copy_to_user_media(request, django_file, img_file.name)
+                except Exception:
+                    pass
+                
+                # Use stored path if available, otherwise use temp path
+                if stored_path and stored_path.exists():
+                    image_paths.append(str(stored_path))
+                    # Only cleanup temp if we successfully stored it
+                    try:
+                        os.remove(temp_path)
+                    except Exception:
+                        pass
+                else:
+                    image_paths.append(temp_path)
+                    temp_paths_to_cleanup.append(temp_path)
+            
+            # Process all images together
+            multi_image_summary = extract_contextual_medical_insights_from_multiple_images(
+                image_paths, tone=tone
+            )
+            
+            # Create a combined filename label
+            image_names = [f.name for f in image_files[:3]]
+            if len(image_files) > 3:
+                image_names.append(f"... and {len(image_files) - 3} more")
+            combined_sections.append(f"{', '.join(image_names)}\n{multi_image_summary}")
+            
+            # Save individual summaries to DB if user is authenticated
+            if request.user.is_authenticated:
+                for img_file in image_files:
+                    try:
+                        MedicalSummary.objects.create(
+                            user=request.user,
+                            uploaded_filename=img_file.name,
+                            tone=tone,
+                            raw_text="(Image file via chat - part of multi-image analysis)",
+                            summary=multi_image_summary,  # Same summary for all as they were analyzed together
+                        )
+                    except Exception:
+                        pass
+        
+        finally:
+            # Cleanup temp files
+            for tmp_path in temp_paths_to_cleanup:
+                try:
+                    os.remove(tmp_path)
+                except Exception:
+                    pass
+    
+    elif len(image_files) == 1:
+        # Single image - use existing single file processing
+        fname, summary = summarize_single_file(
+            image_files[0], tone=tone, system_prompt=system_prompt, user=request.user, request=request,
+        )
+        combined_sections.append(f"{fname}\n{summary}")
+    
+    # Process non-image files individually
+    for f in other_files:
         fname, summary = summarize_single_file(
             f, tone=tone, system_prompt=system_prompt, user=request.user, request=request,
         )
         combined_sections.append(f"{fname}\n{summary}")
+    
     combined_context = "\n\n".join(combined_sections).strip()
 
     # --- Case: only files
