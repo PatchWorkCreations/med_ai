@@ -481,16 +481,20 @@ def _append_urgent_triage(summary_text: str, raw_text: str) -> str:
 
 
 VISION_FORMAT_PROMPT = (
-    "\n\nFormat your findings like this:\n\n"
-    "🧠 **Observed Structures**:\n"
-    "- List key anatomical features and orientation.\n"
-    "- Note symmetry/asymmetry, density patterns, artifacts.\n\n"
-    "🔍 **Possible Findings**:\n"
-    "- Describe abnormalities vs normal; suggest possible causes in a non-diagnostic, educational way.\n\n"
-    "💡 **Explanation**:\n"
-    "Explain warmly what this might mean for a concerned patient/family.\n\n"
-    "🕊 **Next Steps**:\n"
-    "- Suggest reasonable follow-up tests, referrals, or general health tips.\n"
+    "\n\nIMPORTANT: For medical images, you are ANALYZING and DESCRIBING what you see, not giving generic advice.\n\n"
+    "Structure your response as:\n\n"
+    "1. Start with a warm introduction acknowledging you're explaining what the images show (not diagnosing)\n"
+    "2. 'Big picture first' - a brief 2-3 sentence summary of what the images show overall\n"
+    "3. Break down findings by anatomical region or image type, being SPECIFIC:\n"
+    "   - What you can clearly see (e.g., 'straightening or loss of the normal neck curve')\n"
+    "   - What this typically means (e.g., 'Often happens with chronic muscle tension, arthritis...')\n"
+    "   - What this can cause (symptoms patients might experience)\n"
+    "4. If dates are visible, explain what comparing them tells us (chronic vs acute, progression)\n"
+    "5. Overall meaning in everyday language\n"
+    "6. When to seek urgent medical attention (specific red flags, not generic advice)\n"
+    "7. Optional: Offer to help more with specific questions\n\n"
+    "Use specific observations like 'These images show...', 'You can clearly see...', 'What stands out...' NOT generic advice like 'You might notice...' or 'What you can do...'\n"
+    "Be detailed, specific, and descriptive about what's actually visible in the images."
 )
 
 # =============================
@@ -528,9 +532,44 @@ def extract_contextual_medical_insights_from_image(file_path: str, tone: str = "
 
     image_b64 = preprocess_image_for_vision_api(file_path)
     data_uri = f"data:image/png;base64,{image_b64}"
-    system_prompt = get_system_prompt(tone) + VISION_FORMAT_PROMPT
+    
+    # Override FULL BREAKDOWN MODE for images - use image-specific format instead
+    base_prompt = get_system_prompt(tone)
+    # Remove the FULL BREAKDOWN MODE instructions and replace with image analysis format
+    image_system_prompt = base_prompt.replace(
+        "— FULL BREAKDOWN MODE: If there is ANY file/image, OR detailed description (multiple symptoms, history, or follow-up), "
+        "always reply in sections, but do NOT write the word 'Introduction' as a heading:\n"
+        "Start with a 1–2 sentence lead-in (no label).\n"
+        "Common signs – 3–5 bullet points.\n"
+        "What you can do – 3–5 bullet points.\n"
+        "When to seek help – 2–4 bullet points.\n"
+        "For clinicians – only if relevant, 1–4 concise points.\n"
+        "Close with a warm conversational handoff (e.g., 'Is this close to what you're noticing?' or "
+        "'Want me to suggest some next steps for your situation?').",
+        "— IMAGE ANALYSIS MODE: When analyzing medical images, describe what you actually see in the images:\n"
+        "Start with a warm introduction (explaining what images show, not diagnosing).\n"
+        "Big picture first – brief 2–3 sentence summary of what the images show overall.\n"
+        "Break down findings by anatomical region with specific observations (e.g., 'straightening or loss of normal neck curve' not just 'abnormalities').\n"
+        "If dates are visible, compare findings across dates and explain what this tells us.\n"
+        "Overall meaning in everyday language.\n"
+        "When to seek urgent medical attention (specific red flags, not generic advice).\n"
+        "Optional: Offer to help more with specific questions.\n"
+        "Use: 'These images show...', 'You can clearly see...', 'What stands out...', 'This typically means...'\n"
+        "DO NOT use generic sections like 'Common signs:', 'What you can do:', 'When to seek help:'"
+    )
+    system_prompt = image_system_prompt + VISION_FORMAT_PROMPT
 
-    # First pass: interpret the actual image
+    # First pass: interpret the actual image - ACTUALLY ANALYZE, don't give instructions
+    detailed_analysis_prompt = """Analyze this medical image. Describe what you actually see:
+
+- Read any labels, dates, patient identifiers, and view types visible
+- Identify the anatomical region shown
+- Examine specific findings: alignment, curves, disc spaces, bone changes, hardware
+- Be specific about what you observe (e.g., "loss of normal cervical curve" not just "abnormalities")
+- Explain what these findings typically mean in plain language
+
+Present as: "This image shows...", "You can see...", "What stands out...", "This typically means..." - describe what's actually visible, not generic advice."""
+
     resp = client.chat.completions.create(
         model="gpt-4o",
         temperature=0.4,
@@ -539,7 +578,7 @@ def extract_contextual_medical_insights_from_image(file_path: str, tone: str = "
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": "Please interpret this medical image directly and specifically."},
+                    {"type": "text", "text": detailed_analysis_prompt},
                     {"type": "image_url", "image_url": {"url": data_uri}}
                 ]
             },
@@ -547,13 +586,13 @@ def extract_contextual_medical_insights_from_image(file_path: str, tone: str = "
     )
     raw = resp.choices[0].message.content.strip()
 
-    # Second pass: humanize/tone polish
+    # Second pass: humanize/tone polish while maintaining detailed observations
     rewrite = client.chat.completions.create(
         model="gpt-4o",
         temperature=0.3,
         messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": f"Rewrite warmly, clearly, and confidently—keep all details:\n\n{raw}"},
+            {"role": "system", "content": system_prompt + "\n\nYou are analyzing and explaining what you see in the images. Present your findings as observations and explanations, not as instructions. Be specific about anatomical structures, dates, findings, and what they typically mean. Make it warm, detailed, and conversational - like walking someone through what the images show."},
+            {"role": "user", "content": f"Rewrite this analysis to be warm and clear. Present it as 'Here's what I see' and 'This typically means' rather than 'You should do this' or 'Follow these steps'. Keep ALL the detailed observations, specific anatomical findings, date comparisons, and explanations. Make it feel like a knowledgeable medical explainer walking through the images:\n\n{raw}"},
         ],
     )
     return rewrite.choices[0].message.content.strip()
@@ -573,21 +612,67 @@ def extract_contextual_medical_insights_from_multiple_images(file_paths: list[st
         # Fall back to single image processing for consistency
         return extract_contextual_medical_insights_from_image(file_paths[0], tone=tone)
     
-    system_prompt = get_system_prompt(tone) + VISION_FORMAT_PROMPT
+    # Override FULL BREAKDOWN MODE for images - use image-specific format instead
+    base_prompt = get_system_prompt(tone)
+    # Remove the FULL BREAKDOWN MODE instructions and replace with image analysis format
+    image_system_prompt = base_prompt.replace(
+        "— FULL BREAKDOWN MODE: If there is ANY file/image, OR detailed description (multiple symptoms, history, or follow-up), "
+        "always reply in sections, but do NOT write the word 'Introduction' as a heading:\n"
+        "Start with a 1–2 sentence lead-in (no label).\n"
+        "Common signs – 3–5 bullet points.\n"
+        "What you can do – 3–5 bullet points.\n"
+        "When to seek help – 2–4 bullet points.\n"
+        "For clinicians – only if relevant, 1–4 concise points.\n"
+        "Close with a warm conversational handoff (e.g., 'Is this close to what you're noticing?' or "
+        "'Want me to suggest some next steps for your situation?').",
+        "— IMAGE ANALYSIS MODE: When analyzing medical images, describe what you actually see in the images:\n"
+        "Start with a warm introduction (explaining what images show, not diagnosing).\n"
+        "Big picture first – brief 2–3 sentence summary of what the images show overall.\n"
+        "Break down findings by anatomical region with specific observations (e.g., 'straightening or loss of normal neck curve' not just 'abnormalities').\n"
+        "If dates are visible, compare findings across dates and explain what this tells us.\n"
+        "Overall meaning in everyday language.\n"
+        "When to seek urgent medical attention (specific red flags, not generic advice).\n"
+        "Optional: Offer to help more with specific questions.\n"
+        "Use: 'These images show...', 'You can clearly see...', 'What stands out...', 'This typically means...'\n"
+        "DO NOT use generic sections like 'Common signs:', 'What you can do:', 'When to seek help:'"
+    )
+    system_prompt = image_system_prompt + VISION_FORMAT_PROMPT
+    
+    # Enhanced multi-image analysis prompt - ACTUALLY ANALYZE, don't give instructions
+    multi_image_analysis_prompt = f"""Analyze these {len(file_paths)} medical images. You are describing what you actually see in these specific images.
+
+Start by reading any labels, dates, patient identifiers, and view types visible in the images. Then systematically examine:
+
+1. What anatomical regions are shown (e.g., cervical spine, lumbar spine, hip, etc.)
+2. Image orientation and view types (lateral, AP, etc.) - look for "L" markers
+3. Specific findings you observe:
+   - Alignment and curves (be specific: "straightening or loss of normal neck curve" not just "abnormalities")
+   - Disc spaces (narrowing, height changes)
+   - Bone changes (spurs, arthritis, etc.)
+   - Any hardware or implants (describe what you see and position)
+4. If dates are visible, compare findings across dates and explain what this tells us
+5. What these findings typically mean in plain language
+6. What symptoms patients with similar findings often experience
+
+Present your analysis as: "These images show...", "You can clearly see...", "What stands out...", "The images from [date] compared to [date] show...", "This typically means...", "What this can cause..."
+
+DO NOT use generic advice format like "Common signs:", "What you can do:", "When to seek help:" - instead, describe what's actually in these specific images and explain what it means.
+
+Here are the images to analyze:"""
     
     # Prepare all images for the API call
     content_parts = [
-        {"type": "text", "text": f"Please analyze these {len(file_paths)} medical images together. Provide a comprehensive interpretation that considers all images in context. Identify any patterns, relationships, or connections between the images. For each image, note what it shows, and then provide an overall assessment that considers all images together."}
+        {"type": "text", "text": multi_image_analysis_prompt}
     ]
     
-    # Add all images to the content
+    # Add all images to the content with clear labeling
     for i, file_path in enumerate(file_paths, 1):
         try:
             image_b64 = preprocess_image_for_vision_api(file_path)
             data_uri = f"data:image/png;base64,{image_b64}"
             content_parts.append({
                 "type": "text",
-                "text": f"\n--- Image {i} of {len(file_paths)} ---"
+                "text": f"\n\n--- Image {i} of {len(file_paths)} ---"
             })
             content_parts.append({
                 "type": "image_url",
@@ -626,14 +711,14 @@ def extract_contextual_medical_insights_from_multiple_images(file_paths: list[st
         else:
             return "Failed to process any of the provided images."
     
-    # Second pass: humanize/tone polish
+    # Second pass: humanize/tone polish while maintaining structured detail
     try:
         rewrite = client.chat.completions.create(
             model="gpt-4o",
             temperature=0.3,
             messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Rewrite warmly, clearly, and confidently—keep all details and maintain the comprehensive analysis across all images:\n\n{raw}"},
+                {"role": "system", "content": system_prompt + "\n\nYou are analyzing and describing what you see in these specific images. Structure your response as:\n1. Warm introduction (explaining what images show, not diagnosing)\n2. 'Big picture first' - brief summary\n3. Break down by anatomical region with specific observations\n4. Compare dates if visible\n5. Overall meaning in everyday language\n6. When to seek urgent attention (specific red flags)\n\nUse: 'These images show...', 'You can clearly see...', 'What stands out...', 'This typically means...' NOT generic advice sections like 'Common signs:', 'What you can do:', 'When to seek help:'"},
+                {"role": "user", "content": f"Rewrite this analysis to match the desired format. Start with a warm intro, then 'Big picture first', then break down findings by region being SPECIFIC about what's visible. Use 'These images show...', 'You can clearly see...', 'What stands out...' NOT generic advice. Keep ALL detailed observations, specific anatomical findings, date comparisons. Make it feel like walking through what's actually in these images:\n\n{raw}"},
             ],
         )
         return rewrite.choices[0].message.content.strip()
