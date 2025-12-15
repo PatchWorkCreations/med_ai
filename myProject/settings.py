@@ -180,7 +180,7 @@ CHANNEL_LAYERS = {
 
 # Auth redirects
 LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/dashboard/'
+LOGIN_REDIRECT_URL = '/dashboard/new/'
 LOGOUT_REDIRECT_URL = '/'
 
 
