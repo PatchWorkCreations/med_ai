@@ -180,6 +180,7 @@ CHANNEL_LAYERS = {
 
 # Auth redirects
 LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 
 
@@ -200,9 +201,8 @@ CACHES = {
 
 SESSION_COOKIE_SECURE = False      # True only in HTTPS
 CSRF_COOKIE_SECURE = False         # True only in HTTPS
-SESSION_COOKIE_AGE = 30 * 24 * 60 * 60  # 30 days - keep users logged in
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Keep session after browser closes
-SESSION_SAVE_EVERY_REQUEST = True  # Extend session on each request
+SESSION_COOKIE_AGE = 15 * 60       # 15 minutes is plenty for reset
+SESSION_SAVE_EVERY_REQUEST = True
 
 # CSRF settings for iOS/mobile app
 CSRF_COOKIE_HTTPONLY = False       # Allow JavaScript/native apps to read the cookie
