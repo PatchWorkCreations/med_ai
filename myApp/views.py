@@ -1883,11 +1883,24 @@ def dashboard(request):
 @login_required
 def new_dashboard(request):
     """Premium dashboard with upgraded UI/UX"""
-    care = norm_setting(request.GET.get("care_setting"))
-    qs = MedicalSummary.objects.filter(user=request.user).order_by("-created_at")
-    if request.GET.get("care_setting"):  # apply only if explicitly filtered
-        qs = qs.filter(care_setting=care)
-    return render(request, "new_dashboard.html", {"summaries": qs, "selected_care": care})
+    try:
+        care = norm_setting(request.GET.get("care_setting"))
+        qs = MedicalSummary.objects.filter(user=request.user).order_by("-created_at")
+        if request.GET.get("care_setting"):  # apply only if explicitly filtered
+            qs = qs.filter(care_setting=care)
+        context = {
+            "summaries": qs,
+            "selected_care": care,
+        }
+        return render(request, "new_dashboard.html", context)
+    except Exception as e:
+        import logging
+        import traceback
+        logger = logging.getLogger(__name__)
+        error_trace = traceback.format_exc()
+        logger.error(f"Error in new_dashboard: {str(e)}\n{error_trace}")
+        # Re-raise to see the actual error in logs
+        raise
 
 
 @login_required
