@@ -2858,7 +2858,7 @@ class WarmLoginView(DjangoLoginView):
         return context
     template_name = "login.html"
     redirect_authenticated_user = True
-    success_url = reverse_lazy("new_dashboard")
+    success_url = reverse_lazy("dashboard")  # Points to new_dashboard now
     authentication_form = EmailAuthenticationForm
 
     def form_valid(self, form):
@@ -3378,7 +3378,7 @@ def google_oauth_login(request):
     # Generate state token for CSRF protection
     state = secrets.token_urlsafe(32)
     request.session['google_oauth_state'] = state
-    request.session['google_oauth_next'] = request.GET.get('next', '/dashboard/new/')
+    request.session['google_oauth_next'] = request.GET.get('next', '/dashboard/')
     
     # Build clean redirect URI (force HTTPS in production, remove query params)
     callback_path = reverse('google_oauth_callback')
@@ -3447,7 +3447,7 @@ def google_oauth_callback(request):
     # Verify state token
     state = request.GET.get('state')
     stored_state = request.session.pop('google_oauth_state', None)
-    next_url = request.session.pop('google_oauth_next', '/dashboard/new/')
+    next_url = request.session.pop('google_oauth_next', '/dashboard/')
     
     if not state or state != stored_state:
         return HttpResponseBadRequest("Invalid state parameter. Please try again.")

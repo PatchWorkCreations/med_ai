@@ -164,7 +164,7 @@ REST_FRAMEWORK = {
 AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
 
 
-LOGIN_REDIRECT_URL = '/dashboard/new/'
+LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/login/'
 
 
@@ -180,7 +180,6 @@ CHANNEL_LAYERS = {
 
 # Auth redirects
 LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/dashboard/new/'
 LOGOUT_REDIRECT_URL = '/'
 
 
