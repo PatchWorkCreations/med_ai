@@ -31,7 +31,9 @@ urlpatterns = [
     path('auth/google/', views.google_oauth_login, name='google_oauth_login'),
     path('auth/google/callback/', views.google_oauth_callback, name='google_oauth_callback'),
     # Authenticated Dashboard
-    path('dashboard/', views.dashboard, name='dashboard'),
+    path('dashboard/', views.new_dashboard, name='dashboard'),  # New premium dashboard is now default
+    path('dashboard/new/', views.new_dashboard, name='new_dashboard'),  # Premium dashboard (alias)
+    path('dashboard/old/', views.dashboard, name='old_dashboard'),  # Old dashboard (kept for reference)
     path('dashboard/analytics/', views.analytics_dashboard, name='analytics'),
     path('dashboard/analytics/export/', views.analytics_export, name='analytics_export'),
 

@@ -228,6 +228,54 @@ def _parse_bilingual_code(t: str) -> str | None:
     m = re.match(r"^Bilingual([A-Za-z]{2})En$", t or "")
     return m.group(1) if m else None
 
+def _get_language_name(lang_code: str) -> str:
+    """Convert language code to readable name for AI prompts."""
+    lang_map = {
+        'en-US': 'English', 'ja-JP': 'Japanese', 'es-ES': 'Spanish', 'fr-FR': 'French', 
+        'de-DE': 'German', 'it-IT': 'Italian', 'pt-PT': 'Portuguese', 'pt-BR': 'Portuguese (Brazil)',
+        'ru-RU': 'Russian', 'zh-CN': 'Chinese (Simplified)', 'zh-TW': 'Chinese (Traditional)',
+        'ko-KR': 'Korean', 'ar-SA': 'Arabic', 'tr-TR': 'Turkish', 'nl-NL': 'Dutch',
+        'sv-SE': 'Swedish', 'pl-PL': 'Polish', 'da-DK': 'Danish', 'no-NO': 'Norwegian',
+        'fi-FI': 'Finnish', 'he-IL': 'Hebrew', 'th-TH': 'Thai', 'hi-IN': 'Hindi',
+        'cs-CZ': 'Czech', 'ro-RO': 'Romanian', 'hu-HU': 'Hungarian', 'sk-SK': 'Slovak',
+        'bg-BG': 'Bulgarian', 'uk-UA': 'Ukrainian', 'vi-VN': 'Vietnamese', 'id-ID': 'Indonesian',
+        'ms-MY': 'Malay', 'sr-RS': 'Serbian', 'hr-HR': 'Croatian', 'el-GR': 'Greek',
+        'lt-LT': 'Lithuanian', 'lv-LV': 'Latvian', 'et-EE': 'Estonian', 'sl-SI': 'Slovenian',
+        'is-IS': 'Icelandic', 'sq-AL': 'Albanian', 'mk-MK': 'Macedonian', 'bs-BA': 'Bosnian',
+        'ca-ES': 'Catalan', 'gl-ES': 'Galician', 'eu-ES': 'Basque', 'hy-AM': 'Armenian',
+        'fa-IR': 'Persian', 'sw-KE': 'Swahili', 'ta-IN': 'Tamil', 'te-IN': 'Telugu',
+        'kn-IN': 'Kannada', 'ml-IN': 'Malayalam', 'mr-IN': 'Marathi', 'pa-IN': 'Punjabi',
+        'gu-IN': 'Gujarati', 'or-IN': 'Odia', 'as-IN': 'Assamese', 'ne-NP': 'Nepali',
+        'si-LK': 'Sinhala'
+    }
+    return lang_map.get(lang_code, lang_code.split('-')[0].title() if '-' in lang_code else lang_code)
+
+def _add_language_instruction(system_prompt: str, lang: str) -> str:
+    """
+    Add language instruction to system prompt.
+    Matches Language Enforcement Rules from design system.
+    """
+    if not lang or lang == 'en-US':
+        # English is default, no need to add instruction
+        return system_prompt
+    
+    lang_name = _get_language_name(lang)
+    language_instruction = (
+        f"\n\n=== LANGUAGE REQUIREMENT ===\n"
+        f"The user has selected {lang_name} ({lang}) as their preferred language.\n\n"
+        f"Language Enforcement Rules:\n"
+        f"• Entire response must be in {lang_name}\n"
+        f"• Medical meaning must not be shortened or diluted\n"
+        f"• English used only when explicitly requested\n"
+        f"• Maintain structure and clarity in {lang_name}\n"
+        f"• Avoid slang or idioms\n"
+        f"• Every word of your response should be in {lang_name}\n"
+        f"• Preserve emotional tone and human pacing in {lang_name}\n"
+        f"\n"
+        f"This is critical for accessibility and user preference."
+    )
+    return system_prompt + language_instruction
+
 
 def _is_detailed(msg: str) -> bool:
     """Treat as detailed if >= 12 words or contains multiple clauses/signals."""
@@ -278,6 +326,44 @@ def build_system_prompt(tone: str, care_setting: str | None, faith_setting: str 
 
 PROMPT_TEMPLATES = {
     "PlainClinical": (
+        "You are NeuroMed AI, a human-first medical communication assistant.\n"
+        "Your role: Bridge understanding between medical information and real people with clarity, compassion, and confidence.\n"
+        "\n"
+        "Communication Pillars:\n"
+        "1. Clarity Before Complexity\n"
+        "2. Empathy Without Assumption\n"
+        "3. Structure Without Rigidity\n"
+        "4. Accuracy Without Alarmism\n"
+        "5. Guidance Without Diagnosis\n"
+        "\n"
+        "Voice: Calm, confident, human. Conversational, not instructional. Free of markdown symbols or technical formatting. "
+        "No robotic phrasing or excessive disclaimers.\n"
+        "\n"
+        "Response Modes (choose based on context):\n"
+        "\n"
+        "— QUICK MODE: Triggered when user gives only 1 short symptom (under 12 words) and no file/image.\n"
+        "Structure: Gentle acknowledgment + 2–4 safe immediate actions + 1 clear red flag + 1 soft follow-up invitation.\n"
+        "Maximum length: 5 sentences.\n"
+        "Close with: 'Does this align with what you're experiencing?' or similar invitation.\n"
+        "\n"
+        "— EXPLAIN MODE: Triggered when user asks a general health question without a file/image.\n"
+        "Structure: What it is + Common signs or causes + Simple prevention or management + Invitation to explore further.\n"
+        "Length: 2–4 sentences.\n"
+        "Do not add clinician notes unless asked.\n"
+        "Close with: 'Would you like me to go deeper into this?' or similar invitation.\n"
+        "\n"
+        "— FULL BREAKDOWN MODE: Triggered when files/images are uploaded, symptoms are detailed, or follow-up questions are asked.\n"
+        "Structure:\n"
+        "• Short conversational lead-in (no label, no 'Introduction' heading)\n"
+        "• Common signs (3–5 bullets)\n"
+        "• What you can do now (3–5 bullets)\n"
+        "• When to seek medical help (2–4 bullets)\n"
+        "• Clinician notes (only when relevant, 1–4 concise points)\n"
+        "• Warm conversational close\n"
+        "\n"
+        "Always end with an invitation that keeps dialogue going. Maintain conversation flow, not lecture format.\n"
+        "\n"
+        "Original mode details:\n"
         "You are NeuroMed, a warm but precise medical guide.\n"
         "Choose response mode based on context:\n"
         "\n"
@@ -307,10 +393,18 @@ PROMPT_TEMPLATES = {
     ),
 
     "Caregiver": (
-        "You are NeuroMed, a comforting health companion. "
-        "Speak gently, with warmth and where helpful. "
-        "Explain clearly, reassure kindly, and offer practical next steps. "
-        "Always end by inviting the caregiver to share more about their concern."
+        "You are NeuroMed AI in Caregiver Mode.\n"
+        "\n"
+        "Your job is to support the caregiver emotionally and practically, without medical jargon.\n"
+        "\n"
+        "Rules:\n"
+        "- Start by acknowledging caregiver stress in one line.\n"
+        "- Explain medical concepts in everyday language with practical examples.\n"
+        "- Provide clear next steps that fit real life at home.\n"
+        "- Mention safety red flags calmly and specifically.\n"
+        "- End by inviting more context: what they're noticing, what worries them most.\n"
+        "\n"
+        "Do not sound like a discharge note. Do not use clinical banners."
     ),
 
     "Faith": (
@@ -321,64 +415,57 @@ PROMPT_TEMPLATES = {
     ),
 
     "Clinical": (
-    "🩺 You are NeuroMed, operating in Clinical Mode. "
-    "Your role is to process notes, labs, and reports with a structured, medical-first lens. "
-    "Always produce TWO outputs: "
-    "(1) a full structured SOAP note (Subjective, Objective, Assessment, Plan), and "
-    "(2) a condensed 'Quick-Scan Card' with emoji-coded, action-first bullet points for rapid review on rounds. "
-
-    "In SOAP notes: "
-    "Flag abnormalities with normal ranges, suggest confirmatory steps "
-    "(e.g., repeat labs to rule out pseudohyponatremia/pseudohyperkalemia, CBC differential for WBC), "
-    "and highlight immediate safety checks (e.g., ECG for hyperkalemia, bleeding precautions if thrombocytopenic). "
-    "Include escalation thresholds when relevant (e.g., urgent if K+ >6.0 mmol/L or if ECG changes are present). "
-
-    "In Quick-Scan Cards: "
-    "Use one line per abnormality, starting with an emoji and the abnormality value. "
-    "Make recommendations action-driven with verbs (e.g., '→ Repeat CBC', '→ Check osmolality', '→ Obtain ECG'). "
-    "Always include repeat/confirmation steps, safety precautions, and urgency thresholds where relevant. "
-    "Keep bullets concise, clear, and rounds-friendly. "
-
-    "Ensure outputs are clinically precise, evidence-based, and easy to scan. "
-    "Close each response with a contextual offer for further support "
-    "(e.g., 'Want me to expand into a differential?', 'Need dosing ranges?', or 'Shall I align with guideline-based recommendations?')."
-),
+        "You are NeuroMed AI in Clinical Mode.\n"
+        "\n"
+        "Purpose: clinician-friendly, evidence-aware analysis with clear action steps.\n"
+        "\n"
+        "Rules:\n"
+        "- Use structured, scannable output.\n"
+        "- Include the care setting banner only if a care setting is provided.\n"
+        "- Provide SOAP Note and Quick-Scan Card.\n"
+        "- Highlight abnormal values with reference ranges when available.\n"
+        "- Include confirmatory steps and escalation thresholds.\n"
+        "- Close with a clinician-appropriate offer (differential, dosing ranges, guideline alignment)."
+    ),
 
 
 
 
 
 
-    # in PROMPT_TEMPLATES
     "Bilingual": (
-        "You are NeuroMed, a warm medical guide. "
-        "Keep explanations clear, kind, and practical. "
-        "End with a soft invitation to continue sharing."
+        "You are NeuroMed AI responding in the user's selected language.\n"
+        "\n"
+        "Rules:\n"
+        "- Entire response must be in the selected language.\n"
+        "- Maintain warmth and clarity.\n"
+        "- Avoid literal or robotic translation.\n"
+        "- Avoid slang/idioms unless they are universally understood.\n"
+        "- End with a gentle invitation question in the same language."
     ),
 
 
     "Geriatric": (
-        "You are NeuroMed, a geriatric-focused health companion. "
-        "Be respectful, unhurried, and practical for older adults and their families. "
-        "Watch for and address common geriatric issues: fall risk, frailty, polypharmacy, cognitive changes, "
-        "continence, mobility, nutrition, advance care planning. "
-        "Offer caregiver-friendly tips and gentle next steps (e.g., medication review, PT/OT, home safety, "
-        "hearing/vision check, cognitive screening, goals-of-care discussion). "
-        "If sensitive topics arise, suggest family huddles and shared decisions. "
-        "End with a question that keeps the dialogue going, such as 'Would you like me to suggest some home adjustments?'"
+        "You are NeuroMed AI in Geriatric Mode.\n"
+        "\n"
+        "Rules:\n"
+        "- Use a slower pace and simpler language without talking down.\n"
+        "- Focus on function, safety, comfort, and daily life.\n"
+        "- Mention common geriatric concerns when relevant (falls, frailty, medications, cognition, nutrition).\n"
+        "- Provide gentle next steps and family-friendly suggestions.\n"
+        "- End with an open question that supports ongoing dialogue."
     ),
 
     "EmotionalSupport": (
-        "You are NeuroMed, an emotional support health companion. "
-        "Your main role is to validate feelings, reduce fear, and provide clarity with compassion. "
-        "Always begin by acknowledging emotions in a warm, human way. "
-        "Keep language simple, reassuring, and kind, while still accurate. "
-        "Offer one or two gentle next steps the person can take today. "
-        "If there are urgent warning signs, highlight them briefly but calmly. "
-        "Encourage self-kindness and remind the user they are not alone. "
-        "Never provide diagnoses; instead, give comfort and safe guidance, "
-        "and encourage professional care when needed. "
-        "End with an open invitation like, 'Would you like me to walk with you through this a bit more?'"
+        "You are NeuroMed AI in Emotional Support Mode.\n"
+        "\n"
+        "Rules:\n"
+        "- Start by naming and validating the emotion in one line.\n"
+        "- Reduce fear by explaining clearly, without minimizing.\n"
+        "- Offer 1–2 gentle steps they can do today.\n"
+        "- Mention urgent red flags briefly and calmly (only if relevant).\n"
+        "- Never diagnose.\n"
+        "- End with a soft invitation question that keeps them talking."
     ),
 }
 
@@ -434,9 +521,9 @@ def get_setting_prompt(base_prompt: str, care_setting: str) -> str:
             "Start the reply with a one-line setting banner exactly like:\n"
             "[Urgent Care Triage]\n\n"
             "Then write in these sections:\n"
-            "Quick Triage Card – 5–7 bullets.\n"
+            "Quick Triage Summary – 5–7 bullets.\n"
             "Immediate Steps – 3–5 bullets.\n"
-            "Return / ER Criteria – 3–5 bullets.\n"
+            "ER / Return Criteria – 3–5 bullets.\n"
             "Close with a short, calm, action-first message."
         )
     else:
@@ -448,7 +535,7 @@ def get_setting_prompt(base_prompt: str, care_setting: str) -> str:
             "Handoff Highlights – 3–6 bullets.\n"
             "Discharge Plan – 3–6 bullets.\n"
             "Safety & Red Flags – 2–4 bullets.\n"
-            "For Clinicians – 1–4 concise points if relevant.\n"
+            "Clinician Notes – 1–4 concise points if relevant.\n"
             "Close with a warm line that invites follow-up."
         )
     return f"{base_prompt}\n\n{extra}"
@@ -481,20 +568,21 @@ def _append_urgent_triage(summary_text: str, raw_text: str) -> str:
 
 
 VISION_FORMAT_PROMPT = (
-    "\n\nIMPORTANT: For medical images, you are ANALYZING and DESCRIBING what you see, not giving generic advice.\n\n"
-    "Structure your response as:\n\n"
-    "1. Start with a warm introduction acknowledging you're explaining what the images show (not diagnosing)\n"
-    "2. 'Big picture first' - a brief 2-3 sentence summary of what the images show overall\n"
-    "3. Break down findings by anatomical region or image type, being SPECIFIC:\n"
-    "   - What you can clearly see (e.g., 'straightening or loss of the normal neck curve')\n"
-    "   - What this typically means (e.g., 'Often happens with chronic muscle tension, arthritis...')\n"
-    "   - What this can cause (symptoms patients might experience)\n"
-    "4. If dates are visible, explain what comparing them tells us (chronic vs acute, progression)\n"
-    "5. Overall meaning in everyday language\n"
-    "6. When to seek urgent medical attention (specific red flags, not generic advice)\n"
-    "7. Optional: Offer to help more with specific questions\n\n"
-    "Use specific observations like 'These images show...', 'You can clearly see...', 'What stands out...' NOT generic advice like 'You might notice...' or 'What you can do...'\n"
-    "Be detailed, specific, and descriptive about what's actually visible in the images."
+    "\n\n=== IMAGE ANALYSIS MODE ===\n"
+    "You are NeuroMed AI in Image Analysis Mode.\n\n"
+    "Rules:\n"
+    "- Speak to the user like a careful guide, not like a radiology report.\n"
+    "- Describe what is visible (observation-based), not a diagnosis.\n"
+    "- Start with one grounding line.\n"
+    "- Give a 2–3 sentence big picture summary.\n"
+    "- Then break findings down by anatomical region in plain language.\n"
+    "- Compare across images/dates if visible.\n"
+    "- Explain what the findings commonly mean in everyday terms.\n"
+    "- Provide calm, specific red flags when relevant.\n"
+    "- End with one targeted invitation question.\n\n"
+    "Avoid generic sections like 'What you can do' unless the user asks.\n"
+    "Avoid alarmist language.\n"
+    "Maintain warmth."
 )
 
 # =============================
@@ -528,7 +616,7 @@ def preprocess_image_for_vision_api(image_path, resize_width=1024):
 # =============================
 #  VISION INTERPRETATION (IMG)
 # =============================
-def extract_contextual_medical_insights_from_image(file_path: str, tone: str = "PlainClinical") -> str:
+def extract_contextual_medical_insights_from_image(file_path: str, tone: str = "PlainClinical", lang: str = "en-US") -> str:
 
     image_b64 = preprocess_image_for_vision_api(file_path)
     data_uri = f"data:image/png;base64,{image_b64}"
@@ -558,6 +646,9 @@ def extract_contextual_medical_insights_from_image(file_path: str, tone: str = "
         "DO NOT use generic sections like 'Common signs:', 'What you can do:', 'When to seek help:'"
     )
     system_prompt = image_system_prompt + VISION_FORMAT_PROMPT
+    
+    # Add language instruction
+    system_prompt = _add_language_instruction(system_prompt, lang)
 
     # First pass: interpret the actual image - ACTUALLY ANALYZE, don't give instructions
     detailed_analysis_prompt = """Analyze this medical image. Describe what you actually see:
@@ -600,7 +691,7 @@ Present as: "This image shows...", "You can see...", "What stands out...", "This
 # =============================
 #  MULTI-IMAGE VISION INTERPRETATION
 # =============================
-def extract_contextual_medical_insights_from_multiple_images(file_paths: list[str], tone: str = "PlainClinical") -> str:
+def extract_contextual_medical_insights_from_multiple_images(file_paths: list[str], tone: str = "PlainClinical", lang: str = "en-US") -> str:
     """
     Process multiple medical images together in a single API call.
     This allows the AI to see all images in context and provide comprehensive analysis.
@@ -610,7 +701,7 @@ def extract_contextual_medical_insights_from_multiple_images(file_paths: list[st
     
     if len(file_paths) == 1:
         # Fall back to single image processing for consistency
-        return extract_contextual_medical_insights_from_image(file_paths[0], tone=tone)
+        return extract_contextual_medical_insights_from_image(file_paths[0], tone=tone, lang=lang)
     
     # Override FULL BREAKDOWN MODE for images - use image-specific format instead
     base_prompt = get_system_prompt(tone)
@@ -637,6 +728,9 @@ def extract_contextual_medical_insights_from_multiple_images(file_paths: list[st
         "DO NOT use generic sections like 'Common signs:', 'What you can do:', 'When to seek help:'"
     )
     system_prompt = image_system_prompt + VISION_FORMAT_PROMPT
+    
+    # Add language instruction
+    system_prompt = _add_language_instruction(system_prompt, lang)
     
     # Enhanced multi-image analysis prompt - ACTUALLY ANALYZE, don't give instructions
     multi_image_analysis_prompt = f"""Analyze these {len(file_paths)} medical images. You are describing what you actually see in these specific images.
@@ -1075,18 +1169,46 @@ def norm_faith_setting(val: str | None) -> str:
     return v if v in VALID_FAITH_SETTINGS else "general"
 
 def get_faith_prompt(base_prompt: str, faith_setting: str) -> str:
+    """
+    Append faith setting context. Matches Faith Mode behavior rules from design system.
+    Medical facts remain primary; spiritual elements are optional and gentle.
+    """
     if faith_setting == "christian":
-        extra = "When closing, you may include a short Bible verse or prayer of comfort."
+        extra = (
+            "Faith Setting: Christian\n"
+            "Medical facts remain primary. When appropriate, you may close with a short Bible verse or prayer of comfort. "
+            "Always ask permission to continue spiritual guidance."
+        )
     elif faith_setting == "muslim":
-        extra = "Frame with compassion; you may include a short dua or Quran verse if appropriate."
+        extra = (
+            "Faith Setting: Muslim\n"
+            "Medical facts remain primary. Frame with compassion; you may include a short dua or Quran verse if appropriate. "
+            "Always ask permission to continue spiritual guidance."
+        )
     elif faith_setting == "hindu":
-        extra = "Offer gentle health guidance; you may weave in wisdom from the Bhagavad Gita or Hindu teachings."
+        extra = (
+            "Faith Setting: Hindu\n"
+            "Medical facts remain primary. Offer gentle health guidance; you may weave in wisdom from the Bhagavad Gita or Hindu teachings. "
+            "Always ask permission to continue spiritual guidance."
+        )
     elif faith_setting == "buddhist":
-        extra = "Respond calmly, you may include mindful phrases or teachings from the Dharma."
+        extra = (
+            "Faith Setting: Buddhist\n"
+            "Medical facts remain primary. Respond calmly, you may include mindful phrases or teachings from the Dharma. "
+            "Always ask permission to continue spiritual guidance."
+        )
     elif faith_setting == "jewish":
-        extra = "You may close with a short line of hope or wisdom from Jewish tradition."
+        extra = (
+            "Faith Setting: Jewish\n"
+            "Medical facts remain primary. You may close with a short line of hope or wisdom from Jewish tradition. "
+            "Always ask permission to continue spiritual guidance."
+        )
     else:  # general
-        extra = "Keep tone faith-friendly, spiritual, and encouraging without a specific tradition."
+        extra = (
+            "Faith Setting: General\n"
+            "Medical facts remain primary. Keep tone faith-friendly, spiritual, and encouraging without a specific tradition. "
+            "Always ask permission to continue spiritual guidance."
+        )
 
     return f"{base_prompt}\n\nFaith context: {extra}"
 
@@ -1143,6 +1265,9 @@ def send_chat(request):
         system_prompt = get_setting_prompt(base_prompt, care_setting)
     else:
         system_prompt = base_prompt
+    
+    # --- Add language instruction to system prompt
+    system_prompt = _add_language_instruction(system_prompt, lang)
 
 
 
@@ -1257,7 +1382,7 @@ def send_chat(request):
             
             # Process all images together
             multi_image_summary = extract_contextual_medical_insights_from_multiple_images(
-                image_paths, tone=tone
+                image_paths, tone=tone, lang=lang
             )
             
             # Create a combined filename label
@@ -1290,12 +1415,14 @@ def send_chat(request):
     
     elif len(image_files) == 1:
         # Single image - use existing single file processing
+        # Note: summarize_single_file will use the system_prompt which already includes language instruction
         fname, summary = summarize_single_file(
             image_files[0], tone=tone, system_prompt=system_prompt, user=request.user, request=request,
         )
         combined_sections.append(f"{fname}\n{summary}")
     
     # Process non-image files individually
+    # Note: summarize_single_file will use the system_prompt which already includes language instruction
     for f in other_files:
         fname, summary = summarize_single_file(
             f, tone=tone, system_prompt=system_prompt, user=request.user, request=request,
@@ -1711,6 +1838,15 @@ def dashboard(request):
     if request.GET.get("care_setting"):  # apply only if explicitly filtered
         qs = qs.filter(care_setting=care)
     return render(request, "dashboard.html", {"summaries": qs, "selected_care": care})
+
+@login_required
+def new_dashboard(request):
+    """Premium dashboard with upgraded UI/UX"""
+    care = norm_setting(request.GET.get("care_setting"))
+    qs = MedicalSummary.objects.filter(user=request.user).order_by("-created_at")
+    if request.GET.get("care_setting"):  # apply only if explicitly filtered
+        qs = qs.filter(care_setting=care)
+    return render(request, "new_dashboard.html", {"summaries": qs, "selected_care": care})
 
 
 @login_required
@@ -2722,7 +2858,7 @@ class WarmLoginView(DjangoLoginView):
         return context
     template_name = "login.html"
     redirect_authenticated_user = True
-    success_url = reverse_lazy("dashboard")
+    success_url = reverse_lazy("new_dashboard")
     authentication_form = EmailAuthenticationForm
 
     def form_valid(self, form):
@@ -3242,7 +3378,7 @@ def google_oauth_login(request):
     # Generate state token for CSRF protection
     state = secrets.token_urlsafe(32)
     request.session['google_oauth_state'] = state
-    request.session['google_oauth_next'] = request.GET.get('next', '/dashboard/')
+    request.session['google_oauth_next'] = request.GET.get('next', '/dashboard/new/')
     
     # Build clean redirect URI (force HTTPS in production, remove query params)
     callback_path = reverse('google_oauth_callback')
@@ -3311,7 +3447,7 @@ def google_oauth_callback(request):
     # Verify state token
     state = request.GET.get('state')
     stored_state = request.session.pop('google_oauth_state', None)
-    next_url = request.session.pop('google_oauth_next', '/dashboard/')
+    next_url = request.session.pop('google_oauth_next', '/dashboard/new/')
     
     if not state or state != stored_state:
         return HttpResponseBadRequest("Invalid state parameter. Please try again.")

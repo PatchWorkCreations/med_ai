@@ -1,0 +1,3887 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>NeuroMed AI - Premium Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="{% static 'pwa/manifest.webmanifest' %}">
+  <link rel="apple-touch-icon" href="/static/pwa/icons/apple-touch-icon-180.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/pwa/icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/pwa/icons/favicon-16.png">
+  <meta name="theme-color" content="#236092">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  
+<style>
+/* ============================================
+   PREMIUM DASHBOARD - "BILLION-DOLLAR" VISUAL SYSTEM
+   Medical-grade minimalism: bright, airy, ultra-readable
+   ============================================ */
+
+:root {
+  /* Brand tokens */
+  --nm-primary: #236092;
+  --nm-primary-dark: #1B5A8E;
+  --nm-accent: #28926D;
+  --nm-accent-light: #10b981;
+  
+  /* Paper & glass surfaces */
+  --nm-paper: #ffffff;
+  --nm-glass: rgba(255, 255, 255, 0.85);
+  --nm-glass-border: rgba(229, 231, 235, 0.8);
+  --nm-frost: rgba(255, 255, 255, 0.95);
+  
+  /* Text hierarchy */
+  --nm-text-primary: #0f172a;
+  --nm-text-secondary: #475569;
+  --nm-text-muted: #94a3b8;
+  
+  /* Depth & shadows */
+  --nm-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --nm-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --nm-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --nm-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* Borders */
+  --nm-border: 1px solid rgba(229, 231, 235, 0.8);
+  --nm-border-focus: 2px solid var(--nm-accent);
+  
+  /* Spacing */
+  --nm-radius: 12px;
+  --nm-radius-lg: 16px;
+  --nm-radius-xl: 20px;
+}
+
+/* Base */
+body {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  color: var(--nm-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glass surfaces */
+.glass {
+  background: var(--nm-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: var(--nm-border);
+  box-shadow: var(--nm-shadow);
+}
+
+.glass-strong {
+  background: var(--nm-frost);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Premium chat bubbles */
+.chat-bubble {
+  border-radius: var(--nm-radius-lg);
+  padding: 14px 18px;
+  font-size: 15px;
+  line-height: 1.5;
+  max-width: 75%;
+  word-break: break-word;
+  box-shadow: var(--nm-shadow);
+  animation: fadeInUp 0.3s ease-out;
+  position: relative;
+  transition: box-shadow 0.2s ease;
+}
+
+.chat-bubble:hover {
+  box-shadow: var(--nm-shadow-lg);
+}
+
+.chat-user {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: var(--nm-text-primary);
+  margin-left: auto;
+  margin-right: 0;
+  border-bottom-right-radius: 4px;
+}
+
+.chat-ai {
+  background: var(--nm-paper);
+  color: var(--nm-text-primary);
+  margin-right: auto;
+  margin-left: 0;
+  border-bottom-left-radius: 4px;
+  border-left: 3px solid var(--nm-accent);
+}
+
+/* AI badge on assistant bubbles */
+.chat-ai::before {
+  content: 'NeuroMed';
+  position: absolute;
+  top: -8px;
+  left: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--nm-accent);
+  background: var(--nm-paper);
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Message grouping - reduced spacing for consecutive messages */
+.chat-bubble + .chat-bubble {
+  margin-top: 4px;
+}
+
+.chat-user + .chat-user,
+.chat-ai + .chat-ai {
+  margin-top: 2px;
+}
+
+/* Rich markdown in bubbles */
+.chat-ai .md-prose {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.chat-ai .md-prose h1 { font-size: 1.25rem; font-weight: 700; margin: 0.75em 0 0.5em; }
+.chat-ai .md-prose h2 { font-size: 1.15rem; font-weight: 600; margin: 0.65em 0 0.4em; }
+.chat-ai .md-prose h3 { font-size: 1.05rem; font-weight: 600; margin: 0.55em 0 0.35em; }
+.chat-ai .md-prose h4 { font-size: 1rem; font-weight: 600; margin: 0.45em 0 0.3em; }
+
+.chat-ai .md-prose p { margin: 0.5em 0; }
+.chat-ai .md-prose ul, .chat-ai .md-prose ol { margin: 0.5em 0 0.5em 1.5em; }
+.chat-ai .md-prose li { margin: 0.25em 0; }
+
+.chat-ai .md-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75em 0;
+  font-size: 14px;
+  overflow-x: auto;
+  display: block;
+}
+
+.chat-ai .md-prose table thead {
+  background: #f8fafc;
+  position: sticky;
+  top: 0;
+}
+
+.chat-ai .md-prose th,
+.chat-ai .md-prose td {
+  border: 1px solid #e2e8f0;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.chat-ai .md-prose blockquote {
+  border-left: 3px solid var(--nm-accent);
+  padding-left: 16px;
+  margin: 0.75em 0;
+  color: var(--nm-text-secondary);
+  background: #f8fafc;
+  border-radius: 0 8px 8px 0;
+  padding: 12px 16px;
+}
+
+.chat-ai .md-prose code {
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.chat-ai .md-prose pre {
+  background: #0f172a;
+  color: #f1f5f9;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 0.75em 0;
+  overflow-x: auto;
+}
+
+.chat-ai .md-prose pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+/* Inline actions in assistant bubbles */
+.chat-ai .bubble-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  display: flex;
+  gap: 4px;
+}
+
+.chat-ai:hover .bubble-actions {
+  opacity: 1;
+}
+
+.bubble-actions button {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--nm-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.bubble-actions button:hover {
+  background: var(--nm-paper);
+  color: var(--nm-primary);
+  transform: scale(1.1);
+}
+
+/* Typing indicator - premium status row */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--nm-paper);
+  border-radius: var(--nm-radius);
+  box-shadow: var(--nm-shadow-sm);
+  margin: 12px 0;
+  font-size: 13px;
+  color: var(--nm-text-secondary);
+  max-width: fit-content;
+}
+
+.typing-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.typing-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--nm-accent);
+  opacity: 0.4;
+  animation: typing-bounce 1.4s infinite;
+}
+
+.typing-dots span:nth-child(1) { animation-delay: 0s; }
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing-bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* Premium attachment dock */
+.attachment-dock {
+  background: var(--nm-paper);
+  border-radius: var(--nm-radius);
+  padding: 12px;
+  margin-bottom: 12px;
+  box-shadow: var(--nm-shadow-sm);
+  border: var(--nm-border);
+}
+
+.attachment-dock-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--nm-text-secondary);
+  font-weight: 500;
+}
+
+.attachment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.attachment-card {
+  position: relative;
+  background: #f8fafc;
+  border: var(--nm-border);
+  border-radius: 8px;
+  padding: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.attachment-card:hover {
+  background: #f1f5f9;
+  box-shadow: var(--nm-shadow);
+  transform: translateY(-2px);
+}
+
+.attachment-card.unsupported {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.attachment-thumbnail {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
+
+.attachment-icon {
+  width: 100%;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e2e8f0;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  color: var(--nm-text-secondary);
+  font-size: 24px;
+}
+
+.attachment-name {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--nm-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 2px;
+}
+
+.attachment-meta {
+  font-size: 9px;
+  color: var(--nm-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.attachment-status {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.attachment-status.ready { background: #d1fae5; color: #065f46; }
+.attachment-status.queued { background: #dbeafe; color: #1e40af; }
+.attachment-status.error { background: #fee2e2; color: #991b1b; }
+
+.attachment-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.attachment-card:hover .attachment-remove {
+  opacity: 1;
+}
+
+.attachment-remove:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: scale(1.1);
+}
+
+/* Dropzone */
+.dropzone {
+  border: 2px dashed #cbd5e1;
+  border-radius: var(--nm-radius);
+  padding: 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+  background: var(--nm-paper);
+}
+
+.dropzone.dragover {
+  border-color: var(--nm-accent);
+  background: #f0fdfa;
+  border-style: solid;
+}
+
+.dropzone.dragover::before {
+  content: 'Drop files to attach';
+  display: block;
+  color: var(--nm-accent);
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+/* Premium sidebar */
+.sidebar {
+  background: var(--nm-glass);
+  backdrop-filter: blur(12px);
+  border-right: var(--nm-border);
+  box-shadow: var(--nm-shadow-lg);
+}
+
+.session-card {
+  background: var(--nm-paper);
+  border: var(--nm-border);
+  border-radius: var(--nm-radius);
+  padding: 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.session-card:hover {
+  background: #f8fafc;
+  box-shadow: var(--nm-shadow);
+  transform: translateX(2px);
+}
+
+.session-card.active {
+  background: #f0fdfa;
+  border-left: 3px solid var(--nm-accent);
+  box-shadow: var(--nm-shadow);
+}
+
+.session-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--nm-text-primary);
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+.session-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--nm-text-muted);
+}
+
+.session-chips {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.session-chip {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #e2e8f0;
+  color: var(--nm-text-secondary);
+  font-weight: 500;
+}
+
+.session-menu {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.session-card:hover .session-menu {
+  opacity: 1;
+}
+
+/* Premium buttons */
+.btn-primary {
+  background: var(--nm-primary);
+  color: white;
+  border: none;
+  border-radius: var(--nm-radius);
+  padding: 10px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary:hover {
+  background: var(--nm-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--nm-shadow-lg);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-pill {
+  border-radius: 9999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Premium chips */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  background: #f1f5f9;
+  color: var(--nm-text-secondary);
+  border: var(--nm-border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.chip:hover {
+  background: #e2e8f0;
+  transform: translateY(-1px);
+  box-shadow: var(--nm-shadow-sm);
+}
+
+.chip:hover .fa-chevron-down {
+  color: var(--nm-accent);
+  transform: translateY(2px);
+}
+
+.chip:active {
+  transform: translateY(0);
+}
+
+.chip.active {
+  background: var(--nm-accent);
+  color: white;
+  border-color: var(--nm-accent);
+}
+
+.chip.active .fa-chevron-down {
+  color: white;
+}
+
+/* Premium popovers */
+.popover {
+  position: fixed;
+  background: var(--nm-paper);
+  border: var(--nm-border);
+  border-radius: var(--nm-radius-lg);
+  box-shadow: var(--nm-shadow-xl);
+  padding: 12px;
+  z-index: 1000;
+  min-width: 280px;
+  max-width: 320px;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: fadeInUp 0.2s ease-out;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.popover .tone-option {
+  position: relative;
+  border: 1px solid transparent;
+}
+
+.popover .tone-option:hover {
+  border-color: rgba(40, 146, 109, 0.3);
+  transform: translateX(2px);
+}
+
+.popover .tone-option:active {
+  transform: scale(0.98);
+}
+
+/* Active tone option - improved contrast with softer green */
+.popover .tone-option.active-tone {
+  background-color: #2d9f7a !important; /* Softer, lighter green instead of #28926D */
+  color: white !important;
+}
+
+.popover .tone-option.active-tone .tone-title,
+.popover .tone-option.active-tone .tone-description {
+  color: white !important;
+}
+
+.popover .tone-option.active-tone .tone-icon {
+  color: white !important;
+  opacity: 0.95;
+}
+
+.popover .tone-option.active-tone .tone-check {
+  color: white !important;
+}
+
+/* Also handle Tailwind class for compatibility */
+.popover .tone-option[class*="bg-\[#28926D\]"] .tone-title,
+.popover .tone-option[class*="bg-\[#28926D\]"] .tone-description {
+  color: white !important;
+}
+
+.popover .tone-option[class*="bg-\[#28926D\]"] .tone-icon {
+  color: white !important;
+  opacity: 0.95;
+}
+
+/* Premium modals */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  background: var(--nm-paper);
+  border-radius: var(--nm-radius-xl);
+  box-shadow: var(--nm-shadow-xl);
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  animation: scaleIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+}
+
+/* Toast system */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--nm-paper);
+  border: var(--nm-border);
+  border-radius: var(--nm-radius);
+  box-shadow: var(--nm-shadow-xl);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 300px;
+  max-width: 400px;
+  z-index: 1000;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.toast.success { border-left: 3px solid var(--nm-accent); }
+.toast.error { border-left: 3px solid #ef4444; }
+.toast.info { border-left: 3px solid var(--nm-primary); }
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Geriatric mode */
+body.geriatric-zoom {
+  --nm-zoom: 1.25;
+  font-size: 112%;
+}
+
+body.geriatric-zoom .chat-bubble {
+  font-size: 18px;
+  line-height: 1.6;
+  padding: 16px 20px;
+}
+
+body.geriatric-zoom button {
+  min-height: 44px;
+  padding: 12px 20px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .chat-bubble {
+    max-width: 85%;
+    font-size: 14px;
+  }
+  
+  .attachment-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+  
+  .toast {
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+    max-width: none;
+  }
+}
+
+/* Accessibility */
+*:focus-visible {
+  outline: 2px solid var(--nm-accent);
+  outline-offset: 2px;
+}
+
+/* Skeleton loaders */
+.skeleton {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Jump to latest button */
+.jump-to-latest {
+  position: fixed;
+  bottom: 100px;
+  right: 24px;
+  background: var(--nm-primary);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--nm-shadow-lg);
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.jump-to-latest.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.jump-to-latest:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--nm-shadow-xl);
+}
+
+/* Microphone button enhancements */
+#micBtn {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+#micBtn.listening {
+  animation: micPulse 1.5s ease-in-out infinite;
+  box-shadow: 0 0 0 0 rgba(35, 96, 146, 0.7);
+}
+
+@keyframes micPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(35, 96, 146, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(35, 96, 146, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(35, 96, 146, 0);
+  }
+}
+
+#micBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+#micBtn:not(:disabled):hover {
+  transform: scale(1.05);
+}
+
+#micBtn.listening i {
+  animation: micIconBounce 0.6s ease-in-out infinite;
+}
+
+@keyframes micIconBounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+</style>
+</head>
+<body>
+  <!-- 3-Zone Architecture -->
+  <div id="appShell" class="w-full h-screen flex overflow-hidden">
+    
+    <!-- Zone 1: Premium Sidebar -->
+    <aside id="sidebar" class="sidebar w-[320px] flex flex-col h-full overflow-hidden md:flex hidden md:flex">
+      <!-- Sidebar Header -->
+      <div class="p-6 border-b border-gray-200/80">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <img src="https://res.cloudinary.com/djzks0atj/image/upload/v1759412135/NeuroMed_AI_Logo-10_yassi6.png" 
+                 alt="NeuroMed AI" class="h-8" />
+            
+          </div>
+          <button id="sidebarCollapse" class="p-2 hover:bg-gray-100 rounded-lg transition" aria-label="Collapse sidebar">
+            <i class="fa-solid fa-chevron-left text-gray-600"></i>
+          </button>
+        </div>
+        
+        <!-- New Chat Button -->
+        <button id="newChatBtn" class="btn-primary btn-pill w-full">
+          <i class="fa-solid fa-plus"></i>
+          <span>New Chat</span>
+        </button>
+      </div>
+      
+      <!-- Search Zone -->
+      <div class="px-6 py-4 border-b border-gray-200/80">
+        <div class="relative">
+          <input type="text" 
+                 id="sessionSearch" 
+                 placeholder="Search sessions, keywords, summaries…" 
+                 class="w-full px-4 py-2 pl-10 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#28926D]/40 focus:border-[#28926D] bg-white" />
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-400"></i>
+        </div>
+      </div>
+      
+      <!-- Session List -->
+      <div class="flex-1 overflow-y-auto p-4">
+        <ul id="sessionList" class="space-y-2">
+          <!-- Sessions will be populated by JS -->
+        </ul>
+        
+        <!-- Archived Section (collapsible) -->
+        <div id="archivedSection" class="mt-6 hidden">
+          <button id="toggleArchived" class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 flex items-center gap-2 hover:text-gray-700 transition">
+            <i class="fa-solid fa-chevron-down"></i>
+            <span>Archived</span>
+          </button>
+          <ul id="archivedList" class="space-y-2 hidden">
+            <!-- Archived sessions -->
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Sidebar Footer -->
+      <div class="p-4 border-t border-gray-200/80">
+        <button id="userMenuBtn" class="w-full flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg transition">
+          <div class="w-8 h-8 rounded-full bg-[#236092] flex items-center justify-center text-white font-semibold">
+            <i class="fa-solid fa-user"></i>
+          </div>
+          <div class="flex-1 text-left">
+            <div class="text-sm font-medium text-gray-800" id="userDisplayName">User</div>
+            <div class="text-xs text-gray-500">Settings & Logout</div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-gray-400"></i>
+        </button>
+      </div>
+    </aside>
+    
+    <!-- Zone 2: Main Chat Area -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-gradient-to-br from-white to-gray-50/50">
+      <!-- Header -->
+      <header class="px-6 py-4 border-b border-gray-200/80 bg-white/80 backdrop-blur-sm">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <!-- Mobile burger -->
+            <button id="burgerBtn" class="md:hidden p-2 hover:bg-gray-100 rounded-lg">
+              <i class="fa-solid fa-bars text-gray-600"></i>
+            </button>
+            
+            <h1 class="text-xl font-semibold text-gray-800">NeuroMed AI</h1>
+            
+            <!-- Active chips (tone, care, faith, language) -->
+            <div id="activeChips" class="hidden md:flex items-center gap-2">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-3">
+            <!-- Language Picker -->
+            <button id="langBtn" class="p-2 hover:bg-gray-100 rounded-lg transition" aria-label="Language">
+              <i class="fa-solid fa-globe text-gray-600"></i>
+            </button>
+            
+            <!-- Security indicator -->
+            <div class="hidden md:flex items-center gap-2 text-xs text-gray-500">
+              <i class="fa-solid fa-lock"></i>
+              <span>Secure</span>
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      <!-- Chat Window -->
+      <div id="chatWindow" class="flex-1 overflow-y-auto px-6 py-6 space-y-4">
+        <!-- Messages will be populated here -->
+        <!-- Empty state will show here if no messages -->
+        <div id="emptyState" class="hidden flex flex-col items-center justify-center h-full text-center px-4">
+          <div class="mb-6">
+            <i class="fa-solid fa-brain text-6xl text-[#236092] opacity-20"></i>
+          </div>
+          <h2 class="text-2xl font-semibold text-gray-800 mb-2" id="greetingText">Hi there!</h2>
+          <p class="text-gray-600 mb-6 max-w-md">What are we reviewing today?</p>
+          <div class="flex flex-wrap gap-2 justify-center">
+            <button class="chip" onclick="quickPrompt('Summarize this discharge note')">
+              Summarize discharge note
+            </button>
+            <button class="chip" onclick="quickPrompt('Explain these lab results')">
+              Explain lab results
+            </button>
+            <button class="chip" onclick="quickPrompt('Compare two documents')">
+              Compare documents
+            </button>
+            <button class="chip" onclick="quickPrompt('Draft caregiver-friendly plan')">
+              Caregiver plan
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Jump to latest button -->
+      <button id="jumpToLatest" class="jump-to-latest">
+        <i class="fa-solid fa-arrow-down"></i>
+      </button>
+      
+      <!-- Zone 3: Premium Composer -->
+      <div id="composer" class="border-t border-gray-200/80 bg-white/95 backdrop-blur-sm p-4">
+        <!-- Attachment Dock -->
+        <div id="attachmentDock" class="attachment-dock hidden">
+          <div class="attachment-dock-header">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-paperclip text-gray-500"></i>
+              <span>Pending attachments</span>
+              <span id="attachmentCount" class="text-xs bg-gray-200 px-2 py-0.5 rounded-full">0</span>
+            </div>
+            <button id="clearAllBtn" class="text-xs text-red-600 hover:text-red-700 font-medium">
+              Clear all
+            </button>
+          </div>
+          <div id="attachmentGrid" class="attachment-grid">
+            <!-- Attachments will be populated here -->
+          </div>
+          <div id="fileLimitWarning" class="hidden mt-2 text-xs text-amber-600 bg-amber-50 p-2 rounded">
+            <i class="fa-solid fa-exclamation-triangle mr-1"></i>
+            15 file limit reached. Remove one to add more.
+          </div>
+        </div>
+        
+        <!-- Composer Input Area -->
+        <div id="dropzone" class="dropzone flex items-center gap-3 p-3 rounded-xl">
+          <!-- Attach Button -->
+          <button id="attachBtn" class="shrink-0 w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition" title="Attach files (Up to 15 files • PDF/DOCX/TXT/Images)">
+            <i class="fa-solid fa-paperclip text-gray-600"></i>
+          </button>
+          <input type="file" id="fileInput" class="hidden" multiple accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic" />
+          
+          <!-- Text Input -->
+          <input type="text" 
+                 id="chatInput" 
+                 placeholder="Type your question… (attachments will send with this)" 
+                 class="flex-1 min-w-0 px-4 py-3 text-base border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-[#28926D]/40 focus:border-[#28926D] bg-white" />
+          
+          <!-- Tools Row -->
+          <div class="flex items-center gap-2 shrink-0">
+            <!-- Tone Selector -->
+            <button id="toneBtn" class="chip" title="Tone">
+              <i class="fa-solid fa-sliders"></i>
+              <span>Tone</span>
+            </button>
+            
+            <!-- Mic Button -->
+            <button id="micBtn" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition" title="Dictate">
+              <i class="fa-solid fa-microphone text-gray-600"></i>
+            </button>
+            
+            <!-- Send Button -->
+            <button id="sendBtn" class="w-10 h-10 rounded-full bg-[#236092] hover:bg-[#1B5A8E] text-white flex items-center justify-center transition shadow-lg" title="Send">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+        
+        <p class="mt-2 text-xs text-gray-500 text-center">
+          Tip: Drag & drop files here to stage them. They won't send until you hit <b>Send</b>.
+        </p>
+      </div>
+    </main>
+  </div>
+  
+  <!-- Mobile Sidebar Overlay -->
+  <div id="mobileOverlay" class="fixed inset-0 bg-black/40 z-30 hidden md:hidden" onclick="toggleSidebar()"></div>
+  
+  <!-- Premium Modals & Overlays -->
+  
+  <!-- Tone Selector Popover -->
+  <div id="tonePopover" class="popover hidden" style="display: none;">
+    <div class="space-y-2">
+      <div class="font-semibold text-sm text-gray-800 mb-3">Summary Tone</div>
+      <button class="tone-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-tone="PlainClinical">
+        <div class="flex items-center gap-3">
+          <i class="fa-solid fa-scale-balanced text-[#236092] tone-icon"></i>
+          <div class="flex-1">
+            <div class="font-medium tone-title">Balanced</div>
+            <div class="text-xs text-gray-500 tone-description">Clear explanations with clinical notes</div>
+          </div>
+          <i class="fa-solid fa-check text-[#28926D] opacity-0 tone-check" style="font-size: 14px;"></i>
+        </div>
+      </button>
+      <button class="tone-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-tone="Caregiver">
+        <div class="flex items-center gap-3">
+          <i class="fa-solid fa-hand-holding-heart text-amber-600 tone-icon"></i>
+          <div class="flex-1">
+            <div class="font-medium tone-title">Caregiver</div>
+            <div class="text-xs text-gray-500 tone-description">Gentle, practical guidance</div>
+          </div>
+          <i class="fa-solid fa-check text-[#28926D] opacity-0 tone-check" style="font-size: 14px;"></i>
+        </div>
+      </button>
+      <button class="tone-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-tone="Faith">
+        <div class="flex items-center gap-3">
+          <i class="fa-solid fa-hands-praying text-indigo-600 tone-icon"></i>
+          <div class="flex-1">
+            <div class="font-medium tone-title">Faith</div>
+            <div class="text-xs text-gray-500 tone-description">Spiritual support and encouragement</div>
+          </div>
+          <i class="fa-solid fa-check text-[#28926D] opacity-0 tone-check" style="font-size: 14px;"></i>
+        </div>
+      </button>
+      <button class="tone-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-tone="Clinical">
+        <div class="flex items-center gap-3">
+          <i class="fa-solid fa-stethoscope text-slate-700 tone-icon"></i>
+          <div class="flex-1">
+            <div class="font-medium tone-title">Clinical</div>
+            <div class="text-xs text-gray-500 tone-description">Structured, medical-first approach</div>
+          </div>
+          <i class="fa-solid fa-check text-[#28926D] opacity-0 tone-check" style="font-size: 14px;"></i>
+        </div>
+      </button>
+      <button class="tone-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-tone="Geriatric">
+        <div class="flex items-center gap-3">
+          <i class="fa-solid fa-person-cane text-[#28926D] tone-icon"></i>
+          <div class="flex-1">
+            <div class="font-medium tone-title">Geriatric</div>
+            <div class="text-xs text-gray-500 tone-description">Simple, clear steps for older adults</div>
+          </div>
+          <i class="fa-solid fa-check text-[#28926D] opacity-0 tone-check" style="font-size: 14px;"></i>
+        </div>
+      </button>
+      <button class="tone-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-tone="EmotionalSupport">
+        <div class="flex items-center gap-3">
+          <i class="fa-solid fa-heart text-rose-600 tone-icon"></i>
+          <div class="flex-1">
+            <div class="font-medium tone-title">Emotional Support</div>
+            <div class="text-xs text-gray-500 tone-description">Calm, validating support</div>
+          </div>
+          <i class="fa-solid fa-check text-[#28926D] opacity-0 tone-check" style="font-size: 14px;"></i>
+        </div>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Care Setting Popover (conditional) -->
+  <div id="carePopover" class="popover hidden" style="display: none;">
+    <div class="space-y-2">
+      <div class="font-semibold text-sm text-gray-800 mb-3">Care Setting</div>
+      <button class="care-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-care="hospital">
+        <div class="font-medium">Hospital</div>
+        <div class="text-xs text-gray-500">Inpatient context</div>
+      </button>
+      <button class="care-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-care="ambulatory">
+        <div class="font-medium">Ambulatory</div>
+        <div class="text-xs text-gray-500">Clinic/outpatient</div>
+      </button>
+      <button class="care-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-care="urgent">
+        <div class="font-medium">Urgent</div>
+        <div class="text-xs text-gray-500">Fast triage & critical highlights</div>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Faith Setting Popover (conditional) -->
+  <div id="faithPopover" class="popover hidden" style="display: none;">
+    <div class="space-y-2">
+      <div class="font-semibold text-sm text-gray-800 mb-3">Faith Setting</div>
+      <button class="faith-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-faith="general">
+        <div class="font-medium">General</div>
+        <div class="text-xs text-gray-500">Universal spiritual support</div>
+      </button>
+      <button class="faith-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-faith="christian">
+        <div class="font-medium">Christian</div>
+        <div class="text-xs text-gray-500">Christian faith-based guidance</div>
+      </button>
+      <button class="faith-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-faith="jewish">
+        <div class="font-medium">Jewish</div>
+        <div class="text-xs text-gray-500">Jewish faith-based guidance</div>
+      </button>
+      <button class="faith-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-faith="muslim">
+        <div class="font-medium">Muslim</div>
+        <div class="text-xs text-gray-500">Islamic faith-based guidance</div>
+      </button>
+      <button class="faith-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-faith="buddhist">
+        <div class="font-medium">Buddhist</div>
+        <div class="text-xs text-gray-500">Buddhist faith-based guidance</div>
+      </button>
+      <button class="faith-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-faith="hindu">
+        <div class="font-medium">Hindu</div>
+        <div class="text-xs text-gray-500">Hindu faith-based guidance</div>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal-overlay hidden" onclick="if(event.target===this) closeSettingsModal()">
+    <div class="modal-content w-full max-w-lg p-8" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-semibold text-gray-800">Settings</h2>
+        <button onclick="closeSettingsModal()" class="p-2 hover:bg-gray-100 rounded-lg" aria-label="Close">
+          <i class="fa-solid fa-times text-gray-500"></i>
+        </button>
+      </div>
+      
+      <div class="space-y-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Display Name</label>
+          <input type="text" id="displayName" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#28926D]/40" />
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Profession</label>
+          <input type="text" id="profession" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#28926D]/40" />
+        </div>
+        
+        <div class="flex items-center justify-between pt-4 border-t">
+          <button onclick="logoutUser()" class="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition flex items-center gap-2">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Logout</span>
+          </button>
+          <div class="flex items-center gap-3">
+            <button onclick="closeSettingsModal()" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+              Cancel
+            </button>
+            <button onclick="saveSettings()" class="btn-primary">
+              <i class="fa-solid fa-check"></i>
+              <span>Save</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Summary Modal -->
+  <div id="summaryModal" class="modal-overlay hidden" onclick="if(event.target===this) closeSummaryModal()">
+    <div class="modal-content w-full max-w-4xl p-8" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-semibold text-gray-800 flex items-center gap-2">
+          <i class="fa-solid fa-brain text-[#236092]"></i>
+          Full Summary
+        </h2>
+        <div class="flex items-center gap-2">
+          <button onclick="copySummary()" class="p-2 hover:bg-gray-100 rounded-lg" title="Copy" aria-label="Copy summary">
+            <i class="fa-solid fa-copy text-gray-600"></i>
+          </button>
+          <button onclick="closeSummaryModal()" class="p-2 hover:bg-gray-100 rounded-lg" aria-label="Close">
+            <i class="fa-solid fa-times text-gray-500"></i>
+          </button>
+        </div>
+      </div>
+      <div id="summaryContent" class="prose max-w-none">
+        <!-- Summary content -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- Delete Confirmation Modal -->
+  <div id="deleteModal" class="modal-overlay hidden">
+    <div class="modal-content w-full max-w-md p-8" onclick="event.stopPropagation()">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Delete this chat?</h2>
+      <p class="text-gray-600 mb-6">This can't be undone.</p>
+      <div class="space-y-3 mb-6">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="deleteFiles" />
+          <span class="text-sm text-gray-700">Also clear uploaded files from this session</span>
+        </label>
+      </div>
+      <div class="flex items-center justify-end gap-3">
+        <button onclick="closeDeleteModal()" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+          Cancel
+        </button>
+        <button onclick="confirmDelete()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition">
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast Container -->
+  <div id="toastContainer"></div>
+  
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.3/dist/purify.min.js"></script>
+  
+  <script>
+// ============================================
+// PREMIUM DASHBOARD - JAVASCRIPT
+// All functions with premium UX
+// ============================================
+
+// Constants
+const SESSION_KEY = 'nm_session_id';
+const MAX_FILES = 15;
+const LANGUAGE_CHOICES = [
+  ['en-US','English'],['ja-JP','Japanese'],['es-ES','Spanish'],['fr-FR','French'],['de-DE','German'],
+  ['it-IT','Italian'],['pt-PT','Portuguese (Portugal)'],['pt-BR','Portuguese (Brazil)'],['ru-RU','Russian'],
+  ['zh-CN','Chinese (Simplified)'],['zh-TW','Chinese (Traditional)'],['ko-KR','Korean'],['ar-SA','Arabic (Saudi Arabia)'],
+  ['tr-TR','Turkish'],['nl-NL','Dutch'],['sv-SE','Swedish'],['pl-PL','Polish'],['da-DK','Danish'],['no-NO','Norwegian'],
+  ['fi-FI','Finnish'],['he-IL','Hebrew'],['th-TH','Thai'],['hi-IN','Hindi'],['cs-CZ','Czech'],['ro-RO','Romanian'],
+  ['hu-HU','Hungarian'],['sk-SK','Slovak'],['bg-BG','Bulgarian'],['uk-UA','Ukrainian'],['vi-VN','Vietnamese'],['id-ID','Indonesian'],
+  ['ms-MY','Malay'],['sr-RS','Serbian'],['hr-HR','Croatian'],['el-GR','Greek'],['lt-LT','Lithuanian'],['lv-LV','Latvian'],
+  ['et-EE','Estonian'],['sl-SI','Slovenian'],['is-IS','Icelandic'],['sq-AL','Albanian'],['mk-MK','Macedonian'],
+  ['bs-BA','Bosnian'],['ca-ES','Catalan'],['gl-ES','Galician'],['eu-ES','Basque'],['hy-AM','Armenian'],['fa-IR','Persian'],
+  ['sw-KE','Swahili'],['ta-IN','Tamil'],['te-IN','Telugu'],['kn-IN','Kannada'],['ml-IN','Malayalam'],['mr-IN','Marathi'],
+  ['pa-IN','Punjabi'],['gu-IN','Gujarati'],['or-IN','Odia'],['as-IN','Assamese'],['ne-NP','Nepali'],['si-LK','Sinhala'],
+];
+
+// State
+let pending = [];
+let chatLocked = false;
+let currentSessionId = null;
+let deleteSessionId = null;
+
+// Utility Functions
+function getCSRFToken() {
+  const match = document.cookie.match(/(^|;)\s*csrftoken\s*=\s*([^;]+)/);
+  return match ? match.pop() : '';
+}
+
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp('(^|; )' + name + '=([^;]*)'));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
+function getSessionId() {
+  return localStorage.getItem(SESSION_KEY);
+}
+
+function setSessionId(id) {
+  localStorage.setItem(SESSION_KEY, String(id));
+  currentSessionId = id;
+}
+
+function clearSessionId() {
+  localStorage.removeItem(SESSION_KEY);
+  currentSessionId = null;
+}
+
+function debounce(fn, ms = 80) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
+}
+
+// Toast System
+function showToast(message, type = 'info', action = null) {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+  
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `
+    <i class="fa-solid ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+    <div class="flex-1">${message}</div>
+    ${action ? `<button onclick="${action}" class="text-sm font-medium underline">${action.text || 'Retry'}</button>` : ''}
+  `;
+  
+  container.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.animation = 'slideInRight 0.3s ease-out reverse';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
+// ============================================
+// CHAT MESSAGING - Premium Bubbles
+// ============================================
+
+function appendChatBubble(role, content, isHistory = false) {
+  const chatWindow = document.getElementById('chatWindow');
+  if (!chatWindow) return;
+  
+  // Hide empty state
+  const emptyState = document.getElementById('emptyState');
+  if (emptyState) emptyState.classList.add('hidden');
+  
+  const bubbleWrap = document.createElement('div');
+  bubbleWrap.className = `w-full flex mb-3 ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+  
+  const bubble = document.createElement('div');
+  bubble.className = `chat-bubble ${role === 'user' ? 'chat-user' : 'chat-ai'}`;
+  
+  if (typeof content === 'string') {
+    if (role === 'assistant') {
+      // Render markdown for assistant messages
+      const rendered = renderMarkdown(content);
+      bubble.innerHTML = rendered;
+      
+      // Add bubble actions (copy, view full)
+      const actions = document.createElement('div');
+      actions.className = 'bubble-actions';
+      actions.innerHTML = `
+        <button onclick="copyBubbleText(this)" title="Copy">
+          <i class="fa-solid fa-copy"></i>
+        </button>
+        ${content.length > 500 ? `<button onclick="viewFullSummary('${escapeHtml(content)}')" title="View full">
+          <i class="fa-solid fa-expand"></i>
+        </button>` : ''}
+      `;
+      bubble.appendChild(actions);
+    } else {
+      bubble.textContent = content;
+    }
+  } else if (content instanceof Node) {
+    bubble.appendChild(content);
+  }
+  
+  bubbleWrap.appendChild(bubble);
+  chatWindow.appendChild(bubbleWrap);
+  
+  // Auto-scroll if user is at bottom
+  if (!isHistory) {
+    const isAtBottom = chatWindow.scrollHeight - chatWindow.scrollTop - chatWindow.clientHeight < 100;
+    if (isAtBottom) {
+      setTimeout(() => {
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+      }, 100);
+    } else {
+      // Show jump to latest button
+      const jumpBtn = document.getElementById('jumpToLatest');
+      if (jumpBtn) jumpBtn.classList.add('visible');
+    }
+  } else {
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+  }
+  
+  updateComposerPadding();
+}
+
+function renderMarkdown(text) {
+  if (typeof marked === 'undefined') {
+    // Fallback if marked.js not loaded
+    return `<div class="md-prose">${escapeHtml(text).replace(/\n/g, '<br>')}</div>`;
+  }
+  
+  const html = marked.parse(text);
+  const clean = DOMPurify ? DOMPurify.sanitize(html) : html;
+  return `<div class="md-prose">${clean}</div>`;
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function copyBubbleText(btn) {
+  const bubble = btn.closest('.chat-bubble');
+  const text = bubble.textContent || bubble.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Copied to clipboard', 'success');
+    btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+    setTimeout(() => {
+      btn.innerHTML = '<i class="fa-solid fa-copy"></i>';
+    }, 2000);
+  }).catch(() => {
+    showToast('Failed to copy', 'error');
+  });
+}
+
+function viewFullSummary(content) {
+  const modal = document.getElementById('summaryModal');
+  const contentDiv = document.getElementById('summaryContent');
+  if (modal && contentDiv) {
+    contentDiv.innerHTML = renderMarkdown(unescapeHtml(content));
+    modal.classList.remove('hidden');
+  }
+}
+
+function unescapeHtml(html) {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  return div.textContent || div.innerText;
+}
+
+function closeSummaryModal() {
+  const modal = document.getElementById('summaryModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function copySummary() {
+  const contentDiv = document.getElementById('summaryContent');
+  if (contentDiv) {
+    const text = contentDiv.textContent || contentDiv.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('Summary copied to clipboard', 'success');
+    });
+  }
+}
+
+// Typing indicator with context-aware messages
+function showTypingIndicator(context = 'Analyzing...') {
+  const chatWindow = document.getElementById('chatWindow');
+  if (!chatWindow) return;
+  
+  const typingWrap = document.createElement('div');
+  typingWrap.className = 'typing-indicator';
+  typingWrap.id = 'typingIndicator';
+  typingWrap.innerHTML = `
+    <div class="typing-dots">
+      <span></span><span></span><span></span>
+    </div>
+    <span>${context}</span>
+  `;
+  chatWindow.appendChild(typingWrap);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+  return typingWrap;
+}
+
+function hideTypingIndicator() {
+  const indicator = document.getElementById('typingIndicator');
+  if (indicator) indicator.remove();
+}
+
+// ============================================
+// FILE MANAGEMENT - Premium Attachment Dock
+// ============================================
+
+function addFiles(files) {
+  if (!files || files.length === 0) return;
+  
+  const fileArray = Array.from(files);
+  const validExtensions = ['.pdf', '.docx', '.txt', '.jpg', '.jpeg', '.png', '.webp', '.heic'];
+  
+  fileArray.forEach(file => {
+    // Check file limit
+    if (pending.length >= MAX_FILES) {
+      showToast(`Maximum ${MAX_FILES} files allowed`, 'error');
+      const warning = document.getElementById('fileLimitWarning');
+      if (warning) warning.classList.remove('hidden');
+      return;
+    }
+    
+    // Check if duplicate
+    const isDuplicate = pending.some(p => p.file.name === file.name && p.file.size === file.size);
+    if (isDuplicate) {
+      showToast('This file is already added', 'info');
+      return;
+    }
+    
+    // Check file type
+    const ext = '.' + file.name.split('.').pop().toLowerCase();
+    if (!validExtensions.includes(ext)) {
+      const item = {
+        file: file,
+        kind: 'doc',
+        status: 'unsupported',
+        url: null
+      };
+      pending.push(item);
+      renderPending();
+      showToast(`Unsupported file type: ${ext}`, 'error');
+      return;
+    }
+    
+    // Add file
+    const isImage = /^image\//.test(file.type) || ['.jpg', '.jpeg', '.png', '.webp', '.heic'].includes(ext);
+    const item = {
+      file: file,
+      kind: isImage ? 'image' : 'doc',
+      status: 'ready',
+      url: isImage ? URL.createObjectURL(file) : null
+    };
+    pending.push(item);
+  });
+  
+  renderPending();
+  updateFileLimitWarning();
+}
+
+function renderPending() {
+  const dock = document.getElementById('attachmentDock');
+  const grid = document.getElementById('attachmentGrid');
+  const count = document.getElementById('attachmentCount');
+  
+  if (!dock || !grid) return;
+  
+  if (pending.length === 0) {
+    dock.classList.add('hidden');
+    return;
+  }
+  
+  dock.classList.remove('hidden');
+  if (count) count.textContent = pending.length;
+  
+  grid.innerHTML = '';
+  
+  pending.forEach((item, idx) => {
+    const card = document.createElement('div');
+    card.className = `attachment-card ${item.status === 'unsupported' ? 'unsupported' : ''}`;
+    
+    if (item.kind === 'image' && item.url) {
+      const img = document.createElement('img');
+      img.src = item.url;
+      img.className = 'attachment-thumbnail';
+      img.alt = item.file.name;
+      card.appendChild(img);
+    } else {
+      const icon = document.createElement('div');
+      icon.className = 'attachment-icon';
+      icon.innerHTML = `<i class="fa-solid fa-file-lines"></i>`;
+      card.appendChild(icon);
+    }
+    
+    const name = document.createElement('div');
+    name.className = 'attachment-name';
+    name.textContent = item.file.name;
+    card.appendChild(name);
+    
+    const meta = document.createElement('div');
+    meta.className = 'attachment-meta';
+    const size = formatFileSize(item.file.size);
+    meta.innerHTML = `
+      <span>${size}</span>
+      <span class="attachment-status ${item.status}">${item.status}</span>
+    `;
+    card.appendChild(meta);
+    
+    // Remove button
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'attachment-remove';
+    removeBtn.innerHTML = '<i class="fa-solid fa-times"></i>';
+    removeBtn.onclick = (e) => {
+      e.stopPropagation();
+      removePending(idx);
+    };
+    card.appendChild(removeBtn);
+    
+    // Preview button (for images)
+    if (item.kind === 'image' && item.url) {
+      card.style.cursor = 'pointer';
+      card.onclick = () => previewAttachment(idx);
+    }
+    
+    grid.appendChild(card);
+  });
+}
+
+function removePending(index) {
+  if (index < 0 || index >= pending.length) return;
+  const item = pending[index];
+  if (item.url) URL.revokeObjectURL(item.url);
+  pending.splice(index, 1);
+  renderPending();
+  updateFileLimitWarning();
+}
+
+function clearPending() {
+  pending.forEach(item => {
+    if (item.url) URL.revokeObjectURL(item.url);
+  });
+  pending.length = 0;
+  renderPending();
+  updateFileLimitWarning();
+}
+
+function updateFileLimitWarning() {
+  const warning = document.getElementById('fileLimitWarning');
+  if (warning) {
+    if (pending.length >= MAX_FILES) {
+      warning.classList.remove('hidden');
+    } else {
+      warning.classList.add('hidden');
+    }
+  }
+}
+
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+function previewAttachment(index) {
+  const item = pending[index];
+  if (!item || item.kind !== 'image' || !item.url) return;
+  
+  // Create preview modal
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-content max-w-2xl">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold">${escapeHtml(item.file.name)}</h3>
+        <button onclick="this.closest('.modal-overlay').remove()" class="p-2 hover:bg-gray-100 rounded-lg">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+      <img src="${item.url}" alt="${escapeHtml(item.file.name)}" class="w-full rounded-lg" />
+    </div>
+  `;
+  modal.onclick = (e) => {
+    if (e.target === modal) modal.remove();
+  };
+  document.body.appendChild(modal);
+}
+
+// ============================================
+// SESSION MANAGEMENT
+// ============================================
+
+async function refreshSessionList() {
+  const ul = document.getElementById('sessionList');
+  const archivedList = document.getElementById('archivedList');
+  if (!ul) return;
+  
+  // Show skeleton
+  ul.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const li = document.createElement('li');
+    li.className = 'session-card skeleton';
+    li.style.height = '60px';
+    ul.appendChild(li);
+  }
+  
+  try {
+    const res = await fetch('/api/chat/sessions/', { credentials: 'include' });
+    
+    // Check if response is ok
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({ detail: `HTTP ${res.status}` }));
+      throw new Error(errorData.detail || errorData.error || `Failed to load sessions: ${res.status}`);
+    }
+    
+    const rows = await res.json();
+    
+    // Handle case where API returns error object instead of array
+    if (!Array.isArray(rows)) {
+      throw new Error(rows.detail || rows.error || 'Invalid response format');
+    }
+    
+    ul.innerHTML = '';
+    const activeId = String(getSessionId() || '');
+    const activeSessions = [];
+    const archivedSessions = [];
+    
+    rows.forEach(s => {
+      if (s.archived) {
+        archivedSessions.push(s);
+      } else {
+        activeSessions.push(s);
+      }
+    });
+    
+    // Render active sessions
+    activeSessions.forEach(s => {
+      const isActive = String(s.id) === activeId;
+      const li = createSessionCard(s, isActive);
+      ul.appendChild(li);
+    });
+    
+    // Render archived sessions
+    if (archivedSessions.length > 0) {
+      const archivedSection = document.getElementById('archivedSection');
+      const archivedList = document.getElementById('archivedList');
+      if (archivedSection) {
+        archivedSection.classList.remove('hidden');
+        if (archivedList) {
+          archivedList.innerHTML = '';
+          archivedSessions.forEach(s => {
+            const li = createSessionCard(s, false, true);
+            archivedList.appendChild(li);
+          });
+          // Show archived list by default (user can collapse)
+          archivedList.classList.remove('hidden');
+        }
+      }
+    } else {
+      const archivedSection = document.getElementById('archivedSection');
+      if (archivedSection) archivedSection.classList.add('hidden');
+    }
+    
+  } catch (err) {
+    console.error('Failed to load sessions:', err);
+    const errorMsg = err.message || 'Could not load sessions';
+    ul.innerHTML = `<li class="text-sm text-red-600 p-4">
+      <div class="font-semibold mb-1">Failed to load sessions</div>
+      <div class="text-xs text-gray-600">${escapeHtml(errorMsg)}</div>
+      <button onclick="refreshSessionList()" class="mt-2 text-blue-600 hover:underline text-xs">Retry</button>
+    </li>`;
+    showToast(`Failed to load sessions: ${errorMsg}`, 'error');
+  }
+}
+
+function createSessionCard(session, isActive = false, isArchived = false) {
+  const li = document.createElement('li');
+  li.className = `session-card ${isActive ? 'active' : ''}`;
+  li.dataset.sid = session.id;
+  
+  // Format date
+  const date = new Date(session.updated_at || session.created_at);
+  const dateStr = formatDate(date);
+  
+  li.innerHTML = `
+    <div class="flex items-start gap-3">
+      <div class="flex-1 min-w-0">
+        <div class="session-title">${escapeHtml(session.title || 'New chat')}</div>
+        <div class="session-meta">
+          <div class="session-chips">
+            ${session.tone ? `<span class="session-chip">${session.tone}</span>` : ''}
+            ${session.lang ? `<span class="session-chip">${session.lang}</span>` : ''}
+          </div>
+          <span>${dateStr}</span>
+        </div>
+      </div>
+      <div class="session-menu">
+        <button class="p-1 hover:bg-gray-100 rounded" onclick="openSessionMenu(${session.id}, event)">
+          <i class="fa-solid fa-ellipsis-vertical text-gray-500"></i>
+        </button>
+      </div>
+    </div>
+  `;
+  
+  // Click to open session
+  li.addEventListener('click', (e) => {
+    if (!e.target.closest('.session-menu')) {
+      openSession(session.id);
+    }
+  });
+  
+  return li;
+}
+
+function formatDate(date) {
+  const now = new Date();
+  const diff = now - date;
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  
+  if (days === 0) return 'Today';
+  if (days === 1) return 'Yesterday';
+  if (days < 7) return `${days} days ago`;
+  if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
+  return date.toLocaleDateString();
+}
+
+async function openSession(id) {
+  try {
+    const res = await fetch(`/api/chat/sessions/${id}/`, { credentials: 'include' });
+    
+    // Check if response is ok
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({ detail: `HTTP ${res.status}` }));
+      throw new Error(errorData.detail || errorData.error || `Failed to load session: ${res.status}`);
+    }
+    
+    const data = await res.json();
+    
+    // Validate response structure
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid session data received');
+    }
+    
+    setSessionId(id);
+    const chatWindow = document.getElementById('chatWindow');
+    if (chatWindow) chatWindow.innerHTML = '';
+    
+    // Hide empty state
+    const emptyState = document.getElementById('emptyState');
+    if (emptyState) emptyState.classList.add('hidden');
+    
+    // Load messages
+    const messages = Array.isArray(data.messages) ? data.messages : [];
+    if (messages.length === 0) {
+      // No messages in session, show AI greeting instead of empty state
+      await greetUser(true);
+    } else {
+      messages.forEach(m => {
+        if (m && (m.role === 'user' || m.role === 'assistant') && m.content) {
+          appendChatBubble(m.role, m.content, true);
+        }
+      });
+    }
+    
+    // Update active session highlight
+    document.querySelectorAll('.session-card').forEach(card => {
+      card.classList.remove('active');
+      if (String(card.dataset.sid) === String(id)) {
+        card.classList.add('active');
+      }
+    });
+    
+    // Refresh session list to update highlights
+    await refreshSessionList();
+    
+    showToast('Session loaded', 'success');
+    
+  } catch (err) {
+    console.error('Failed to open session:', err);
+    const errorMsg = err.message || 'Failed to load session';
+    showToast(errorMsg, 'error');
+    // Clear session ID if it was invalid
+    if (err.message && err.message.includes('not found')) {
+      clearSessionId();
+    }
+  }
+}
+
+async function newChat() {
+  const chatWindow = document.getElementById('chatWindow');
+  if (chatWindow) {
+    chatWindow.innerHTML = '';
+    const emptyState = document.getElementById('emptyState');
+    if (emptyState) emptyState.classList.add('hidden'); // Hide empty state, we'll show greeting bubble
+  }
+  
+  clearSessionId();
+  clearPending();
+  
+  try {
+    await fetch('/clear-session/', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': getCSRFToken() },
+      credentials: 'include'
+    });
+    
+    const res = await fetch('/api/chat/sessions/new/', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': getCSRFToken() },
+      credentials: 'include'
+    });
+    const data = await res.json();
+    
+    if (data.session_id) {
+      setSessionId(data.session_id);
+      await refreshSessionList();
+    }
+    
+    // Show greeting as AI bubble
+    await greetUser(true);
+    
+  } catch (err) {
+    console.error('Failed to create new chat:', err);
+    showToast('Failed to create new chat', 'error');
+    // Still show greeting even if session creation fails
+    await greetUser(true);
+  }
+}
+
+async function greetUser(showBubble = false) {
+  try {
+    const res = await fetch('/api/user/settings/', { credentials: 'include' });
+    const data = await res.json();
+    const name = data.display_name || 'there';
+    
+    const greetings = [
+      `Hi ${name}! 👋 I'm NeuroMed AI, your medical assistant. I'm here to help you understand your health information, analyze medical documents, and answer your questions. What would you like to explore today?`,
+      `Welcome, ${name}! 🌟 I'm NeuroMed AI, ready to assist you with medical information, document analysis, and health questions. Feel free to share documents, images, or ask me anything.`,
+      `Hello ${name}! 💙 I'm NeuroMed AI. I can help you understand medical documents, analyze health images, and provide clear explanations. What can I help you with today?`,
+      `Hi there, ${name}! 🏥 I'm NeuroMed AI, your medical guide. I'm here to translate medical jargon, review documents, and help you make sense of your health information. How can I assist you?`,
+      `Welcome back, ${name}! ✨ I'm NeuroMed AI. Whether you have questions about symptoms, need help understanding test results, or want to review medical documents, I'm here to help. What's on your mind?`,
+    ];
+    
+    const greeting = greetings[Math.floor(Math.random() * greetings.length)];
+    
+    // Update empty state greeting text
+    const greetingEl = document.getElementById('greetingText');
+    if (greetingEl) greetingEl.textContent = greeting.split('!')[0] + '!';
+    
+    // Show greeting as AI chat bubble if requested
+    if (showBubble) {
+      const chatWindow = document.getElementById('chatWindow');
+      const emptyState = document.getElementById('emptyState');
+      
+      // Only show bubble if chat window is empty (no messages)
+      if (chatWindow && chatWindow.children.length === 0) {
+        // Hide empty state
+        if (emptyState) emptyState.classList.add('hidden');
+        
+        // Add greeting bubble
+        appendChatBubble('assistant', greeting, false);
+      }
+    }
+    
+  } catch (err) {
+    console.error('Failed to load user settings:', err);
+    // Fallback greeting if API fails
+    if (showBubble) {
+      const chatWindow = document.getElementById('chatWindow');
+      const emptyState = document.getElementById('emptyState');
+      if (chatWindow && chatWindow.children.length === 0) {
+        if (emptyState) emptyState.classList.add('hidden');
+        appendChatBubble('assistant', 'Hi there! 👋 I\'m NeuroMed AI, your medical assistant. How can I help you today?', false);
+      }
+    }
+  }
+}
+
+// Session menu (3-dot menu)
+function openSessionMenu(sessionId, event) {
+  event.stopPropagation();
+  
+  // Close any existing menus
+  document.querySelectorAll('.session-menu-popover').forEach(m => m.remove());
+  
+  const popover = document.createElement('div');
+  popover.className = 'popover session-menu-popover';
+  popover.style.position = 'absolute';
+  popover.style.right = '8px';
+  popover.style.top = '40px';
+  popover.style.minWidth = '160px';
+  
+  // Check if session is archived
+  const sessionCard = event.target.closest('.session-card');
+  const isArchived = sessionCard?.closest('#archivedList') !== null;
+  
+  popover.innerHTML = `
+    <button class="w-full text-left px-3 py-2 hover:bg-gray-50 rounded flex items-center gap-2" onclick="startRenameSession(${sessionId})">
+      <i class="fa-solid fa-pen text-gray-500"></i>
+      <span>Rename</span>
+    </button>
+    <button class="w-full text-left px-3 py-2 hover:bg-gray-50 rounded flex items-center gap-2" onclick="${isArchived ? 'unarchiveSession' : 'archiveSession'}(${sessionId})">
+      <i class="fa-solid fa-box-archive text-gray-500"></i>
+      <span>${isArchived ? 'Unarchive' : 'Archive'}</span>
+    </button>
+    <button class="w-full text-left px-3 py-2 hover:bg-gray-50 rounded flex items-center gap-2 text-red-600" onclick="confirmDeleteSession(${sessionId})">
+      <i class="fa-solid fa-trash text-red-600"></i>
+      <span>Delete</span>
+    </button>
+  `;
+  
+  if (sessionCard) {
+    sessionCard.style.position = 'relative';
+    sessionCard.appendChild(popover);
+  }
+  
+  // Close on outside click
+  setTimeout(() => {
+    document.addEventListener('click', function closeMenu(e) {
+      if (!popover.contains(e.target) && e.target !== event.target) {
+        popover.remove();
+        document.removeEventListener('click', closeMenu);
+      }
+    }, { once: true });
+  }, 0);
+}
+
+async function startRenameSession(sessionId) {
+  const card = document.querySelector(`.session-card[data-sid="${sessionId}"]`);
+  if (!card) return;
+  
+  const titleEl = card.querySelector('.session-title');
+  if (!titleEl) return;
+  
+  const currentTitle = titleEl.textContent;
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = currentTitle;
+  input.className = 'w-full px-2 py-1 border border-[#28926D] rounded focus:outline-none focus:ring-2 focus:ring-[#28926D]/40';
+  input.style.fontSize = '14px';
+  input.style.fontWeight = '600';
+  
+  const saveRename = async () => {
+    const newTitle = input.value.trim();
+    if (!newTitle) {
+      showToast('Title cannot be empty', 'error');
+      titleEl.textContent = currentTitle;
+      return;
+    }
+    
+    try {
+      const res = await fetch(`/api/chat/sessions/${sessionId}/rename/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({ title: newTitle }),
+        credentials: 'include'
+      });
+      
+      if (res.ok) {
+        titleEl.textContent = newTitle;
+        showToast('Session renamed', 'success');
+        await refreshSessionList();
+      } else {
+        throw new Error('Rename failed');
+      }
+    } catch (err) {
+      showToast('Failed to rename session', 'error');
+      titleEl.textContent = currentTitle;
+    }
+  };
+  
+  titleEl.replaceWith(input);
+  input.focus();
+  input.select();
+  
+  input.addEventListener('blur', saveRename);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      input.blur();
+    } else if (e.key === 'Escape') {
+      titleEl.textContent = currentTitle;
+      input.replaceWith(titleEl);
+    }
+  });
+  
+  // Close menu
+  document.querySelectorAll('.session-menu-popover').forEach(m => m.remove());
+}
+
+async function archiveSession(sessionId) {
+  try {
+    const res = await fetch(`/api/chat/sessions/${sessionId}/archive/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken()
+      },
+      body: JSON.stringify({ archived: true }),
+      credentials: 'include'
+    });
+    
+    if (res.ok) {
+      showToast('Session archived', 'success');
+      
+      // If this was the active session, clear it
+      if (String(getSessionId()) === String(sessionId)) {
+        clearSessionId();
+        const chatWindow = document.getElementById('chatWindow');
+        if (chatWindow) chatWindow.innerHTML = '';
+        const emptyState = document.getElementById('emptyState');
+        if (emptyState) emptyState.classList.remove('hidden');
+      }
+      
+      // Update UI immediately - remove from active, add to archived
+      const sessionCard = document.querySelector(`.session-card[data-sid="${sessionId}"]`);
+      if (sessionCard) {
+        sessionCard.style.animation = 'fadeOut 0.3s ease-out';
+        setTimeout(() => {
+          sessionCard.remove();
+          refreshSessionList(); // Refresh to update archived section
+        }, 300);
+      } else {
+        await refreshSessionList();
+      }
+    } else {
+      throw new Error('Archive failed');
+    }
+  } catch (err) {
+    showToast('Failed to archive session', 'error');
+  }
+  
+  // Close menu
+  document.querySelectorAll('.session-menu-popover').forEach(m => m.remove());
+}
+
+async function unarchiveSession(sessionId) {
+  try {
+    const res = await fetch(`/api/chat/sessions/${sessionId}/archive/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken()
+      },
+      body: JSON.stringify({ archived: false }),
+      credentials: 'include'
+    });
+    
+    if (res.ok) {
+      showToast('Session unarchived', 'success');
+      
+      // Update UI immediately - remove from archived, add to active
+      const sessionCard = document.querySelector(`.session-card[data-sid="${sessionId}"]`);
+      if (sessionCard) {
+        sessionCard.style.animation = 'fadeOut 0.3s ease-out';
+        setTimeout(() => {
+          sessionCard.remove();
+          refreshSessionList(); // Refresh to update lists
+        }, 300);
+      } else {
+        await refreshSessionList();
+      }
+    } else {
+      throw new Error('Unarchive failed');
+    }
+  } catch (err) {
+    showToast('Failed to unarchive session', 'error');
+  }
+  
+  // Close menu
+  document.querySelectorAll('.session-menu-popover').forEach(m => m.remove());
+}
+
+function confirmDeleteSession(sessionId) {
+  deleteSessionId = sessionId;
+  const modal = document.getElementById('deleteModal');
+  if (modal) modal.classList.remove('hidden');
+  
+  // Close menu
+  document.querySelectorAll('.session-menu-popover').forEach(m => m.remove());
+}
+
+function closeDeleteModal() {
+  const modal = document.getElementById('deleteModal');
+  if (modal) modal.classList.add('hidden');
+  deleteSessionId = null;
+}
+
+async function confirmDelete() {
+  if (!deleteSessionId) return;
+  
+  const deleteFiles = document.getElementById('deleteFiles')?.checked || false;
+  
+  try {
+    const res = await fetch(`/api/chat/sessions/${deleteSessionId}/delete/`, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': getCSRFToken() },
+      credentials: 'include'
+    });
+    
+    if (res.ok) {
+      showToast('Session deleted', 'success');
+      closeDeleteModal();
+      
+      // If this was the active session, clear it
+      if (String(getSessionId()) === String(deleteSessionId)) {
+        clearSessionId();
+        newChat();
+      }
+      
+      await refreshSessionList();
+    } else {
+      throw new Error('Delete failed');
+    }
+  } catch (err) {
+    showToast('Failed to delete session', 'error');
+  }
+}
+
+// ============================================
+// SEND CHAT - Premium Flow
+// ============================================
+
+async function sendChat() {
+  if (chatLocked) return;
+  
+  const inputEl = document.getElementById('chatInput');
+  const text = (inputEl?.value || '').trim();
+  
+  // Validation: must have text or files
+  if (!text && pending.length === 0) {
+    showToast('Please enter a message or attach files', 'info');
+    return;
+  }
+  
+  chatLocked = true;
+  
+  // Disable send button
+  const sendBtn = document.getElementById('sendBtn');
+  if (sendBtn) {
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+  }
+  
+  // Show user message immediately (optimistic UI)
+  if (text || pending.length > 0) {
+    const userContent = document.createElement('div');
+    
+    if (text) {
+      const textDiv = document.createElement('div');
+      textDiv.textContent = text;
+      userContent.appendChild(textDiv);
+    }
+    
+    if (pending.length > 0) {
+      const filesDiv = document.createElement('div');
+      filesDiv.className = 'flex flex-wrap gap-2 mt-2';
+      pending.forEach(item => {
+        const fileChip = document.createElement('div');
+        fileChip.className = 'flex items-center gap-2 bg-white/20 rounded-lg px-3 py-2 text-sm';
+        if (item.kind === 'image' && item.url) {
+          const img = document.createElement('img');
+          img.src = item.url;
+          img.className = 'w-8 h-8 object-cover rounded';
+          fileChip.appendChild(img);
+        } else {
+          const icon = document.createElement('i');
+          icon.className = 'fa-solid fa-file-lines';
+          fileChip.appendChild(icon);
+        }
+        const name = document.createElement('span');
+        name.textContent = item.file.name;
+        name.className = 'max-w-[120px] truncate';
+        fileChip.appendChild(name);
+        filesDiv.appendChild(fileChip);
+      });
+      userContent.appendChild(filesDiv);
+    }
+    
+    appendChatBubble('user', userContent);
+  }
+  
+  // Clear input
+  if (inputEl) inputEl.value = '';
+  
+  // Show typing indicator with context-aware message
+  let typingContext = 'Analyzing...';
+  if (pending.length > 0) {
+    const imageCount = pending.filter(p => p.kind === 'image').length;
+    if (imageCount > 0) {
+      typingContext = `Processing ${imageCount} image${imageCount > 1 ? 's' : ''}...`;
+    } else {
+      typingContext = 'Extracting text from documents...';
+    }
+  }
+  showTypingIndicator(typingContext);
+  
+  try {
+    // Get settings
+    const tone = localStorage.getItem('nm_tone') || 'PlainClinical';
+    const lang = localStorage.getItem('nm_lang') || 'en-US';
+    const care = localStorage.getItem('nm_care_setting') || 'hospital';
+    const faith = localStorage.getItem('nm_faith_setting') || 'general';
+    
+    // Log language being sent for debugging
+    console.log('Sending chat with language:', lang);
+    
+    // Build FormData
+    const formData = new FormData();
+    if (text) formData.append('message', text);
+    formData.append('tone', tone);
+    formData.append('lang', lang); // Ensure language is sent
+    formData.append('care_setting', care);
+    formData.append('faith_setting', faith);
+    
+    const sid = getSessionId();
+    if (sid) formData.append('session_id', sid);
+    
+    // Add files
+    pending.forEach(item => {
+      formData.append('files[]', item.file, item.file.name);
+    });
+    
+    // Send request
+    const res = await fetch('/api/send-chat/', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': getCSRFToken() },
+      body: formData,
+      credentials: 'include'
+    });
+    
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      const text = await res.text();
+      throw new Error(`Server error: ${res.status}`);
+    }
+    
+    if (!res.ok) {
+      throw new Error(data.detail || data.message || 'Request failed');
+    }
+    
+    // Update session ID if provided
+    if (data.session_id) {
+      setSessionId(data.session_id);
+      await refreshSessionList();
+    }
+    
+    // Hide typing indicator
+    hideTypingIndicator();
+    
+    // Show response
+    appendChatBubble('assistant', data.reply);
+    
+    // Clear pending files
+    clearPending();
+    
+    // Show success
+    showToast('Message sent', 'success');
+    
+  } catch (err) {
+    console.error('sendChat error:', err);
+    hideTypingIndicator();
+    showToast('Failed to send message. Please try again.', 'error', {
+      text: 'Retry',
+      onclick: 'sendChat()'
+    });
+    appendChatBubble('assistant', '⚠️ Sorry, something went wrong. Please try again.');
+  } finally {
+    chatLocked = false;
+    if (sendBtn) {
+      sendBtn.disabled = false;
+      sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
+    }
+  }
+}
+
+// ============================================
+// TONE / CARE / FAITH SELECTORS
+// ============================================
+
+let currentTone = localStorage.getItem('nm_tone') || 'PlainClinical';
+let currentCare = localStorage.getItem('nm_care_setting') || 'hospital';
+let currentFaith = localStorage.getItem('nm_faith_setting') || 'general';
+
+function initToneSelector() {
+  const toneBtn = document.getElementById('toneBtn');
+  const tonePopover = document.getElementById('tonePopover');
+  
+  if (!toneBtn || !tonePopover) return;
+  
+  toneBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const rect = toneBtn.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+    
+    // Calculate position - prefer above if near bottom
+    let top = rect.bottom + 8;
+    let left = rect.left;
+    
+    // If popover would go off bottom, show above button
+    const popoverHeight = 400; // Approximate height
+    if (top + popoverHeight > viewportHeight - 20) {
+      top = rect.top - popoverHeight - 8;
+    }
+    
+    // Ensure popover doesn't go off right edge
+    const popoverWidth = 320;
+    if (left + popoverWidth > viewportWidth - 20) {
+      left = viewportWidth - popoverWidth - 20;
+    }
+    
+    // Ensure popover doesn't go off left edge
+    if (left < 20) {
+      left = 20;
+    }
+    
+    // Ensure popover doesn't go off top
+    if (top < 20) {
+      top = 20;
+    }
+    
+    tonePopover.style.display = 'block';
+    tonePopover.style.position = 'fixed';
+    tonePopover.style.top = `${top}px`;
+    tonePopover.style.left = `${left}px`;
+    tonePopover.style.zIndex = '1000';
+    tonePopover.classList.remove('hidden');
+    
+    // Mark current selection with visual indicator
+    tonePopover.querySelectorAll('.tone-option').forEach(opt => {
+      opt.classList.remove('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]');
+      opt.classList.add('bg-white');
+      
+      // Reset text colors to default
+      const title = opt.querySelector('.tone-title');
+      const description = opt.querySelector('.tone-description');
+      const icon = opt.querySelector('.tone-icon');
+      const checkIcon = opt.querySelector('.tone-check');
+      
+      if (opt.dataset.tone === currentTone) {
+        opt.classList.add('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
+        
+        // Force white text for all elements when active
+        if (title) {
+          title.classList.add('text-white');
+          title.style.color = 'white';
+        }
+        if (description) {
+          description.classList.remove('text-gray-500');
+          description.classList.add('text-white');
+          description.style.color = 'white';
+        }
+        if (icon) {
+          icon.classList.add('text-white');
+          icon.style.color = 'white';
+        }
+        if (checkIcon) {
+          checkIcon.classList.remove('opacity-0');
+          checkIcon.classList.add('opacity-100', 'text-white');
+          checkIcon.style.color = 'white';
+        }
+      } else {
+        // Reset to default colors
+        if (title) title.classList.remove('text-white');
+        if (description) {
+          description.classList.remove('text-white');
+          description.classList.add('text-gray-500');
+        }
+        if (icon) icon.classList.remove('text-white');
+        if (checkIcon) {
+          checkIcon.classList.add('opacity-0');
+          checkIcon.classList.remove('opacity-100', 'text-white');
+        }
+      }
+    });
+    
+    // Scroll popover into view if needed
+    tonePopover.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+  
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!tonePopover.contains(e.target) && 
+        e.target !== toneBtn && 
+        !toneBtn.contains(e.target)) {
+      tonePopover.classList.add('hidden');
+      tonePopover.style.display = 'none';
+    }
+  });
+  
+  // Close on ESC key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !tonePopover.classList.contains('hidden')) {
+      tonePopover.classList.add('hidden');
+      tonePopover.style.display = 'none';
+    }
+  });
+  
+  // Handle tone selection - improved UX with better feedback
+  tonePopover.querySelectorAll('.tone-option').forEach(opt => {
+    // Add click handler with proper event handling
+    opt.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const tone = opt.dataset.tone;
+      console.log('Tone selected:', tone);
+      
+      // Immediate visual feedback - highlight selected option
+      tonePopover.querySelectorAll('.tone-option').forEach(o => {
+        o.classList.remove('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
+        o.classList.add('bg-white');
+        
+        // Reset text colors with inline styles
+        const title = o.querySelector('.tone-title');
+        const desc = o.querySelector('.tone-description');
+        const icon = o.querySelector('.tone-icon');
+        const check = o.querySelector('.tone-check');
+        
+        if (title) {
+          title.classList.remove('text-white');
+          title.style.color = '';
+        }
+        if (desc) {
+          desc.classList.remove('text-white');
+          desc.classList.add('text-gray-500');
+          desc.style.color = '';
+        }
+        if (icon) {
+          icon.classList.remove('text-white');
+          icon.style.color = '';
+        }
+        if (check) {
+          check.classList.add('opacity-0');
+          check.classList.remove('opacity-100', 'text-white');
+          check.style.color = '';
+        }
+      });
+      
+      // Highlight the clicked option immediately with white text and softer green
+      opt.classList.remove('bg-white', 'bg-gray-100');
+      opt.classList.add('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
+      
+      const title = opt.querySelector('.tone-title');
+      const description = opt.querySelector('.tone-description');
+      const icon = opt.querySelector('.tone-icon');
+      const checkIcon = opt.querySelector('.tone-check');
+      
+      // Force all text to white when active using both classes and inline styles
+      if (title) {
+        title.classList.add('text-white');
+        title.style.color = 'white';
+      }
+      if (description) {
+        description.classList.remove('text-gray-500');
+        description.classList.add('text-white');
+        description.style.color = 'white';
+      }
+      if (icon) {
+        icon.classList.add('text-white');
+        icon.style.color = 'white';
+      }
+      if (checkIcon) {
+        checkIcon.classList.remove('opacity-0');
+        checkIcon.classList.add('opacity-100', 'text-white');
+        checkIcon.style.color = 'white';
+      }
+      
+      // Apply selection after brief visual feedback
+      setTimeout(() => {
+        currentTone = tone;
+        localStorage.setItem('nm_tone', tone);
+        
+        // Update button text
+        const toneLabels = {
+          'PlainClinical': 'Balanced',
+          'Caregiver': 'Caregiver',
+          'Faith': 'Faith',
+          'Clinical': 'Clinical',
+          'Geriatric': 'Geriatric',
+          'EmotionalSupport': 'Emotional Support'
+        };
+        const label = toneLabels[tone] || tone;
+        const toneBtnSpan = toneBtn.querySelector('span');
+        if (toneBtnSpan) {
+          toneBtnSpan.textContent = label;
+        }
+        
+        // Close popover smoothly
+        tonePopover.style.opacity = '0';
+        tonePopover.style.transform = 'translateY(-10px)';
+        setTimeout(() => {
+          tonePopover.classList.add('hidden');
+          tonePopover.style.display = 'none';
+          tonePopover.style.opacity = '1';
+          tonePopover.style.transform = 'translateY(0)';
+        }, 200);
+        
+        // Update UI
+        updateActiveChips();
+        showToast(`✓ Tone set to ${label}`, 'success');
+        
+        // Show/hide care/faith based on tone
+        updateConditionalSettings();
+      }, 200);
+    });
+    
+    // Enhanced hover effect - only if not selected
+    opt.addEventListener('mouseenter', () => {
+      if (!opt.classList.contains('bg-[#28926D]')) {
+        opt.classList.remove('bg-white');
+        opt.classList.add('bg-gray-100');
+      }
+    });
+    
+    opt.addEventListener('mouseleave', () => {
+      if (!opt.classList.contains('bg-[#28926D]')) {
+        opt.classList.remove('bg-gray-100');
+        opt.classList.add('bg-white');
+      }
+    });
+  });
+}
+
+function updateConditionalSettings() {
+  const careGroup = document.getElementById('careGroup');
+  const faithGroup = document.getElementById('faithGroup');
+  
+  // Care setting only for Caregiver and Clinical
+  if (careGroup) {
+    if (currentTone === 'Caregiver' || currentTone === 'Clinical') {
+      careGroup.classList.remove('hidden');
+    } else {
+      careGroup.classList.add('hidden');
+    }
+  }
+  
+  // Faith setting only for Faith tone
+  if (faithGroup) {
+    if (currentTone === 'Faith') {
+      faithGroup.classList.remove('hidden');
+    } else {
+      faithGroup.classList.add('hidden');
+    }
+  }
+}
+
+function initCareSelector() {
+  const carePopover = document.getElementById('carePopover');
+  if (!carePopover) return;
+  
+  // Care selector triggered from active chips
+  carePopover.querySelectorAll('.care-option').forEach(opt => {
+    opt.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const care = opt.dataset.care;
+      
+      // Visual feedback
+      carePopover.querySelectorAll('.care-option').forEach(o => {
+        o.classList.remove('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
+        o.classList.add('bg-white');
+      });
+      
+      opt.classList.remove('bg-white');
+      opt.classList.add('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
+      
+      setTimeout(() => {
+        currentCare = care;
+        localStorage.setItem('nm_care_setting', care);
+        carePopover.classList.add('hidden');
+        carePopover.style.display = 'none';
+        updateActiveChips();
+        showToast(`Care setting: ${opt.querySelector('.font-medium').textContent}`, 'success');
+      }, 200);
+    });
+  });
+  
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!carePopover.contains(e.target) && !carePopover.classList.contains('hidden')) {
+      const careChip = document.querySelector('[data-chip="care"]');
+      if (!careChip || !careChip.contains(e.target)) {
+        carePopover.classList.add('hidden');
+        carePopover.style.display = 'none';
+      }
+    }
+  });
+}
+
+function initFaithSelector() {
+  const faithPopover = document.getElementById('faithPopover');
+  if (!faithPopover) return;
+  
+  // Faith selector triggered from active chips
+  faithPopover.querySelectorAll('.faith-option').forEach(opt => {
+    opt.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const faith = opt.dataset.faith;
+      
+      // Visual feedback
+      faithPopover.querySelectorAll('.faith-option').forEach(o => {
+        o.classList.remove('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
+        o.classList.add('bg-white');
+      });
+      
+      opt.classList.remove('bg-white');
+      opt.classList.add('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
+      
+      setTimeout(() => {
+        currentFaith = faith;
+        localStorage.setItem('nm_faith_setting', faith);
+        faithPopover.classList.add('hidden');
+        faithPopover.style.display = 'none';
+        updateActiveChips();
+        showToast(`Faith setting: ${opt.querySelector('.font-medium').textContent}`, 'success');
+      }, 200);
+    });
+  });
+  
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!faithPopover.contains(e.target) && !faithPopover.classList.contains('hidden')) {
+      const faithChip = document.querySelector('[data-chip="faith"]');
+      if (!faithChip || !faithChip.contains(e.target)) {
+        faithPopover.classList.add('hidden');
+        faithPopover.style.display = 'none';
+      }
+    }
+  });
+  
+  console.log('Faith selector initialized');
+}
+
+function updateActiveChips() {
+  const chipsContainer = document.getElementById('activeChips');
+  if (!chipsContainer) return;
+  
+  chipsContainer.innerHTML = '';
+  
+  // Tone chip
+  const toneLabels = {
+    'PlainClinical': 'Balanced',
+    'Caregiver': 'Caregiver',
+    'Faith': 'Faith',
+    'Clinical': 'Clinical',
+    'Geriatric': 'Geriatric',
+    'EmotionalSupport': 'Emotional Support'
+  };
+  const toneChip = createChip('Tone', toneLabels[currentTone] || currentTone, (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Tone chip clicked');
+    const toneBtn = document.getElementById('toneBtn');
+    const tonePopover = document.getElementById('tonePopover');
+    if (toneBtn && tonePopover) {
+      // Trigger the same logic as tone button click
+      const rect = toneChip.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
+      
+      let top = rect.bottom + 8;
+      let left = rect.left;
+      
+      const popoverHeight = 400;
+      if (top + popoverHeight > viewportHeight - 20) {
+        top = rect.top - popoverHeight - 8;
+      }
+      
+      const popoverWidth = 320;
+      if (left + popoverWidth > viewportWidth - 20) {
+        left = viewportWidth - popoverWidth - 20;
+      }
+      
+      if (left < 20) left = 20;
+      if (top < 20) top = 20;
+      
+      tonePopover.style.display = 'block';
+      tonePopover.style.position = 'fixed';
+      tonePopover.style.top = `${top}px`;
+      tonePopover.style.left = `${left}px`;
+      tonePopover.style.zIndex = '1000';
+      tonePopover.classList.remove('hidden');
+      
+      // Mark current selection
+      tonePopover.querySelectorAll('.tone-option').forEach(opt => {
+        opt.classList.remove('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
+        opt.classList.add('bg-white');
+        const checkIcon = opt.querySelector('.tone-check');
+        
+        if (opt.dataset.tone === currentTone) {
+          opt.classList.add('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
+          if (checkIcon) {
+            checkIcon.classList.remove('opacity-0');
+            checkIcon.classList.add('opacity-100');
+          }
+        } else {
+          if (checkIcon) {
+            checkIcon.classList.add('opacity-0');
+            checkIcon.classList.remove('opacity-100');
+          }
+        }
+      });
+    } else {
+      // Fallback: try clicking the button
+      toneBtn?.click();
+    }
+  });
+  toneChip.setAttribute('title', 'Click to change tone');
+  chipsContainer.appendChild(toneChip);
+  
+  // Care chip (conditional)
+  if (currentTone === 'Caregiver' || currentTone === 'Clinical') {
+    const careLabels = {
+      'hospital': 'Hospital',
+      'ambulatory': 'Ambulatory',
+      'urgent': 'Urgent'
+    };
+    const careLabel = careLabels[currentCare] || currentCare;
+    const careChip = createChip('Care', careLabel, () => {
+      // Open care popover
+      const carePopover = document.getElementById('carePopover');
+      if (carePopover) {
+        const rect = careChip.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+        
+        let top = rect.bottom + 8;
+        let left = rect.left;
+        
+        const popoverHeight = 250;
+        if (top + popoverHeight > viewportHeight - 20) {
+          top = rect.top - popoverHeight - 8;
+        }
+        
+        const popoverWidth = 280;
+        if (left + popoverWidth > viewportWidth - 20) {
+          left = viewportWidth - popoverWidth - 20;
+        }
+        
+        if (left < 20) left = 20;
+        if (top < 20) top = 20;
+        
+        carePopover.style.display = 'block';
+        carePopover.style.position = 'fixed';
+        carePopover.style.top = `${top}px`;
+        carePopover.style.left = `${left}px`;
+        carePopover.style.zIndex = '1000';
+        carePopover.classList.remove('hidden');
+        
+        // Mark current selection
+        carePopover.querySelectorAll('.care-option').forEach(o => {
+          o.classList.remove('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
+          o.classList.add('bg-white');
+          if (o.dataset.care === currentCare) {
+            o.classList.add('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
+          }
+        });
+      }
+    });
+    careChip.setAttribute('data-chip', 'care');
+    careChip.setAttribute('title', 'Click to change care setting');
+    chipsContainer.appendChild(careChip);
+  }
+  
+  // Faith chip (conditional)
+  if (currentTone === 'Faith') {
+    const faithLabels = {
+      'general': 'General',
+      'christian': 'Christian',
+      'jewish': 'Jewish',
+      'muslim': 'Muslim',
+      'buddhist': 'Buddhist',
+      'hindu': 'Hindu'
+    };
+    const faithLabel = faithLabels[currentFaith] || currentFaith;
+    const faithChip = createChip('Faith', faithLabel, () => {
+      // Open faith popover
+      const faithPopover = document.getElementById('faithPopover');
+      if (faithPopover) {
+        const rect = faithChip.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+        
+        let top = rect.bottom + 8;
+        let left = rect.left;
+        
+        const popoverHeight = 400;
+        if (top + popoverHeight > viewportHeight - 20) {
+          top = rect.top - popoverHeight - 8;
+        }
+        
+        const popoverWidth = 320;
+        if (left + popoverWidth > viewportWidth - 20) {
+          left = viewportWidth - popoverWidth - 20;
+        }
+        
+        if (left < 20) left = 20;
+        if (top < 20) top = 20;
+        
+        faithPopover.style.display = 'block';
+        faithPopover.style.position = 'fixed';
+        faithPopover.style.top = `${top}px`;
+        faithPopover.style.left = `${left}px`;
+        faithPopover.style.zIndex = '1000';
+        faithPopover.classList.remove('hidden');
+        
+        // Mark current selection
+        faithPopover.querySelectorAll('.faith-option').forEach(o => {
+          o.classList.remove('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
+          o.classList.add('bg-white');
+          if (o.dataset.faith === currentFaith) {
+            o.classList.add('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
+          }
+        });
+      }
+    });
+    faithChip.setAttribute('data-chip', 'faith');
+    faithChip.setAttribute('title', 'Click to change faith setting');
+    chipsContainer.appendChild(faithChip);
+  }
+  
+  // Language chip
+  const lang = localStorage.getItem('nm_lang') || 'en-US';
+  const langLabel = LANGUAGE_CHOICES.find(([code]) => code === lang)?.[1] || lang;
+  const langChip = createChip('Language', langLabel, (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Language chip clicked');
+    const langMenu = document.getElementById('langMenu');
+    
+    if (langMenu) {
+      // Render languages before opening - use the renderLanguages function
+      const langList = langMenu.querySelector('.space-y-1');
+      const langSearchInput = langMenu.querySelector('input');
+      
+      // Clear search and render all languages
+      if (langSearchInput) {
+        langSearchInput.value = '';
+      }
+      
+      // Use the renderLanguages function that's already defined
+      if (langList) {
+        langList.innerHTML = '';
+        const currentLang = localStorage.getItem('nm_lang') || 'en-US';
+        
+        LANGUAGE_CHOICES.forEach(([code, name]) => {
+          const btn = document.createElement('button');
+          btn.className = 'w-full text-left px-3 py-2 hover:bg-gray-100 rounded flex items-center justify-between transition cursor-pointer';
+          btn.type = 'button';
+          btn.innerHTML = `
+            <span class="flex-1">${name}</span>
+            ${currentLang === code ? '<i class="fa-solid fa-check text-[#28926D] ml-2"></i>' : '<span class="ml-2 w-4"></span>'}
+          `;
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            selectLanguage(code);
+          });
+          langList.appendChild(btn);
+        });
+        
+        console.log(`Rendered ${LANGUAGE_CHOICES.length} languages in menu`);
+      }
+      
+      // Open language menu directly
+      const rect = langChip.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
+      
+      let top = rect.bottom + 8;
+      let left = rect.left;
+      
+      // If popover would go off bottom, show above chip
+      const popoverHeight = 400;
+      if (top + popoverHeight > viewportHeight - 20) {
+        top = rect.top - popoverHeight - 8;
+      }
+      
+      // Ensure popover doesn't go off right edge
+      const popoverWidth = 280;
+      if (left + popoverWidth > viewportWidth - 20) {
+        left = viewportWidth - popoverWidth - 20;
+      }
+      
+      // Ensure popover doesn't go off left edge
+      if (left < 20) {
+        left = 20;
+      }
+      
+      // Ensure popover doesn't go off top
+      if (top < 20) {
+        top = 20;
+      }
+      
+      langMenu.style.display = 'block';
+      langMenu.style.position = 'fixed';
+      langMenu.style.top = `${top}px`;
+      langMenu.style.left = `${left}px`;
+      langMenu.style.zIndex = '1000';
+      langMenu.classList.remove('hidden');
+      
+      // Focus search input if it exists
+      const langSearchInput2 = langMenu.querySelector('input');
+      if (langSearchInput2) {
+        setTimeout(() => langSearchInput2.focus(), 100);
+      }
+    } else {
+      console.error('Language menu not found - initializing...');
+      // Initialize language picker if not done yet
+      initLanguagePicker();
+      // Try again after a brief delay
+      setTimeout(() => {
+        const langBtn = document.getElementById('langBtn');
+        if (langBtn) langBtn.click();
+      }, 100);
+    }
+  });
+  langChip.setAttribute('title', 'Click to change language');
+  chipsContainer.appendChild(langChip);
+  
+  // Always show chips container (remove hidden class)
+  chipsContainer.classList.remove('hidden');
+  chipsContainer.style.display = 'flex';
+}
+
+function createChip(label, value, onClick) {
+  const chip = document.createElement('button');
+  chip.className = 'chip';
+  chip.type = 'button'; // Prevent form submission
+  chip.innerHTML = `
+    <span class="text-xs text-gray-500">${label}:</span>
+    <span>${value}</span>
+    <i class="fa-solid fa-chevron-down text-gray-400 text-xs ml-1 transition-transform duration-200"></i>
+  `;
+  
+  // Use addEventListener instead of onclick for better control
+  chip.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onClick) onClick(e);
+  });
+  
+  // Add hover effect to arrow
+  chip.addEventListener('mouseenter', () => {
+    const arrow = chip.querySelector('.fa-chevron-down');
+    if (arrow) arrow.style.transform = 'translateY(2px)';
+  });
+  
+  chip.addEventListener('mouseleave', () => {
+    const arrow = chip.querySelector('.fa-chevron-down');
+    if (arrow) arrow.style.transform = 'translateY(0)';
+  });
+  
+  return chip;
+}
+
+// ============================================
+// LANGUAGE PICKER
+// ============================================
+
+function initLanguagePicker() {
+  const langBtn = document.getElementById('langBtn');
+  const langMenu = document.createElement('div');
+  langMenu.id = 'langMenu';
+  langMenu.className = 'popover hidden';
+  langMenu.style.position = 'absolute';
+  langMenu.style.right = '0';
+  langMenu.style.top = '100%';
+  langMenu.style.marginTop = '8px';
+  langMenu.style.maxHeight = '400px';
+  langMenu.style.overflowY = 'auto';
+  langMenu.style.minWidth = '250px';
+  
+  // Search input
+  const searchInput = document.createElement('input');
+  searchInput.type = 'text';
+  searchInput.placeholder = 'Search languages...';
+  searchInput.className = 'w-full px-3 py-2 border border-gray-200 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-[#28926D]/40';
+  langMenu.appendChild(searchInput);
+  
+  // Language list
+  const langList = document.createElement('div');
+  langList.className = 'space-y-1';
+  
+  function renderLanguages(filter = '') {
+    langList.innerHTML = '';
+    const filtered = LANGUAGE_CHOICES.filter(([code, name]) => 
+      name.toLowerCase().includes(filter.toLowerCase()) ||
+      code.toLowerCase().includes(filter.toLowerCase())
+    );
+    
+    if (filtered.length === 0) {
+      langList.innerHTML = '<div class="px-3 py-2 text-sm text-gray-500">No languages found</div>';
+      return;
+    }
+    
+    const currentLang = localStorage.getItem('nm_lang') || 'en-US';
+    
+    filtered.forEach(([code, name]) => {
+      const btn = document.createElement('button');
+      btn.className = 'w-full text-left px-3 py-2 hover:bg-gray-100 rounded flex items-center justify-between transition cursor-pointer';
+      btn.type = 'button';
+      btn.innerHTML = `
+        <span class="flex-1">${name}</span>
+        ${currentLang === code ? '<i class="fa-solid fa-check text-[#28926D] ml-2"></i>' : '<span class="ml-2 w-4"></span>'}
+      `;
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        selectLanguage(code);
+      });
+      langList.appendChild(btn);
+    });
+    
+    console.log(`Rendered ${filtered.length} languages`);
+  }
+  
+  searchInput.addEventListener('input', (e) => {
+    renderLanguages(e.target.value);
+  });
+  
+  langMenu.appendChild(langList);
+  document.body.appendChild(langMenu);
+  
+  // Render languages initially
+  renderLanguages('');
+  console.log(`Language menu initialized with ${LANGUAGE_CHOICES.length} languages`);
+  
+  langBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    console.log('Language button clicked');
+    const currentLang = localStorage.getItem('nm_lang') || 'en-US';
+    
+    // Always render languages before opening to ensure they're visible
+    renderLanguages('');
+    
+    // Position menu relative to button
+    const rect = langBtn.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+    
+    let top = rect.bottom + 8;
+    let right = viewportWidth - rect.right;
+    
+    const popoverHeight = 400;
+    if (top + popoverHeight > viewportHeight - 20) {
+      top = rect.top - popoverHeight - 8;
+    }
+    
+    langMenu.style.display = 'block';
+    langMenu.style.position = 'fixed';
+    langMenu.style.top = `${top}px`;
+    langMenu.style.right = `${right}px`;
+    langMenu.style.zIndex = '1000';
+    langMenu.classList.toggle('hidden');
+    
+      // Focus search if opening
+      if (!langMenu.classList.contains('hidden')) {
+        const langSearchInput3 = langMenu.querySelector('input');
+        if (langSearchInput3) {
+          langSearchInput3.value = ''; // Clear search
+          setTimeout(() => langSearchInput3.focus(), 100);
+        }
+      }
+  });
+  
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!langMenu.contains(e.target) && e.target !== langBtn && !langBtn.contains(e.target)) {
+      langMenu.classList.add('hidden');
+      langMenu.style.display = 'none';
+    }
+  });
+}
+
+function selectLanguage(code) {
+  localStorage.setItem('nm_lang', code);
+  const langMenu = document.getElementById('langMenu');
+  if (langMenu) langMenu.classList.add('hidden');
+  updateActiveChips();
+  showToast(`Language set to ${LANGUAGE_CHOICES.find(([c]) => c === code)?.[1] || code}`, 'success');
+}
+
+// ============================================
+// VOICE DICTATION
+// ============================================
+
+function initVoiceDictation() {
+  const micBtn = document.getElementById('micBtn');
+  const input = document.getElementById('chatInput');
+  if (!micBtn || !input) return;
+  
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) {
+    micBtn.title = 'Voice dictation not supported in this browser';
+    micBtn.disabled = true;
+    micBtn.style.opacity = '0.5';
+    micBtn.style.cursor = 'not-allowed';
+    return;
+  }
+  
+  // Check if microphone is available
+  async function checkMicrophonePermission() {
+    try {
+      if (navigator.permissions && navigator.permissions.query) {
+        const result = await navigator.permissions.query({ name: 'microphone' });
+        return result.state;
+      }
+      // Fallback: try to get user media to check availability
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(track => track.stop()); // Stop immediately
+        return 'granted';
+      } catch (e) {
+        if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+          return 'denied';
+        }
+        return 'prompt';
+      }
+    } catch (e) {
+      console.log('Permission check not available:', e);
+      return 'prompt'; // Assume we can prompt
+    }
+  }
+  
+  let recognition = null;
+  let isListening = false;
+  let silenceTimeout = null;
+  let listeningStartTime = null;
+  const MAX_LISTENING_TIME = 60000; // 60 seconds max
+  const SILENCE_TIMEOUT = 3000; // 3 seconds of silence before auto-stop
+  
+  function resetMicButton() {
+    isListening = false;
+    micBtn.classList.remove('bg-[#236092]', 'text-white', 'listening');
+    micBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+    micBtn.title = 'Dictate';
+    if (silenceTimeout) {
+      clearTimeout(silenceTimeout);
+      silenceTimeout = null;
+    }
+    listeningStartTime = null;
+  }
+  
+  function stopRecognition() {
+    if (recognition) {
+      try {
+        recognition.stop();
+      } catch (e) {
+        console.log('Error stopping recognition:', e);
+      }
+      recognition = null;
+    }
+    resetMicButton();
+  }
+  
+  micBtn.addEventListener('click', async () => {
+    if (isListening) {
+      stopRecognition();
+      return;
+    }
+    
+    // Check microphone permission before starting
+    const permissionState = await checkMicrophonePermission();
+    if (permissionState === 'denied') {
+      showToast('Microphone access denied. Please enable it in your browser settings.', 'error');
+      micBtn.title = 'Microphone access denied - Click to check settings';
+      return;
+    }
+    
+    if (!recognition) {
+      recognition = new SpeechRec();
+      recognition.lang = localStorage.getItem('nm_lang') || 'en-US';
+      recognition.continuous = true; // Changed to true for better detection
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 1;
+      
+      recognition.onstart = () => {
+        isListening = true;
+        listeningStartTime = Date.now();
+        micBtn.classList.add('bg-[#236092]', 'text-white', 'listening');
+        micBtn.innerHTML = '<i class="fa-solid fa-stop"></i>';
+        micBtn.title = 'Listening... Click to stop';
+        showToast('🎤 Listening... Speak now', 'info');
+        
+        // Auto-stop after max time
+        setTimeout(() => {
+          if (isListening) {
+            stopRecognition();
+            showToast('Recording stopped automatically after 60 seconds', 'info');
+          }
+        }, MAX_LISTENING_TIME);
+      };
+      
+      recognition.onend = () => {
+        // Only reset if we're still supposed to be listening (unexpected end)
+        if (isListening && Date.now() - listeningStartTime < 2000) {
+          // If it ended very quickly, might be an error - try to restart
+          console.log('Recognition ended unexpectedly, might restart...');
+        }
+        stopRecognition();
+      };
+      
+      recognition.onerror = (e) => {
+        console.error('Speech recognition error:', e);
+        let errorMessage = 'Voice recognition error';
+        
+        // Handle specific error types
+        switch (e.error) {
+          case 'no-speech':
+            errorMessage = 'No speech detected. Please try again.';
+            break;
+          case 'audio-capture':
+            errorMessage = 'No microphone found. Please check your microphone.';
+            break;
+          case 'not-allowed':
+            errorMessage = 'Microphone access denied. Please enable it in your browser settings.';
+            micBtn.title = 'Microphone access denied - Click to check settings';
+            break;
+          case 'network':
+            errorMessage = 'Network error. Please check your connection.';
+            break;
+          case 'aborted':
+            // User stopped it, don't show error
+            return;
+          case 'service-not-allowed':
+            errorMessage = 'Speech recognition service not available.';
+            break;
+          default:
+            errorMessage = `Voice recognition error: ${e.error || 'Unknown error'}`;
+        }
+        
+        stopRecognition();
+        if (e.error !== 'aborted') {
+          showToast(errorMessage, 'error');
+        }
+      };
+      
+      recognition.onresult = (e) => {
+        let final = '';
+        let interim = '';
+        let hasNewFinal = false;
+        
+        // Reset silence timeout on any result
+        if (silenceTimeout) {
+          clearTimeout(silenceTimeout);
+        }
+        
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const transcript = e.results[i][0].transcript;
+          if (e.results[i].isFinal) {
+            final += transcript + ' ';
+            hasNewFinal = true;
+          } else {
+            interim += transcript;
+          }
+        }
+        
+        // Update input with final results, or show interim results
+        if (hasNewFinal) {
+          const currentText = input.value.trim();
+          input.value = (currentText + ' ' + final).trim();
+          input.focus();
+          
+          // Auto-stop after getting final result (user finished speaking)
+          silenceTimeout = setTimeout(() => {
+            if (isListening) {
+              stopRecognition();
+              showToast('Voice input complete', 'success');
+            }
+          }, SILENCE_TIMEOUT);
+        } else if (interim) {
+          // Show interim results in real-time
+          const currentFinal = input.value.trim();
+          input.value = currentFinal + (currentFinal ? ' ' : '') + interim;
+          input.focus();
+        }
+      };
+      
+      recognition.onspeechstart = () => {
+        // User started speaking
+        if (silenceTimeout) {
+          clearTimeout(silenceTimeout);
+          silenceTimeout = null;
+        }
+      };
+      
+      recognition.onspeechend = () => {
+        // User stopped speaking - wait a bit then auto-stop
+        if (isListening) {
+          silenceTimeout = setTimeout(() => {
+            if (isListening) {
+              stopRecognition();
+              showToast('Voice input complete', 'success');
+            }
+          }, SILENCE_TIMEOUT);
+        }
+      };
+    }
+    
+    try {
+      recognition.start();
+    } catch (err) {
+      console.error('Failed to start recognition:', err);
+      if (err.name === 'InvalidStateError') {
+        // Recognition already started, ignore
+        return;
+      }
+      showToast('Failed to start voice recognition. Please try again.', 'error');
+      stopRecognition();
+    }
+  });
+  
+  // Check initial permission state and update button
+  checkMicrophonePermission().then(state => {
+    if (state === 'denied') {
+      micBtn.title = 'Microphone access denied - Click to check settings';
+      micBtn.style.opacity = '0.7';
+    }
+  });
+}
+
+// ============================================
+// SETTINGS MODAL
+// ============================================
+
+async function openSettingsModal() {
+  const modal = document.getElementById('settingsModal');
+  if (!modal) return;
+  
+  modal.classList.remove('hidden');
+  
+  try {
+    const res = await fetch('/api/user/settings/', { credentials: 'include' });
+    const data = await res.json();
+    
+    const nameInput = document.getElementById('displayName');
+    const profInput = document.getElementById('profession');
+    
+    if (nameInput) nameInput.value = data.display_name || '';
+    if (profInput) profInput.value = data.profession || '';
+    
+    // Update user display name in sidebar
+    const userDisplayName = document.getElementById('userDisplayName');
+    if (userDisplayName) userDisplayName.textContent = data.display_name || 'User';
+    
+  } catch (err) {
+    console.error('Failed to load settings:', err);
+  }
+}
+
+function closeSettingsModal() {
+  const modal = document.getElementById('settingsModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function saveSettings() {
+  const nameInput = document.getElementById('displayName');
+  const profInput = document.getElementById('profession');
+  
+  if (!nameInput || !profInput) return;
+  
+  const name = nameInput.value.trim();
+  const profession = profInput.value.trim();
+  
+  // Validation
+  if (!name) {
+    showToast('Display name is required', 'error');
+    nameInput.focus();
+    return;
+  }
+  
+  const saveBtn = document.querySelector('#settingsModal .btn-primary');
+  const originalHTML = saveBtn?.innerHTML;
+  
+  // Show loading state
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+  }
+  
+  try {
+    const res = await fetch('/api/user/settings/update/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken()
+      },
+      body: JSON.stringify({ display_name: name, profession }),
+      credentials: 'include'
+    });
+    
+    if (res.ok) {
+      showToast('Settings saved', 'success');
+      closeSettingsModal();
+      
+      // Update UI immediately
+      const userDisplayName = document.getElementById('userDisplayName');
+      if (userDisplayName) userDisplayName.textContent = name;
+      
+    } else {
+      throw new Error('Save failed');
+    }
+  } catch (err) {
+    showToast('Failed to save settings', 'error');
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      if (originalHTML) saveBtn.innerHTML = originalHTML;
+    }
+  }
+}
+
+// ============================================
+// LAYOUT & NAVIGATION
+// ============================================
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('mobileOverlay');
+  
+  if (sidebar && overlay) {
+    const isOpen = !sidebar.classList.contains('-translate-x-full');
+    if (isOpen) {
+      sidebar.classList.add('-translate-x-full');
+      overlay.classList.add('hidden');
+    } else {
+      sidebar.classList.remove('-translate-x-full');
+      overlay.classList.remove('hidden');
+    }
+  }
+}
+
+function updateComposerPadding() {
+  const composer = document.getElementById('composer');
+  const chatWindow = document.getElementById('chatWindow');
+  if (!composer || !chatWindow) return;
+  
+  const height = composer.getBoundingClientRect().height;
+  chatWindow.style.paddingBottom = `${height + 24}px`;
+}
+
+// Jump to latest
+function initJumpToLatest() {
+  const jumpBtn = document.getElementById('jumpToLatest');
+  const chatWindow = document.getElementById('chatWindow');
+  
+  if (!jumpBtn || !chatWindow) return;
+  
+  jumpBtn.addEventListener('click', () => {
+    chatWindow.scrollTo({
+      top: chatWindow.scrollHeight,
+      behavior: 'smooth'
+    });
+    jumpBtn.classList.remove('visible');
+  });
+  
+  // Show/hide based on scroll position
+  chatWindow.addEventListener('scroll', debounce(() => {
+    const isAtBottom = chatWindow.scrollHeight - chatWindow.scrollTop - chatWindow.clientHeight < 100;
+    if (isAtBottom) {
+      jumpBtn.classList.remove('visible');
+    } else {
+      jumpBtn.classList.add('visible');
+    }
+  }, 100));
+}
+
+// ============================================
+// QUICK PROMPTS
+// ============================================
+
+function quickPrompt(text) {
+  const input = document.getElementById('chatInput');
+  if (input) {
+    input.value = text;
+    input.focus();
+    // Auto-send or let user review
+    // sendChat(); // Uncomment to auto-send
+  }
+}
+
+// ============================================
+// INITIALIZATION
+// ============================================
+
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log('Dashboard initializing...');
+  
+  try {
+    // Initialize all components
+    initToneSelector();
+    initCareSelector();
+    initFaithSelector();
+    initLanguagePicker();
+    initVoiceDictation();
+    initJumpToLatest();
+    updateActiveChips();
+    updateConditionalSettings();
+    updateComposerPadding();
+    
+    // File input
+    const fileInput = document.getElementById('fileInput');
+    const attachBtn = document.getElementById('attachBtn');
+    console.log('File input:', fileInput, 'Attach button:', attachBtn);
+    if (attachBtn && fileInput) {
+      attachBtn.addEventListener('click', () => {
+        console.log('Attach button clicked');
+        fileInput.click();
+      });
+      fileInput.addEventListener('change', (e) => {
+        console.log('Files selected:', e.target.files);
+        if (e.target.files) addFiles(e.target.files);
+        e.target.value = ''; // Reset to allow re-selecting same file
+      });
+    } else {
+      console.warn('File input or attach button not found');
+    }
+    
+    // Clear all button
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    if (clearAllBtn) {
+      clearAllBtn.addEventListener('click', () => {
+        console.log('Clear all clicked');
+        clearPending();
+      });
+    } else {
+      console.warn('Clear all button not found');
+    }
+    
+    // Send button
+    const sendBtn = document.getElementById('sendBtn');
+    if (sendBtn) {
+      sendBtn.addEventListener('click', () => {
+        console.log('Send button clicked');
+        sendChat();
+      });
+    } else {
+      console.error('Send button not found!');
+    }
+    
+    // Chat input Enter key
+    const chatInput = document.getElementById('chatInput');
+    if (chatInput) {
+      chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          console.log('Enter key pressed, sending chat');
+          sendChat();
+        }
+      });
+    } else {
+      console.error('Chat input not found!');
+    }
+    
+    // New chat button
+    const newChatBtn = document.getElementById('newChatBtn');
+    if (newChatBtn) {
+      newChatBtn.addEventListener('click', () => {
+        console.log('New chat button clicked');
+        newChat();
+      });
+    } else {
+      console.error('New chat button not found!');
+    }
+    
+    // User menu button
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    if (userMenuBtn) {
+      userMenuBtn.addEventListener('click', () => {
+        console.log('User menu button clicked');
+        openSettingsModal();
+      });
+    } else {
+      console.warn('User menu button not found');
+    }
+    
+    // Burger button (mobile)
+    const burgerBtn = document.getElementById('burgerBtn');
+    if (burgerBtn) {
+      burgerBtn.addEventListener('click', () => {
+        console.log('Burger button clicked');
+        toggleSidebar();
+      });
+    } else {
+      console.warn('Burger button not found');
+    }
+    
+    // Sidebar collapse
+    const sidebarCollapse = document.getElementById('sidebarCollapse');
+    if (sidebarCollapse) {
+      sidebarCollapse.addEventListener('click', () => {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar) sidebar.classList.toggle('hidden');
+      });
+    }
+    
+    // Toggle archived section
+    const toggleArchived = document.getElementById('toggleArchived');
+    const archivedList = document.getElementById('archivedList');
+    if (toggleArchived && archivedList) {
+      toggleArchived.addEventListener('click', () => {
+        const isHidden = archivedList.classList.contains('hidden');
+        archivedList.classList.toggle('hidden');
+        const icon = toggleArchived.querySelector('i');
+        if (icon) {
+          icon.classList.toggle('fa-chevron-down');
+          icon.classList.toggle('fa-chevron-up');
+        }
+      });
+    }
+    
+    // Drag & drop
+    const dropzone = document.getElementById('dropzone');
+    if (dropzone) {
+      dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      });
+      
+      dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('dragover');
+      });
+      
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        if (e.dataTransfer.files) {
+          addFiles(e.dataTransfer.files);
+        }
+      });
+    }
+    
+    // Session search
+    const sessionSearch = document.getElementById('sessionSearch');
+    if (sessionSearch) {
+      sessionSearch.addEventListener('input', debounce((e) => {
+        const query = e.target.value.toLowerCase();
+        document.querySelectorAll('.session-card').forEach(card => {
+          const title = card.querySelector('.session-title')?.textContent.toLowerCase() || '';
+          if (title.includes(query)) {
+            card.style.display = '';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      }, 300));
+    }
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      // ESC closes modals
+      if (e.key === 'Escape') {
+        closeSettingsModal();
+        closeSummaryModal();
+        closeDeleteModal();
+        document.querySelectorAll('.popover').forEach(p => {
+          p.classList.add('hidden');
+          p.style.display = 'none';
+        });
+      }
+      
+      // Cmd/Ctrl + K for new chat
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        newChat();
+      }
+    });
+    
+    // Load initial state
+    console.log('Loading sessions...');
+    try {
+      await refreshSessionList();
+      console.log('Sessions loaded successfully');
+    } catch (err) {
+      console.error('Failed to load sessions on init:', err);
+      showToast('Failed to load chat history. Please refresh the page.', 'error');
+    }
+    
+    // Try to restore last session
+    const sid = getSessionId();
+    if (sid) {
+      console.log('Restoring last session:', sid);
+      try {
+        await openSession(sid);
+        console.log('Session restored successfully');
+        // If session has no messages, show greeting
+        const chatWindow = document.getElementById('chatWindow');
+        if (chatWindow && chatWindow.children.length === 0) {
+          await greetUser(true);
+        }
+      } catch (err) {
+        console.error('Failed to restore session:', err);
+        clearSessionId();
+        // Show greeting if session restore failed
+        await greetUser(true);
+      }
+    } else {
+      // No session to restore, show greeting
+      await greetUser(true);
+    }
+    
+    // Window resize handler
+    window.addEventListener('resize', debounce(updateComposerPadding, 100));
+    
+    // Geriatric mode
+    if (currentTone === 'Geriatric') {
+      document.body.classList.add('geriatric-zoom');
+    }
+    
+    console.log('Dashboard initialized successfully');
+  } catch (error) {
+    console.error('Dashboard initialization error:', error);
+    console.error('Error stack:', error.stack);
+    // Try to show toast, but if showToast isn't defined, just alert
+    try {
+      showToast('Failed to initialize dashboard. Please refresh the page.', 'error');
+    } catch {
+      alert('Dashboard initialization failed. Please check console and refresh the page.');
+    }
+  }
+});
+
+// Expose functions globally for onclick handlers
+window.quickPrompt = quickPrompt;
+window.closeSettingsModal = closeSettingsModal;
+window.saveSettings = saveSettings;
+window.closeSummaryModal = closeSummaryModal;
+window.copySummary = copySummary;
+window.closeDeleteModal = closeDeleteModal;
+window.confirmDelete = confirmDelete;
+window.toggleSidebar = toggleSidebar;
+window.openSessionMenu = openSessionMenu;
+window.startRenameSession = startRenameSession;
+window.archiveSession = archiveSession;
+window.unarchiveSession = unarchiveSession;
+window.confirmDeleteSession = confirmDeleteSession;
+window.logoutUser = function() {
+  if (confirm('Are you sure you want to log out?')) {
+    const logoutUrl = '{% url "logout" %}';
+    const loginUrl = '{% url "login" %}';
+    
+    fetch(logoutUrl, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': getCSRFToken() },
+      credentials: 'include'
+    }).then(() => {
+      clearSessionId();
+      window.location.href = loginUrl;
+    }).catch(() => {
+      window.location.href = loginUrl;
+    });
+  }
+};
+  </script>
+</body>
+</html>
