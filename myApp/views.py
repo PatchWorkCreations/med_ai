@@ -184,7 +184,8 @@ def _save_copy_to_user_media(request, file_obj, display_name: str) -> Path:
 
 # -------- OpenAI
 from openai import OpenAI
-client = OpenAI()
+# Set timeout to prevent Railway 502 errors (30s max for HTTP requests)
+client = OpenAI(timeout=25.0)  # Slightly under Railway's typical 30s limit
 
 # =============================
 #         PROMPTS
@@ -715,6 +716,7 @@ Present as: "This image shows...", "You can see...", "What stands out...", "This
                 ]
             },
         ],
+        timeout=25.0,  # Explicit timeout to prevent Railway 502
     )
     raw = resp.choices[0].message.content.strip()
 
@@ -726,6 +728,7 @@ Present as: "This image shows...", "You can see...", "What stands out...", "This
             {"role": "system", "content": system_prompt + "\n\nYou are analyzing and explaining what you see in the images. Present your findings as observations and explanations, not as instructions. Be specific about anatomical structures, dates, findings, and what they typically mean. Make it warm, detailed, and conversational - like walking someone through what the images show."},
             {"role": "user", "content": f"Rewrite this analysis to be warm and clear. Present it as 'Here's what I see' and 'This typically means' rather than 'You should do this' or 'Follow these steps'. Keep ALL the detailed observations, specific anatomical findings, date comparisons, and explanations. Make it feel like a knowledgeable medical explainer walking through the images:\n\n{raw}"},
         ],
+        timeout=25.0,  # Explicit timeout to prevent Railway 502
     )
     return rewrite.choices[0].message.content.strip()
 
@@ -821,6 +824,29 @@ Here are the images to analyze:"""
         return "Failed to process the provided images."
     
     # First pass: interpret all images together
+    # Limit to 5 images per batch to avoid timeout (Railway has ~30s HTTP limit)
+    MAX_IMAGES_PER_BATCH = 5
+    if len(file_paths) > MAX_IMAGES_PER_BATCH:
+        # Process in batches and combine
+        log.info(f"Processing {len(file_paths)} images in batches of {MAX_IMAGES_PER_BATCH}")
+        batch_summaries = []
+        for batch_start in range(0, len(file_paths), MAX_IMAGES_PER_BATCH):
+            batch_paths = file_paths[batch_start:batch_start + MAX_IMAGES_PER_BATCH]
+            try:
+                # Recursively call this function for the batch
+                if len(batch_paths) == 1:
+                    batch_summary = extract_contextual_medical_insights_from_image(batch_paths[0], tone=tone, lang=lang)
+                else:
+                    batch_summary = extract_contextual_medical_insights_from_multiple_images(batch_paths, tone=tone, lang=lang)
+                batch_summaries.append(f"**Batch {batch_start//MAX_IMAGES_PER_BATCH + 1} ({len(batch_paths)} images):**\n{batch_summary}")
+            except Exception as e:
+                log.error(f"Batch {batch_start//MAX_IMAGES_PER_BATCH + 1} failed: {e}")
+                continue
+        if batch_summaries:
+            return "\n\n---\n\n".join(batch_summaries)
+        else:
+            return "Failed to process the image batches."
+    
     try:
         resp = client.chat.completions.create(
             model="gpt-4o",
@@ -829,6 +855,7 @@ Here are the images to analyze:"""
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": content_parts}
             ],
+            timeout=25.0,  # Explicit timeout to prevent Railway 502
         )
         raw = resp.choices[0].message.content.strip()
     except Exception as e:
@@ -837,14 +864,14 @@ Here are the images to analyze:"""
         individual_summaries = []
         for file_path in file_paths:
             try:
-                summary = extract_contextual_medical_insights_from_image(file_path, tone=tone)
+                summary = extract_contextual_medical_insights_from_image(file_path, tone=tone, lang=lang)
                 individual_summaries.append(summary)
             except Exception:
                 continue
         if individual_summaries:
             raw = "\n\n".join([f"Image {i+1}:\n{summary}" for i, summary in enumerate(individual_summaries)])
         else:
-            return "Failed to process any of the provided images."
+            return "Failed to process any of the provided images. The images may be too large or in an unsupported format."
     
     # Second pass: humanize/tone polish while maintaining structured detail
     try:
@@ -1607,10 +1634,23 @@ def send_chat(request):
 
         return JsonResponse({"reply": reply, "session_id": getattr(session_obj, "id", None)})
 
-    except Exception:
+    except Exception as e:
         log.exception("send_chat failed")
+        error_msg = str(e).lower()
+        # Check for timeout-related errors
+        if "timeout" in error_msg or "502" in error_msg or "gateway" in error_msg:
+            return JsonResponse(
+                {
+                    "reply": "The image analysis is taking longer than expected. Please try with fewer images (5 or less) or try again in a moment.",
+                    "error": "TIMEOUT"
+                },
+                status=504,  # Gateway Timeout
+            )
         return JsonResponse(
-            {"reply": "Hi! Our system is busy right now due to a lot of users — please try again in a few minutes."},
+            {
+                "reply": "Sorry, something went wrong while processing your request. Please try again with fewer images or contact support if this persists.",
+                "error": "PROCESSING_ERROR"
+            },
             status=500,
         )
 
