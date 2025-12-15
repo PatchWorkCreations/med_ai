@@ -2941,13 +2941,11 @@ class WarmLoginView(DjangoLoginView):
         return resp
 
     def get_success_url(self):
-        url = super().get_success_url() or str(self.success_url)
-        if "next" in self.request.GET:
-            return url
-        parts = list(urlparse(url))
-        qs = parse_qs(parts[4]); qs.setdefault("welcome", ["1"])
-        parts[4] = urlencode(qs, doseq=True)
-        return urlunparse(parts)
+        """
+        After login, respect ?next=… when present, otherwise go to success_url,
+        without adding any extra query params like ?welcome=1.
+        """
+        return super().get_success_url() or str(self.success_url)
 
     def post(self, request, *args, **kwargs):
         # Handle API requests (JSON)
