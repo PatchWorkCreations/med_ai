@@ -824,16 +824,16 @@ Here are the images to analyze:"""
         return "Failed to process the provided images."
     
     # First pass: interpret all images together
-    # Limit to 5 images per batch to avoid timeout (Railway has ~30s HTTP limit)
-    MAX_IMAGES_PER_BATCH = 5
+    # Limit to 2 images per batch to avoid timeout (Railway has ~30s HTTP limit)
+    MAX_IMAGES_PER_BATCH = 2
     if len(file_paths) > MAX_IMAGES_PER_BATCH:
-        # Process in batches and combine
-        log.info(f"Processing {len(file_paths)} images in batches of {MAX_IMAGES_PER_BATCH}")
+        # Process in batches of 2 and combine
+        log.info(f"Processing {len(file_paths)} images in batches of {MAX_IMAGES_PER_BATCH} to avoid timeout")
         batch_summaries = []
         for batch_start in range(0, len(file_paths), MAX_IMAGES_PER_BATCH):
             batch_paths = file_paths[batch_start:batch_start + MAX_IMAGES_PER_BATCH]
             try:
-                # Recursively call this function for the batch
+                log.info(f"Processing batch {batch_start//MAX_IMAGES_PER_BATCH + 1} ({len(batch_paths)} images)")
                 if len(batch_paths) == 1:
                     batch_summary = extract_contextual_medical_insights_from_image(batch_paths[0], tone=tone, lang=lang)
                 else:
@@ -841,11 +841,22 @@ Here are the images to analyze:"""
                 batch_summaries.append(f"**Batch {batch_start//MAX_IMAGES_PER_BATCH + 1} ({len(batch_paths)} images):**\n{batch_summary}")
             except Exception as e:
                 log.error(f"Batch {batch_start//MAX_IMAGES_PER_BATCH + 1} failed: {e}")
+                # Fallback: try individual processing for this batch
+                for i, file_path in enumerate(batch_paths, 1):
+                    try:
+                        summary = extract_contextual_medical_insights_from_image(file_path, tone=tone, lang=lang)
+                        batch_summaries.append(f"**Image {batch_start + i}:**\n{summary}")
+                    except Exception:
+                        batch_summaries.append(f"**Image {batch_start + i}:**\n(Unable to process this image)")
                 continue
+        
         if batch_summaries:
-            return "\n\n---\n\n".join(batch_summaries)
+            combined = "\n\n---\n\n".join(batch_summaries)
+            if len(file_paths) > MAX_IMAGES_PER_BATCH:
+                return f"I've analyzed {len(file_paths)} images in batches. Here's what I found:\n\n{combined}"
+            return combined
         else:
-            return "Failed to process the image batches."
+            return "Failed to process any of the provided images. Please try with fewer images or check the file formats."
     
     try:
         resp = client.chat.completions.create(
@@ -1409,8 +1420,74 @@ def send_chat(request):
     
     combined_sections = []
     
-    # Process multiple images together if there are 2+ images
-    if len(image_files) >= 2:
+    # Process images: in batches of 2-3 to avoid timeout
+    # For 5+ images, process in batches of 2-3 and combine
+    if len(image_files) >= 5:
+        # Process in batches of 2 to stay under timeout
+        log.info(f"Processing {len(image_files)} images in batches of 2 to avoid timeout")
+        batch_size = 2
+        for batch_start in range(0, len(image_files), batch_size):
+            batch_files = image_files[batch_start:batch_start + batch_size]
+            try:
+                # Save batch to temp files
+                batch_paths = []
+                temp_paths_to_cleanup = []
+                for img_file in batch_files:
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(img_file.name)[1]) as tmp:
+                        for chunk in img_file.chunks():
+                            tmp.write(chunk)
+                        temp_path = tmp.name
+                    
+                    # Try to save to user media
+                    stored_path = None
+                    try:
+                        if request.user.is_authenticated:
+                            with open(temp_path, 'rb') as temp_file:
+                                from django.core.files import File
+                                django_file = File(temp_file, name=img_file.name)
+                                stored_path = _save_copy_to_user_media(request, django_file, img_file.name)
+                    except Exception:
+                        pass
+                    
+                    if stored_path and stored_path.exists():
+                        batch_paths.append(str(stored_path))
+                        try:
+                            os.remove(temp_path)
+                        except Exception:
+                            pass
+                    else:
+                        batch_paths.append(temp_path)
+                        temp_paths_to_cleanup.append(temp_path)
+                
+                # Process batch
+                if len(batch_paths) == 1:
+                    batch_summary = extract_contextual_medical_insights_from_image(batch_paths[0], tone=tone, lang=lang)
+                else:
+                    batch_summary = extract_contextual_medical_insights_from_multiple_images(batch_paths, tone=tone, lang=lang)
+                
+                # Combine filenames
+                batch_names = [f.name for f in batch_files]
+                combined_sections.append(f"{', '.join(batch_names)}\n{batch_summary}")
+                
+                # Cleanup temp files
+                for tmp_path in temp_paths_to_cleanup:
+                    try:
+                        os.remove(tmp_path)
+                    except Exception:
+                        pass
+                        
+            except Exception as e:
+                log.error(f"Batch {batch_start//batch_size + 1} failed: {e}")
+                # Fallback: process individually for this batch
+                for img_file in batch_files:
+                    try:
+                        fname, summary = summarize_single_file(
+                            img_file, tone=tone, system_prompt=system_prompt, user=request.user, request=request,
+                        )
+                        combined_sections.append(f"{fname}\n{summary}")
+                    except Exception:
+                        combined_sections.append(f"{img_file.name}\n(Unable to process this image)")
+    elif len(image_files) >= 2:
         # Process all images together for better context understanding
         image_paths = []
         temp_paths_to_cleanup = []
