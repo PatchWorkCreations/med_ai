@@ -1,6 +1,6 @@
 # myApp/emailer.py
 import json, logging, requests
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Union
 from django.conf import settings
 
 log = logging.getLogger(__name__)
@@ -12,12 +12,12 @@ RESEND_REPLY_TO = settings.RESEND.get("REPLY_TO")
 
 def send_via_resend(
     *,
-    to: Iterable[str] | str,
+    to: Union[Iterable[str], str],
     subject: str,
     text: Optional[str] = None,
     html: Optional[str] = None,
     from_email: Optional[str] = None,
-    reply_to: Optional[Iterable[str] | str] = None,
+    reply_to: Optional[Union[Iterable[str], str]] = None,
     cc: Optional[Iterable[str]] = None,
     bcc: Optional[Iterable[str]] = None,
     tags: Optional[dict] = None,

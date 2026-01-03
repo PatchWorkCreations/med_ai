@@ -17,6 +17,7 @@ ALLOWED_HOSTS = [
     "neuromedai.org", ".neuromedai.org",
     "medai-production-21ae.up.railway.app",
     "localhost", "127.0.0.1",
+    "192.168.100.53",  # Mac IP for iOS physical device testing
     ".localtest.me",          # ← allow any *.localtest.me subdomain
     ".lvh.me",                # ← optional alt to localtest.me
 ]
@@ -27,6 +28,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://medai-production-21ae.up.railway.app",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
+    "http://192.168.100.53:8000",  # Mac IP for iOS physical device testing
     "http://*.localtest.me:8000",  # ← add
     "http://*.lvh.me:8000",        # ← optional
 ]
@@ -50,12 +52,19 @@ INSTALLED_APPS = [
     'myApp',
     'widget_tweaks',
     'channels',
+    # Mobile API support
+    'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders',
+    'mobile_api',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # CORS must be early
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'myProject.middleware.DisableCSRFForAPI',  # Disable CSRF for API endpoints (before CSRF middleware)
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -161,8 +170,54 @@ REST_FRAMEWORK = {
 }
 
 
-AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
+AUTHENTICATION_BACKENDS = [
+    "myApp.auth_backends.EmailOrUsernameCIBackend",  # Supports email OR username login
+    "django.contrib.auth.backends.ModelBackend",  # Fallback
+]
 
+# Mobile API Feature Flag
+# Set MOBILE_API_ENABLED=0 in environment to disable mobile API
+MOBILE_API_ENABLED = os.getenv("MOBILE_API_ENABLED", "1") == "1"
+
+# CORS Configuration - Scoped to Mobile API only
+# Only applies to /api/mobile/* paths to avoid affecting main website
+CORS_URLS_REGEX = r"^/api/mobile/.*$"
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://192.168.100.53:8000",  # Mac IP for iOS physical device testing
+    "https://neuromedai.org",
+    "https://www.neuromedai.org",
+]
+
+# For development: Allow all local network IPs (optional, more permissive)
+# Uncomment this for easier testing, but restrict in production:
+# CORS_ALLOWED_ORIGIN_REGEXES = [
+#     r"^http://192\.168\.\d+\.\d+:8000$",  # Allow any 192.168.x.x IP
+# ]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
 
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/login/'
@@ -209,6 +264,17 @@ CSRF_COOKIE_HTTPONLY = False       # Allow JavaScript/native apps to read the co
 CSRF_COOKIE_SAMESITE = 'Lax'       # 'None' if you need cross-site requests (requires HTTPS)
 CSRF_COOKIE_NAME = 'csrftoken'     # Default name, explicit for clarity
 CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'  # Default header name Django expects
+
+# Exempt API endpoints from CSRF (they use token authentication)
+CSRF_TRUSTED_ORIGINS = [
+    "https://neuromedai.org",
+    "https://*.neuromedai.org",
+    "https://medai-production-21ae.up.railway.app",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://*.localtest.me:8000",
+    "http://*.lvh.me:8000",
+]
 
 
 import os

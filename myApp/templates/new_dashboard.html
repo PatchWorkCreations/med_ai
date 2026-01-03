@@ -945,7 +945,7 @@ body.geriatric-zoom button {
     </aside>
     
     <!-- Zone 2: Main Chat Area -->
-    <main class="flex-1 flex flex-col h-full overflow-hidden bg-gradient-to-br from-white to-gray-50/50">
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-gradient-to-br from-white to-gray-50/50 relative">
       <!-- Header -->
       <header class="px-6 py-4 border-b border-gray-200/80 bg-white/80 backdrop-blur-sm">
         <div class="flex items-center justify-between">
@@ -1000,6 +1000,29 @@ body.geriatric-zoom button {
             </button>
             <button class="chip" onclick="quickPrompt('Draft caregiver-friendly plan')">
               Caregiver plan
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Centered First Message View (overlays main content area only) -->
+      <div id="firstMessageView" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-white to-gray-50/50 z-10">
+        <h2 id="firstMessageHeading" class="text-2xl font-medium text-gray-900 mb-8">Hi there! How can I help you?</h2>
+        <div class="w-full max-w-2xl px-4">
+          <div class="flex items-center gap-3 bg-white border border-gray-300 rounded-full px-4 py-4 shadow-sm">
+            <button id="firstAttachBtn" class="shrink-0 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition">
+              <i class="fa-solid fa-plus text-gray-600 text-sm"></i>
+            </button>
+            <input type="file" id="firstFileInput" class="hidden" multiple accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic" />
+            <input type="text" 
+                   id="firstChatInput" 
+                   placeholder="Ask anything" 
+                   class="flex-1 min-w-0 text-base border-none focus:outline-none bg-transparent" />
+            <button id="firstMicBtn" class="shrink-0 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition">
+              <i class="fa-solid fa-microphone text-gray-600 text-sm"></i>
+            </button>
+            <button id="firstSendBtn" class="shrink-0 w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-900 text-white flex items-center justify-center transition">
+              <i class="fa-solid fa-arrow-up text-sm"></i>
             </button>
           </div>
         </div>
@@ -1865,6 +1888,9 @@ async function openSession(id) {
     const chatWindow = document.getElementById('chatWindow');
     if (chatWindow) chatWindow.innerHTML = '';
     
+    // Ensure we're in normal chat view (not first message view)
+    transitionToNormalChat();
+    
     // Hide empty state
     const emptyState = document.getElementById('emptyState');
     if (emptyState) emptyState.classList.add('hidden');
@@ -1906,12 +1932,114 @@ async function openSession(id) {
   }
 }
 
+// Helper function to initialize a new chat (used for automatic initialization on login)
+async function initializeNewChat() {
+  const chatWindow = document.getElementById('chatWindow');
+  if (chatWindow) {
+    chatWindow.innerHTML = '';
+    const emptyState = document.getElementById('emptyState');
+    if (emptyState) emptyState.classList.add('hidden');
+  }
+  
+  clearPending();
+  
+  try {
+    // Create new session
+    const res = await fetch('/api/chat/sessions/new/', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': getCSRFToken() },
+      credentials: 'include'
+    });
+    
+    if (!res.ok) {
+      throw new Error('Failed to create session');
+    }
+    
+    const data = await res.json();
+    
+    if (data.session_id) {
+      setSessionId(data.session_id);
+      await refreshSessionList();
+    }
+    
+    // Show first message view (centered, minimal)
+    showFirstMessageView();
+    
+  } catch (err) {
+    console.error('Failed to initialize new chat:', err);
+    // Still show first message view even if session creation fails
+    showFirstMessageView();
+  }
+}
+
+// Show the centered first message view
+async function showFirstMessageView() {
+  const firstMessageView = document.getElementById('firstMessageView');
+  const composer = document.getElementById('composer');
+  const chatWindow = document.getElementById('chatWindow');
+  const heading = document.getElementById('firstMessageHeading');
+  
+  if (firstMessageView) {
+    // Fetch user name and update heading
+    try {
+      const res = await fetch('/api/user/settings/', { credentials: 'include' });
+      const data = await res.json();
+      const name = data.display_name || 'there';
+      if (heading) {
+        heading.textContent = `Hi ${name}! How can I help you?`;
+      }
+    } catch (err) {
+      console.error('Failed to load user settings:', err);
+      // Keep default text if API fails
+      if (heading) {
+        heading.textContent = 'Hi there! How can I help you?';
+      }
+    }
+    
+    firstMessageView.classList.remove('hidden');
+    // Hide composer for minimal first view (sidebar stays visible)
+    if (composer) composer.style.display = 'none';
+    // Hide chat window content
+    if (chatWindow) {
+      chatWindow.style.display = 'none';
+    }
+  }
+}
+
+// Transition from first message view to normal chat interface
+function transitionToNormalChat() {
+  const firstMessageView = document.getElementById('firstMessageView');
+  const composer = document.getElementById('composer');
+  const chatWindow = document.getElementById('chatWindow');
+  
+  // Hide first message view
+  if (firstMessageView) {
+    firstMessageView.classList.add('hidden');
+  }
+  
+  // Show composer and chat window
+  if (composer) {
+    composer.style.display = '';
+  }
+  
+  // Ensure chat window is visible
+  if (chatWindow) {
+    chatWindow.style.display = '';
+  }
+  
+  // Focus the regular input
+  const regularInput = document.getElementById('chatInput');
+  if (regularInput) {
+    setTimeout(() => regularInput.focus(), 100);
+  }
+}
+
 async function newChat() {
   const chatWindow = document.getElementById('chatWindow');
   if (chatWindow) {
     chatWindow.innerHTML = '';
     const emptyState = document.getElementById('emptyState');
-    if (emptyState) emptyState.classList.add('hidden'); // Hide empty state, we'll show greeting bubble
+    if (emptyState) emptyState.classList.add('hidden');
   }
   
   clearSessionId();
@@ -1936,14 +2064,14 @@ async function newChat() {
       await refreshSessionList();
     }
     
-    // Show greeting as AI bubble
-    await greetUser(true);
+    // Show first message view (centered, minimal)
+    showFirstMessageView();
     
   } catch (err) {
     console.error('Failed to create new chat:', err);
     showToast('Failed to create new chat', 'error');
-    // Still show greeting even if session creation fails
-    await greetUser(true);
+    // Still show first message view even if session creation fails
+    showFirstMessageView();
   }
 }
 
@@ -1954,11 +2082,11 @@ async function greetUser(showBubble = false) {
     const name = data.display_name || 'there';
     
     const greetings = [
-      `Hi ${name}! 👋 I'm NeuroMed AI, your medical assistant. I'm here to help you understand your health information, analyze medical documents, and answer your questions. What would you like to explore today?`,
-      `Welcome, ${name}! 🌟 I'm NeuroMed AI, ready to assist you with medical information, document analysis, and health questions. Feel free to share documents, images, or ask me anything.`,
-      `Hello ${name}! 💙 I'm NeuroMed AI. I can help you understand medical documents, analyze health images, and provide clear explanations. What can I help you with today?`,
-      `Hi there, ${name}! 🏥 I'm NeuroMed AI, your medical guide. I'm here to translate medical jargon, review documents, and help you make sense of your health information. How can I assist you?`,
-      `Welcome back, ${name}! ✨ I'm NeuroMed AI. Whether you have questions about symptoms, need help understanding test results, or want to review medical documents, I'm here to help. What's on your mind?`,
+      `Hi ${name}! 👋 I'm your medical assistant. I'm here to help you understand your health information, analyze medical documents, and answer your questions. What would you like to explore today?`,
+      `Welcome, ${name}! 🌟 I'm ready to assist you with medical information, document analysis, and health questions. Feel free to share documents, images, or ask me anything.`,
+      `Hello ${name}! 💙 I can help you understand medical documents, analyze health images, and provide clear explanations. What can I help you with today?`,
+      `Hi there, ${name}! 🏥 I'm your medical guide. I'm here to translate medical jargon, review documents, and help you make sense of your health information. How can I assist you?`,
+      `Welcome back, ${name}! ✨ Whether you have questions about symptoms, need help understanding test results, or want to review medical documents, I'm here to help. What's on your mind?`,
     ];
     
     const greeting = greetings[Math.floor(Math.random() * greetings.length)];
@@ -1967,13 +2095,15 @@ async function greetUser(showBubble = false) {
     const greetingEl = document.getElementById('greetingText');
     if (greetingEl) greetingEl.textContent = greeting.split('!')[0] + '!';
     
-    // Show greeting as AI chat bubble if requested
+    // Show greeting as AI chat bubble if requested (only for restored sessions with no messages)
     if (showBubble) {
       const chatWindow = document.getElementById('chatWindow');
       const emptyState = document.getElementById('emptyState');
+      const firstMessageView = document.getElementById('firstMessageView');
       
-      // Only show bubble if chat window is empty (no messages)
-      if (chatWindow && chatWindow.children.length === 0) {
+      // Only show bubble if we're not in first message view and chat window is empty
+      if (chatWindow && chatWindow.children.length === 0 && 
+          (!firstMessageView || firstMessageView.classList.contains('hidden'))) {
         // Hide empty state
         if (emptyState) emptyState.classList.add('hidden');
         
@@ -1988,9 +2118,11 @@ async function greetUser(showBubble = false) {
     if (showBubble) {
       const chatWindow = document.getElementById('chatWindow');
       const emptyState = document.getElementById('emptyState');
-      if (chatWindow && chatWindow.children.length === 0) {
+      const firstMessageView = document.getElementById('firstMessageView');
+      if (chatWindow && chatWindow.children.length === 0 && 
+          (!firstMessageView || firstMessageView.classList.contains('hidden'))) {
         if (emptyState) emptyState.classList.add('hidden');
-        appendChatBubble('assistant', 'Hi there! 👋 I\'m NeuroMed AI, your medical assistant. How can I help you today?', false);
+        appendChatBubble('assistant', 'Hi there! 👋 I\'m your medical assistant. How can I help you today?', false);
       }
     }
   }
@@ -2247,13 +2379,28 @@ async function confirmDelete() {
 async function sendChat() {
   if (chatLocked) return;
   
-  const inputEl = document.getElementById('chatInput');
+  // Check if we're using the first message view
+  const firstMessageView = document.getElementById('firstMessageView');
+  const isFirstMessage = firstMessageView && !firstMessageView.classList.contains('hidden');
+  
+  const firstInputEl = document.getElementById('firstChatInput');
+  const regularInputEl = document.getElementById('chatInput');
+  const inputEl = isFirstMessage ? firstInputEl : regularInputEl;
   const text = (inputEl?.value || '').trim();
   
   // Validation: must have text or files
   if (!text && pending.length === 0) {
     showToast('Please enter a message or attach files', 'info');
     return;
+  }
+  
+  // If this is the first message, transition to normal chat view and copy text
+  if (isFirstMessage) {
+    transitionToNormalChat();
+    // Copy text from first input to regular input
+    if (text && regularInputEl) {
+      regularInputEl.value = text;
+    }
   }
   
   chatLocked = true;
@@ -2303,8 +2450,10 @@ async function sendChat() {
     appendChatBubble('user', userContent);
   }
   
-  // Clear input
+  // Clear input (both first message and regular input)
   if (inputEl) inputEl.value = '';
+  const regularInput = document.getElementById('chatInput');
+  if (regularInput) regularInput.value = '';
   
   // Show typing indicator with context-aware message
   let typingContext = 'Analyzing...';
@@ -3684,6 +3833,54 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.error('Chat input not found!');
     }
     
+    // First message view input handlers
+    const firstChatInput = document.getElementById('firstChatInput');
+    const firstSendBtn = document.getElementById('firstSendBtn');
+    const firstMicBtn = document.getElementById('firstMicBtn');
+    const firstAttachBtn = document.getElementById('firstAttachBtn');
+    const firstFileInput = document.getElementById('firstFileInput');
+    
+    if (firstChatInput) {
+      firstChatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendChat();
+        }
+      });
+    }
+    
+    if (firstSendBtn) {
+      firstSendBtn.addEventListener('click', () => {
+        sendChat();
+      });
+    }
+    
+    if (firstAttachBtn && firstFileInput) {
+      firstAttachBtn.addEventListener('click', () => {
+        firstFileInput.click();
+      });
+      firstFileInput.addEventListener('change', (e) => {
+        if (e.target.files) {
+          addFiles(e.target.files);
+          // Transition to normal view when files are added
+          transitionToNormalChat();
+        }
+        e.target.value = '';
+      });
+    }
+    
+    // First message mic button (can reuse voice dictation logic)
+    if (firstMicBtn) {
+      firstMicBtn.addEventListener('click', () => {
+        // Transition to normal view and trigger mic
+        transitionToNormalChat();
+        setTimeout(() => {
+          const micBtn = document.getElementById('micBtn');
+          if (micBtn) micBtn.click();
+        }, 200);
+      });
+    }
+    
     // New chat button
     const newChatBtn = document.getElementById('newChatBtn');
     if (newChatBtn) {
@@ -3808,7 +4005,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       showToast('Failed to load chat history. Please refresh the page.', 'error');
     }
     
-    // Try to restore last session
+    // Try to restore last session, or create new one automatically
     const sid = getSessionId();
     if (sid) {
       console.log('Restoring last session:', sid);
@@ -3823,12 +4020,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       } catch (err) {
         console.error('Failed to restore session:', err);
         clearSessionId();
-        // Show greeting if session restore failed
-        await greetUser(true);
+        // Automatically create new session and show greeting
+        await initializeNewChat();
       }
     } else {
-      // No session to restore, show greeting
-      await greetUser(true);
+      // No session exists - automatically create new chat and show greeting
+      console.log('No session found - creating new chat automatically');
+      await initializeNewChat();
     }
     
     // Window resize handler

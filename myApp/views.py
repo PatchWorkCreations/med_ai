@@ -41,7 +41,7 @@ from .models import ChatSession
 
 # myApp/emailer.py
 import json, logging, requests
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Union
 from django.conf import settings
 
 log = logging.getLogger(__name__)
@@ -53,12 +53,12 @@ RESEND_REPLY_TO = settings.RESEND.get("REPLY_TO")
 
 def send_via_resend(
     *,
-    to: Iterable[str] | str,
+    to: Union[Iterable[str], str],
     subject: str,
     text: Optional[str] = None,
     html: Optional[str] = None,
     from_email: Optional[str] = None,
-    reply_to: Optional[Iterable[str] | str] = None,
+    reply_to: Optional[Union[Iterable[str], str]] = None,
     cc: Optional[Iterable[str]] = None,
     bcc: Optional[Iterable[str]] = None,
     tags: Optional[dict] = None,
@@ -136,7 +136,7 @@ def _index_known_image(request, display_name: str, abs_path: Path):
     request.session[SESSION_IMAGE_INDEX] = idx
     request.session.modified = True
 
-def _resolve_indexed_image(request, filename: str) -> Path | None:
+def _resolve_indexed_image(request, filename: str) -> Optional[Path]:
     idx = request.session.get(SESSION_IMAGE_INDEX, {})
     rel = idx.get(filename.lower())
     if not rel:
@@ -144,7 +144,7 @@ def _resolve_indexed_image(request, filename: str) -> Path | None:
     p = Path(settings.MEDIA_ROOT) / rel
     return p if p.exists() else None
 
-def _scan_user_media_for_name(user, filename: str) -> Path | None:
+def _scan_user_media_for_name(user, filename: str) -> Optional[Path]:
     """Fallback: look for exact filename in the user's media dir."""
     base = _user_media_root(user)
     target = filename.lower()
@@ -224,7 +224,7 @@ AUTO_PROMPT = (
     "Keep it warm, clear, practical, and invite follow-up."
 )
 
-def _parse_bilingual_code(t: str) -> str | None:
+def _parse_bilingual_code(t: str) -> Optional[str]:
     # Accept forms like BilingualEsEn, BilingualFrEn, BilingualJaEn, etc.
     m = re.match(r"^Bilingual([A-Za-z]{2})En$", t or "")
     return m.group(1) if m else None
@@ -310,7 +310,7 @@ def _classify_mode(user_message: str, has_files: bool, session: dict) -> tuple[s
     return "EXPLAIN", ""
 
 
-def build_system_prompt(tone: str, care_setting: str | None, faith_setting: str | None, lang: str) -> str:
+def build_system_prompt(tone: str, care_setting: Optional[str], faith_setting: Optional[str], lang: str) -> str:
     base = get_system_prompt(tone)
 
     if tone in ("Clinical", "Caregiver") and care_setting:
@@ -507,27 +507,48 @@ PROMPT_TEMPLATES = {
 
 
 
-def normalize_tone(tone: str | None) -> str:
+def normalize_tone(tone: Optional[str]) -> str:
     """
     Normalize tone names. Defaults to PlainClinical if not matched.
+    Handles various formats:
+    - "plain_clinical" -> "PlainClinical"
+    - "PlainClinical" -> "PlainClinical"
+    - "plainclinical" -> "PlainClinical"
+    - "plain" -> "PlainClinical"
     """
     if not tone:
         return "PlainClinical"
     t = str(tone).strip()
 
+    # Convert underscore-separated to PascalCase (e.g., "plain_clinical" -> "PlainClinical")
+    if '_' in t:
+        t = ''.join(word.capitalize() for word in t.split('_'))
+    
     # exact key match (case-insensitive)
     key = next((k for k in PROMPT_TEMPLATES.keys() if k.lower() == t.lower()), None)
     if key:
         return key
 
     # legacy aliases
-    if t.lower() in {"plain", "science", "default", "balanced"}:
+    if t.lower() in {"plain", "science", "default", "balanced", "plainclinical"}:
         return "PlainClinical"
+    
+    # Handle common variations
+    tone_map = {
+        "caregiver": "Caregiver",
+        "emotional": "EmotionalSupport",
+        "emotional_support": "EmotionalSupport",
+        "geriatric": "Geriatric",
+        "clinical": "Clinical",
+        "bilingual": "Bilingual",
+    }
+    if t.lower() in tone_map:
+        return tone_map[t.lower()]
 
     return "PlainClinical"
 
 
-def get_system_prompt(tone: str | None) -> str:
+def get_system_prompt(tone: Optional[str]) -> str:
     """
     Return the base tone-specific system prompt.
     """
@@ -578,7 +599,7 @@ def get_setting_prompt(base_prompt: str, care_setting: str) -> str:
 
 
 VALID_SETTINGS = {"hospital", "ambulatory", "urgent"}
-def norm_setting(val: str | None) -> str:
+def norm_setting(val: Optional[str]) -> str:
     v = (val or "hospital").lower().strip()
     return v if v in VALID_SETTINGS else "hospital"
 
@@ -1243,7 +1264,7 @@ def _ai_title(user_message: str, files, reply: str, lang: str = "en-US", max_len
 
 VALID_FAITH_SETTINGS = {"general", "christian", "muslim", "hindu", "buddhist", "jewish"}
 
-def norm_faith_setting(val: str | None) -> str:
+def norm_faith_setting(val: Optional[str]) -> str:
     v = (val or "general").lower().strip()
     return v if v in VALID_FAITH_SETTINGS else "general"
 

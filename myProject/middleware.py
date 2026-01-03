@@ -1,14 +1,27 @@
-import os
-from django.shortcuts import render
+"""
+Custom middleware for the project.
+"""
+from django.utils.deprecation import MiddlewareMixin
 
-class BusyModeMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
 
-    def __call__(self, request):
-        # Toggle via env var or cache/feature flag
-        if os.environ.get("NM_BUSY_MODE") == "1":
-            resp = render(request, "503.html", status=503)
-            resp["Retry-After"] = "120"
-            return resp
-        return self.get_response(request)
+class DisableCSRFForAPI(MiddlewareMixin):
+    """
+    Disable CSRF protection for mobile API endpoints only.
+    Mobile API uses token-based authentication, not session-based.
+    Main website API endpoints still use CSRF protection.
+    """
+    def process_request(self, request):
+        # Only disable CSRF for mobile API paths to avoid affecting main website
+        if request.path.startswith('/api/mobile/'):
+            setattr(request, '_dont_enforce_csrf_checks', True)
+        return None
+
+
+class BusyModeMiddleware(MiddlewareMixin):
+    """
+    Placeholder middleware for busy mode functionality.
+    Can be implemented later if needed.
+    """
+    def process_request(self, request):
+        # Placeholder - no action needed
+        return None

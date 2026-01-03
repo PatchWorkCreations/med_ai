@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json, os, re, uuid
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Union
 from datetime import timedelta
 
 from django import forms
@@ -610,7 +610,7 @@ def kiosk_consent(request):
 # -----------------------------
 # Ops: Launch links & device control
 # -----------------------------
-def _primary_domain(org: Org) -> str | None:
+def _primary_domain(org: Org) -> Optional[str]:
     dom = org.domains.filter(is_primary=True).first()
     return dom.domain if dom else None
 
@@ -618,7 +618,7 @@ def _portal_login_url_for(org: Org) -> str:
     domain = _primary_domain(org) or "neuromedai.org"
     return f"https://{domain}/portal/login/"
 
-def _email_credentials(to_email: str, org: Org, password: str | None):
+def _email_credentials(to_email: str, org: Org, password: Optional[str]):
     try:
         subject = f"Your NeuroMed AI Portal Access – {org.name}"
         login_url = _portal_login_url_for(org)
@@ -997,7 +997,7 @@ def _normalize_negatives(fields: dict, message: str) -> dict:
     return out
 
 
-def _llm_triage_turn(message: str, history: List[Dict[str, str]] | None = None, tone: str = "PlainClinical"):
+def _llm_triage_turn(message: str, history: Optional[List[Dict[str, str]]] = None, tone: str = "PlainClinical"):
     history = history or []
     default_reply = "Thanks—how long has this been going on, and is the pain mild, moderate, or severe?"
     sys_prompt = get_system_prompt(tone) + "\n" + TRIAGE_FORMAT_PROMPT
@@ -1049,7 +1049,7 @@ QUICK_OPTIONS = {
     "red_flags": ["none", "chest pain", "trouble breathing", "weakness/numbness", "severe bleeding", "anaphylaxis"],
 }
 
-def _next_slot(fields: dict) -> str | None:
+def _next_slot(fields: dict) -> Optional[str]:
     order = ["red_flags", "duration", "severity", "location", "onset", "modifiers"]
     for key in order:
         v = fields.get(key)
