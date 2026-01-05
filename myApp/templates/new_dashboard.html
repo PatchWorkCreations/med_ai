@@ -3192,6 +3192,12 @@ function appendChatBubble(role, content, isHistory = false) {
   const emptyState = document.getElementById('emptyState');
   if (emptyState) emptyState.classList.add('hidden');
   
+  // Hide first message view when messages are added
+  const firstMessageView = document.getElementById('firstMessageView');
+  if (firstMessageView && !firstMessageView.classList.contains('hidden')) {
+    transitionToNormalChat();
+  }
+  
   const bubbleWrap = document.createElement('div');
   bubbleWrap.className = `w-full flex mb-3 ${role === 'user' ? 'justify-end' : 'justify-start'}`;
   
@@ -3912,7 +3918,7 @@ async function openSession(id) {
     const chatWindow = document.getElementById('chatWindow');
     if (chatWindow) chatWindow.innerHTML = '';
     
-    // Ensure we're in normal chat view (not first message view)
+    // Ensure we're in normal chat view (not first message view) - do this FIRST
     transitionToNormalChat();
     
     // Hide empty state
@@ -3925,6 +3931,8 @@ async function openSession(id) {
       // No messages in session, show AI greeting instead of empty state
       await greetUser(true);
     } else {
+      // Session has messages - ensure first message view is definitely hidden
+      transitionToNormalChat();
       let hasImagesInHistory = false;
       messages.forEach(m => {
         if (m && (m.role === 'user' || m.role === 'assistant') && m.content) {
@@ -3941,6 +3949,9 @@ async function openSession(id) {
           }
         }
       });
+      
+      // Final check - ensure first message view is hidden after loading messages
+      transitionToNormalChat();
       // Update images badge if images found in history
       if (hasImagesInHistory) {
         localStorage.setItem('has_uploaded_images', 'true');
@@ -4843,6 +4854,9 @@ async function sendChat() {
     
     // Show response
     appendChatBubble('assistant', data.reply);
+    
+    // Ensure first message view is hidden after sending (double-check)
+    transitionToNormalChat();
     
     // Note: Pending files are already cleared above (optimistic UI) - no need to clear again
     
@@ -7319,6 +7333,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sid = getSessionId();
     if (sid) {
       console.log('Restoring last session:', sid);
+      // Ensure first message view is hidden BEFORE loading session (in case it's showing)
+      // This prevents any flash of the first message view when loading existing sessions
+      transitionToNormalChat();
       try {
         await openSession(sid);
         console.log('Session restored successfully');
@@ -7326,6 +7343,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const chatWindow = document.getElementById('chatWindow');
         if (chatWindow && chatWindow.children.length === 0) {
           await greetUser(true);
+        } else {
+          // Session has messages - ensure first message view is definitely hidden
+          transitionToNormalChat();
         }
       } catch (err) {
         console.error('Failed to restore session:', err);
