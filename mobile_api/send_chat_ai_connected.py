@@ -140,24 +140,14 @@ def send_chat(request):
     
     print(f"🤖 CHAT: Calling OpenAI with {len(chat_history)} messages...")
     
-    # Call OpenAI - Two-pass system
+    # Call OpenAI - OPTIMIZED: Single pass for faster responses
     try:
-        # Pass 1: Raw response (accurate)
-        raw = client.chat.completions.create(
-            model="gpt-4o",
-            temperature=0.6,
-            messages=chat_history,
-        ).choices[0].message.content.strip()
-        
-        # Pass 2: Polish tone (warm)
+        # Single optimized call with balanced temperature for both accuracy and warmth
+        # The system_prompt already includes tone instructions, so we don't need a second pass
         polished = client.chat.completions.create(
             model="gpt-4o",
-            temperature=0.3,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "system", "content": header},
-                {"role": "user", "content": f"Rewrite warmly, clearly, and confidently:\n\n{raw}"},
-            ],
+            temperature=0.5,  # Balanced between accuracy (0.3) and creativity (0.6)
+            messages=chat_history,
         ).choices[0].message.content.strip()
         
         print(f"✅ CHAT: AI response generated ({len(polished)} chars)")

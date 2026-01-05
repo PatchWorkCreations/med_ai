@@ -1686,18 +1686,14 @@ def send_chat(request):
         session_obj.updated_at = timezone.now()
         session_obj.save(update_fields=["messages", "updated_at", "title", "tone", "lang"])
 
-    # --- Call the model (your existing flow)
+    # --- Call the model (OPTIMIZED: Single pass instead of two-pass for faster responses)
     try:
-        raw = client.chat.completions.create(
-            model="gpt-4o", temperature=0.6, messages=chat_history,
-        ).choices[0].message.content.strip()
-
+        # Single optimized call with balanced temperature for both accuracy and warmth
+        # The system_prompt already includes tone instructions, so we don't need a second pass
         reply = client.chat.completions.create(
-            model="gpt-4o", temperature=0.3, messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "system", "content": header},
-                {"role": "user",   "content": f"Rewrite warmly, clearly, and confidently:\n\n{raw}"},
-            ],
+            model="gpt-4o", 
+            temperature=0.5,  # Balanced between accuracy (0.3) and creativity (0.6)
+            messages=chat_history,
         ).choices[0].message.content.strip()
 
         if use_db:
@@ -2504,8 +2500,17 @@ def export_users_list(request, format_type='csv'):
 @login_required
 def get_user_settings(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
+    
+    # Construct full name from first_name + last_name, fallback to display_name, then username
+    full_name = None
+    if request.user.first_name or request.user.last_name:
+        full_name = f"{request.user.first_name or ''} {request.user.last_name or ''}".strip()
+    
     return JsonResponse({
-        "display_name": profile.display_name or request.user.first_name or request.user.username,
+        "display_name": profile.display_name or "",
+        "first_name": request.user.first_name or "",
+        "last_name": request.user.last_name or "",
+        "full_name": full_name or profile.display_name or request.user.username,
         "profession": profile.profession or "",
         "language": profile.language,  # ✅ include language
     })

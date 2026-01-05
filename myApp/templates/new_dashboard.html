@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -12,7 +12,37 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/static/pwa/icons/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/static/pwa/icons/favicon-16.png">
   <meta name="theme-color" content="#236092">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <!-- FontAwesome - Using jsDelivr CDN (more reliable) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" />
+  
+  <!-- Apply theme IMMEDIATELY to prevent flash of wrong theme -->
+  <script>
+    (function() {
+      const savedAppearance = localStorage.getItem('nm_appearance') || 'system';
+      const root = document.documentElement;
+      
+      if (savedAppearance === 'system') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        root.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+      } else {
+        root.setAttribute('data-theme', savedAppearance);
+      }
+      
+      // Apply accent color immediately
+      const savedAccentColor = localStorage.getItem('nm_accent_color') || 'default';
+      const accentMap = {
+        'default': { main: '#28926D', light: '#10b981', focusRing: 'rgba(40, 146, 109, 0.4)' },
+        'green': { main: '#28926D', light: '#10b981', focusRing: 'rgba(40, 146, 109, 0.4)' },
+        'blue': { main: '#236092', light: '#3B82F6', focusRing: 'rgba(35, 96, 146, 0.4)' },
+        'purple': { main: '#7C3AED', light: '#A78BFA', focusRing: 'rgba(124, 58, 237, 0.4)' },
+        'red': { main: '#DC2626', light: '#EF4444', focusRing: 'rgba(220, 38, 38, 0.4)' }
+      };
+      const accentData = accentMap[savedAccentColor] || accentMap['default'];
+      root.style.setProperty('--nm-accent', accentData.main);
+      root.style.setProperty('--nm-accent-light', accentData.light);
+      root.style.setProperty('--nm-accent-focus-ring', accentData.focusRing);
+    })();
+  </script>
   
 <style>
 /* ============================================
@@ -20,33 +50,105 @@
    Medical-grade minimalism: bright, airy, ultra-readable
    ============================================ */
 
-:root {
-  /* Brand tokens */
+/* ============================================
+   DESIGN TOKEN SYSTEM - SINGLE SOURCE OF TRUTH
+   All colors centralized here - NO hard-coded colors elsewhere
+   ============================================ */
+
+:root,
+[data-theme="light"] {
+  /* Brand tokens - consistent across themes */
   --nm-primary: #236092;
   --nm-primary-dark: #1B5A8E;
+  
+  /* Accent colors - user selectable (default: green) */
   --nm-accent: #28926D;
   --nm-accent-light: #10b981;
+  --nm-accent-focus-ring: rgba(40, 146, 109, 0.4);
+  --nm-accent-softer: #2d9f7a;
   
-  /* Paper & glass surfaces */
+  /* Background surfaces - Light mode */
+  --nm-bg-body-start: #f8fafc;
+  --nm-bg-body-end: #f1f5f9;
   --nm-paper: #ffffff;
   --nm-glass: rgba(255, 255, 255, 0.85);
   --nm-glass-border: rgba(229, 231, 235, 0.8);
   --nm-frost: rgba(255, 255, 255, 0.95);
+  --nm-bg-table-header: #f8fafc;
+  --nm-bg-code: #f1f5f9;
+  --nm-bg-blockquote: #f8fafc;
+  --nm-bg-dropzone: #f0fdfa;
+  --nm-bg-dropzone-hover: #f0fdfa;
+  --nm-bg-attachment-card: #f8fafc;
+  --nm-bg-attachment-ready: #d1fae5;
+  --nm-bg-attachment-queued: #dbeafe;
+  --nm-bg-attachment-error: #fee2e2;
+  --nm-bg-skeleton: #f1f5f9;
+  --nm-bg-skeleton-shine: #e2e8f0;
   
-  /* Text hierarchy */
+  /* Chat bubble backgrounds - Light mode */
+  --nm-chat-user-start: #dbeafe;
+  --nm-chat-user-end: #bfdbfe;
+  --nm-chat-ai: #ffffff;
+  --nm-chat-code-bg: #0f172a;
+  --nm-chat-code-text: #f1f5f9;
+  
+  /* Text hierarchy - Light mode */
   --nm-text-primary: #0f172a;
   --nm-text-secondary: #475569;
   --nm-text-muted: #94a3b8;
+  --nm-text-gray-800: #1f2937;
+  --nm-text-gray-700: #374151;
+  --nm-text-gray-600: #4b5563;
+  --nm-text-gray-500: #6b7280;
+  --nm-text-gray-400: #9ca3af;
+  --nm-text-attachment-ready: #065f46;
+  --nm-text-attachment-queued: #1e40af;
+  --nm-text-attachment-error: #991b1b;
   
-  /* Depth & shadows */
+  /* Borders - Light mode */
+  --nm-border-color: rgba(229, 231, 235, 0.8);
+  --nm-border-table: #e2e8f0;
+  --nm-border-dropzone: #cbd5e1;
+  --nm-border-focus: 2px solid var(--nm-accent);
+  
+  /* Shadows - Light mode */
   --nm-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --nm-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --nm-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --nm-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   
-  /* Borders */
-  --nm-border: 1px solid rgba(229, 231, 235, 0.8);
-  --nm-border-focus: 2px solid var(--nm-accent);
+  /* Tone colors - Light mode */
+  --nm-tone-balanced-icon: #236092;
+  --nm-tone-balanced-bg: #e2e8f0;
+  --nm-tone-balanced-text: #334155;
+  --nm-tone-caregiver-icon: #F59E0B;
+  --nm-tone-caregiver-bg: #ffe4e6;
+  --nm-tone-caregiver-text: #9f1239;
+  --nm-tone-faith-icon: #4F46E5;
+  --nm-tone-faith-bg: #e0e7ff;
+  --nm-tone-faith-text: #3730a3;
+  --nm-tone-clinical-icon: #475569;
+  --nm-tone-clinical-bg: #fef9c3;
+  --nm-tone-clinical-text: #92400e;
+  --nm-tone-geriatric-icon: #28926D;
+  --nm-tone-geriatric-bg: #dcfce7;
+  --nm-tone-geriatric-text: #065f46;
+  --nm-tone-emotional-icon: #E11D48;
+  --nm-tone-emotional-bg: #ede9fe;
+  --nm-tone-emotional-text: #6d28d9;
+  
+  /* State colors - Light mode */
+  --nm-state-hover-primary: #1B5A8E;
+  --nm-state-active-selected: #28926D;
+  --nm-state-error: #ef4444;
+  --nm-state-error-border: #ef4444;
+  
+  /* UI element colors - Light mode */
+  --nm-ui-avatar-bg: #236092;
+  --nm-ui-bubble-action-bg: rgba(255, 255, 255, 0.9);
+  --nm-ui-divider: #e5e7eb;
+  --nm-ui-toast-error-border: #ef4444;
   
   /* Spacing */
   --nm-radius: 12px;
@@ -54,13 +156,483 @@
   --nm-radius-xl: 20px;
 }
 
+/* Dark mode theme */
+[data-theme="dark"] {
+  /* Brand tokens - same as light */
+  --nm-primary: #236092;
+  --nm-primary-dark: #1B5A8E;
+  
+  /* Accent colors - same values, different context */
+  --nm-accent: #28926D;
+  --nm-accent-light: #10b981;
+  --nm-accent-focus-ring: rgba(40, 146, 109, 0.4);
+  --nm-accent-softer: #2d9f7a;
+  
+  /* Background surfaces - Dark mode */
+  --nm-bg-body-start: #0f172a;
+  --nm-bg-body-end: #1e293b;
+  --nm-paper: #1e293b;
+  --nm-glass: rgba(30, 41, 59, 0.85);
+  --nm-glass-border: rgba(51, 65, 85, 0.8);
+  --nm-frost: rgba(30, 41, 59, 0.95);
+  --nm-bg-table-header: #334155;
+  --nm-bg-code: #334155;
+  --nm-bg-blockquote: #334155;
+  --nm-bg-dropzone: rgba(15, 23, 42, 0.5);
+  --nm-bg-dropzone-hover: rgba(15, 23, 42, 0.7);
+  --nm-bg-attachment-card: #334155;
+  --nm-bg-attachment-ready: rgba(16, 185, 129, 0.2);
+  --nm-bg-attachment-queued: rgba(59, 130, 246, 0.2);
+  --nm-bg-attachment-error: rgba(239, 68, 68, 0.2);
+  --nm-bg-skeleton: #334155;
+  --nm-bg-skeleton-shine: #475569;
+  
+  /* Chat bubble backgrounds - Dark mode */
+  --nm-chat-user-start: #1e293b;
+  --nm-chat-user-end: #0f172a;
+  --nm-chat-ai: #0b1120;
+  --nm-chat-code-bg: #0f172a;
+  --nm-chat-code-text: #f1f5f9;
+  
+  /* Text hierarchy - Dark mode */
+  --nm-text-primary: #f1f5f9;
+  --nm-text-secondary: #cbd5e1;
+  --nm-text-muted: #64748b;
+  --nm-text-gray-800: #f1f5f9;
+  --nm-text-gray-700: #cbd5e1;
+  --nm-text-gray-600: #94a3b8;
+  --nm-text-gray-500: #64748b;
+  --nm-text-gray-400: #475569;
+  --nm-text-attachment-ready: #10b981;
+  --nm-text-attachment-queued: #3b82f6;
+  --nm-text-attachment-error: #ef4444;
+  
+  /* Borders - Dark mode */
+  --nm-border-color: rgba(51, 65, 85, 0.8);
+  --nm-border-table: #475569;
+  --nm-border-dropzone: #475569;
+  --nm-border-focus: 2px solid var(--nm-accent);
+  
+  /* Shadows - Dark mode (lighter shadows for visibility) */
+  --nm-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --nm-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --nm-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  --nm-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+  
+  /* Tone colors - Dark mode (darker backgrounds, lighter text) */
+  --nm-tone-balanced-icon: #236092;
+  --nm-tone-balanced-bg: #334155;
+  --nm-tone-balanced-text: #cbd5e1;
+  --nm-tone-caregiver-icon: #F59E0B;
+  --nm-tone-caregiver-bg: #7c2d12;
+  --nm-tone-caregiver-text: #fecdd3;
+  --nm-tone-faith-icon: #4F46E5;
+  --nm-tone-faith-bg: #312e81;
+  --nm-tone-faith-text: #c7d2fe;
+  --nm-tone-clinical-icon: #475569;
+  --nm-tone-clinical-bg: #78350f;
+  --nm-tone-clinical-text: #fef3c7;
+  --nm-tone-geriatric-icon: #28926D;
+  --nm-tone-geriatric-bg: #064e3b;
+  --nm-tone-geriatric-text: #d1fae5;
+  --nm-tone-emotional-icon: #E11D48;
+  --nm-tone-emotional-bg: #581c87;
+  --nm-tone-emotional-text: #e9d5ff;
+  
+  /* State colors - Dark mode */
+  --nm-state-hover-primary: #1B5A8E;
+  --nm-state-active-selected: #28926D;
+  --nm-state-error: #ef4444;
+  --nm-state-error-border: #ef4444;
+  
+  /* UI element colors - Dark mode */
+  --nm-ui-avatar-bg: #236092;
+  --nm-ui-bubble-action-bg: rgba(30, 41, 59, 0.9);
+  --nm-ui-divider: #475569;
+  --nm-ui-toast-error-border: #ef4444;
+}
+
+/* ============================================
+   UTILITY CLASSES - Token-based replacements
+   ============================================ */
+
+/* Background utilities */
+.bg-token-primary { background-color: var(--nm-primary) !important; }
+.bg-token-primary-dark { background-color: var(--nm-primary-dark) !important; }
+.bg-token-accent { background-color: var(--nm-accent) !important; }
+.bg-token-accent-light { background-color: var(--nm-accent-light) !important; }
+.bg-token-paper { background-color: var(--nm-paper) !important; }
+
+/* Text utilities */
+.text-token-primary { color: var(--nm-primary) !important; }
+.text-token-accent { color: var(--nm-accent) !important; }
+.text-token-gray-800 { color: var(--nm-text-gray-800) !important; }
+.text-token-gray-700 { color: var(--nm-text-gray-700) !important; }
+.text-token-gray-600 { color: var(--nm-text-gray-600) !important; }
+.text-token-gray-500 { color: var(--nm-text-gray-500) !important; }
+
+/* Border utilities */
+.border-token-accent { border-color: var(--nm-accent) !important; }
+.border-token-gray-200 { border-color: var(--nm-border-color) !important; }
+.border-token-gray-300 { border-color: var(--nm-border-color) !important; }
+
+/* Ring/Focus utilities */
+.focus-ring-accent:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--nm-accent-focus-ring);
+  border-color: var(--nm-accent);
+}
+
+/* Tone icon color utilities */
+.tone-icon-balanced { color: var(--nm-tone-balanced-icon) !important; }
+.tone-icon-caregiver { color: var(--nm-tone-caregiver-icon) !important; }
+.tone-icon-faith { color: var(--nm-tone-faith-icon) !important; }
+.tone-icon-clinical { color: var(--nm-tone-clinical-icon) !important; }
+.tone-icon-geriatric { color: var(--nm-tone-geriatric-icon) !important; }
+.tone-icon-emotional { color: var(--nm-tone-emotional-icon) !important; }
+
+/* Map Tailwind gray classes to tokens for theme compatibility */
+.text-gray-800 { color: var(--nm-text-gray-800) !important; }
+.text-gray-700 { color: var(--nm-text-gray-700) !important; }
+.text-gray-600 { color: var(--nm-text-gray-600) !important; }
+.text-gray-500 { color: var(--nm-text-gray-500) !important; }
+.text-gray-400 { color: var(--nm-text-gray-400) !important; }
+
+.border-gray-200,
+.border-gray-300 { border-color: var(--nm-border-color) !important; }
+
+.bg-white { background-color: var(--nm-paper) !important; }
+.bg-gray-50,
+.bg-gray-100 { background-color: var(--nm-bg-skeleton) !important; }
+.bg-gray-200 { background-color: var(--nm-bg-skeleton-shine) !important; }
+.bg-gray-900 { background-color: var(--nm-text-primary) !important; }
+.bg-gray-800 { background-color: var(--nm-text-gray-800) !important; }
+
+.hover\:bg-gray-100:hover { background-color: var(--nm-bg-skeleton) !important; }
+.hover\:bg-gray-800:hover { background-color: var(--nm-text-gray-800) !important; }
+
+/* Dark mode specific styling for inputs and selects */
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background-color: var(--nm-paper) !important;
+  color: var(--nm-text-primary) !important;
+  border-color: var(--nm-border-color) !important;
+}
+
+[data-theme="dark"] input:focus,
+[data-theme="dark"] textarea:focus,
+[data-theme="dark"] select:focus {
+  background-color: var(--nm-paper) !important;
+  color: var(--nm-text-primary) !important;
+  border-color: var(--nm-accent) !important;
+  box-shadow: 0 0 0 2px var(--nm-accent-focus-ring) !important;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: var(--nm-text-muted) !important;
+}
+
+[data-theme="dark"] select option {
+  background-color: var(--nm-paper) !important;
+  color: var(--nm-text-primary) !important;
+}
+
+/* Dark mode text colors for better visibility */
+[data-theme="dark"] .text-gray-800,
+[data-theme="dark"] h3.text-gray-800,
+[data-theme="dark"] .text-sm.font-medium.text-gray-800 {
+  color: var(--nm-text-primary) !important;
+}
+
+[data-theme="dark"] .text-gray-700 {
+  color: var(--nm-text-secondary) !important;
+}
+
+[data-theme="dark"] .text-gray-500 {
+  color: var(--nm-text-muted) !important;
+}
+
+/* Dark mode borders */
+[data-theme="dark"] .border-gray-100 {
+  border-color: var(--nm-border-color) !important;
+}
+
+/* Dark mode settings section styling */
+[data-theme="dark"] #settingsModal {
+  background: var(--nm-glass) !important;
+}
+
+[data-theme="dark"] #settingsModal .modal-content {
+  background: var(--nm-paper) !important;
+  color: var(--nm-text-primary) !important;
+}
+
+/* Dark mode select dropdown arrow - ensure it's visible */
+[data-theme="dark"] select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23cbd5e1' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
+  background-position: right 0.5rem center !important;
+  background-repeat: no-repeat !important;
+  background-size: 1.5em 1.5em !important;
+  padding-right: 2.5rem !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+}
+
+/* Chat window styling */
+.chat-main-area {
+  background: linear-gradient(135deg, var(--nm-bg-body-start) 0%, var(--nm-bg-body-end) 100%);
+}
+
+.chat-header {
+  border-color: var(--nm-border-color);
+  background: var(--nm-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.chat-window {
+  background: transparent;
+}
+
+/* Dark mode chat window improvements */
+[data-theme="dark"] .chat-window {
+  background: transparent;
+}
+
+[data-theme="dark"] .chat-header {
+  background: var(--nm-glass);
+  border-color: var(--nm-glass-border);
+}
+
+[data-theme="dark"] .chat-header h1,
+[data-theme="dark"] .chat-header .text-gray-800,
+[data-theme="dark"] .chat-header .text-gray-600,
+[data-theme="dark"] .chat-header .text-gray-500 {
+  color: var(--nm-text-primary) !important;
+}
+
+[data-theme="dark"] #emptyState h2,
+[data-theme="dark"] #emptyState .text-gray-800 {
+  color: var(--nm-text-primary) !important;
+}
+
+/* Ensure chat window header text is visible in dark mode */
+[data-theme="dark"] .chat-header-title,
+[data-theme="dark"] header h1.text-gray-800 {
+  color: var(--nm-text-primary) !important;
+}
+
+/* Chat window background should use body gradient */
+.chat-main-area {
+  background: linear-gradient(135deg, var(--nm-bg-body-start) 0%, var(--nm-bg-body-end) 100%);
+  transition: background 0.3s ease;
+}
+
+/* Composer area styling - Floaty like ChatGPT */
+.composer-area {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 16px 24px;
+}
+
+/* Dark mode composer */
+[data-theme="dark"] .composer-area {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+/* Dark mode session cards - ensure text is visible */
+[data-theme="dark"] .session-card {
+  background: var(--nm-paper);
+  border-color: var(--nm-border-color);
+}
+
+[data-theme="dark"] .session-card:hover {
+  background: var(--nm-bg-skeleton);
+}
+
+[data-theme="dark"] .session-card.active {
+  background: var(--nm-bg-dropzone);
+}
+
+[data-theme="dark"] .session-chip {
+  background: var(--nm-bg-skeleton-shine);
+  color: var(--nm-text-secondary);
+}
+
+[data-theme="dark"] .session-title {
+  color: var(--nm-text-primary) !important;
+}
+
+[data-theme="dark"] .session-meta {
+  color: var(--nm-text-muted) !important;
+}
+
+/* Chip styling for dark mode */
+[data-theme="dark"] .chip {
+  background: var(--nm-bg-skeleton);
+  border-color: var(--nm-border-color);
+  color: var(--nm-text-secondary);
+}
+
+[data-theme="dark"] .chip:hover {
+  background: var(--nm-bg-skeleton-shine);
+}
+
+[data-theme="dark"] .chip-label,
+[data-theme="dark"] .chip .text-gray-500 {
+  color: var(--nm-text-muted) !important;
+}
+
+[data-theme="dark"] .chip-value {
+  color: var(--nm-text-primary) !important;
+}
+
+[data-theme="dark"] .chip-arrow,
+[data-theme="dark"] .chip .text-gray-400,
+[data-theme="dark"] .chip .fa-chevron-down {
+  color: var(--nm-text-muted) !important;
+}
+
+[data-theme="dark"] .chip:hover .fa-chevron-down {
+  color: var(--nm-accent) !important;
+}
+
+/* Sidebar logo styling for dark mode */
+[data-theme="dark"] .sidebar-logo-container {
+  background: transparent;
+}
+
+[data-theme="dark"] .sidebar-logo-heart {
+  filter: brightness(1.1) contrast(1.05); /* Slightly brighten logo in dark mode for better visibility */
+}
+
+[data-theme="dark"] .sidebar-logo-icon {
+  color: var(--nm-text-secondary);
+}
+
+[data-theme="dark"] .sidebar-logo-icon:hover {
+  background-color: var(--nm-bg-skeleton);
+  color: var(--nm-text-primary);
+}
+
+[data-theme="dark"] .sidebar-header-container {
+  border-color: var(--nm-border-color);
+  background: var(--nm-glass);
+}
+
+/* Ensure logo is visible in dark mode */
+[data-theme="dark"] .sidebar-logo {
+  opacity: 1;
+  filter: brightness(1.05); /* Slight brightness boost for dark backgrounds */
+}
+
+/* First message view styling */
+.first-message-heading {
+  color: var(--nm-text-primary);
+}
+
+.first-message-input-container {
+  background: var(--nm-paper);
+  border-color: var(--nm-border-color);
+}
+
+.first-message-input {
+  background: transparent;
+  border: none;
+  color: var(--nm-text-primary);
+}
+
+.first-message-input::placeholder {
+  color: var(--nm-text-muted);
+}
+
+.first-message-btn {
+  background: var(--nm-bg-skeleton);
+  color: var(--nm-text-secondary);
+}
+
+.first-message-btn:hover {
+  background: var(--nm-bg-skeleton-shine);
+  color: var(--nm-text-primary);
+}
+
+.first-message-icon {
+  color: var(--nm-text-secondary);
+}
+
+.first-message-btn:hover .first-message-icon {
+  color: var(--nm-text-primary);
+}
+
+/* Dark mode first message view */
+[data-theme="dark"] .first-message-heading {
+  color: var(--nm-text-primary) !important;
+}
+
+[data-theme="dark"] .first-message-input-container {
+  background: var(--nm-paper);
+  border-color: var(--nm-border-color);
+}
+
+[data-theme="dark"] .first-message-input {
+  background: transparent;
+  color: var(--nm-text-primary);
+}
+
+[data-theme="dark"] .first-message-input::placeholder {
+  color: var(--nm-text-muted);
+}
+
+[data-theme="dark"] .first-message-btn {
+  background: var(--nm-bg-skeleton);
+  color: var(--nm-text-secondary);
+}
+
+[data-theme="dark"] .first-message-btn:hover {
+  background: var(--nm-bg-skeleton-shine);
+  color: var(--nm-text-primary);
+}
+
+/* Ensure proper contrast in dark mode */
+[data-theme="dark"] .border-gray-200,
+[data-theme="dark"] .border-gray-300 {
+  border-color: var(--nm-border-color) !important;
+}
+
+/* Dark mode modal and settings improvements */
+[data-theme="dark"] .glass,
+[data-theme="dark"] .glass-strong {
+  background: var(--nm-glass) !important;
+  border-color: var(--nm-glass-border) !important;
+}
+
+[data-theme="dark"] .settings-nav-item {
+  color: var(--nm-text-secondary) !important;
+}
+
+[data-theme="dark"] .settings-nav-item:hover {
+  background-color: var(--nm-bg-skeleton) !important;
+}
+
+[data-theme="dark"] .settings-nav-item.active {
+  background-color: var(--nm-bg-skeleton) !important;
+  color: var(--nm-text-primary) !important;
+}
+
 /* Base */
 body {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: linear-gradient(135deg, var(--nm-bg-body-start) 0%, var(--nm-bg-body-end) 100%);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   color: var(--nm-text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Glass surfaces */
@@ -68,7 +640,7 @@ body {
   background: var(--nm-glass);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: var(--nm-border);
+  border: 1px solid var(--nm-glass-border);
   box-shadow: var(--nm-shadow);
 }
 
@@ -97,7 +669,7 @@ body {
 }
 
 .chat-user {
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  background: linear-gradient(135deg, var(--nm-chat-user-start) 0%, var(--nm-chat-user-end) 100%);
   color: var(--nm-text-primary);
   margin-left: auto;
   margin-right: 0;
@@ -105,7 +677,7 @@ body {
 }
 
 .chat-ai {
-  background: var(--nm-paper);
+  background: var(--nm-chat-ai);
   color: var(--nm-text-primary);
   margin-right: auto;
   margin-left: 0;
@@ -164,14 +736,14 @@ body {
 }
 
 .chat-ai .md-prose table thead {
-  background: #f8fafc;
+  background: var(--nm-bg-table-header);
   position: sticky;
   top: 0;
 }
 
 .chat-ai .md-prose th,
 .chat-ai .md-prose td {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--nm-border-table);
   padding: 8px 12px;
   text-align: left;
 }
@@ -181,13 +753,13 @@ body {
   padding-left: 16px;
   margin: 0.75em 0;
   color: var(--nm-text-secondary);
-  background: #f8fafc;
+  background: var(--nm-bg-blockquote);
   border-radius: 0 8px 8px 0;
   padding: 12px 16px;
 }
 
 .chat-ai .md-prose code {
-  background: #f1f5f9;
+  background: var(--nm-bg-code);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.9em;
@@ -195,8 +767,8 @@ body {
 }
 
 .chat-ai .md-prose pre {
-  background: #0f172a;
-  color: #f1f5f9;
+  background: var(--nm-chat-code-bg);
+  color: var(--nm-chat-code-text);
   padding: 12px;
   border-radius: 8px;
   margin: 0.75em 0;
@@ -229,7 +801,7 @@ body {
   height: 24px;
   border-radius: 6px;
   border: none;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--nm-ui-bubble-action-bg);
   color: var(--nm-text-secondary);
   cursor: pointer;
   display: flex;
@@ -313,7 +885,7 @@ body {
 
 .attachment-card {
   position: relative;
-  background: #f8fafc;
+  background: var(--nm-bg-attachment-card);
   border: var(--nm-border);
   border-radius: 8px;
   padding: 8px;
@@ -322,7 +894,7 @@ body {
 }
 
 .attachment-card:hover {
-  background: #f1f5f9;
+  background: var(--nm-bg-skeleton);
   box-shadow: var(--nm-shadow);
   transform: translateY(-2px);
 }
@@ -346,7 +918,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #e2e8f0;
+  background: var(--nm-bg-skeleton-shine);
   border-radius: 6px;
   margin-bottom: 6px;
   color: var(--nm-text-secondary);
@@ -378,9 +950,9 @@ body {
   font-weight: 500;
 }
 
-.attachment-status.ready { background: #d1fae5; color: #065f46; }
-.attachment-status.queued { background: #dbeafe; color: #1e40af; }
-.attachment-status.error { background: #fee2e2; color: #991b1b; }
+.attachment-status.ready { background: var(--nm-bg-attachment-ready); color: var(--nm-text-attachment-ready); }
+.attachment-status.queued { background: var(--nm-bg-attachment-queued); color: var(--nm-text-attachment-queued); }
+.attachment-status.error { background: var(--nm-bg-attachment-error); color: var(--nm-text-attachment-error); }
 
 .attachment-remove {
   position: absolute;
@@ -410,20 +982,27 @@ body {
   transform: scale(1.1);
 }
 
-/* Dropzone */
+/* Dropzone - ChatGPT-style unified floating bar */
 .dropzone {
-  border: 2px dashed #cbd5e1;
-  border-radius: var(--nm-radius);
-  padding: 24px;
+  border: none;
+  border-radius: 9999px; /* Fully rounded like ChatGPT */
+  padding: 0;
   text-align: center;
   transition: all 0.3s ease;
   background: var(--nm-paper);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+  max-width: 768px;
+  margin: 0 auto;
+}
+
+/* Dark mode shadow */
+[data-theme="dark"] .dropzone {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .dropzone.dragover {
-  border-color: var(--nm-accent);
-  background: #f0fdfa;
-  border-style: solid;
+  background: var(--nm-bg-dropzone-hover);
+  box-shadow: 0 0 0 2px var(--nm-accent-focus-ring);
 }
 
 .dropzone.dragover::before {
@@ -442,6 +1021,108 @@ body {
   box-shadow: var(--nm-shadow-lg);
 }
 
+/* Collapsed sidebar styles */
+.sidebar.sidebar-collapsed {
+  width: 60px !important;
+}
+
+.sidebar.sidebar-collapsed .sidebar-logo-container {
+  width: 24px;
+  justify-content: center;
+  overflow: visible;
+}
+
+.sidebar.sidebar-collapsed .sidebar-logo-heart {
+  display: none !important;
+}
+
+.sidebar.sidebar-collapsed .sidebar-logo-icon {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar.sidebar-expanded .sidebar-logo-heart {
+  display: block !important;
+}
+
+.sidebar.sidebar-expanded .sidebar-logo-icon {
+  display: none !important;
+}
+
+/* Expanded state - full logo */
+.sidebar.sidebar-expanded .sidebar-logo {
+  height: 32px;
+  width: auto;
+}
+
+.sidebar.sidebar-collapsed .sidebar-toggle-btn {
+  display: none !important;
+}
+
+.sidebar.sidebar-expanded .sidebar-toggle-btn {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar.sidebar-expanded .sidebar-icon-svg {
+  color: #6b7280;
+  width: 16px;
+  height: 16px;
+}
+
+/* Show "Open sidebar" panel on hover when collapsed */
+.sidebar.sidebar-collapsed:hover .sidebar-open-hover {
+  display: flex !important;
+}
+
+.sidebar.sidebar-expanded .sidebar-open-hover {
+  display: none !important;
+}
+
+/* Position the hover panel correctly */
+.sidebar.sidebar-collapsed .sidebar-header-container {
+  position: relative;
+}
+
+.sidebar.sidebar-collapsed .sidebar-search-container,
+.sidebar.sidebar-collapsed .sidebar-menu-text,
+.sidebar.sidebar-collapsed .sidebar-badge,
+.sidebar.sidebar-collapsed #sessionListContainer,
+.sidebar.sidebar-collapsed .sidebar-footer-text {
+  display: none !important;
+}
+
+.sidebar.sidebar-collapsed .sidebar-menu-item {
+  justify-content: center;
+  padding: 12px;
+}
+
+.sidebar.sidebar-collapsed .sidebar-menu-item i {
+  margin: 0;
+  font-size: 18px !important;
+}
+
+.sidebar.sidebar-collapsed .sidebar-menu-item svg {
+  width: 22px !important;
+  height: 22px !important;
+  flex-shrink: 0;
+}
+
+.sidebar.sidebar-collapsed .sidebar-user-btn {
+  justify-content: center;
+  padding: 8px;
+  width: 100%;
+}
+
+.sidebar.sidebar-collapsed .sidebar-user-icon {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  flex-shrink: 0;
+}
+
 .session-card {
   background: var(--nm-paper);
   border: var(--nm-border);
@@ -454,13 +1135,13 @@ body {
 }
 
 .session-card:hover {
-  background: #f8fafc;
+  background: var(--nm-bg-skeleton);
   box-shadow: var(--nm-shadow);
   transform: translateX(2px);
 }
 
 .session-card.active {
-  background: #f0fdfa;
+  background: var(--nm-bg-dropzone);
   border-left: 3px solid var(--nm-accent);
   box-shadow: var(--nm-shadow);
 }
@@ -494,7 +1175,7 @@ body {
   font-size: 9px;
   padding: 2px 6px;
   border-radius: 4px;
-  background: #e2e8f0;
+  background: var(--nm-bg-skeleton-shine);
   color: var(--nm-text-secondary);
   font-weight: 500;
 }
@@ -552,7 +1233,7 @@ body {
   border-radius: 9999px;
   font-size: 12px;
   font-weight: 500;
-  background: #f1f5f9;
+  background: var(--nm-bg-skeleton);
   color: var(--nm-text-secondary);
   border: var(--nm-border);
   cursor: pointer;
@@ -561,7 +1242,7 @@ body {
 }
 
 .chip:hover {
-  background: #e2e8f0;
+  background: var(--nm-bg-skeleton-shine);
   transform: translateY(-1px);
   box-shadow: var(--nm-shadow-sm);
 }
@@ -602,6 +1283,13 @@ body {
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
+/* Session menu popover needs higher z-index to appear above session cards */
+.session-menu-popover {
+  z-index: 9999 !important;
+  position: fixed !important;
+  pointer-events: auto !important;
+}
+
 .popover .tone-option {
   position: relative;
   border: 1px solid transparent;
@@ -618,7 +1306,7 @@ body {
 
 /* Active tone option - improved contrast with softer green */
 .popover .tone-option.active-tone {
-  background-color: #2d9f7a !important; /* Softer, lighter green instead of #28926D */
+  background-color: var(--nm-accent-softer) !important;
   color: white !important;
 }
 
@@ -670,6 +1358,137 @@ body {
   animation: scaleIn 0.2s ease-out;
 }
 
+/* Base tone selector styles */
+.base-tone-option.selected {
+  background: var(--nm-accent) !important;
+  border-color: var(--nm-accent) !important;
+  color: white;
+}
+
+.base-tone-option.selected .font-medium,
+.base-tone-option.selected .text-gray-800 {
+  color: white !important;
+}
+
+.base-tone-option.selected .text-gray-500 {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.base-tone-option.selected i:not(.base-tone-check) {
+  color: white !important;
+}
+
+.base-tone-option.selected .base-tone-check {
+  opacity: 1 !important;
+  color: white !important;
+}
+
+/* Mobile responsive settings modal */
+@media (max-width: 768px) {
+  .modal-content {
+    max-width: 100vw;
+    max-height: 100vh;
+    border-radius: 0;
+    flex-direction: column;
+  }
+  
+  /* Hide left navigation panel on mobile */
+  #settingsModal .modal-content > div.hidden.md\:flex {
+    display: none !important;
+  }
+  
+  /* Mobile dropdown styling */
+  #settingsMobileDropdown {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    min-height: 48px;
+    padding: 12px 16px;
+    border: 1px solid var(--nm-border-color);
+    border-radius: var(--nm-radius);
+    background: var(--nm-paper);
+    color: var(--nm-text-primary);
+    flex: 1; /* Takes remaining space, leaving room for X button */
+  }
+  
+  /* Close button on mobile - positioned beside dropdown */
+  #settingsModal .md\:hidden.flex button {
+    min-width: 40px;
+    min-height: 40px;
+  }
+  
+  /* Content area - full width on mobile */
+  #settingsModal .modal-content > div.flex-1 {
+    width: 100% !important;
+    padding: 1rem !important;
+  }
+  
+  #settingsModal .flex-1.overflow-y-auto {
+    padding: 1rem !important;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+  }
+  
+  /* Settings navigation items - hidden on mobile */
+  .settings-nav-item {
+    display: none !important;
+  }
+  
+  /* Stack characteristics on mobile */
+  .grid.grid-cols-1.sm\:grid-cols-2 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Make selects full width on mobile */
+  .flex.items-center.justify-between {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+  }
+  
+  .flex.items-center.justify-between select,
+  .flex.items-center.justify-between > div:last-child {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+  
+  /* Inputs and textareas - mobile friendly */
+  input[type="text"],
+  input[type="email"],
+  textarea,
+  select {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    min-height: 44px !important;
+    padding: 12px 16px !important;
+  }
+  
+  /* Buttons - mobile touch targets */
+  button:not(.chip):not(.tone-option):not(.base-tone-option),
+  .btn-primary {
+    min-height: 44px !important;
+    min-width: 44px !important;
+    padding: 12px 20px !important;
+    font-size: 15px !important;
+  }
+  
+  /* Popovers - mobile full width */
+  .popover,
+  .session-menu-popover {
+    max-width: calc(100vw - 32px) !important;
+    left: 16px !important;
+    right: 16px !important;
+  }
+  
+  /* Search modal - mobile full screen */
+  #searchModal {
+    padding: 1rem !important;
+  }
+  
+  #searchModal .modal-content {
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+  }
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -695,6 +1514,24 @@ body {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* Settings Navigation */
+.settings-nav-item {
+  color: var(--nm-text-gray-600);
+}
+
+.settings-nav-item:hover {
+  background-color: var(--nm-bg-skeleton);
+}
+
+.settings-nav-item.active {
+  background-color: var(--nm-bg-skeleton);
+  color: var(--nm-text-gray-800);
+}
+
+.settings-nav-item.active i {
+  color: var(--nm-text-gray-800);
 }
 
 @keyframes fadeOut {
@@ -728,7 +1565,7 @@ body {
 }
 
 .toast.success { border-left: 3px solid var(--nm-accent); }
-.toast.error { border-left: 3px solid #ef4444; }
+.toast.error { border-left: 3px solid var(--nm-ui-toast-error-border); }
 .toast.info { border-left: 3px solid var(--nm-primary); }
 
 @keyframes slideInRight {
@@ -761,20 +1598,392 @@ body.geriatric-zoom button {
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
-  .chat-bubble {
-    max-width: 85%;
+  /* iOS Safari 100vh fix */
+  @supports (height: 100dvh) {
+    .h-screen {
+      height: 100dvh;
+    }
+  }
+  
+  /* Touch optimization */
+  * {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  
+  button, a {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Sidebar mobile behavior - override hidden class */
+  .sidebar {
+    position: fixed !important;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 50 !important;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    display: flex !important; /* Override hidden class on mobile */
+    width: 320px !important;
+    max-width: 85vw !important;
+  }
+  
+  .sidebar.sidebar-open {
+    transform: translateX(0) !important;
+  }
+  
+  /* Mobile overlay */
+  #mobileOverlay {
+    z-index: 40 !important;
+    display: none;
+  }
+  
+  #mobileOverlay:not(.hidden) {
+    display: block !important;
+    opacity: 1;
+  }
+  
+  /* Ensure main content is visible on mobile */
+  main {
+    width: 100% !important;
+    margin-left: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* Header - mobile optimized */
+  .chat-header {
+    padding: 12px 16px !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+  }
+  
+  .chat-header h1 {
+    font-size: 18px !important;
+    flex: 1;
+    min-width: 0;
+  }
+  
+  /* Logo on mobile header - smaller to fit */
+  .chat-header img {
+    height: 24px !important;
+    width: auto;
+    flex-shrink: 0;
+    object-fit: contain;
+  }
+  
+  /* Globe icon on mobile - no padding, positioned at far right */
+  #langBtn {
+    padding: 0 !important;
+    margin: 0 !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+  }
+  
+  .chat-header > div > div:last-child {
+    gap: 0 !important;
+    margin-left: auto;
+  }
+  
+  /* Hide desktop-only elements on mobile */
+  #activeChips {
+    display: none !important;
+  }
+  
+  /* Hide NEW badge on mobile */
+  #imagesNewBadge {
+    display: none !important;
+  }
+  
+  /* Hide "Select multiple" button on mobile */
+  #toggleBulkSelectContainer {
+    display: none !important;
+  }
+  
+  /* Sidebar menu items - mobile touch targets and left alignment */
+  .sidebar-menu-item {
+    min-height: 48px;
+    padding: 14px 16px !important;
+    justify-content: flex-start !important; /* Force left alignment on mobile */
+  }
+  
+  /* Search input - fix icon overlap on mobile */
+  .sidebar-search-input {
+    padding-left: 2.75rem !important; /* Ensure enough space for icon */
+    padding-right: 0.75rem !important;
+  }
+  
+  .sidebar-search-container .fa-magnifying-glass {
+    left: 0.875rem !important; /* Adjust icon position */
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    pointer-events: none;
+  }
+  
+  /* Session cards - mobile optimized */
+  .session-card {
+    min-height: 60px;
+    padding: 14px 16px !important;
+  }
+  
+  /* User menu button - mobile */
+  .sidebar-user-btn {
+    min-height: 48px;
+    padding: 12px 16px !important;
+  }
+  
+  /* Attachment dock - mobile */
+  .attachment-dock {
+    padding: 12px !important;
+    margin-bottom: 12px;
+  }
+  
+  /* First message view - mobile */
+  #firstMessageView {
+    padding: 24px 16px !important;
+  }
+  
+  .first-message-input-container {
+    padding: 12px !important;
+  }
+  
+  /* Bulk actions - mobile */
+  #bulkActionsBar {
+    padding: 12px 16px !important;
+    flex-wrap: wrap;
+  }
+  
+  #bulkActionsBar button {
+    min-height: 40px;
+    padding: 8px 16px !important;
     font-size: 14px;
   }
   
-  .attachment-grid {
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  /* Chat bubbles - mobile optimized */
+  .chat-bubble {
+    max-width: 85%;
+    font-size: 15px;
+    padding: 12px 16px;
+    line-height: 1.5;
   }
   
+  .chat-user {
+    margin-left: auto;
+    margin-right: 0;
+  }
+  
+  .chat-ai {
+    margin-left: 0;
+    margin-right: auto;
+  }
+  
+  /* Chat window - mobile padding */
+  #chatWindow {
+    padding: 12px 16px;
+    padding-bottom: calc(100px + env(safe-area-inset-bottom));
+  }
+  
+  /* Composer - mobile optimized */
+  .composer-area {
+    padding: 12px 16px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    position: sticky;
+    bottom: 0;
+    background: var(--nm-bg-body-start);
+    z-index: 20;
+  }
+  
+  /* Dropzone - mobile touch targets */
+  .dropzone {
+    padding: 10px 12px;
+    max-width: 100%;
+  }
+  
+  /* Buttons - minimum 44x44px touch target */
+  #attachBtn,
+  #micBtn,
+  #sendBtn,
+  #toneBtn {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  #attachBtn {
+    width: 44px;
+    height: 44px;
+  }
+  
+  #micBtn,
+  #sendBtn {
+    width: 44px;
+    height: 44px;
+  }
+  
+  /* Chat input - mobile optimized */
+  #chatInput {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 12px 16px;
+    min-height: 44px;
+  }
+  
+  /* Header - mobile optimized */
+  .chat-header {
+    padding: 12px 16px;
+  }
+  
+  .chat-header h1 {
+    font-size: 18px;
+  }
+  
+  /* Session cards - mobile optimized */
+  .session-card {
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  
+  .session-title {
+    font-size: 15px;
+  }
+  
+  /* Attachment grid - mobile */
+  .attachment-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+  }
+  
+  /* Toast - mobile full width */
   .toast {
     bottom: 16px;
     right: 16px;
     left: 16px;
     max-width: none;
+    margin: 0;
+  }
+  
+  /* First message view - mobile optimized */
+  #firstMessageView {
+    padding: 24px 16px;
+  }
+  
+  .first-message-heading {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+  
+  .first-message-input-container {
+    padding: 12px;
+  }
+  
+  .first-message-input {
+    font-size: 16px;
+    padding: 14px 16px;
+    min-height: 44px;
+  }
+  
+  /* Settings modal - mobile full screen */
+  #settingsModal .modal-content {
+    max-width: 100vw;
+    max-height: 100vh;
+    border-radius: 0;
+    margin: 0;
+  }
+  
+  /* Jump to latest - mobile position */
+  .jump-to-latest {
+    bottom: calc(100px + env(safe-area-inset-bottom));
+    right: 16px;
+    width: 44px;
+    height: 44px;
+  }
+  
+  /* Bulk actions bar - mobile optimized */
+  #bulkActionsBar {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  /* Search modal - mobile full screen */
+  #searchModal {
+    border-radius: 0;
+  }
+  
+  /* Tone selector - mobile friendly */
+  .tone-option {
+    min-height: 44px;
+    padding: 12px;
+  }
+  
+  /* Base tone selector - mobile grid */
+  #baseStyleToneSelector {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .base-tone-option {
+    min-height: 60px;
+    padding: 16px;
+  }
+}
+
+/* Small phones (<= 375px) */
+@media (max-width: 375px) {
+  .chat-bubble {
+    max-width: 90%;
+    font-size: 14px;
+    padding: 10px 14px;
+  }
+  
+  #chatWindow {
+    padding: 10px 12px;
+  }
+  
+  .composer-area {
+    padding: 10px 12px;
+  }
+  
+  .dropzone {
+    padding: 8px 10px;
+  }
+  
+  .first-message-heading {
+    font-size: 20px;
+  }
+  
+  .session-card {
+    padding: 12px;
+  }
+  
+  .session-title {
+    font-size: 14px;
+  }
+}
+
+/* Very small phones (<= 320px) */
+@media (max-width: 320px) {
+  .chat-bubble {
+    max-width: 95%;
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  
+  #chatInput {
+    font-size: 16px;
+    padding: 10px 12px;
+  }
+  
+  #attachBtn,
+  #micBtn,
+  #sendBtn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .first-message-heading {
+    font-size: 18px;
   }
 }
 
@@ -786,7 +1995,7 @@ body.geriatric-zoom button {
 
 /* Skeleton loaders */
 .skeleton {
-  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background: linear-gradient(90deg, var(--nm-bg-skeleton) 25%, var(--nm-bg-skeleton-shine) 50%, var(--nm-bg-skeleton) 75%);
   background-size: 200% 100%;
   animation: loading 1.5s infinite;
 }
@@ -879,40 +2088,114 @@ body.geriatric-zoom button {
   <div id="appShell" class="w-full h-screen flex overflow-hidden">
     
     <!-- Zone 1: Premium Sidebar -->
-    <aside id="sidebar" class="sidebar w-[320px] flex flex-col h-full overflow-hidden md:flex hidden md:flex">
+    <aside id="sidebar" class="sidebar w-[320px] flex flex-col h-full overflow-hidden hidden md:flex transition-all duration-300 sidebar-expanded sidebar-content">
       <!-- Sidebar Header -->
-      <div class="p-6 border-b border-gray-200/80">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-3">
+      <div class="p-3 border-b border-gray-200/80 relative sidebar-header-container">
+        <div class="flex items-center justify-between w-full">
+          <div class="flex items-center gap-2 justify-center flex-1 sidebar-logo-container overflow-hidden">
+            <!-- Heart Logo (shown when expanded) -->
             <img src="https://res.cloudinary.com/djzks0atj/image/upload/v1759412135/NeuroMed_AI_Logo-10_yassi6.png" 
-                 alt="NeuroMed AI" class="h-8" />
-            
+                 alt="NeuroMed AI" 
+                 class="h-8 sidebar-logo sidebar-logo-heart" />
+            <!-- Sidebar Icon (shown when collapsed) -->
+            <button id="sidebarIconBtn" type="button" class="p-1.5 hover:bg-gray-100 rounded-lg transition sidebar-logo-icon hidden" aria-label="Open sidebar">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="1" y="2" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                <line x1="6" y1="2" x2="6" y2="14" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+            </button>
           </div>
-          <button id="sidebarCollapse" class="p-2 hover:bg-gray-100 rounded-lg transition" aria-label="Collapse sidebar">
-            <i class="fa-solid fa-chevron-left text-gray-600"></i>
+          <button id="toggleHistoryBtn" type="button" class="p-1.5 hover:bg-gray-100 rounded-lg transition sidebar-toggle-btn" aria-label="Toggle sidebar">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="sidebar-icon-svg">
+              <rect x="1" y="2" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+              <line x1="6" y1="2" x2="6" y2="14" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
           </button>
         </div>
         
-        <!-- New Chat Button -->
-        <button id="newChatBtn" class="btn-primary btn-pill w-full">
-          <i class="fa-solid fa-plus"></i>
-          <span>New Chat</span>
+        <!-- Open Sidebar Hover Panel (shown on hover when collapsed) -->
+        <div class="sidebar-open-hover hidden absolute left-full top-0 ml-2 z-50 flex items-center gap-2">
+          <!-- Sidebar Icon -->
+          <div class="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="2" width="4" height="12" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/>
+              <rect x="8" y="2" width="6" height="12" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            </svg>
+          </div>
+          <!-- Open Sidebar Button -->
+          <button id="openSidebarHoverBtn" class="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white rounded-full transition text-sm font-medium whitespace-nowrap shadow-lg">
+            Open sidebar
         </button>
+        </div>
       </div>
       
       <!-- Search Zone -->
-      <div class="px-6 py-4 border-b border-gray-200/80">
+      <div class="px-3 py-2 border-b border-gray-200/80 sidebar-search-container">
         <div class="relative">
           <input type="text" 
                  id="sessionSearch" 
                  placeholder="Search sessions, keywords, summaries…" 
-                 class="w-full px-4 py-2 pl-10 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#28926D]/40 focus:border-[#28926D] bg-white" />
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-400"></i>
+                 class="w-full px-4 py-2 pl-10 pr-3 text-sm border border-token-gray-200 rounded-lg focus-ring-accent bg-token-paper sidebar-search-input" />
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
         </div>
       </div>
       
-      <!-- Session List -->
-      <div class="flex-1 overflow-y-auto p-4">
+      <!-- Sidebar Menu -->
+      <div class="px-3 py-2 border-b border-gray-200/80">
+        <div class="space-y-1">
+          <button id="sidebarNewChat" class="w-full flex items-center justify-start gap-3 px-3 py-2.5 hover:bg-gray-100 rounded-lg transition text-left sidebar-menu-item">
+            <i class="fa-regular fa-pen-to-square text-gray-700 text-base"></i>
+            <span class="text-sm font-medium text-gray-800 sidebar-menu-text">New chat</span>
+          </button>
+          <button id="sidebarSearchChats" class="w-full flex items-center justify-start gap-3 px-3 py-2.5 hover:bg-gray-100 rounded-lg transition text-left sidebar-menu-item">
+            <svg width="22" height="22" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-gray-800">
+              <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+              <path d="M10.5 10.5 L13.5 13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span class="text-sm font-medium text-gray-800 sidebar-menu-text">Search chats</span>
+          </button>
+          <button id="sidebarImages" class="w-full flex items-center justify-start gap-3 px-3 py-2.5 hover:bg-gray-100 rounded-lg transition text-left relative sidebar-menu-item">
+            <i class="fa-regular fa-images text-gray-700 text-base"></i>
+            <span class="text-sm font-medium text-gray-800 sidebar-menu-text">Images</span>
+            <span id="imagesNewBadge" class="hidden ml-auto px-2 py-0.5 text-xs font-semibold text-gray-600 bg-gray-200 rounded-full sidebar-badge">NEW</span>
+          </button>
+          <button id="sidebarApps" class="w-full flex items-center justify-start gap-3 px-3 py-2.5 hover:bg-gray-100 rounded-lg transition text-left sidebar-menu-item">
+            <i class="fa-solid fa-th-large text-gray-700 text-base"></i>
+            <span class="text-sm font-medium text-gray-800 sidebar-menu-text">Apps</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Session List (Collapsible) -->
+      <div id="sessionListContainer" class="flex-1 overflow-y-auto p-4">
+        <!-- Toggle Bulk Select Button (shown when not in bulk mode) -->
+        <div id="toggleBulkSelectContainer" class="mb-2 flex justify-end">
+          <button id="toggleBulkSelectBtn" class="text-xs text-gray-500 hover:text-gray-700 px-2 py-1 rounded transition flex items-center gap-1">
+            <i class="fa-solid fa-check-square text-xs"></i>
+            <span>Select multiple</span>
+          </button>
+        </div>
+        
+        <!-- Bulk Actions Bar (hidden by default) -->
+        <div id="bulkActionsBar" class="hidden mb-3 px-3 py-2 bg-token-paper border-b border-token-border-color">
+          <div class="flex items-center justify-between gap-4 overflow-hidden">
+            <div class="flex items-center gap-3 flex-shrink-0">
+              <span id="selectedCount" class="text-xs font-medium text-token-text-primary whitespace-nowrap">0 selected</span>
+              <button id="selectAllBtn" class="text-xs text-token-accent hover:text-token-accent-dark font-medium transition whitespace-nowrap flex-shrink-0">
+                Select all
+              </button>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0 ml-auto">
+              <button id="bulkDeleteBtn" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap flex-shrink-0">
+                Delete
+              </button>
+              <button id="cancelBulkSelectBtn" onclick="toggleBulkSelect()" class="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition flex-shrink-0" title="Cancel selection">
+                <i class="fa-solid fa-xmark text-sm"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
         <ul id="sessionList" class="space-y-2">
           <!-- Sessions will be populated by JS -->
         </ul>
@@ -931,31 +2214,40 @@ body.geriatric-zoom button {
       
       <!-- Sidebar Footer -->
       <div class="p-4 border-t border-gray-200/80">
-        <button id="userMenuBtn" class="w-full flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg transition">
-          <div class="w-8 h-8 rounded-full bg-[#236092] flex items-center justify-center text-white font-semibold">
+        <button id="userMenuBtn" class="w-full flex items-center justify-center md:justify-start gap-3 p-2 hover:bg-gray-100 rounded-lg transition sidebar-user-btn">
+          <div class="w-8 h-8 rounded-full bg-token-primary flex items-center justify-center text-white font-semibold sidebar-user-icon">
             <i class="fa-solid fa-user"></i>
           </div>
-          <div class="flex-1 text-left">
+          <div class="flex-1 text-left sidebar-footer-text">
             <div class="text-sm font-medium text-gray-800" id="userDisplayName">User</div>
             <div class="text-xs text-gray-500">Settings & Logout</div>
           </div>
-          <i class="fa-solid fa-chevron-right text-gray-400"></i>
+          <i class="fa-solid fa-chevron-right text-gray-400 sidebar-footer-text"></i>
         </button>
       </div>
     </aside>
     
     <!-- Zone 2: Main Chat Area -->
-    <main class="flex-1 flex flex-col h-full overflow-hidden bg-gradient-to-br from-white to-gray-50/50 relative">
+    <main class="flex-1 flex flex-col h-full overflow-hidden chat-main-area relative">
       <!-- Header -->
-      <header class="px-6 py-4 border-b border-gray-200/80 bg-white/80 backdrop-blur-sm">
+      <header class="px-6 py-4 border-b chat-header">
         <div class="flex items-center justify-between">
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-4 flex-1">
             <!-- Mobile burger -->
-            <button id="burgerBtn" class="md:hidden p-2 hover:bg-gray-100 rounded-lg">
-              <i class="fa-solid fa-bars text-gray-600"></i>
+            <button id="burgerBtn" class="md:hidden p-3 hover:bg-gray-100 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation" aria-label="Toggle sidebar" type="button">
+              <i class="fa-solid fa-bars text-gray-600 text-lg"></i>
             </button>
             
-            <h1 class="text-xl font-semibold text-gray-800">NeuroMed AI</h1>
+            <!-- Open Sidebar Button (shown when sidebar is hidden) -->
+            <button id="openSidebarBtn" class="hidden px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition text-sm font-medium">
+              Open sidebar
+            </button>
+            
+            <!-- Logo on mobile, text on desktop -->
+            <img src="https://res.cloudinary.com/djzks0atj/image/upload/v1759412135/NeuroMed_AI_Logo-10_yassi6.png" 
+                 alt="NeuroMed AI" 
+                 class="md:hidden h-6 w-auto" />
+            <h1 class="hidden md:block text-xl font-semibold text-gray-800">NeuroMed AI</h1>
             
             <!-- Active chips (tone, care, faith, language) -->
             <div id="activeChips" class="hidden md:flex items-center gap-2">
@@ -963,10 +2255,10 @@ body.geriatric-zoom button {
             </div>
           </div>
           
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2">
             <!-- Language Picker -->
-            <button id="langBtn" class="p-2 hover:bg-gray-100 rounded-lg transition" aria-label="Language">
-              <i class="fa-solid fa-globe text-gray-600"></i>
+            <button id="langBtn" class="md:p-2 hover:bg-gray-100 rounded-lg transition flex items-center justify-center min-w-[32px] min-h-[32px] md:min-w-[40px] md:min-h-[40px]" aria-label="Language">
+              <i class="fa-solid fa-globe text-gray-600 text-base md:text-lg"></i>
             </button>
             
             <!-- Security indicator -->
@@ -979,12 +2271,12 @@ body.geriatric-zoom button {
       </header>
       
       <!-- Chat Window -->
-      <div id="chatWindow" class="flex-1 overflow-y-auto px-6 py-6 space-y-4">
+      <div id="chatWindow" class="flex-1 overflow-y-auto px-6 py-6 space-y-4 chat-window">
         <!-- Messages will be populated here -->
         <!-- Empty state will show here if no messages -->
         <div id="emptyState" class="hidden flex flex-col items-center justify-center h-full text-center px-4">
           <div class="mb-6">
-            <i class="fa-solid fa-brain text-6xl text-[#236092] opacity-20"></i>
+            <i class="fa-solid fa-brain text-6xl text-token-primary opacity-20"></i>
           </div>
           <h2 class="text-2xl font-semibold text-gray-800 mb-2" id="greetingText">Hi there!</h2>
           <p class="text-gray-600 mb-6 max-w-md">What are we reviewing today?</p>
@@ -1006,23 +2298,23 @@ body.geriatric-zoom button {
       </div>
       
       <!-- Centered First Message View (overlays main content area only) -->
-      <div id="firstMessageView" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-white to-gray-50/50 z-10">
-        <h2 id="firstMessageHeading" class="text-2xl font-medium text-gray-900 mb-8">Hi there! How can I help you?</h2>
+      <div id="firstMessageView" class="hidden absolute inset-0 flex flex-col items-center justify-center chat-main-area z-10">
+        <h2 id="firstMessageHeading" class="text-2xl font-medium first-message-heading mb-8">Hi there! How can I help you?</h2>
         <div class="w-full max-w-2xl px-4">
-          <div class="flex items-center gap-3 bg-white border border-gray-300 rounded-full px-4 py-4 shadow-sm">
-            <button id="firstAttachBtn" class="shrink-0 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition">
-              <i class="fa-solid fa-plus text-gray-600 text-sm"></i>
+          <div class="flex items-center gap-3 first-message-input-container border rounded-full px-4 py-4 shadow-sm">
+            <button id="firstAttachBtn" class="shrink-0 w-8 h-8 rounded-full first-message-btn flex items-center justify-center transition">
+              <i class="fa-solid fa-plus first-message-icon text-sm"></i>
             </button>
             <input type="file" id="firstFileInput" class="hidden" multiple accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic" />
             <input type="text" 
                    id="firstChatInput" 
                    placeholder="Ask anything" 
-                   class="flex-1 min-w-0 text-base border-none focus:outline-none bg-transparent" />
-            <button id="firstMicBtn" class="shrink-0 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition">
-              <i class="fa-solid fa-microphone text-gray-600 text-sm"></i>
+                   class="flex-1 min-w-0 text-base first-message-input border-none focus:outline-none bg-transparent" />
+            <button id="firstMicBtn" class="shrink-0 w-8 h-8 rounded-full first-message-btn flex items-center justify-center transition">
+              <i class="fa-solid fa-microphone first-message-icon text-sm"></i>
             </button>
-            <button id="firstSendBtn" class="shrink-0 w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-900 text-white flex items-center justify-center transition">
-              <i class="fa-solid fa-arrow-up text-sm"></i>
+            <button id="firstSendBtn" class="shrink-0 w-10 h-10 rounded-full bg-token-primary hover:bg-token-primary-dark text-white flex items-center justify-center transition">
+              <i class="fa-solid fa-arrow-up text-white text-sm"></i>
             </button>
           </div>
         </div>
@@ -1034,7 +2326,7 @@ body.geriatric-zoom button {
       </button>
       
       <!-- Zone 3: Premium Composer -->
-      <div id="composer" class="border-t border-gray-200/80 bg-white/95 backdrop-blur-sm p-4">
+      <div id="composer" class="composer-area backdrop-blur-sm p-4">
         <!-- Attachment Dock -->
         <div id="attachmentDock" class="attachment-dock hidden">
           <div class="attachment-dock-header">
@@ -1056,36 +2348,36 @@ body.geriatric-zoom button {
           </div>
         </div>
         
-        <!-- Composer Input Area -->
-        <div id="dropzone" class="dropzone flex items-center gap-3 p-3 rounded-xl">
+        <!-- Composer Input Area - ChatGPT-style unified floating bar -->
+        <div id="dropzone" class="dropzone flex items-center gap-2 px-4 py-3 rounded-full bg-token-paper shadow-lg">
           <!-- Attach Button -->
-          <button id="attachBtn" class="shrink-0 w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition" title="Attach files (Up to 15 files • PDF/DOCX/TXT/Images)">
-            <i class="fa-solid fa-paperclip text-gray-600"></i>
+          <button id="attachBtn" class="shrink-0 w-8 h-8 flex items-center justify-center transition hover:bg-gray-100 rounded-full" title="Attach files (Up to 15 files • PDF/DOCX/TXT/Images)">
+            <i class="fa-solid fa-plus text-gray-700 text-lg"></i>
           </button>
           <input type="file" id="fileInput" class="hidden" multiple accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic" />
           
-          <!-- Text Input -->
+          <!-- Text Input - No border, seamless integration -->
           <input type="text" 
                  id="chatInput" 
-                 placeholder="Type your question… (attachments will send with this)" 
-                 class="flex-1 min-w-0 px-4 py-3 text-base border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-[#28926D]/40 focus:border-[#28926D] bg-white" />
+                 placeholder="Ask anything" 
+                 class="flex-1 min-w-0 px-2 py-2 text-base border-none rounded-full focus:outline-none focus:ring-0 bg-transparent placeholder:text-gray-400" />
           
-          <!-- Tools Row -->
-          <div class="flex items-center gap-2 shrink-0">
-            <!-- Tone Selector -->
-            <button id="toneBtn" class="chip" title="Tone">
-              <i class="fa-solid fa-sliders"></i>
-              <span>Tone</span>
+          <!-- Tools Row - Integrated seamlessly -->
+          <div class="flex items-center gap-1 shrink-0">
+            <!-- Tone Selector - Minimal style -->
+            <button id="toneBtn" class="px-3 py-1.5 rounded-full hover:bg-gray-100 transition flex items-center gap-1.5 text-sm text-gray-700" title="Tone">
+              <i class="fa-solid fa-sliders text-xs"></i>
+              <span class="hidden sm:inline">Tone</span>
             </button>
             
             <!-- Mic Button -->
-            <button id="micBtn" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition" title="Dictate">
-              <i class="fa-solid fa-microphone text-gray-600"></i>
+            <button id="micBtn" class="w-8 h-8 flex items-center justify-center transition hover:bg-gray-100 rounded-full" title="Dictate">
+              <i class="fa-solid fa-microphone text-gray-700"></i>
             </button>
             
-            <!-- Send Button -->
-            <button id="sendBtn" class="w-10 h-10 rounded-full bg-[#236092] hover:bg-[#1B5A8E] text-white flex items-center justify-center transition shadow-lg" title="Send">
-              <i class="fa-solid fa-paper-plane"></i>
+            <!-- Send Button - Integrated seamlessly -->
+            <button id="sendBtn" class="w-8 h-8 rounded-full bg-black hover:bg-gray-800 text-white flex items-center justify-center transition" title="Send">
+              <i class="fa-solid fa-paper-plane text-xs"></i>
             </button>
           </div>
         </div>
@@ -1098,7 +2390,7 @@ body.geriatric-zoom button {
   </div>
   
   <!-- Mobile Sidebar Overlay -->
-  <div id="mobileOverlay" class="fixed inset-0 bg-black/40 z-30 hidden md:hidden" onclick="toggleSidebar()"></div>
+  <div id="mobileOverlay" class="fixed inset-0 bg-black/40 z-40 hidden transition-opacity duration-300"></div>
   
   <!-- Premium Modals & Overlays -->
   
@@ -1106,64 +2398,64 @@ body.geriatric-zoom button {
   <div id="tonePopover" class="popover hidden" style="display: none;">
     <div class="space-y-2">
       <div class="font-semibold text-sm text-gray-800 mb-3">Summary Tone</div>
-      <button class="tone-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-tone="PlainClinical">
+      <button class="tone-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-token-paper" data-tone="PlainClinical">
         <div class="flex items-center gap-3">
-          <i class="fa-solid fa-scale-balanced text-[#236092] tone-icon"></i>
+          <i class="fa-solid fa-scale-balanced text-token-primary tone-icon"></i>
           <div class="flex-1">
             <div class="font-medium tone-title">Balanced</div>
             <div class="text-xs text-gray-500 tone-description">Clear explanations with clinical notes</div>
           </div>
-          <i class="fa-solid fa-check text-[#28926D] opacity-0 tone-check" style="font-size: 14px;"></i>
+          <i class="fa-solid fa-check text-token-accent opacity-0 tone-check" style="font-size: 14px;"></i>
         </div>
       </button>
       <button class="tone-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-tone="Caregiver">
         <div class="flex items-center gap-3">
-          <i class="fa-solid fa-hand-holding-heart text-amber-600 tone-icon"></i>
+          <i class="fa-solid fa-hand-holding-heart tone-icon tone-icon-caregiver"></i>
           <div class="flex-1">
             <div class="font-medium tone-title">Caregiver</div>
             <div class="text-xs text-gray-500 tone-description">Gentle, practical guidance</div>
           </div>
-          <i class="fa-solid fa-check text-[#28926D] opacity-0 tone-check" style="font-size: 14px;"></i>
+          <i class="fa-solid fa-check text-token-accent opacity-0 tone-check" style="font-size: 14px;"></i>
         </div>
       </button>
       <button class="tone-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-tone="Faith">
         <div class="flex items-center gap-3">
-          <i class="fa-solid fa-hands-praying text-indigo-600 tone-icon"></i>
+          <i class="fa-solid fa-hands-praying tone-icon tone-icon-faith"></i>
           <div class="flex-1">
             <div class="font-medium tone-title">Faith</div>
             <div class="text-xs text-gray-500 tone-description">Spiritual support and encouragement</div>
           </div>
-          <i class="fa-solid fa-check text-[#28926D] opacity-0 tone-check" style="font-size: 14px;"></i>
+          <i class="fa-solid fa-check text-token-accent opacity-0 tone-check" style="font-size: 14px;"></i>
         </div>
       </button>
       <button class="tone-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-tone="Clinical">
         <div class="flex items-center gap-3">
-          <i class="fa-solid fa-stethoscope text-slate-700 tone-icon"></i>
+          <i class="fa-solid fa-stethoscope tone-icon tone-icon-clinical"></i>
           <div class="flex-1">
             <div class="font-medium tone-title">Clinical</div>
             <div class="text-xs text-gray-500 tone-description">Structured, medical-first approach</div>
           </div>
-          <i class="fa-solid fa-check text-[#28926D] opacity-0 tone-check" style="font-size: 14px;"></i>
+          <i class="fa-solid fa-check text-token-accent opacity-0 tone-check" style="font-size: 14px;"></i>
         </div>
       </button>
       <button class="tone-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-tone="Geriatric">
         <div class="flex items-center gap-3">
-          <i class="fa-solid fa-person-cane text-[#28926D] tone-icon"></i>
+          <i class="fa-solid fa-person-cane text-token-accent tone-icon"></i>
           <div class="flex-1">
             <div class="font-medium tone-title">Geriatric</div>
             <div class="text-xs text-gray-500 tone-description">Simple, clear steps for older adults</div>
           </div>
-          <i class="fa-solid fa-check text-[#28926D] opacity-0 tone-check" style="font-size: 14px;"></i>
+          <i class="fa-solid fa-check text-token-accent opacity-0 tone-check" style="font-size: 14px;"></i>
         </div>
       </button>
       <button class="tone-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-tone="EmotionalSupport">
         <div class="flex items-center gap-3">
-          <i class="fa-solid fa-heart text-rose-600 tone-icon"></i>
+          <i class="fa-solid fa-heart tone-icon tone-icon-emotional"></i>
           <div class="flex-1">
             <div class="font-medium tone-title">Emotional Support</div>
             <div class="text-xs text-gray-500 tone-description">Calm, validating support</div>
           </div>
-          <i class="fa-solid fa-check text-[#28926D] opacity-0 tone-check" style="font-size: 14px;"></i>
+          <i class="fa-solid fa-check text-token-accent opacity-0 tone-check" style="font-size: 14px;"></i>
         </div>
       </button>
     </div>
@@ -1173,7 +2465,7 @@ body.geriatric-zoom button {
   <div id="carePopover" class="popover hidden" style="display: none;">
     <div class="space-y-2">
       <div class="font-semibold text-sm text-gray-800 mb-3">Care Setting</div>
-      <button class="care-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-care="hospital">
+      <button class="care-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-token-paper" data-care="hospital">
         <div class="font-medium">Hospital</div>
         <div class="text-xs text-gray-500">Inpatient context</div>
       </button>
@@ -1192,7 +2484,7 @@ body.geriatric-zoom button {
   <div id="faithPopover" class="popover hidden" style="display: none;">
     <div class="space-y-2">
       <div class="font-semibold text-sm text-gray-800 mb-3">Faith Setting</div>
-      <button class="faith-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-white" data-faith="general">
+      <button class="faith-option w-full text-left p-3 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer bg-token-paper" data-faith="general">
         <div class="font-medium">General</div>
         <div class="text-xs text-gray-500">Universal spiritual support</div>
       </button>
@@ -1221,14 +2513,441 @@ body.geriatric-zoom button {
   
   <!-- Settings Modal -->
   <div id="settingsModal" class="modal-overlay hidden" onclick="if(event.target===this) closeSettingsModal()">
-    <div class="modal-content w-full max-w-lg p-8" onclick="event.stopPropagation()">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-2xl font-semibold text-gray-800">Settings</h2>
-        <button onclick="closeSettingsModal()" class="p-2 hover:bg-gray-100 rounded-lg" aria-label="Close">
-          <i class="fa-solid fa-times text-gray-500"></i>
+    <div class="modal-content w-full max-w-5xl bg-white rounded-lg shadow-xl relative" onclick="event.stopPropagation()" style="max-height: 90vh; overflow: hidden; display: flex;">
+      <!-- Mobile Dropdown (shown only on mobile) -->
+      <div class="md:hidden p-4 border-b border-gray-200 flex items-center gap-3">
+        <select id="settingsMobileDropdown" class="flex-1 px-4 py-3 text-sm border border-gray-300 rounded-lg focus-ring-accent bg-white">
+          <option value="general">⚙️ General</option>
+          <option value="notifications">🔔 Notifications</option>
+          <option value="personalization">🎨 Personalization</option>
+          <option value="apps">📱 Apps</option>
+          <option value="schedules">📅 Schedules</option>
+          <option value="data">💾 Data controls</option>
+          <option value="security">🔐 Security</option>
+          <option value="parental">👨‍👩‍👧 Parental controls</option>
+          <option value="account">👤 Account</option>
+        </select>
+        <!-- Close button - positioned beside dropdown -->
+        <button onclick="closeSettingsModal()" class="flex items-center justify-center w-10 h-10 flex-shrink-0" aria-label="Close">
+          <i class="fa-solid fa-times text-gray-500 text-base"></i>
         </button>
       </div>
       
+      <!-- Left Navigation Panel (hidden on mobile) -->
+        <div class="hidden md:flex w-64 flex-col flex-shrink-0">
+         <div class="p-4">
+           <h2 class="text-lg font-semibold text-gray-800">Settings</h2>
+          </div>
+        <div class="flex-1 overflow-y-auto p-2">
+          <nav class="space-y-1">
+            <button class="settings-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-left active" data-section="general">
+              <i class="fa-solid fa-gear text-gray-600"></i>
+              <span class="text-sm font-medium">General</span>
+            </button>
+            <button class="settings-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-left" data-section="notifications">
+              <i class="fa-regular fa-bell text-gray-600"></i>
+              <span class="text-sm font-medium">Notifications</span>
+            </button>
+            <button class="settings-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-left" data-section="personalization">
+              <i class="fa-solid fa-palette text-gray-600"></i>
+              <span class="text-sm font-medium">Personalization</span>
+            </button>
+            <button class="settings-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-left" data-section="apps">
+              <i class="fa-solid fa-th-large text-gray-600"></i>
+              <span class="text-sm font-medium">Apps</span>
+            </button>
+            <button class="settings-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-left" data-section="schedules">
+              <i class="fa-regular fa-calendar text-gray-600"></i>
+              <span class="text-sm font-medium">Schedules</span>
+            </button>
+            <button class="settings-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-left" data-section="data">
+              <i class="fa-solid fa-database text-gray-600"></i>
+              <span class="text-sm font-medium">Data controls</span>
+            </button>
+            <button class="settings-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-left" data-section="security">
+              <i class="fa-solid fa-key text-gray-600"></i>
+              <span class="text-sm font-medium">Security</span>
+            </button>
+            <button class="settings-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-left" data-section="parental">
+              <i class="fa-solid fa-users text-gray-600"></i>
+              <span class="text-sm font-medium">Parental controls</span>
+            </button>
+            <button class="settings-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-left" data-section="account">
+              <i class="fa-regular fa-user text-gray-600"></i>
+              <span class="text-sm font-medium">Account</span>
+            </button>
+          </nav>
+        </div>
+      </div>
+      
+      <!-- Right Content Area -->
+      <div class="flex-1 overflow-y-auto p-8">
+        <!-- General Settings -->
+        <div id="settingsSection-general" class="settings-section">
+          <h3 class="text-2xl font-semibold text-gray-800 mb-6">General</h3>
+          <div class="space-y-6">
+            <!-- Appearance -->
+            <div class="flex items-center justify-between py-3 border-b border-gray-100">
+              <div>
+                <div class="text-sm font-medium text-gray-800">Appearance</div>
+              </div>
+              <select id="appearanceSelect" class="px-3 py-1.5 border border-token-gray-300 rounded-lg text-sm focus-ring-accent">
+                <option value="system">System</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </div>
+            
+            <!-- Accent color -->
+            <div class="flex items-center justify-between py-3 border-b border-gray-100">
+              <div>
+                <div class="text-sm font-medium text-gray-800">Accent color</div>
+              </div>
+              <div class="flex items-center gap-3">
+                <label class="flex items-center gap-2">
+                  <input type="radio" name="accentColor" value="default" checked class="text-token-accent">
+                  <span class="text-sm text-gray-700">Default</span>
+                </label>
+                <select id="accentColorSelect" class="px-3 py-1.5 border border-token-gray-300 rounded-lg text-sm focus-ring-accent">
+                  <option value="green">Green</option>
+                  <option value="blue">Blue</option>
+                  <option value="purple">Purple</option>
+                  <option value="red">Red</option>
+                </select>
+              </div>
+            </div>
+            
+            <!-- Language -->
+            <div class="flex items-center justify-between py-3 border-b border-gray-100">
+              <div>
+                <div class="text-sm font-medium text-gray-800">Language</div>
+              </div>
+              <select id="languageSelect" class="px-3 py-1.5 border border-token-gray-300 rounded-lg text-sm focus-ring-accent">
+                <option value="auto">Auto-detect</option>
+                <option value="en-US">English (US)</option>
+                <option value="es-ES">Spanish</option>
+                <option value="fr-FR">French</option>
+                <option value="de-DE">German</option>
+              </select>
+            </div>
+            
+            <!-- Spoken language -->
+            <div class="flex items-center justify-between py-3 border-b border-gray-100">
+              <div class="flex-1">
+                <div class="text-sm font-medium text-gray-800 mb-1">Spoken language</div>
+                <div class="text-xs text-gray-500">For best results, select the language you mainly speak. If it's not listed, it may still be supported via auto-detection.</div>
+              </div>
+              <select id="spokenLanguageSelect" class="px-3 py-1.5 border border-token-gray-300 rounded-lg text-sm focus-ring-accent ml-4">
+                <option value="auto">Auto-detect</option>
+                <option value="en-US">English (US)</option>
+                <option value="es-ES">Spanish</option>
+                <option value="fr-FR">French</option>
+                <option value="de-DE">German</option>
+              </select>
+            </div>
+            
+            <!-- Voice -->
+            <div class="flex items-center justify-between py-3 border-b border-gray-100">
+              <div>
+                <div class="text-sm font-medium text-gray-800">Voice</div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button id="playVoiceBtn" class="p-2 hover:bg-gray-100 rounded-lg transition">
+                  <i class="fa-solid fa-play text-gray-600 text-xs"></i>
+                </button>
+                <select id="voiceSelect" class="px-3 py-1.5 border border-token-gray-300 rounded-lg text-sm focus-ring-accent">
+                  <option value="spruce">Spruce</option>
+                  <option value="cove">Cove</option>
+                  <option value="ember">Ember</option>
+                  <option value="juniper">Juniper</option>
+                </select>
+              </div>
+            </div>
+            
+            <!-- Separate voice mode -->
+            <div class="flex items-center justify-between py-3 border-b border-gray-100">
+              <div class="flex-1">
+                <div class="text-sm font-medium text-gray-800 mb-1">Separate voice mode</div>
+                <div class="text-xs text-gray-500">Keep ChatGPT Voice in a separate full screen, without real time transcripts and visuals.</div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer ml-4">
+                <input type="checkbox" id="separateVoiceMode" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-accent/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-token-accent"></div>
+              </label>
+            </div>
+            
+            <!-- Show additional models -->
+            <div class="flex items-center justify-between py-3">
+              <div>
+                <div class="text-sm font-medium text-gray-800">Show additional models</div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer ml-4">
+                <input type="checkbox" id="showAdditionalModels" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-accent/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-token-accent"></div>
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Other Settings Sections (hidden by default) -->
+        <div id="settingsSection-notifications" class="settings-section hidden">
+          <h3 class="text-2xl font-semibold text-gray-800 mb-6">Notifications</h3>
+          <div class="text-gray-500 text-sm">Notification settings coming soon...</div>
+        </div>
+        
+        <div id="settingsSection-personalization" class="settings-section hidden">
+          <h3 class="text-2xl font-semibold text-gray-800 mb-6">Personalization</h3>
+          <div class="space-y-8">
+            <!-- Base style and tone -->
+            <div class="space-y-3">
+              <div>
+                <div class="text-sm font-medium text-gray-800 mb-1">Base style and tone</div>
+                <div class="text-xs text-gray-500 mb-4">Set the style and tone of how ChatGPT responds to you. This doesn't impact ChatGPT's capabilities.</div>
+              </div>
+              
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="baseStyleToneSelector">
+                <!-- Balanced -->
+                <button class="base-tone-option w-full text-left p-3 rounded-lg transition-all duration-200 cursor-pointer bg-token-paper border-2 border-token-gray-200 hover:border-token-accent/50" data-tone="PlainClinical">
+                  <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-scale-balanced text-token-primary text-lg"></i>
+                    <div class="flex-1">
+                      <div class="font-medium text-gray-800">Balanced</div>
+                      <div class="text-xs text-gray-500">Clear explanations with clinical notes</div>
+                    </div>
+                    <i class="fa-solid fa-check text-white opacity-0 base-tone-check" style="font-size: 14px;"></i>
+                  </div>
+                </button>
+                
+                <!-- Caregiver -->
+                <button class="base-tone-option w-full text-left p-3 rounded-lg transition-all duration-200 cursor-pointer bg-token-paper border-2 border-token-gray-200 hover:border-token-accent/50" data-tone="Caregiver">
+                  <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-hand-holding-heart tone-icon-caregiver text-lg"></i>
+                    <div class="flex-1">
+                      <div class="font-medium text-gray-800">Caregiver</div>
+                      <div class="text-xs text-gray-500">Gentle, practical guidance</div>
+                    </div>
+                    <i class="fa-solid fa-check text-white opacity-0 base-tone-check" style="font-size: 14px;"></i>
+                  </div>
+                </button>
+                
+                <!-- Faith -->
+                <button class="base-tone-option w-full text-left p-3 rounded-lg transition-all duration-200 cursor-pointer bg-token-paper border-2 border-token-gray-200 hover:border-token-accent/50" data-tone="Faith">
+                  <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-hands-praying tone-icon-faith text-lg"></i>
+                    <div class="flex-1">
+                      <div class="font-medium text-gray-800">Faith</div>
+                      <div class="text-xs text-gray-500">Spiritual support and encouragement</div>
+                    </div>
+                    <i class="fa-solid fa-check text-white opacity-0 base-tone-check" style="font-size: 14px;"></i>
+                  </div>
+                </button>
+                
+                <!-- Clinical -->
+                <button class="base-tone-option w-full text-left p-3 rounded-lg transition-all duration-200 cursor-pointer bg-token-paper border-2 border-token-gray-200 hover:border-token-accent/50" data-tone="Clinical">
+                  <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-stethoscope tone-icon-clinical text-lg"></i>
+                    <div class="flex-1">
+                      <div class="font-medium text-gray-800">Clinical</div>
+                      <div class="text-xs text-gray-500">Structured, medical-first approach</div>
+                    </div>
+                    <i class="fa-solid fa-check text-white opacity-0 base-tone-check" style="font-size: 14px;"></i>
+                  </div>
+                </button>
+                
+                <!-- Geriatric -->
+                <button class="base-tone-option w-full text-left p-3 rounded-lg transition-all duration-200 cursor-pointer bg-token-paper border-2 border-gray-200 hover:border-[#28926D]/50" data-tone="Geriatric">
+                  <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-person-cane text-[#28926D] text-lg"></i>
+                    <div class="flex-1">
+                      <div class="font-medium text-gray-800">Geriatric</div>
+                      <div class="text-xs text-gray-500">Simple, clear steps for older adults</div>
+                    </div>
+                    <i class="fa-solid fa-check text-white opacity-0 base-tone-check" style="font-size: 14px;"></i>
+                  </div>
+                </button>
+                
+                <!-- Emotional Support -->
+                <button class="base-tone-option w-full text-left p-3 rounded-lg transition-all duration-200 cursor-pointer bg-token-paper border-2 border-token-gray-200 hover:border-token-accent/50" data-tone="EmotionalSupport">
+                  <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-heart tone-icon-emotional text-lg"></i>
+                    <div class="flex-1">
+                      <div class="font-medium text-gray-800">Emotional Support</div>
+                      <div class="text-xs text-gray-500">Calm, validating support</div>
+                    </div>
+                    <i class="fa-solid fa-check text-white opacity-0 base-tone-check" style="font-size: 14px;"></i>
+                  </div>
+                </button>
+              </div>
+            </div>
+            
+            <!-- Characteristics -->
+            <div class="space-y-4">
+              <div>
+                <div class="text-sm font-medium text-gray-800 mb-1">Characteristics</div>
+                <div class="text-xs text-gray-500 mb-4">Choose additional customizations on top of your base style and tone.</div>
+              </div>
+              
+              <div class="space-y-3">
+                <!-- Warm -->
+                <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                  <div class="text-sm text-gray-800">Warm</div>
+                  <select id="characteristicWarm" class="px-3 py-1.5 border border-token-gray-300 rounded-lg text-sm focus-ring-accent">
+                    <option value="default">Default</option>
+                    <option value="more">More</option>
+                    <option value="less">Less</option>
+                  </select>
+                </div>
+                
+                <!-- Enthusiastic -->
+                <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                  <div class="text-sm text-gray-800">Enthusiastic</div>
+                  <select id="characteristicEnthusiastic" class="px-3 py-1.5 border border-token-gray-300 rounded-lg text-sm focus-ring-accent">
+                    <option value="default">Default</option>
+                    <option value="more">More</option>
+                    <option value="less">Less</option>
+                  </select>
+                </div>
+                
+                <!-- Headers & Lists -->
+                <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                  <div class="text-sm text-gray-800">Headers & Lists</div>
+                  <select id="characteristicHeaders" class="px-3 py-1.5 border border-token-gray-300 rounded-lg text-sm focus-ring-accent">
+                    <option value="default">Default</option>
+                    <option value="more">More</option>
+                    <option value="less">Less</option>
+                  </select>
+                </div>
+                
+                <!-- Emoji -->
+                <div class="flex items-center justify-between py-2">
+                  <div class="text-sm text-gray-800">Emoji</div>
+                  <select id="characteristicEmoji" class="px-3 py-1.5 border border-token-gray-300 rounded-lg text-sm focus-ring-accent">
+                    <option value="default">Default</option>
+                    <option value="more">More</option>
+                    <option value="less">Less</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Custom instructions -->
+            <div class="space-y-2">
+              <div class="text-sm font-medium text-gray-800">Custom instructions</div>
+              <textarea 
+                id="customInstructions" 
+                rows="6"
+                placeholder="I want ChatGPT to response wisely yet witty enough. Write like you talk and share wins and lessons. Use 'i' with weight. Don't sound like a brand and show what built me and always sound human. I want it to be always kind, compassionate, understanding, intelligent yet funny. I want the response not too short yet not too long. I want it to be compelling enough that people can understand and relate."
+                class="w-full px-4 py-3 border border-token-gray-300 rounded-lg focus-ring-accent text-sm resize-none"
+              ></textarea>
+            </div>
+            
+            <!-- About you -->
+            <div class="space-y-4">
+              <div class="text-sm font-medium text-gray-800">About you</div>
+              
+              <!-- Nickname -->
+              <div class="space-y-1">
+                <label class="block text-xs text-gray-600">Nickname</label>
+                <input 
+                  type="text" 
+                  id="personalizationNickname" 
+                  placeholder="What should ChatGPT call you?"
+                  class="w-full px-4 py-2 border border-token-gray-300 rounded-lg focus-ring-accent text-sm"
+                />
+              </div>
+              
+              <!-- Occupation -->
+              <div class="space-y-1">
+                <label class="block text-xs text-gray-600">Occupation</label>
+                <input 
+                  type="text" 
+                  id="personalizationOccupation" 
+                  placeholder="e.g., Pharma sales"
+                  class="w-full px-4 py-2 border border-token-gray-300 rounded-lg focus-ring-accent text-sm"
+                />
+              </div>
+              
+              <!-- More about you -->
+              <div class="space-y-1">
+                <label class="block text-xs text-gray-600">More about you</label>
+                <textarea 
+                  id="moreAboutYou" 
+                  rows="5"
+                  placeholder="I'm a business coach, philanthropist, I love God and I love helping people, and I love making a difference to people's lives. I want to sound informal when responding to text messages and a combination of formal and informal when I'm talking about business. I sometimes like detailed responses with a touch of wits and humor if necessary. I like making people feel comfortable and I want to feel..."
+                  class="w-full px-4 py-3 border border-token-gray-300 rounded-lg focus-ring-accent text-sm resize-none"
+                ></textarea>
+              </div>
+            </div>
+            
+            <!-- Memory -->
+            <div class="space-y-4 pt-4 border-t border-gray-200">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <div class="text-sm font-medium text-gray-800">Memory</div>
+                  <button class="text-gray-400 hover:text-gray-600 transition" title="Learn more about Memory">
+                    <i class="fa-regular fa-circle-question text-xs"></i>
+                  </button>
+                </div>
+                <button id="manageMemoryBtn" class="px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition">
+                  Manage
+                </button>
+              </div>
+              
+              <!-- Reference saved memories -->
+              <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                <div class="flex-1">
+                  <div class="text-sm font-medium text-gray-800 mb-1">Reference saved memories</div>
+                  <div class="text-xs text-gray-500">Let ChatGPT save and use memories when responding.</div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer ml-4">
+                  <input type="checkbox" id="referenceSavedMemories" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-accent/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-token-accent"></div>
+                </label>
+              </div>
+              
+              <!-- Reference chat history -->
+              <div class="flex items-center justify-between py-3">
+                <div class="flex-1">
+                  <div class="text-sm font-medium text-gray-800 mb-1">Reference chat history</div>
+                  <div class="text-xs text-gray-500">Let ChatGPT reference all previous conversations when responding.</div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer ml-4">
+                  <input type="checkbox" id="referenceChatHistory" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-accent/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-token-accent"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div id="settingsSection-apps" class="settings-section hidden">
+          <h3 class="text-2xl font-semibold text-gray-800 mb-6">Apps</h3>
+          <div class="text-gray-500 text-sm">Apps settings coming soon...</div>
+        </div>
+        
+        <div id="settingsSection-schedules" class="settings-section hidden">
+          <h3 class="text-2xl font-semibold text-gray-800 mb-6">Schedules</h3>
+          <div class="text-gray-500 text-sm">Schedules settings coming soon...</div>
+        </div>
+        
+        <div id="settingsSection-data" class="settings-section hidden">
+          <h3 class="text-2xl font-semibold text-gray-800 mb-6">Data controls</h3>
+          <div class="text-gray-500 text-sm">Data controls settings coming soon...</div>
+        </div>
+        
+        <div id="settingsSection-security" class="settings-section hidden">
+          <h3 class="text-2xl font-semibold text-gray-800 mb-6">Security</h3>
+          <div class="text-gray-500 text-sm">Security settings coming soon...</div>
+        </div>
+        
+        <div id="settingsSection-parental" class="settings-section hidden">
+          <h3 class="text-2xl font-semibold text-gray-800 mb-6">Parental controls</h3>
+          <div class="text-gray-500 text-sm">Parental controls settings coming soon...</div>
+        </div>
+        
+        <!-- Account Settings -->
+        <div id="settingsSection-account" class="settings-section hidden">
+          <h3 class="text-2xl font-semibold text-gray-800 mb-6">Account</h3>
       <div class="space-y-6">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Display Name</label>
@@ -1253,7 +2972,52 @@ body.geriatric-zoom button {
               <i class="fa-solid fa-check"></i>
               <span>Save</span>
             </button>
+              </div>
+            </div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Search Modal -->
+  <div id="searchModal" class="modal-overlay hidden" onclick="if(event.target===this) closeSearchModal()">
+    <div class="modal-content w-full max-w-md bg-white rounded-lg shadow-xl" onclick="event.stopPropagation()" style="max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;">
+      <!-- Search Header -->
+      <div class="p-4 border-b border-gray-200">
+        <div class="flex items-center gap-3">
+          <div class="flex-1 relative">
+            <input type="text" 
+                   id="searchModalInput" 
+                   placeholder="Search chats..." 
+                   class="w-full px-4 py-2.5 pl-10 pr-10 text-sm border border-token-gray-300 rounded-lg focus-ring-accent focus:border-token-accent bg-token-paper" 
+                   autocomplete="off" />
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3.5 text-gray-400 text-sm"></i>
+            <button id="clearSearchBtn" class="absolute right-3 top-3 p-1 hover:bg-gray-100 rounded transition hidden">
+              <i class="fa-solid fa-times text-gray-400 text-sm"></i>
+            </button>
+          </div>
+          <button onclick="closeSearchModal()" class="p-2 hover:bg-gray-100 rounded-lg transition" aria-label="Close search">
+            <i class="fa-solid fa-times text-gray-500"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- New Chat Option -->
+      <div class="px-4 py-3 border-b border-gray-200">
+        <button id="searchNewChatBtn" class="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-100 rounded-lg transition text-left">
+          <i class="fa-regular fa-pen-to-square text-gray-700 text-base"></i>
+          <span class="text-sm font-medium text-gray-800">New chat</span>
+        </button>
+      </div>
+      
+      <!-- Search Results / Chat History -->
+      <div class="flex-1 overflow-y-auto px-4 py-4" id="searchResultsContainer">
+        <div id="searchResultsList" class="space-y-1">
+          <!-- Results will be populated by JS -->
+        </div>
+        <div id="searchEmptyState" class="hidden text-center py-8 text-gray-500 text-sm">
+          No chats found
         </div>
       </div>
     </div>
@@ -1264,7 +3028,7 @@ body.geriatric-zoom button {
     <div class="modal-content w-full max-w-4xl p-8" onclick="event.stopPropagation()">
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-2xl font-semibold text-gray-800 flex items-center gap-2">
-          <i class="fa-solid fa-brain text-[#236092]"></i>
+          <i class="fa-solid fa-brain text-token-primary"></i>
           Full Summary
         </h2>
         <div class="flex items-center gap-2">
@@ -1297,8 +3061,30 @@ body.geriatric-zoom button {
         <button onclick="closeDeleteModal()" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
           Cancel
         </button>
-        <button onclick="confirmDelete()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition">
+        <button id="confirmDeleteBtn" onclick="confirmDelete()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition">
           Delete
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Bulk Delete Confirmation Modal -->
+  <div id="bulkDeleteModal" class="modal-overlay hidden">
+    <div class="modal-content w-full max-w-md p-8" onclick="event.stopPropagation()">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Delete <span id="bulkDeleteCount">0</span> chats?</h2>
+      <p class="text-gray-600 mb-6">This can't be undone.</p>
+      <div class="space-y-3 mb-6">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="bulkDeleteFiles" />
+          <span class="text-sm text-gray-700">Also clear uploaded files from these sessions</span>
+        </label>
+      </div>
+      <div class="flex items-center justify-end gap-3">
+        <button onclick="closeBulkDeleteModal()" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+          Cancel
+        </button>
+        <button id="confirmBulkDeleteBtn" onclick="confirmBulkDelete()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition">
+          Delete All
         </button>
       </div>
     </div>
@@ -1510,6 +3296,162 @@ function closeSummaryModal() {
   if (modal) modal.classList.add('hidden');
 }
 
+// ============================================
+// SEARCH MODAL
+// ============================================
+
+function openSearchModal() {
+  const modal = document.getElementById('searchModal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    const input = document.getElementById('searchModalInput');
+    if (input) {
+      setTimeout(() => input.focus(), 100);
+    }
+    loadSearchResults();
+  }
+}
+
+function closeSearchModal() {
+  const modal = document.getElementById('searchModal');
+  if (modal) {
+    modal.classList.add('hidden');
+    const input = document.getElementById('searchModalInput');
+    if (input) {
+      input.value = '';
+    }
+    const clearBtn = document.getElementById('clearSearchBtn');
+    if (clearBtn) clearBtn.classList.add('hidden');
+  }
+}
+
+async function loadSearchResults(query = '') {
+  const resultsList = document.getElementById('searchResultsList');
+  const emptyState = document.getElementById('searchEmptyState');
+  if (!resultsList) return;
+  
+  try {
+    const res = await fetch('/api/chat/sessions/', { credentials: 'include' });
+    if (!res.ok) {
+      console.error('Failed to fetch sessions:', res.status);
+      emptyState.classList.remove('hidden');
+      return;
+    }
+    
+    const sessions = await res.json();
+    console.log('Loaded sessions:', sessions.length);
+    
+    // Filter sessions with messages (use message_count if available, otherwise check messages array)
+    const validSessions = sessions.filter(s => {
+      if (s.message_count !== undefined) {
+        return s.message_count > 0;
+      }
+      if (s.messages && Array.isArray(s.messages)) {
+        return s.messages.length > 0;
+      }
+      // If no message info, include it (backend should have filtered empty ones)
+      return true;
+    });
+    
+    console.log('Valid sessions:', validSessions.length);
+    
+    // Filter by query if provided
+    let filteredSessions = validSessions;
+    if (query.trim()) {
+      const lowerQuery = query.toLowerCase();
+      filteredSessions = validSessions.filter(s => {
+        const title = (s.title || 'New chat').toLowerCase();
+        return title.includes(lowerQuery);
+      });
+    }
+    
+    resultsList.innerHTML = '';
+    
+    if (filteredSessions.length === 0) {
+      if (query.trim()) {
+        emptyState.textContent = 'No chats found';
+      } else {
+        emptyState.textContent = 'No chats yet';
+      }
+      emptyState.classList.remove('hidden');
+      return;
+    }
+    
+    emptyState.classList.add('hidden');
+    
+    // Group by date
+    const grouped = groupSessionsByDate(filteredSessions);
+    
+    Object.keys(grouped).forEach(dateLabel => {
+      const dateHeader = document.createElement('div');
+      dateHeader.className = 'text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 mt-4 first:mt-0';
+      dateHeader.textContent = dateLabel;
+      resultsList.appendChild(dateHeader);
+      
+      grouped[dateLabel].forEach(session => {
+        const item = document.createElement('button');
+        item.className = 'w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-100 rounded-lg transition text-left';
+        item.onclick = () => {
+          closeSearchModal();
+          openSession(session.id);
+        };
+        
+        item.innerHTML = `
+          <i class="fa-regular fa-message text-gray-600 text-sm"></i>
+          <span class="text-sm font-medium text-gray-800 flex-1 text-left">${escapeHtml(session.title || 'New chat')}</span>
+        `;
+        
+        resultsList.appendChild(item);
+      });
+    });
+  } catch (err) {
+    console.error('Failed to load search results:', err);
+    emptyState.textContent = 'Failed to load chats';
+    emptyState.classList.remove('hidden');
+  }
+}
+
+function groupSessionsByDate(sessions) {
+  const groups = {};
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  
+  sessions.forEach(session => {
+    const sessionDate = new Date(session.updated_at || session.created_at);
+    const sessionDay = new Date(sessionDate.getFullYear(), sessionDate.getMonth(), sessionDate.getDate());
+    
+    let label;
+    const diffTime = today - sessionDay;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      label = 'Today';
+    } else if (diffDays === 1) {
+      label = 'Yesterday';
+    } else if (diffDays < 7) {
+      label = sessionDate.toLocaleDateString('en-US', { weekday: 'long' });
+    } else {
+      label = sessionDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: sessionDate.getFullYear() !== now.getFullYear() ? 'numeric' : undefined });
+    }
+    
+    if (!groups[label]) {
+      groups[label] = [];
+    }
+    groups[label].push(session);
+  });
+  
+  // Sort sessions within each group by updated_at (newest first)
+  Object.keys(groups).forEach(key => {
+    groups[key].sort((a, b) => {
+      const dateA = new Date(a.updated_at || a.created_at);
+      const dateB = new Date(b.updated_at || b.created_at);
+      return dateB - dateA;
+    });
+  });
+  
+  return groups;
+}
+
 function copySummary() {
   const contentDiv = document.getElementById('summaryContent');
   if (contentDiv) {
@@ -1598,6 +3540,25 @@ function addFiles(files) {
   
   renderPending();
   updateFileLimitWarning();
+  updateImagesBadge();
+}
+
+// Update Images badge in sidebar
+function updateImagesBadge() {
+  const imagesBadge = document.getElementById('imagesNewBadge');
+  if (!imagesBadge) return;
+  
+  // Check if there are any images in pending files
+  const hasImages = pending.some(item => item.kind === 'image');
+  
+  // Also check localStorage to see if user has uploaded images before
+  const hasUploadedBefore = localStorage.getItem('has_uploaded_images') === 'true';
+  
+  if (hasImages || hasUploadedBefore) {
+    imagesBadge.classList.remove('hidden');
+  } else {
+    imagesBadge.classList.add('hidden');
+  }
 }
 
 function renderPending() {
@@ -1609,10 +3570,14 @@ function renderPending() {
   
   if (pending.length === 0) {
     dock.classList.add('hidden');
+    dock.style.display = 'none'; // Force hide
+    if (grid) grid.innerHTML = ''; // Clear grid
+    if (count) count.textContent = '0';
     return;
   }
   
   dock.classList.remove('hidden');
+  dock.style.display = ''; // Remove inline style if present
   if (count) count.textContent = pending.length;
   
   grid.innerHTML = '';
@@ -1675,15 +3640,38 @@ function removePending(index) {
   pending.splice(index, 1);
   renderPending();
   updateFileLimitWarning();
+  updateImagesBadge();
 }
 
 function clearPending() {
+  // Force hide the dock IMMEDIATELY (before clearing array)
+  const dock = document.getElementById('attachmentDock');
+  const grid = document.getElementById('attachmentGrid');
+  const count = document.getElementById('attachmentCount');
+  
+  if (dock) {
+    dock.classList.add('hidden');
+    dock.style.display = 'none'; // Force hide with inline style too
+  }
+  
+  if (grid) {
+    grid.innerHTML = ''; // Clear grid content immediately
+  }
+  
+  if (count) {
+    count.textContent = '0';
+  }
+  
+  // Clean up object URLs
   pending.forEach(item => {
     if (item.url) URL.revokeObjectURL(item.url);
   });
   pending.length = 0;
+  
+  // Call renderPending to ensure everything is synced (though dock should already be hidden)
   renderPending();
   updateFileLimitWarning();
+  updateImagesBadge();
 }
 
 function updateFileLimitWarning() {
@@ -1769,12 +3757,45 @@ async function refreshSessionList() {
     const archivedSessions = [];
     
     rows.forEach(s => {
+      // Filter out empty sessions (sessions with no messages) - additional safety check
+      // Backend should already filter these, but this ensures empty sessions don't show up
+      const messageCount = s.message_count || (s.messages && Array.isArray(s.messages) ? s.messages.length : 0);
+      if (messageCount === 0 && !s.archived) {
+        // Skip empty active sessions (they shouldn't appear in history)
+        return;
+      }
+      
       if (s.archived) {
         archivedSessions.push(s);
       } else {
         activeSessions.push(s);
       }
     });
+    
+    // Check if any session has images and update badge
+    let hasImagesInSessions = false;
+    activeSessions.forEach(s => {
+      // Check if session has images in messages
+      if (s.messages && Array.isArray(s.messages)) {
+        const hasImages = s.messages.some(m => {
+          if (m.meta && m.meta.files) {
+            return m.meta.files.some(f => 
+              (f.type && f.type.startsWith('image/')) || 
+              /\.(jpg|jpeg|png|webp|heic)$/i.test(f.name || '')
+            );
+          }
+          return false;
+        });
+        if (hasImages) {
+          hasImagesInSessions = true;
+        }
+      }
+    });
+    
+    if (hasImagesInSessions) {
+      localStorage.setItem('has_uploaded_images', 'true');
+      updateImagesBadge();
+    }
     
     // Render active sessions
     activeSessions.forEach(s => {
@@ -1827,6 +3848,9 @@ function createSessionCard(session, isActive = false, isArchived = false) {
   
   li.innerHTML = `
     <div class="flex items-start gap-3">
+      <div class="flex items-center gap-2 session-checkbox-container" style="display: none; min-width: 24px; padding-top: 2px;">
+        <input type="checkbox" class="session-checkbox w-4 h-4 text-token-accent border-gray-300 rounded focus:ring-token-accent focus:ring-2 cursor-pointer" data-session-id="${session.id}" onclick="event.stopPropagation()" />
+      </div>
       <div class="flex-1 min-w-0">
         <div class="session-title">${escapeHtml(session.title || 'New chat')}</div>
         <div class="session-meta">
@@ -1845,9 +3869,9 @@ function createSessionCard(session, isActive = false, isArchived = false) {
     </div>
   `;
   
-  // Click to open session
+  // Click to open session (but not if clicking checkbox)
   li.addEventListener('click', (e) => {
-    if (!e.target.closest('.session-menu')) {
+    if (!e.target.closest('.session-menu') && !e.target.closest('.session-checkbox') && !e.target.closest('.session-checkbox-container')) {
       openSession(session.id);
     }
   });
@@ -1901,11 +3925,27 @@ async function openSession(id) {
       // No messages in session, show AI greeting instead of empty state
       await greetUser(true);
     } else {
+      let hasImagesInHistory = false;
       messages.forEach(m => {
         if (m && (m.role === 'user' || m.role === 'assistant') && m.content) {
           appendChatBubble(m.role, m.content, true);
+          // Check if message has image attachments
+          if (m.meta && m.meta.files) {
+            const imageFiles = m.meta.files.filter(f => 
+              f.type && f.type.startsWith('image/') || 
+              /\.(jpg|jpeg|png|webp|heic)$/i.test(f.name || '')
+            );
+            if (imageFiles.length > 0) {
+              hasImagesInHistory = true;
+            }
+          }
         }
       });
+      // Update images badge if images found in history
+      if (hasImagesInHistory) {
+        localStorage.setItem('has_uploaded_images', 'true');
+        updateImagesBadge();
+      }
     }
     
     // Update active session highlight
@@ -1984,7 +4024,8 @@ async function showFirstMessageView() {
     try {
       const res = await fetch('/api/user/settings/', { credentials: 'include' });
       const data = await res.json();
-      const name = data.display_name || 'there';
+      // Use full_name (first_name + last_name) if available, otherwise display_name, then 'there'
+      const name = data.full_name || data.display_name || 'there';
       if (heading) {
         heading.textContent = `Hi ${name}! How can I help you?`;
       }
@@ -1996,7 +4037,13 @@ async function showFirstMessageView() {
       }
     }
     
+    // Remove hidden class and clear any inline styles that might hide it
     firstMessageView.classList.remove('hidden');
+    firstMessageView.style.display = '';
+    firstMessageView.style.visibility = '';
+    firstMessageView.style.opacity = '';
+    firstMessageView.style.pointerEvents = '';
+    
     // Hide composer for minimal first view (sidebar stays visible)
     if (composer) composer.style.display = 'none';
     // Hide chat window content
@@ -2012,9 +4059,11 @@ function transitionToNormalChat() {
   const composer = document.getElementById('composer');
   const chatWindow = document.getElementById('chatWindow');
   
-  // Hide first message view
+  // Hide first message view IMMEDIATELY - use both class and inline style for reliability
   if (firstMessageView) {
     firstMessageView.classList.add('hidden');
+    firstMessageView.style.display = 'none';
+    firstMessageView.style.visibility = 'hidden';
   }
   
   // Show composer and chat window
@@ -2064,7 +4113,7 @@ async function newChat() {
       await refreshSessionList();
     }
     
-    // Show first message view (centered, minimal)
+    // Show first message view with greeting after creating new session
     showFirstMessageView();
     
   } catch (err) {
@@ -2137,14 +4186,25 @@ function openSessionMenu(sessionId, event) {
   
   const popover = document.createElement('div');
   popover.className = 'popover session-menu-popover';
-  popover.style.position = 'absolute';
-  popover.style.right = '8px';
-  popover.style.top = '40px';
-  popover.style.minWidth = '160px';
   
   // Check if session is archived
   const sessionCard = event.target.closest('.session-card');
   const isArchived = sessionCard?.closest('#archivedList') !== null;
+  
+  // Get button position
+  const button = event.target.closest('button') || event.target;
+  const buttonRect = button.getBoundingClientRect();
+  
+  // Calculate position - show below the button, aligned to the right
+  const popoverTop = buttonRect.bottom + 4;
+  const popoverRight = window.innerWidth - buttonRect.right;
+  
+  // Set fixed positioning relative to viewport
+  popover.style.position = 'fixed';
+  popover.style.top = `${popoverTop}px`;
+  popover.style.right = `${popoverRight}px`;
+  popover.style.minWidth = '160px';
+  popover.style.zIndex = '9999';
   
   popover.innerHTML = `
     <button class="w-full text-left px-3 py-2 hover:bg-gray-50 rounded flex items-center gap-2" onclick="startRenameSession(${sessionId})">
@@ -2161,15 +4221,30 @@ function openSessionMenu(sessionId, event) {
     </button>
   `;
   
-  if (sessionCard) {
-    sessionCard.style.position = 'relative';
-    sessionCard.appendChild(popover);
-  }
+  // Append to body instead of session card to avoid z-index issues
+  document.body.appendChild(popover);
+  
+  // Adjust position if popover would go off screen
+  setTimeout(() => {
+    const popoverRect = popover.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+    
+    // If popover goes off bottom, show above button instead
+    if (popoverRect.bottom > viewportHeight - 10) {
+      popover.style.top = `${buttonRect.top - popoverRect.height - 4}px`;
+    }
+    
+    // If popover goes off right, align to left edge of button
+    if (popoverRect.right > viewportWidth - 10) {
+      popover.style.right = `${window.innerWidth - buttonRect.left}px`;
+    }
+  }, 0);
   
   // Close on outside click
   setTimeout(() => {
     document.addEventListener('click', function closeMenu(e) {
-      if (!popover.contains(e.target) && e.target !== event.target) {
+      if (!popover.contains(e.target) && e.target !== button && !button.contains(e.target)) {
         popover.remove();
         document.removeEventListener('click', closeMenu);
       }
@@ -2345,30 +4420,233 @@ async function confirmDelete() {
   if (!deleteSessionId) return;
   
   const deleteFiles = document.getElementById('deleteFiles')?.checked || false;
+  const sessionIdToDelete = deleteSessionId;
+  
+  // OPTIMISTIC UI UPDATE - Remove from UI immediately for instant feedback
+  const sessionCard = document.querySelector(`.session-card[data-sid="${sessionIdToDelete}"]`);
+  const wasActiveSession = String(getSessionId()) === String(sessionIdToDelete);
+  
+  // Close modal immediately
+  closeDeleteModal();
+  
+  // Remove card instantly (no animation delay)
+  if (sessionCard) {
+    sessionCard.remove();
+  }
+  
+  // If this was the active session, clear it immediately
+  if (wasActiveSession) {
+    clearSessionId();
+    const chatWindow = document.getElementById('chatWindow');
+    if (chatWindow) chatWindow.innerHTML = '';
+    showFirstMessageView();
+  }
+  
+  // Show success toast immediately
+  showToast('Session deleted', 'success');
+  
+  // Perform actual deletion in background (don't block UI)
+  fetch(`/api/chat/sessions/${sessionIdToDelete}/delete/`, {
+      method: 'POST',
+    headers: { 
+      'X-CSRFToken': getCSRFToken(),
+      'Content-Type': 'application/json'
+    },
+      credentials: 'include'
+  })
+  .then(async (res) => {
+    let responseData;
+    try {
+      responseData = await res.json();
+    } catch {
+      responseData = {};
+    }
+    
+    if (!res.ok || (!responseData.deleted && !responseData.ok)) {
+      // If deletion failed, refresh list to restore the card
+      console.error('Delete failed on server:', responseData);
+      refreshSessionList().catch(() => {});
+      showToast('Failed to delete session. Please try again.', 'error');
+    } else {
+      // Success - refresh list in background to ensure consistency
+      refreshSessionList().catch(() => {});
+    }
+  })
+  .catch((err) => {
+    console.error('Delete error:', err);
+    // Refresh list to restore card if network error
+    refreshSessionList().catch(() => {});
+    showToast('Network error. Please check your connection.', 'error');
+  });
+}
+
+// ============================================
+// BULK DELETE FUNCTIONALITY
+// ============================================
+
+let bulkSelectMode = false;
+
+function toggleBulkSelect() {
+  bulkSelectMode = !bulkSelectMode;
+  const checkboxes = document.querySelectorAll('.session-checkbox-container');
+  const bulkActionsBar = document.getElementById('bulkActionsBar');
+  const toggleContainer = document.getElementById('toggleBulkSelectContainer');
+  
+  checkboxes.forEach(container => {
+    container.style.display = bulkSelectMode ? 'flex' : 'none';
+  });
+  
+  if (bulkActionsBar) {
+    if (bulkSelectMode) {
+      bulkActionsBar.classList.remove('hidden');
+      updateSelectedCount();
+    } else {
+      bulkActionsBar.classList.add('hidden');
+      // Uncheck all
+      document.querySelectorAll('.session-checkbox').forEach(cb => cb.checked = false);
+    }
+  }
+  
+  // Hide/show toggle button container
+  if (toggleContainer) {
+    toggleContainer.style.display = bulkSelectMode ? 'none' : 'flex';
+  }
+}
+
+function updateSelectedCount() {
+  const checked = document.querySelectorAll('.session-checkbox:checked');
+  const count = checked.length;
+  const countEl = document.getElementById('selectedCount');
+  if (countEl) {
+    countEl.textContent = `${count} selected`;
+  }
+  
+  const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+  if (bulkDeleteBtn) {
+    bulkDeleteBtn.disabled = count === 0;
+  }
+}
+
+function selectAllSessions() {
+  const checkboxes = document.querySelectorAll('.session-checkbox');
+  const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+  
+  // Toggle: if all are checked, deselect all; otherwise select all
+  checkboxes.forEach(cb => {
+    cb.checked = !allChecked;
+  });
+  updateSelectedCount();
+}
+
+function deselectAllSessions() {
+  document.querySelectorAll('.session-checkbox').forEach(cb => {
+    cb.checked = false;
+  });
+  updateSelectedCount();
+}
+
+function getSelectedSessionIds() {
+  const checked = document.querySelectorAll('.session-checkbox:checked');
+  return Array.from(checked).map(cb => cb.dataset.sessionId);
+}
+
+function openBulkDeleteModal() {
+  const selectedIds = getSelectedSessionIds();
+  if (selectedIds.length === 0) {
+    showToast('Please select at least one chat to delete', 'info');
+    return;
+  }
+  
+  const modal = document.getElementById('bulkDeleteModal');
+  const countEl = document.getElementById('bulkDeleteCount');
+  if (countEl) countEl.textContent = selectedIds.length;
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeBulkDeleteModal() {
+  const modal = document.getElementById('bulkDeleteModal');
+  if (modal) modal.classList.add('hidden');
+  const checkbox = document.getElementById('bulkDeleteFiles');
+  if (checkbox) checkbox.checked = false;
+}
+
+async function confirmBulkDelete() {
+  const selectedIds = getSelectedSessionIds();
+  if (selectedIds.length === 0) return;
+  
+  const deleteFiles = document.getElementById('bulkDeleteFiles')?.checked || false;
+  const deleteBtn = document.getElementById('confirmBulkDeleteBtn');
+  const originalText = deleteBtn?.textContent || 'Delete All';
+  
+  if (deleteBtn) {
+    deleteBtn.disabled = true;
+    deleteBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
+  }
   
   try {
-    const res = await fetch(`/api/chat/sessions/${deleteSessionId}/delete/`, {
-      method: 'POST',
-      headers: { 'X-CSRFToken': getCSRFToken() },
-      credentials: 'include'
-    });
+    // Delete all sessions in parallel for speed
+    const deletePromises = selectedIds.map(sessionId => 
+      fetch(`/api/chat/sessions/${sessionId}/delete/`, {
+        method: 'POST',
+        headers: { 
+          'X-CSRFToken': getCSRFToken(),
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
+    );
     
-    if (res.ok) {
-      showToast('Session deleted', 'success');
-      closeDeleteModal();
+    const results = await Promise.allSettled(deletePromises);
+    
+    // Count successful deletions
+    let successCount = 0;
+    let failCount = 0;
+    
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled' && result.value.ok) {
+        successCount++;
+        // Immediately remove from UI
+        const sessionCard = document.querySelector(`.session-card[data-sid="${selectedIds[index]}"]`);
+        if (sessionCard) {
+          sessionCard.style.animation = 'fadeOut 0.2s ease-out';
+          setTimeout(() => sessionCard.remove(), 200);
+        }
       
       // If this was the active session, clear it
-      if (String(getSessionId()) === String(deleteSessionId)) {
+        if (String(getSessionId()) === String(selectedIds[index])) {
         clearSessionId();
-        newChat();
+          const chatWindow = document.getElementById('chatWindow');
+          if (chatWindow) chatWindow.innerHTML = '';
+          showFirstMessageView();
       }
-      
-      await refreshSessionList();
     } else {
-      throw new Error('Delete failed');
+        failCount++;
+      }
+    });
+    
+    closeBulkDeleteModal();
+    
+    if (successCount > 0) {
+      showToast(`Deleted ${successCount} chat${successCount > 1 ? 's' : ''} successfully`, 'success');
+      // Refresh in background
+      refreshSessionList().catch(() => {});
+      
+      // Exit bulk select mode
+      toggleBulkSelect();
     }
+    
+    if (failCount > 0) {
+      showToast(`Failed to delete ${failCount} chat${failCount > 1 ? 's' : ''}`, 'error');
+    }
+    
   } catch (err) {
-    showToast('Failed to delete session', 'error');
+    console.error('Bulk delete error:', err);
+    showToast('Failed to delete chats', 'error');
+  } finally {
+    if (deleteBtn) {
+      deleteBtn.disabled = false;
+      deleteBtn.textContent = originalText;
+    }
   }
 }
 
@@ -2385,8 +4663,19 @@ async function sendChat() {
   
   const firstInputEl = document.getElementById('firstChatInput');
   const regularInputEl = document.getElementById('chatInput');
-  const inputEl = isFirstMessage ? firstInputEl : regularInputEl;
-  const text = (inputEl?.value || '').trim();
+  
+  // Get text - check both inputs (event handlers should have copied from first to regular)
+  // But also check first input in case it wasn't copied yet
+  let text = '';
+  if (firstInputEl && firstInputEl.value.trim()) {
+    text = firstInputEl.value.trim();
+    // Copy to regular input if not already there
+    if (regularInputEl && !regularInputEl.value.trim()) {
+      regularInputEl.value = text;
+    }
+  } else if (regularInputEl && regularInputEl.value.trim()) {
+    text = regularInputEl.value.trim();
+  }
   
   // Validation: must have text or files
   if (!text && pending.length === 0) {
@@ -2394,14 +4683,20 @@ async function sendChat() {
     return;
   }
   
-  // If this is the first message, transition to normal chat view and copy text
+  // If this is the first message, transition to normal chat view IMMEDIATELY (before sending)
+  // Note: This should already be called by the event handlers, but ensure it here too
   if (isFirstMessage) {
     transitionToNormalChat();
-    // Copy text from first input to regular input
-    if (text && regularInputEl) {
-      regularInputEl.value = text;
+    // Clear first input after copying
+    if (firstInputEl) firstInputEl.value = '';
+    
+    // Double-check first message view is hidden (in case transition wasn't called)
+    if (firstMessageView && !firstMessageView.classList.contains('hidden')) {
+      transitionToNormalChat();
     }
   }
+  
+  const inputEl = regularInputEl; // Always use regular input after transition
   
   chatLocked = true;
   
@@ -2412,8 +4707,11 @@ async function sendChat() {
     sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
   }
   
+  // Save pending files BEFORE clearing (for API call and user bubble display)
+  const pendingFilesToSend = [...pending];
+  
   // Show user message immediately (optimistic UI)
-  if (text || pending.length > 0) {
+  if (text || pendingFilesToSend.length > 0) {
     const userContent = document.createElement('div');
     
     if (text) {
@@ -2422,10 +4720,10 @@ async function sendChat() {
       userContent.appendChild(textDiv);
     }
     
-    if (pending.length > 0) {
+    if (pendingFilesToSend.length > 0) {
       const filesDiv = document.createElement('div');
       filesDiv.className = 'flex flex-wrap gap-2 mt-2';
-      pending.forEach(item => {
+      pendingFilesToSend.forEach(item => {
         const fileChip = document.createElement('div');
         fileChip.className = 'flex items-center gap-2 bg-white/20 rounded-lg px-3 py-2 text-sm';
         if (item.kind === 'image' && item.url) {
@@ -2451,14 +4749,25 @@ async function sendChat() {
   }
   
   // Clear input (both first message and regular input)
-  if (inputEl) inputEl.value = '';
   const regularInput = document.getElementById('chatInput');
   if (regularInput) regularInput.value = '';
+  // Also clear first input if it exists
+  if (firstInputEl) firstInputEl.value = '';
+  
+  // Clear pending attachments IMMEDIATELY after sending (optimistic UI)
+  // This removes them from the pending section right away
+  clearPending();
+  
+  // Ensure chat window is visible before showing typing indicator
+  const chatWindow = document.getElementById('chatWindow');
+  if (chatWindow) {
+    chatWindow.style.display = '';
+  }
   
   // Show typing indicator with context-aware message
   let typingContext = 'Analyzing...';
-  if (pending.length > 0) {
-    const imageCount = pending.filter(p => p.kind === 'image').length;
+  if (pendingFilesToSend.length > 0) {
+    const imageCount = pendingFilesToSend.filter(p => p.kind === 'image').length;
     if (imageCount > 0) {
       typingContext = `Processing ${imageCount} image${imageCount > 1 ? 's' : ''}...`;
     } else {
@@ -2488,10 +4797,20 @@ async function sendChat() {
     const sid = getSessionId();
     if (sid) formData.append('session_id', sid);
     
-    // Add files
-    pending.forEach(item => {
+    // Add files and track if images are being sent (use saved copy since pending is already cleared)
+    let hasImagesInUpload = false;
+    pendingFilesToSend.forEach(item => {
       formData.append('files[]', item.file, item.file.name);
+      if (item.kind === 'image') {
+        hasImagesInUpload = true;
+      }
     });
+    
+    // Mark that user has uploaded images
+    if (hasImagesInUpload) {
+      localStorage.setItem('has_uploaded_images', 'true');
+      updateImagesBadge();
+    }
     
     // Send request
     const res = await fetch('/api/send-chat/', {
@@ -2525,8 +4844,7 @@ async function sendChat() {
     // Show response
     appendChatBubble('assistant', data.reply);
     
-    // Clear pending files
-    clearPending();
+    // Note: Pending files are already cleared above (optimistic UI) - no need to clear again
     
     // Show success
     showToast('Message sent', 'success');
@@ -2603,8 +4921,8 @@ function initToneSelector() {
     
     // Mark current selection with visual indicator
     tonePopover.querySelectorAll('.tone-option').forEach(opt => {
-      opt.classList.remove('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]');
-      opt.classList.add('bg-white');
+      opt.classList.remove('bg-token-accent', 'text-white', 'ring-2', 'ring-accent', 'active-tone');
+      opt.classList.add('bg-token-paper');
       
       // Reset text colors to default
       const title = opt.querySelector('.tone-title');
@@ -2613,7 +4931,7 @@ function initToneSelector() {
       const checkIcon = opt.querySelector('.tone-check');
       
       if (opt.dataset.tone === currentTone) {
-        opt.classList.add('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
+        opt.classList.add('bg-token-accent', 'text-white', 'ring-2', 'ring-accent', 'active-tone');
         
         // Force white text for all elements when active
         if (title) {
@@ -2683,7 +5001,7 @@ function initToneSelector() {
       
       // Immediate visual feedback - highlight selected option
       tonePopover.querySelectorAll('.tone-option').forEach(o => {
-        o.classList.remove('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
+        o.classList.remove('bg-token-accent', 'text-white', 'ring-2', 'ring-accent', 'active-tone');
         o.classList.add('bg-white');
         
         // Reset text colors with inline styles
@@ -2782,14 +5100,14 @@ function initToneSelector() {
     
     // Enhanced hover effect - only if not selected
     opt.addEventListener('mouseenter', () => {
-      if (!opt.classList.contains('bg-[#28926D]')) {
+      if (!opt.classList.contains('bg-token-accent')) {
         opt.classList.remove('bg-white');
         opt.classList.add('bg-gray-100');
       }
     });
     
     opt.addEventListener('mouseleave', () => {
-      if (!opt.classList.contains('bg-[#28926D]')) {
+      if (!opt.classList.contains('bg-token-accent')) {
         opt.classList.remove('bg-gray-100');
         opt.classList.add('bg-white');
       }
@@ -2834,7 +5152,7 @@ function initCareSelector() {
       
       // Visual feedback
       carePopover.querySelectorAll('.care-option').forEach(o => {
-        o.classList.remove('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
+        o.classList.remove('bg-token-accent', 'text-white', 'ring-2', 'ring-accent', 'active-tone');
         o.classList.add('bg-white');
       });
       
@@ -2878,7 +5196,7 @@ function initFaithSelector() {
       
       // Visual feedback
       faithPopover.querySelectorAll('.faith-option').forEach(o => {
-        o.classList.remove('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
+        o.classList.remove('bg-token-accent', 'text-white', 'ring-2', 'ring-accent', 'active-tone');
         o.classList.add('bg-white');
       });
       
@@ -2967,7 +5285,7 @@ function updateActiveChips() {
         const checkIcon = opt.querySelector('.tone-check');
         
         if (opt.dataset.tone === currentTone) {
-          opt.classList.add('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
+          opt.classList.add('bg-token-accent', 'text-white', 'ring-2', 'ring-accent', 'active-tone');
           if (checkIcon) {
             checkIcon.classList.remove('opacity-0');
             checkIcon.classList.add('opacity-100');
@@ -3028,7 +5346,7 @@ function updateActiveChips() {
         
         // Mark current selection
         carePopover.querySelectorAll('.care-option').forEach(o => {
-          o.classList.remove('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
+          o.classList.remove('bg-token-accent', 'text-white', 'ring-2', 'ring-accent', 'active-tone');
           o.classList.add('bg-white');
           if (o.dataset.care === currentCare) {
             o.classList.add('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
@@ -3085,7 +5403,7 @@ function updateActiveChips() {
         
         // Mark current selection
         faithPopover.querySelectorAll('.faith-option').forEach(o => {
-          o.classList.remove('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
+          o.classList.remove('bg-token-accent', 'text-white', 'ring-2', 'ring-accent', 'active-tone');
           o.classList.add('bg-white');
           if (o.dataset.faith === currentFaith) {
             o.classList.add('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
@@ -3128,7 +5446,7 @@ function updateActiveChips() {
           btn.type = 'button';
           btn.innerHTML = `
             <span class="flex-1">${name}</span>
-            ${currentLang === code ? '<i class="fa-solid fa-check text-[#28926D] ml-2"></i>' : '<span class="ml-2 w-4"></span>'}
+            ${currentLang === code ? '<i class="fa-solid fa-check text-token-accent ml-2"></i>' : '<span class="ml-2 w-4"></span>'}
           `;
           btn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -3207,9 +5525,9 @@ function createChip(label, value, onClick) {
   chip.className = 'chip';
   chip.type = 'button'; // Prevent form submission
   chip.innerHTML = `
-    <span class="text-xs text-gray-500">${label}:</span>
-    <span>${value}</span>
-    <i class="fa-solid fa-chevron-down text-gray-400 text-xs ml-1 transition-transform duration-200"></i>
+    <span class="text-xs chip-label">${label}:</span>
+    <span class="chip-value">${value}</span>
+    <i class="fa-solid fa-chevron-down chip-arrow text-xs ml-1 transition-transform duration-200"></i>
   `;
   
   // Use addEventListener instead of onclick for better control
@@ -3254,7 +5572,7 @@ function initLanguagePicker() {
   const searchInput = document.createElement('input');
   searchInput.type = 'text';
   searchInput.placeholder = 'Search languages...';
-  searchInput.className = 'w-full px-3 py-2 border border-gray-200 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-[#28926D]/40';
+  searchInput.className = 'w-full px-3 py-2 border border-token-gray-200 rounded-lg mb-2 focus-ring-accent';
   langMenu.appendChild(searchInput);
   
   // Language list
@@ -3407,6 +5725,8 @@ function initVoiceDictation() {
   let isListening = false;
   let silenceTimeout = null;
   let listeningStartTime = null;
+  let lastProcessedIndex = 0; // Track the last processed result index to avoid duplicates
+  let lastInterimText = ''; // Track last interim text to replace it instead of appending
   const MAX_LISTENING_TIME = 60000; // 60 seconds max
   const SILENCE_TIMEOUT = 3000; // 3 seconds of silence before auto-stop
   
@@ -3420,6 +5740,8 @@ function initVoiceDictation() {
       silenceTimeout = null;
     }
     listeningStartTime = null;
+    lastProcessedIndex = 0; // Reset processed index
+    lastInterimText = ''; // Reset interim text
   }
   
   function stopRecognition() {
@@ -3517,30 +5839,45 @@ function initVoiceDictation() {
       };
       
       recognition.onresult = (e) => {
-        let final = '';
-        let interim = '';
-        let hasNewFinal = false;
-        
         // Reset silence timeout on any result
         if (silenceTimeout) {
           clearTimeout(silenceTimeout);
         }
         
-        for (let i = e.resultIndex; i < e.results.length; i++) {
+        let newFinalText = '';
+        let newInterimText = '';
+        let hasNewFinal = false;
+        
+        // Only process new results (from lastProcessedIndex onwards)
+        const startIndex = Math.max(e.resultIndex, lastProcessedIndex);
+        
+        for (let i = startIndex; i < e.results.length; i++) {
           const transcript = e.results[i][0].transcript;
           if (e.results[i].isFinal) {
-            final += transcript + ' ';
+            // This is a final result - add it to final text
+            newFinalText += transcript + ' ';
             hasNewFinal = true;
+            lastProcessedIndex = i + 1; // Mark this as processed
+            lastInterimText = ''; // Clear interim since this is now final
           } else {
-            interim += transcript;
+            // This is an interim result - replace previous interim
+            newInterimText = transcript;
           }
+        }
+        
+        // Get current input value (without any previous interim text)
+        let currentText = input.value.trim();
+        
+        // Remove the last interim text if it exists (to replace it with new one)
+        if (lastInterimText && currentText.endsWith(lastInterimText)) {
+          currentText = currentText.slice(0, -lastInterimText.length).trim();
         }
         
         // Update input with final results, or show interim results
         if (hasNewFinal) {
-          const currentText = input.value.trim();
-          input.value = (currentText + ' ' + final).trim();
-          input.focus();
+          // Add new final text to the input
+          input.value = (currentText + ' ' + newFinalText).trim();
+          lastInterimText = ''; // Clear interim
           
           // Auto-stop after getting final result (user finished speaking)
           silenceTimeout = setTimeout(() => {
@@ -3549,12 +5886,13 @@ function initVoiceDictation() {
               showToast('Voice input complete', 'success');
             }
           }, SILENCE_TIMEOUT);
-        } else if (interim) {
-          // Show interim results in real-time
-          const currentFinal = input.value.trim();
-          input.value = currentFinal + (currentFinal ? ' ' : '') + interim;
-          input.focus();
+        } else if (newInterimText) {
+          // Show interim results in real-time (replace previous interim)
+          input.value = currentText + (currentText ? ' ' : '') + newInterimText;
+          lastInterimText = newInterimText; // Save for next replacement
         }
+        
+        input.focus();
       };
       
       recognition.onspeechstart = () => {
@@ -3610,22 +5948,28 @@ async function openSettingsModal() {
   
   modal.classList.remove('hidden');
   
+  // Initialize navigation and load settings
+  initSettingsNavigation();
+  await loadSettings();
+  initVoicePlayButton();
+  initSettingsChangeHandlers(); // Initialize change handlers for real-time updates
+  
+  // Switch to General section by default
+  switchSettingsSection('general');
+  
+  // User display name is already loaded by loadSettings()
   try {
     const res = await fetch('/api/user/settings/', { credentials: 'include' });
+    if (res.ok) {
     const data = await res.json();
-    
-    const nameInput = document.getElementById('displayName');
-    const profInput = document.getElementById('profession');
-    
-    if (nameInput) nameInput.value = data.display_name || '';
-    if (profInput) profInput.value = data.profession || '';
-    
-    // Update user display name in sidebar
     const userDisplayName = document.getElementById('userDisplayName');
-    if (userDisplayName) userDisplayName.textContent = data.display_name || 'User';
-    
+    if (userDisplayName) {
+      // Prioritize display_name (user's preferred name from Account settings), then full_name, then fallback
+      userDisplayName.textContent = data.display_name || data.full_name || 'User';
+    }
+    }
   } catch (err) {
-    console.error('Failed to load settings:', err);
+    console.error('Failed to load user settings:', err);
   }
 }
 
@@ -3634,7 +5978,279 @@ function closeSettingsModal() {
   if (modal) modal.classList.add('hidden');
 }
 
+// Settings Navigation
+function initSettingsNavigation() {
+  // Desktop navigation buttons
+  const navItems = document.querySelectorAll('.settings-nav-item');
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const section = item.getAttribute('data-section');
+      switchSettingsSection(section);
+    });
+  });
+  
+  // Mobile dropdown
+  const mobileDropdown = document.getElementById('settingsMobileDropdown');
+  if (mobileDropdown) {
+    mobileDropdown.addEventListener('change', (e) => {
+      const section = e.target.value;
+      switchSettingsSection(section);
+    });
+  }
+}
+
+function switchSettingsSection(section) {
+  // Update desktop navigation active state
+  document.querySelectorAll('.settings-nav-item').forEach(item => {
+    item.classList.remove('active');
+    if (item.getAttribute('data-section') === section) {
+      item.classList.add('active');
+    }
+  });
+  
+  // Update mobile dropdown value
+  const mobileDropdown = document.getElementById('settingsMobileDropdown');
+  if (mobileDropdown) {
+    mobileDropdown.value = section;
+  }
+  
+  // Show/hide sections
+  document.querySelectorAll('.settings-section').forEach(sec => {
+    sec.classList.add('hidden');
+  });
+  
+  const targetSection = document.getElementById(`settingsSection-${section}`);
+  if (targetSection) {
+    targetSection.classList.remove('hidden');
+  }
+}
+
+// Load settings from localStorage and server
+// Function to apply accent color to CSS variables
+function applyAccentColor(color) {
+  const colorMap = {
+    'default': { main: '#28926D', light: '#10b981', focusRing: 'rgba(40, 146, 109, 0.4)' },
+    'green': { main: '#28926D', light: '#10b981', focusRing: 'rgba(40, 146, 109, 0.4)' },
+    'blue': { main: '#236092', light: '#3B82F6', focusRing: 'rgba(35, 96, 146, 0.4)' },
+    'purple': { main: '#7C3AED', light: '#A78BFA', focusRing: 'rgba(124, 58, 237, 0.4)' },
+    'red': { main: '#DC2626', light: '#EF4444', focusRing: 'rgba(220, 38, 38, 0.4)' }
+  };
+  
+  const colorData = colorMap[color] || colorMap['default'];
+  console.log('Applying accent color:', color, '->', colorData);
+  
+  // Update CSS variables - these are used throughout the app
+  document.documentElement.style.setProperty('--nm-accent', colorData.main);
+  document.documentElement.style.setProperty('--nm-accent-light', colorData.light);
+  document.documentElement.style.setProperty('--nm-accent-focus-ring', colorData.focusRing);
+  
+  // Update check icons in tone selectors (use CSS variable)
+  const checkIcons = document.querySelectorAll('.tone-check, .base-tone-check');
+  checkIcons.forEach(icon => {
+    icon.style.color = '';
+    icon.classList.add('text-token-accent');
+  });
+  
+  // Update selected tone option backgrounds (use CSS variable)
+  const selectedToneOptions = document.querySelectorAll('.tone-option.selected, .base-tone-option.selected');
+  selectedToneOptions.forEach(option => {
+    option.style.backgroundColor = '';
+    option.style.borderColor = '';
+    option.classList.add('bg-token-accent', 'border-token-accent');
+  });
+  
+  console.log('Accent color applied successfully');
+  
+  // Trigger a custom event so other parts of the app can react
+  window.dispatchEvent(new CustomEvent('accentColorChanged', { detail: { color: color, value: colorData.main } }));
+}
+
+// Function to apply theme (light/dark/system)
+function applyTheme(theme) {
+  const root = document.documentElement;
+  
+  if (theme === 'system') {
+    // Follow OS preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    root.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+  } else {
+    root.setAttribute('data-theme', theme);
+  }
+  
+  console.log('Theme applied:', theme === 'system' ? (root.getAttribute('data-theme')) : theme);
+  
+  // Trigger custom event
+  window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: root.getAttribute('data-theme') } }));
+}
+
+async function loadSettings() {
+  // Load from localStorage first (for client-side settings)
+  const appearance = localStorage.getItem('nm_appearance') || 'system';
+  const accentColor = localStorage.getItem('nm_accent_color') || 'default';
+  const language = localStorage.getItem('nm_language') || 'auto';
+  const spokenLanguage = localStorage.getItem('nm_spoken_language') || 'auto';
+  const voice = localStorage.getItem('nm_voice') || 'spruce';
+  const separateVoiceMode = localStorage.getItem('nm_separate_voice_mode') === 'true';
+  const showAdditionalModels = localStorage.getItem('nm_show_additional_models') === 'true';
+  
+  // Set UI values
+  const appearanceSelect = document.getElementById('appearanceSelect');
+  if (appearanceSelect) appearanceSelect.value = appearance;
+  
+  // Apply appearance on load using the theme system
+  applyTheme(appearance);
+  
+  const accentColorSelect = document.getElementById('accentColorSelect');
+  if (accentColorSelect) {
+    accentColorSelect.value = accentColor === 'default' ? 'green' : accentColor;
+  }
+  
+  // Apply the accent color on load
+  applyAccentColor(accentColor);
+  
+  // Set default radio button state
+  const accentColorRadio = document.querySelector('input[name="accentColor"][value="default"]');
+  if (accentColorRadio) {
+    accentColorRadio.checked = accentColor === 'default';
+  }
+  
+  const languageSelect = document.getElementById('languageSelect');
+  if (languageSelect) languageSelect.value = language;
+  
+  const spokenLanguageSelect = document.getElementById('spokenLanguageSelect');
+  if (spokenLanguageSelect) spokenLanguageSelect.value = spokenLanguage;
+  
+  const voiceSelect = document.getElementById('voiceSelect');
+  if (voiceSelect) voiceSelect.value = voice;
+  
+  const separateVoiceModeToggle = document.getElementById('separateVoiceMode');
+  if (separateVoiceModeToggle) separateVoiceModeToggle.checked = separateVoiceMode;
+  
+  const showAdditionalModelsToggle = document.getElementById('showAdditionalModels');
+  if (showAdditionalModelsToggle) showAdditionalModelsToggle.checked = showAdditionalModels;
+  
+  // Load personalization settings from localStorage
+  // Default to PlainClinical (Balanced) if not set
+  const baseStyleTone = localStorage.getItem('nm_base_style_tone') || localStorage.getItem('nm_mode') || 'PlainClinical';
+  const characteristicWarm = localStorage.getItem('nm_characteristic_warm') || 'default';
+  const characteristicEnthusiastic = localStorage.getItem('nm_characteristic_enthusiastic') || 'default';
+  const characteristicHeaders = localStorage.getItem('nm_characteristic_headers') || 'default';
+  const characteristicEmoji = localStorage.getItem('nm_characteristic_emoji') || 'default';
+  const customInstructions = localStorage.getItem('nm_custom_instructions') || '';
+  const personalizationNickname = localStorage.getItem('nm_personalization_nickname') || '';
+  const personalizationOccupation = localStorage.getItem('nm_personalization_occupation') || '';
+  const moreAboutYou = localStorage.getItem('nm_more_about_you') || '';
+  const referenceSavedMemories = localStorage.getItem('nm_reference_saved_memories') !== 'false'; // Default true
+  const referenceChatHistory = localStorage.getItem('nm_reference_chat_history') !== 'false'; // Default true
+  
+  // Load user name from server
+  try {
+    const res = await fetch('/api/user/settings/', { credentials: 'include' });
+    if (res.ok) {
+      const data = await res.json();
+      const userDisplayName = document.getElementById('userDisplayName');
+      if (userDisplayName) {
+        // Prioritize display_name (user's preferred name from Account settings), then full_name, then fallback
+        userDisplayName.textContent = data.display_name || data.full_name || 'User';
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load user name:', err);
+  }
+  
+  // Set personalization UI values - base tone selector (buttons)
+  const baseToneOptions = document.querySelectorAll('.base-tone-option');
+  baseToneOptions.forEach(btn => {
+    if (btn.getAttribute('data-tone') === baseStyleTone) {
+      btn.classList.add('selected');
+      const checkIcon = btn.querySelector('.base-tone-check');
+      if (checkIcon) checkIcon.style.opacity = '1';
+    } else {
+      btn.classList.remove('selected');
+      const checkIcon = btn.querySelector('.base-tone-check');
+      if (checkIcon) checkIcon.style.opacity = '0';
+    }
+  });
+  
+  const characteristicWarmSelect = document.getElementById('characteristicWarm');
+  if (characteristicWarmSelect) characteristicWarmSelect.value = characteristicWarm;
+  
+  const characteristicEnthusiasticSelect = document.getElementById('characteristicEnthusiastic');
+  if (characteristicEnthusiasticSelect) characteristicEnthusiasticSelect.value = characteristicEnthusiastic;
+  
+  const characteristicHeadersSelect = document.getElementById('characteristicHeaders');
+  if (characteristicHeadersSelect) characteristicHeadersSelect.value = characteristicHeaders;
+  
+  const characteristicEmojiSelect = document.getElementById('characteristicEmoji');
+  if (characteristicEmojiSelect) characteristicEmojiSelect.value = characteristicEmoji;
+  
+  const customInstructionsTextarea = document.getElementById('customInstructions');
+  if (customInstructionsTextarea) customInstructionsTextarea.value = customInstructions;
+  
+  const personalizationNicknameInput = document.getElementById('personalizationNickname');
+  if (personalizationNicknameInput) personalizationNicknameInput.value = personalizationNickname;
+  
+  const personalizationOccupationInput = document.getElementById('personalizationOccupation');
+  if (personalizationOccupationInput) personalizationOccupationInput.value = personalizationOccupation;
+  
+  const moreAboutYouTextarea = document.getElementById('moreAboutYou');
+  if (moreAboutYouTextarea) moreAboutYouTextarea.value = moreAboutYou;
+  
+  const referenceSavedMemoriesToggle = document.getElementById('referenceSavedMemories');
+  if (referenceSavedMemoriesToggle) referenceSavedMemoriesToggle.checked = referenceSavedMemories;
+  
+  const referenceChatHistoryToggle = document.getElementById('referenceChatHistory');
+  if (referenceChatHistoryToggle) referenceChatHistoryToggle.checked = referenceChatHistory;
+  
+  // Load account settings from server
+  try {
+    const res = await fetch('/api/user/settings/', {
+      credentials: 'include'
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      const nameInput = document.getElementById('displayName');
+      const profInput = document.getElementById('profession');
+      
+      if (nameInput && data.display_name) nameInput.value = data.display_name;
+      if (profInput && data.profession) profInput.value = data.profession;
+      
+      // Load personalization from server if available
+      if (data.personalization) {
+        if (data.personalization.base_style_tone) {
+          const serverTone = data.personalization.base_style_tone;
+          baseToneOptions.forEach(btn => {
+            if (btn.getAttribute('data-tone') === serverTone) {
+              btn.classList.add('selected');
+              const checkIcon = btn.querySelector('.base-tone-check');
+              if (checkIcon) checkIcon.style.opacity = '1';
+            } else {
+              btn.classList.remove('selected');
+              const checkIcon = btn.querySelector('.base-tone-check');
+              if (checkIcon) checkIcon.style.opacity = '0';
+            }
+          });
+        }
+        if (characteristicWarmSelect && data.personalization.characteristic_warm) characteristicWarmSelect.value = data.personalization.characteristic_warm;
+        if (characteristicEnthusiasticSelect && data.personalization.characteristic_enthusiastic) characteristicEnthusiasticSelect.value = data.personalization.characteristic_enthusiastic;
+        if (characteristicHeadersSelect && data.personalization.characteristic_headers) characteristicHeadersSelect.value = data.personalization.characteristic_headers;
+        if (characteristicEmojiSelect && data.personalization.characteristic_emoji) characteristicEmojiSelect.value = data.personalization.characteristic_emoji;
+        if (customInstructionsTextarea && data.personalization.custom_instructions) customInstructionsTextarea.value = data.personalization.custom_instructions;
+        if (personalizationNicknameInput && data.personalization.nickname) personalizationNicknameInput.value = data.personalization.nickname;
+        if (personalizationOccupationInput && data.personalization.occupation) personalizationOccupationInput.value = data.personalization.occupation;
+        if (moreAboutYouTextarea && data.personalization.more_about_you) moreAboutYouTextarea.value = data.personalization.more_about_you;
+        if (referenceSavedMemoriesToggle && data.personalization.reference_saved_memories !== undefined) referenceSavedMemoriesToggle.checked = data.personalization.reference_saved_memories;
+        if (referenceChatHistoryToggle && data.personalization.reference_chat_history !== undefined) referenceChatHistoryToggle.checked = data.personalization.reference_chat_history;
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load account settings:', err);
+  }
+}
+
 async function saveSettings() {
+  // Get account settings
   const nameInput = document.getElementById('displayName');
   const profInput = document.getElementById('profession');
   
@@ -3650,7 +6266,52 @@ async function saveSettings() {
     return;
   }
   
-  const saveBtn = document.querySelector('#settingsModal .btn-primary');
+  // Get general settings
+  const appearance = document.getElementById('appearanceSelect')?.value || 'system';
+  const accentColor = document.getElementById('accentColorSelect')?.value || 'default';
+  const language = document.getElementById('languageSelect')?.value || 'auto';
+  const spokenLanguage = document.getElementById('spokenLanguageSelect')?.value || 'auto';
+  const voice = document.getElementById('voiceSelect')?.value || 'spruce';
+  const separateVoiceMode = document.getElementById('separateVoiceMode')?.checked || false;
+  const showAdditionalModels = document.getElementById('showAdditionalModels')?.checked || false;
+  
+  // Get personalization settings - base tone from selected button
+  const selectedBaseTone = document.querySelector('.base-tone-option.selected');
+  const baseStyleTone = selectedBaseTone ? selectedBaseTone.getAttribute('data-tone') : 'PlainClinical';
+  const characteristicWarm = document.getElementById('characteristicWarm')?.value || 'default';
+  const characteristicEnthusiastic = document.getElementById('characteristicEnthusiastic')?.value || 'default';
+  const characteristicHeaders = document.getElementById('characteristicHeaders')?.value || 'default';
+  const characteristicEmoji = document.getElementById('characteristicEmoji')?.value || 'default';
+  const customInstructions = document.getElementById('customInstructions')?.value || '';
+  const personalizationNickname = document.getElementById('personalizationNickname')?.value || '';
+  const personalizationOccupation = document.getElementById('personalizationOccupation')?.value || '';
+  const moreAboutYou = document.getElementById('moreAboutYou')?.value || '';
+  const referenceSavedMemories = document.getElementById('referenceSavedMemories')?.checked !== false;
+  const referenceChatHistory = document.getElementById('referenceChatHistory')?.checked !== false;
+  
+  // Save client-side settings to localStorage
+  localStorage.setItem('nm_appearance', appearance);
+  localStorage.setItem('nm_accent_color', accentColor);
+  localStorage.setItem('nm_language', language);
+  localStorage.setItem('nm_spoken_language', spokenLanguage);
+  localStorage.setItem('nm_voice', voice);
+  localStorage.setItem('nm_separate_voice_mode', separateVoiceMode.toString());
+  localStorage.setItem('nm_show_additional_models', showAdditionalModels.toString());
+  
+  // Save personalization settings to localStorage
+  localStorage.setItem('nm_base_style_tone', baseStyleTone);
+  localStorage.setItem('nm_characteristic_warm', characteristicWarm);
+  localStorage.setItem('nm_characteristic_enthusiastic', characteristicEnthusiastic);
+  localStorage.setItem('nm_characteristic_headers', characteristicHeaders);
+  localStorage.setItem('nm_characteristic_emoji', characteristicEmoji);
+  localStorage.setItem('nm_custom_instructions', customInstructions);
+  localStorage.setItem('nm_personalization_nickname', personalizationNickname);
+  localStorage.setItem('nm_personalization_occupation', personalizationOccupation);
+  localStorage.setItem('nm_more_about_you', moreAboutYou);
+  localStorage.setItem('nm_reference_saved_memories', referenceSavedMemories.toString());
+  localStorage.setItem('nm_reference_chat_history', referenceChatHistory.toString());
+  
+  const saveBtn = document.querySelector('#settingsSection-account .btn-primary');
   const originalHTML = saveBtn?.innerHTML;
   
   // Show loading state
@@ -3666,7 +6327,30 @@ async function saveSettings() {
         'Content-Type': 'application/json',
         'X-CSRFToken': getCSRFToken()
       },
-      body: JSON.stringify({ display_name: name, profession }),
+      body: JSON.stringify({ 
+        display_name: name, 
+        profession,
+        appearance,
+        accent_color: accentColor,
+        language,
+        spoken_language: spokenLanguage,
+        voice,
+        separate_voice_mode: separateVoiceMode,
+        show_additional_models: showAdditionalModels,
+        personalization: {
+          base_style_tone: baseStyleTone,
+          characteristic_warm: characteristicWarm,
+          characteristic_enthusiastic: characteristicEnthusiastic,
+          characteristic_headers: characteristicHeaders,
+          characteristic_emoji: characteristicEmoji,
+          custom_instructions: customInstructions,
+          nickname: personalizationNickname,
+          occupation: personalizationOccupation,
+          more_about_you: moreAboutYou,
+          reference_saved_memories: referenceSavedMemories,
+          reference_chat_history: referenceChatHistory
+        }
+      }),
       credentials: 'include'
     });
     
@@ -3674,9 +6358,27 @@ async function saveSettings() {
       showToast('Settings saved', 'success');
       closeSettingsModal();
       
-      // Update UI immediately
+      // Update UI immediately - fetch fresh data to get updated name
+      try {
+        const refreshRes = await fetch('/api/user/settings/', { credentials: 'include' });
+        if (refreshRes.ok) {
+          const refreshData = await refreshRes.json();
+          const userDisplayName = document.getElementById('userDisplayName');
+          if (userDisplayName) {
+            // Prioritize display_name (what user just set), then full_name, then fallback
+            // This ensures the display_name change is immediately reflected in the sidebar
+            userDisplayName.textContent = refreshData.display_name || refreshData.full_name || 'User';
+          }
+        }
+      } catch (err) {
+        console.error('Failed to refresh user name:', err);
+        // Fallback to the name that was saved
       const userDisplayName = document.getElementById('userDisplayName');
       if (userDisplayName) userDisplayName.textContent = name;
+      }
+      
+      // Apply appearance if changed using the theme system
+      applyTheme(appearance);
       
     } else {
       throw new Error('Save failed');
@@ -3691,24 +6393,365 @@ async function saveSettings() {
   }
 }
 
+// Initialize real-time change handlers for client-side settings
+function initSettingsChangeHandlers() {
+  // Appearance
+  const appearanceSelect = document.getElementById('appearanceSelect');
+  if (appearanceSelect) {
+    appearanceSelect.addEventListener('change', (e) => {
+      const selectedAppearance = e.target.value;
+      localStorage.setItem('nm_appearance', selectedAppearance);
+      applyTheme(selectedAppearance);
+      showToast(`Appearance changed to ${selectedAppearance}`, 'success');
+    });
+  }
+  
+  // Accent color - Remove old listeners first to prevent duplicates
+  const accentColorSelect = document.getElementById('accentColorSelect');
+  const accentColorRadio = document.querySelector('input[name="accentColor"][value="default"]');
+  
+  if (accentColorSelect) {
+    // Clone and replace to remove old listeners
+    const newSelect = accentColorSelect.cloneNode(true);
+    accentColorSelect.parentNode.replaceChild(newSelect, accentColorSelect);
+    
+    // Get fresh reference after replacement
+    const freshSelect = document.getElementById('accentColorSelect');
+    if (freshSelect) {
+      freshSelect.addEventListener('change', function(e) {
+        const selectedColor = e.target.value;
+        console.log('Accent color selector changed to:', selectedColor);
+        localStorage.setItem('nm_accent_color', selectedColor);
+        applyAccentColor(selectedColor);
+        showToast(`Accent color changed to ${selectedColor}`, 'success');
+        
+        // Uncheck default radio if a color is selected
+        const radio = document.querySelector('input[name="accentColor"][value="default"]');
+        if (radio && selectedColor !== 'default') {
+          radio.checked = false;
+        }
+      });
+      console.log('Accent color selector event listener attached successfully');
+    } else {
+      console.error('Could not find accent color select after replacement!');
+    }
+  } else {
+    console.error('Accent color select element not found!');
+  }
+  
+  // Handle default radio button
+  if (accentColorRadio) {
+    accentColorRadio.addEventListener('change', (e) => {
+      if (e.target.checked) {
+        const defaultColor = 'default';
+        console.log('Accent color reset to default');
+        localStorage.setItem('nm_accent_color', defaultColor);
+        applyAccentColor(defaultColor);
+        const select = document.getElementById('accentColorSelect');
+        if (select) select.value = 'green';
+        showToast('Accent color reset to default', 'success');
+      }
+    });
+  }
+  
+  // Language
+  const languageSelect = document.getElementById('languageSelect');
+  if (languageSelect) {
+    languageSelect.addEventListener('change', (e) => {
+      localStorage.setItem('nm_language', e.target.value);
+    });
+  }
+  
+  // Spoken language
+  const spokenLanguageSelect = document.getElementById('spokenLanguageSelect');
+  if (spokenLanguageSelect) {
+    spokenLanguageSelect.addEventListener('change', (e) => {
+      localStorage.setItem('nm_spoken_language', e.target.value);
+    });
+  }
+  
+  // Voice
+  const voiceSelect = document.getElementById('voiceSelect');
+  if (voiceSelect) {
+    voiceSelect.addEventListener('change', (e) => {
+      localStorage.setItem('nm_voice', e.target.value);
+    });
+  }
+  
+  // Separate voice mode
+  const separateVoiceMode = document.getElementById('separateVoiceMode');
+  if (separateVoiceMode) {
+    separateVoiceMode.addEventListener('change', (e) => {
+      localStorage.setItem('nm_separate_voice_mode', e.target.checked.toString());
+    });
+  }
+  
+  // Show additional models
+  const showAdditionalModels = document.getElementById('showAdditionalModels');
+  if (showAdditionalModels) {
+    showAdditionalModels.addEventListener('change', (e) => {
+      localStorage.setItem('nm_show_additional_models', e.target.checked.toString());
+    });
+  }
+  
+  // Personalization settings - base tone selector (buttons)
+  const baseToneOptions = document.querySelectorAll('.base-tone-option');
+  baseToneOptions.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Remove selected class from all buttons
+      baseToneOptions.forEach(b => {
+        b.classList.remove('selected');
+        const checkIcon = b.querySelector('.base-tone-check');
+        if (checkIcon) checkIcon.style.opacity = '0';
+      });
+      
+      // Add selected class to clicked button
+      btn.classList.add('selected');
+      const checkIcon = btn.querySelector('.base-tone-check');
+      if (checkIcon) checkIcon.style.opacity = '1';
+      
+      // Save to localStorage
+      const selectedTone = btn.getAttribute('data-tone');
+      localStorage.setItem('nm_base_style_tone', selectedTone);
+      localStorage.setItem('nm_mode', selectedTone); // Also update main tone setting
+      
+      // Update the main chat tone if it exists
+      if (typeof updateTone === 'function') {
+        updateTone(selectedTone);
+      }
+    });
+  });
+  
+  const characteristicWarm = document.getElementById('characteristicWarm');
+  if (characteristicWarm) {
+    characteristicWarm.addEventListener('change', (e) => {
+      localStorage.setItem('nm_characteristic_warm', e.target.value);
+    });
+  }
+  
+  const characteristicEnthusiastic = document.getElementById('characteristicEnthusiastic');
+  if (characteristicEnthusiastic) {
+    characteristicEnthusiastic.addEventListener('change', (e) => {
+      localStorage.setItem('nm_characteristic_enthusiastic', e.target.value);
+    });
+  }
+  
+  const characteristicHeaders = document.getElementById('characteristicHeaders');
+  if (characteristicHeaders) {
+    characteristicHeaders.addEventListener('change', (e) => {
+      localStorage.setItem('nm_characteristic_headers', e.target.value);
+    });
+  }
+  
+  const characteristicEmoji = document.getElementById('characteristicEmoji');
+  if (characteristicEmoji) {
+    characteristicEmoji.addEventListener('change', (e) => {
+      localStorage.setItem('nm_characteristic_emoji', e.target.value);
+    });
+  }
+  
+  const customInstructions = document.getElementById('customInstructions');
+  if (customInstructions) {
+    customInstructions.addEventListener('input', (e) => {
+      localStorage.setItem('nm_custom_instructions', e.target.value);
+    });
+  }
+  
+  const personalizationNickname = document.getElementById('personalizationNickname');
+  if (personalizationNickname) {
+    personalizationNickname.addEventListener('input', (e) => {
+      localStorage.setItem('nm_personalization_nickname', e.target.value);
+    });
+  }
+  
+  const personalizationOccupation = document.getElementById('personalizationOccupation');
+  if (personalizationOccupation) {
+    personalizationOccupation.addEventListener('input', (e) => {
+      localStorage.setItem('nm_personalization_occupation', e.target.value);
+    });
+  }
+  
+  const moreAboutYou = document.getElementById('moreAboutYou');
+  if (moreAboutYou) {
+    moreAboutYou.addEventListener('input', (e) => {
+      localStorage.setItem('nm_more_about_you', e.target.value);
+    });
+  }
+  
+  const referenceSavedMemories = document.getElementById('referenceSavedMemories');
+  if (referenceSavedMemories) {
+    referenceSavedMemories.addEventListener('change', (e) => {
+      localStorage.setItem('nm_reference_saved_memories', e.target.checked.toString());
+    });
+  }
+  
+  const referenceChatHistory = document.getElementById('referenceChatHistory');
+  if (referenceChatHistory) {
+    referenceChatHistory.addEventListener('change', (e) => {
+      localStorage.setItem('nm_reference_chat_history', e.target.checked.toString());
+    });
+  }
+  
+  // Manage Memory button
+  const manageMemoryBtn = document.getElementById('manageMemoryBtn');
+  if (manageMemoryBtn) {
+    manageMemoryBtn.addEventListener('click', () => {
+      showToast('Memory management coming soon', 'info');
+      // TODO: Implement memory management modal/page
+    });
+  }
+}
+
+// Voice play button functionality
+function initVoicePlayButton() {
+  const playBtn = document.getElementById('playVoiceBtn');
+  if (!playBtn) return;
+  
+  let isPlaying = false;
+  let audioContext = null;
+  let oscillator = null;
+  
+  playBtn.addEventListener('click', () => {
+    if (isPlaying) {
+      // Stop playing
+      if (oscillator) {
+        oscillator.stop();
+        oscillator = null;
+      }
+      if (audioContext) {
+        audioContext.close();
+        audioContext = null;
+      }
+      playBtn.innerHTML = '<i class="fa-solid fa-play text-gray-600 text-xs"></i>';
+      isPlaying = false;
+    } else {
+      // Start playing
+      try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = 440; // A4 note
+        oscillator.type = 'sine';
+        gainNode.gain.value = 0.1;
+        
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.5); // Play for 0.5 seconds
+        
+        playBtn.innerHTML = '<i class="fa-solid fa-stop text-gray-600 text-xs"></i>';
+        isPlaying = true;
+        
+        oscillator.onended = () => {
+          playBtn.innerHTML = '<i class="fa-solid fa-play text-gray-600 text-xs"></i>';
+          isPlaying = false;
+          if (audioContext) {
+            audioContext.close();
+            audioContext = null;
+          }
+        };
+      } catch (err) {
+        console.error('Failed to play voice preview:', err);
+        showToast('Voice preview not available', 'info');
+      }
+    }
+  });
+}
+
 // ============================================
 // LAYOUT & NAVIGATION
 // ============================================
 
-function toggleSidebar() {
+// Mobile sidebar toggle (for burger button)
+function toggleMobileSidebar() {
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('mobileOverlay');
   
-  if (sidebar && overlay) {
-    const isOpen = !sidebar.classList.contains('-translate-x-full');
-    if (isOpen) {
-      sidebar.classList.add('-translate-x-full');
-      overlay.classList.add('hidden');
-    } else {
-      sidebar.classList.remove('-translate-x-full');
-      overlay.classList.remove('hidden');
-    }
+  if (!sidebar || !overlay) {
+    console.error('Sidebar or overlay not found');
+    return;
   }
+  
+  // Check if we're on mobile
+  if (window.innerWidth > 768) {
+    return; // Don't toggle on desktop
+  }
+  
+  const isOpen = sidebar.classList.contains('sidebar-open');
+  
+    if (isOpen) {
+    // Close sidebar
+    sidebar.classList.remove('sidebar-open');
+      overlay.classList.add('hidden');
+    document.body.style.overflow = '';
+    console.log('Mobile sidebar closed');
+    } else {
+    // Open sidebar
+    sidebar.classList.add('sidebar-open');
+      overlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    console.log('Mobile sidebar opened');
+  }
+}
+
+function initMobileSidebar() {
+  const burgerBtn = document.getElementById('burgerBtn');
+  const overlay = document.getElementById('mobileOverlay');
+  const sidebar = document.getElementById('sidebar');
+  
+  console.log('Initializing mobile sidebar...', { burgerBtn, overlay, sidebar });
+  
+  // Burger button click
+  if (burgerBtn) {
+    // Remove old listeners by cloning
+    const newBtn = burgerBtn.cloneNode(true);
+    burgerBtn.parentNode.replaceChild(newBtn, burgerBtn);
+    
+    newBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('Burger button clicked in initMobileSidebar');
+      toggleMobileSidebar();
+    });
+  } else {
+    console.error('Burger button not found in initMobileSidebar');
+  }
+  
+  // Overlay click to close
+  if (overlay) {
+    overlay.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleMobileSidebar();
+    });
+  }
+  
+  // Close sidebar when clicking on a session card (mobile)
+  document.addEventListener('click', (e) => {
+    if (window.innerWidth <= 768) {
+      const sessionCard = e.target.closest('.session-card');
+      if (sessionCard && sidebar && sidebar.classList.contains('sidebar-open')) {
+        toggleMobileSidebar();
+      }
+    }
+  });
+  
+  // Handle window resize
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+      // Desktop: ensure sidebar is visible and reset mobile state
+      if (sidebar) {
+        sidebar.classList.remove('sidebar-open');
+        sidebar.style.transform = '';
+      }
+      if (overlay) {
+        overlay.classList.add('hidden');
+      }
+      document.body.style.overflow = '';
+    }
+  });
 }
 
 function updateComposerPadding() {
@@ -3761,11 +6804,126 @@ function quickPrompt(text) {
 }
 
 // ============================================
+// TOGGLE HISTORY
+// ============================================
+
+// Global function to toggle sidebar (used by multiple buttons)
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  if (!sidebar) {
+    console.error('Sidebar not found');
+    return;
+  }
+  
+  // Don't collapse on mobile
+  if (window.innerWidth <= 768) {
+    return;
+  }
+  
+  const isCollapsed = sidebar.classList.contains('sidebar-collapsed');
+  
+  if (isCollapsed) {
+    // Expand sidebar
+    sidebar.classList.remove('sidebar-collapsed');
+    sidebar.classList.add('sidebar-expanded');
+    localStorage.setItem('sidebarCollapsed', 'false');
+  } else {
+    // Collapse sidebar
+    sidebar.classList.remove('sidebar-expanded');
+    sidebar.classList.add('sidebar-collapsed');
+    localStorage.setItem('sidebarCollapsed', 'true');
+  }
+}
+
+function initToggleHistory() {
+  const toggleBtn = document.getElementById('toggleHistoryBtn');
+  const sidebar = document.getElementById('sidebar');
+  
+  if (!toggleBtn || !sidebar) {
+    console.error('Toggle sidebar elements not found');
+    return;
+  }
+  
+  // Check localStorage for saved state
+  const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+  if (isCollapsed) {
+    sidebar.classList.add('sidebar-collapsed');
+    sidebar.classList.remove('sidebar-expanded');
+  } else {
+    sidebar.classList.remove('sidebar-collapsed');
+    sidebar.classList.add('sidebar-expanded');
+  }
+  
+  // Toggle from split-screen button (when expanded) - desktop only
+  toggleBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Toggle history button clicked');
+    // Only collapse/expand on desktop
+    if (window.innerWidth > 768) {
+      toggleSidebar();
+    }
+  });
+  
+  // Toggle from "Open sidebar" hover button
+  const openSidebarHoverBtn = document.getElementById('openSidebarHoverBtn');
+  if (openSidebarHoverBtn) {
+    openSidebarHoverBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleSidebar();
+    });
+  }
+  
+  // Toggle from sidebar icon button (when collapsed)
+  const sidebarIconBtn = document.getElementById('sidebarIconBtn');
+  if (sidebarIconBtn) {
+    sidebarIconBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (sidebar.classList.contains('sidebar-collapsed')) {
+        toggleSidebar();
+      }
+    });
+  }
+}
+
+// ============================================
 // INITIALIZATION
 // ============================================
 
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('Dashboard initializing...');
+  
+  // Apply appearance on page load FIRST (before other initializations) - CRITICAL: Do this first to avoid flash
+  const savedAppearance = localStorage.getItem('nm_appearance') || 'system';
+  applyTheme(savedAppearance);
+  
+  // Listen for system theme changes if using system preference
+  if (savedAppearance === 'system') {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      applyTheme('system');
+    });
+  }
+  
+  // Apply accent color on page load
+  const savedAccentColor = localStorage.getItem('nm_accent_color') || 'default';
+  applyAccentColor(savedAccentColor);
+  
+  // Load user name on page load
+  try {
+    const res = await fetch('/api/user/settings/', { credentials: 'include' });
+    if (res.ok) {
+      const data = await res.json();
+      const userDisplayName = document.getElementById('userDisplayName');
+      if (userDisplayName) {
+        // Prioritize display_name (user's preferred name from Account settings), then full_name, then fallback
+        userDisplayName.textContent = data.display_name || data.full_name || 'User';
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load user name on page load:', err);
+  }
   
   try {
     // Initialize all components
@@ -3844,14 +7002,38 @@ document.addEventListener('DOMContentLoaded', async () => {
       firstChatInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
-          sendChat();
+          // Copy text to regular input BEFORE transitioning
+          const text = firstChatInput.value.trim();
+          const regularInput = document.getElementById('chatInput');
+          if (text && regularInput) {
+            regularInput.value = text;
+          }
+          // Transition IMMEDIATELY before sending
+          const firstMessageView = document.getElementById('firstMessageView');
+          if (firstMessageView && !firstMessageView.classList.contains('hidden')) {
+            transitionToNormalChat();
+          }
+          // Small delay to ensure transition completes, then send
+          setTimeout(() => sendChat(), 50);
         }
       });
     }
     
     if (firstSendBtn) {
       firstSendBtn.addEventListener('click', () => {
-        sendChat();
+        // Copy text to regular input BEFORE transitioning
+        const text = firstChatInput.value.trim();
+        const regularInput = document.getElementById('chatInput');
+        if (text && regularInput) {
+          regularInput.value = text;
+        }
+        // Transition IMMEDIATELY before sending
+        const firstMessageView = document.getElementById('firstMessageView');
+        if (firstMessageView && !firstMessageView.classList.contains('hidden')) {
+          transitionToNormalChat();
+        }
+        // Small delay to ensure transition completes, then send
+        setTimeout(() => sendChat(), 50);
       });
     }
     
@@ -3860,10 +7042,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         firstFileInput.click();
       });
       firstFileInput.addEventListener('change', (e) => {
-        if (e.target.files) {
+        if (e.target.files && e.target.files.length > 0) {
           addFiles(e.target.files);
-          // Transition to normal view when files are added
+          // Transition to normal view IMMEDIATELY when files are added
           transitionToNormalChat();
+          // Copy any text from first input to regular input
+          const firstInputText = firstChatInput?.value || '';
+          const regularInput = document.getElementById('chatInput');
+          if (firstInputText && regularInput) {
+            regularInput.value = firstInputText;
+          }
+          // Clear first input
+          if (firstChatInput) firstChatInput.value = '';
         }
         e.target.value = '';
       });
@@ -3892,34 +7082,132 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.error('New chat button not found!');
     }
     
+    // Initialize mobile sidebar (with error handling)
+    try {
+      if (typeof initMobileSidebar === 'function') {
+        initMobileSidebar();
+        console.log('Mobile sidebar initialized');
+      } else {
+        console.error('initMobileSidebar function not found');
+      }
+    } catch (err) {
+      console.error('Failed to initialize mobile sidebar:', err);
+    }
+    
+    // Sidebar menu items
+    const sidebarNewChat = document.getElementById('sidebarNewChat');
+    if (sidebarNewChat) {
+      sidebarNewChat.addEventListener('click', () => {
+        newChat();
+        // Close sidebar on mobile after clicking
+        if (window.innerWidth <= 768) {
+          toggleMobileSidebar();
+        }
+      });
+    }
+    
+    const sidebarSearchChats = document.getElementById('sidebarSearchChats');
+    if (sidebarSearchChats) {
+      sidebarSearchChats.addEventListener('click', () => {
+        openSearchModal();
+        // Close sidebar on mobile after clicking
+        if (window.innerWidth <= 768) {
+          toggleMobileSidebar();
+        }
+      });
+    }
+    
+    // Search modal functionality
+    const searchModalInput = document.getElementById('searchModalInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const searchNewChatBtn = document.getElementById('searchNewChatBtn');
+    
+    if (searchModalInput) {
+      searchModalInput.addEventListener('input', (e) => {
+        const query = e.target.value;
+        if (query.trim()) {
+          if (clearSearchBtn) clearSearchBtn.classList.remove('hidden');
+          loadSearchResults(query);
+        } else {
+          if (clearSearchBtn) clearSearchBtn.classList.add('hidden');
+          loadSearchResults('');
+        }
+      });
+      
+      // Close on Escape
+      searchModalInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeSearchModal();
+        }
+      });
+    }
+    
+    if (clearSearchBtn) {
+      clearSearchBtn.addEventListener('click', () => {
+        if (searchModalInput) {
+          searchModalInput.value = '';
+          searchModalInput.focus();
+        }
+        clearSearchBtn.classList.add('hidden');
+        loadSearchResults('');
+      });
+    }
+    
+    if (searchNewChatBtn) {
+      searchNewChatBtn.addEventListener('click', () => {
+        closeSearchModal();
+        newChat();
+      });
+    }
+    
+    const sidebarImages = document.getElementById('sidebarImages');
+    if (sidebarImages) {
+      sidebarImages.addEventListener('click', () => {
+        // Show images view or filter sessions with images
+        // For now, just show a toast - can be expanded later
+        showToast('Images feature coming soon', 'info');
+        // Could filter sessions to show only those with images
+      });
+    }
+    
+    const sidebarApps = document.getElementById('sidebarApps');
+    if (sidebarApps) {
+      sidebarApps.addEventListener('click', () => {
+        // Show apps view
+        showToast('Apps feature coming soon', 'info');
+      });
+    }
+    
+    // Initialize images badge on load
+    updateImagesBadge();
+    
     // User menu button
     const userMenuBtn = document.getElementById('userMenuBtn');
     if (userMenuBtn) {
       userMenuBtn.addEventListener('click', () => {
         console.log('User menu button clicked');
         openSettingsModal();
+        // Close sidebar on mobile after clicking
+        if (window.innerWidth <= 768) {
+          toggleMobileSidebar();
+        }
       });
     } else {
       console.warn('User menu button not found');
     }
     
-    // Burger button (mobile)
-    const burgerBtn = document.getElementById('burgerBtn');
-    if (burgerBtn) {
-      burgerBtn.addEventListener('click', () => {
-        console.log('Burger button clicked');
-        toggleSidebar();
-      });
-    } else {
-      console.warn('Burger button not found');
-    }
+    // Burger button is handled by initMobileSidebar() above
     
-    // Sidebar collapse
-    const sidebarCollapse = document.getElementById('sidebarCollapse');
-    if (sidebarCollapse) {
-      sidebarCollapse.addEventListener('click', () => {
-        const sidebar = document.getElementById('sidebar');
-        if (sidebar) sidebar.classList.toggle('hidden');
+    // Toggle history (arrow next to logo)
+    initToggleHistory();
+    
+    // Header "Open sidebar" button
+    const openSidebarBtn = document.getElementById('openSidebarBtn');
+    if (openSidebarBtn) {
+      openSidebarBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleSidebar();
       });
     }
     
@@ -3995,6 +7283,28 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
     
+    // Bulk delete functionality
+    const toggleBulkSelectBtn = document.getElementById('toggleBulkSelectBtn');
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+    
+    if (toggleBulkSelectBtn) {
+      toggleBulkSelectBtn.addEventListener('click', toggleBulkSelect);
+    }
+    if (selectAllBtn) {
+      selectAllBtn.addEventListener('click', selectAllSessions);
+    }
+    if (bulkDeleteBtn) {
+      bulkDeleteBtn.addEventListener('click', openBulkDeleteModal);
+    }
+    
+    // Update selected count when checkboxes change
+    document.addEventListener('change', (e) => {
+      if (e.target.classList.contains('session-checkbox')) {
+        updateSelectedCount();
+      }
+    });
+    
     // Load initial state
     console.log('Loading sessions...');
     try {
@@ -4040,6 +7350,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('Dashboard initialized successfully');
   } catch (error) {
     console.error('Dashboard initialization error:', error);
+    // Show user-friendly error message
+    showToast('Failed to initialize dashboard. Please refresh the page.', 'error');
     console.error('Error stack:', error.stack);
     // Try to show toast, but if showToast isn't defined, just alert
     try {
@@ -4064,6 +7376,13 @@ window.startRenameSession = startRenameSession;
 window.archiveSession = archiveSession;
 window.unarchiveSession = unarchiveSession;
 window.confirmDeleteSession = confirmDeleteSession;
+window.toggleBulkSelect = toggleBulkSelect;
+window.selectAllSessions = selectAllSessions;
+window.deselectAllSessions = deselectAllSessions;
+window.openBulkDeleteModal = openBulkDeleteModal;
+window.closeBulkDeleteModal = closeBulkDeleteModal;
+window.confirmBulkDelete = confirmBulkDelete;
+window.updateSelectedCount = updateSelectedCount;
 window.logoutUser = function() {
   if (confirm('Are you sure you want to log out?')) {
     const logoutUrl = '{% url "logout" %}';
@@ -4081,6 +7400,10 @@ window.logoutUser = function() {
     });
   }
 };
+
+// Make mobile functions available globally
+window.toggleMobileSidebar = toggleMobileSidebar;
+window.initMobileSidebar = initMobileSidebar;
   </script>
 </body>
 </html>
