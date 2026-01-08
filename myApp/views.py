@@ -3218,6 +3218,10 @@ def api_login(request):
                 except Exception:
                     pass
                 
+                # Create/get token for API authentication
+                from rest_framework.authtoken.models import Token
+                token, _ = Token.objects.get_or_create(user=user)
+                
                 return JsonResponse({
                     'id': user.id,
                     'username': user.username,
@@ -3229,6 +3233,7 @@ def api_login(request):
                     'is_active': user.is_active,
                     'is_staff': user.is_staff,
                     'is_superuser': user.is_superuser,
+                    'token': token.key,  # ✅ Add token for iOS/mobile API compatibility
                 })
             else:
                 # Track failed login attempt

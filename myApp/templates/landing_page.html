@@ -77,15 +77,28 @@
 /* ---------- Base theme & layout ---------- */
 :root{
   --brand:#236092;
+  --brand-dark:#1B4A7A;
+  --brand-light:#2D7BB8;
+  --accent-warm:#F59E0B;
+  --accent-coral:#F87171;
+  --accent-lavender:#A78BFA;
   --font-scale: 1.125;              /* 18px base for readability */
   --line-scale: 1.08;
   --max-ch: 68ch;
   --tour-blur: 6px;
   --tour-wash: rgba(255,255,255,.26);
   --tour-dim:  rgba(2,6,23,.18);
+  --gradient-bg: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 25%, #f6f8fb 50%, #fef3f2 100%);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.18);
 }
 html{ font-size: calc(16px * var(--font-scale)); }
-body{ background:#f6f8fb; line-height: calc(1.55 * var(--line-scale)); letter-spacing:.1px; }
+body{ 
+  background: var(--gradient-bg);
+  background-attachment: fixed;
+  line-height: calc(1.55 * var(--line-scale)); 
+  letter-spacing:.1px; 
+}
 .easy-read{ --font-scale: 1.2; --line-scale: 1.12; } /* toggle-able bump */
 .hc *{ color:#000 !important; border-color:#0003 !important }
 .hc .chat-ai{ background:#fff !important; }
@@ -163,6 +176,44 @@ body{ background:#f6f8fb; line-height: calc(1.55 * var(--line-scale)); letter-sp
   #modeSelectWrap{ display:none !important; }
 }
 
+/* Premium Mode Cards */
+.mode-card{
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mode-card[aria-pressed="true"]{
+  border-color: var(--brand) !important;
+  background: linear-gradient(135deg, rgba(35,96,146,0.05) 0%, rgba(35,96,146,0.02) 100%);
+  box-shadow: 0 4px 12px rgba(35,96,146,0.15);
+}
+.mode-card:hover{
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+/* Premium Button Styles */
+#ctaUpload{
+  position: relative;
+  overflow: hidden;
+}
+#ctaUpload::before{
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+#ctaUpload:hover::before{
+  left: 100%;
+}
+
+/* Glassmorphism Chat Card */
+.chat-ai.chat-bubble{
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
 /* Airier mode chips */
 .mode-chip{
   display:inline-flex; align-items:center; gap:.5rem;
@@ -184,9 +235,8 @@ body{ background:#f6f8fb; line-height: calc(1.55 * var(--line-scale)); letter-sp
 
 </head>
 <body class="text-slate-800">
-  <!-- Top bar -->
-  <!-- Top bar -->
-  <header class="w-full border-b bg-white/80 backdrop-blur">
+  <!-- Premium Top Bar -->
+  <header class="w-full border-b border-slate-200/50 bg-white/90 backdrop-blur-md shadow-sm">
     <div class="max-w-6xl mx-auto px-5 py-3 flex items-center justify-between">
       <!-- Brand -->
       <a href="/" class="flex items-center gap-3">
@@ -270,53 +320,130 @@ body{ background:#f6f8fb; line-height: calc(1.55 * var(--line-scale)); letter-sp
 
 
   <!-- Main -->
-  <main class="max-w-4xl mx-auto px-4 md:px-5 pt-6 md:pt-10 pb-24">
-    <!-- Hero (shortened) -->
-    <!-- Hero intro -->
-    <div id="heroIntro" class="text-center">
-      <h1 class="text-3xl md:text-5xl font-bold tracking-tight">
-        Make medical papers easy.
+  <main class="max-w-5xl mx-auto px-4 md:px-5 pt-8 md:pt-16 pb-24">
+    <!-- Hero (Premium Redesign) -->
+    <div id="heroIntro" class="text-center relative">
+      <!-- Subtle background elements for depth -->
+      <div class="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-200/20 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl"></div>
+      </div>
+      
+      <!-- Premium Headline -->
+      <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 mb-6 leading-[1.1]">
+        <span class="block">Medical results,</span>
+        <span class="block text-[#236092]">finally explained</span>
+        <span class="block">in plain language.</span>
       </h1>
-      <p class="mt-2 text-slate-600 max-w-2xl mx-auto">
-        Upload a note, lab, or script — get clear next steps. NeuroMed AI uses your Google account information (email and name) to create and manage your account, personalize your experience, and provide secure access to your medical document summaries. <a href="{% url 'privacy' %}" class="text-[#236092] hover:underline font-medium">View our Privacy Policy</a> to learn more.
+      
+      <!-- Refined Subheading -->
+      <p class="mt-6 text-lg md:text-xl text-slate-600 max-w-[65ch] mx-auto leading-relaxed font-light">
+        Upload any medical document. We'll summarize it clearly. You get next steps explained in plain English.
       </p>
-      <div class="mt-4 flex flex-col sm:flex-row gap-3 justify-center">
-        <button id="ctaUpload" class="px-5 py-3 rounded-xl bg-[#236092] text-white hover:bg-[#1B5A8E]">
+      
+      <!-- Trust Bar -->
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-slate-500">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-shield-halved text-[#236092]"></i>
+          <span>Your files are encrypted and never shared</span>
+        </div>
+        <span class="hidden sm:inline">•</span>
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-users text-[#236092]"></i>
+          <span>Used by caregivers & clinicians worldwide</span>
+        </div>
+      </div>
+      
+      <!-- Premium CTA -->
+      <div class="mt-8 flex justify-center items-center">
+        <button id="ctaUpload" class="group relative px-8 py-4 rounded-2xl bg-[#236092] text-white font-semibold text-lg shadow-lg shadow-[#236092]/25 hover:shadow-xl hover:shadow-[#236092]/30 hover:bg-[#1B5A8E] transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0">
+          <i class="fa-solid fa-upload mr-2"></i>
           Upload a file
         </button>
-        <button id="ctaDemo" class="px-5 py-3 rounded-xl border hover:bg-slate-50">
-          Try a quick demo
-        </button>
       </div>
+      
+      <!-- Privacy Note -->
+      <p class="mt-6 text-xs text-slate-500 max-w-2xl mx-auto">
+        NeuroMed AI uses your Google account information (email and name) to create and manage your account. <a href="{% url 'privacy' %}" class="text-[#236092] hover:underline font-medium">View our Privacy Policy</a> to learn more.
+      </p>
     </div>
 
 
-    <!-- Mode switcher (kept, tighter) -->
-<div class="mt-6">
-  <div class="text-center text-sm text-slate-600 mb-3">Choose a mode</div>
+    <!-- Mode switcher (Premium Card Design) -->
+<div class="mt-12">
+  <div class="text-center mb-6">
+    <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-2">Choose your tone</h2>
+    <p class="text-slate-600">Pick how you'd like information explained. You can change anytime.</p>
+  </div>
 
-  <!-- auto-fit grid = any number of modes, nicely wrapped -->
+  <!-- Premium mode cards with descriptions -->
   <div id="modeGroup"
-       class="mx-auto max-w-4xl grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-3">
-    <button data-mode="Caregiver" class="mode-chip justify-center text-sm" aria-pressed="true">
-      <i class="fa-solid fa-hands-holding-child text-amber-700"></i><span>Caregiver</span>
+       class="mx-auto max-w-5xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <button data-mode="Caregiver" class="mode-card group relative bg-white/80 backdrop-blur-sm border-2 border-slate-200 rounded-2xl p-5 text-left hover:border-amber-300 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1" aria-pressed="true">
+      <div class="flex items-start gap-3 mb-2">
+        <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+          <i class="fa-solid fa-hands-holding-child text-amber-700 text-xl"></i>
+        </div>
+        <div class="flex-1">
+          <h3 class="font-bold text-lg text-slate-900">Caregiver</h3>
+          <p class="text-sm text-slate-600 mt-1">Gentle, practical steps for families</p>
+        </div>
+      </div>
     </button>
-    <button data-mode="PlainClinical" class="mode-chip justify-center text-sm" aria-pressed="false">
-      <i class="fa-regular fa-message text-[#236092]"></i><span>Balanced</span>
+    <button data-mode="PlainClinical" class="mode-card group relative bg-white/80 backdrop-blur-sm border-2 border-slate-200 rounded-2xl p-5 text-left hover:border-[#236092] hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1" aria-pressed="false">
+      <div class="flex items-start gap-3 mb-2">
+        <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
+          <i class="fa-regular fa-message text-[#236092] text-xl"></i>
+        </div>
+        <div class="flex-1">
+          <h3 class="font-bold text-lg text-slate-900">Balanced</h3>
+          <p class="text-sm text-slate-600 mt-1">Clear + calm explanations</p>
+        </div>
+      </div>
     </button>
-    <button data-mode="Clinical" class="mode-chip justify-center text-sm" aria-pressed="false">
-      <i class="fa-solid fa-stethoscope text-slate-800"></i><span>Clinical</span>
+    <button data-mode="Clinical" class="mode-card group relative bg-white/80 backdrop-blur-sm border-2 border-slate-200 rounded-2xl p-5 text-left hover:border-slate-400 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1" aria-pressed="false">
+      <div class="flex items-start gap-3 mb-2">
+        <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0">
+          <i class="fa-solid fa-stethoscope text-slate-800 text-xl"></i>
+        </div>
+        <div class="flex-1">
+          <h3 class="font-bold text-lg text-slate-900">Clinical</h3>
+          <p class="text-sm text-slate-600 mt-1">Concise & technical</p>
+        </div>
+      </div>
     </button>
-    <button data-mode="Faith" class="mode-chip justify-center text-sm" aria-pressed="false">
-      <i class="fa-solid fa-hands-praying text-indigo-700"></i><span>Faith</span>
+    <button data-mode="Faith" class="mode-card group relative bg-white/80 backdrop-blur-sm border-2 border-slate-200 rounded-2xl p-5 text-left hover:border-indigo-300 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1" aria-pressed="false">
+      <div class="flex items-start gap-3 mb-2">
+        <div class="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
+          <i class="fa-solid fa-hands-praying text-indigo-700 text-xl"></i>
+        </div>
+        <div class="flex-1">
+          <h3 class="font-bold text-lg text-slate-900">Faith</h3>
+          <p class="text-sm text-slate-600 mt-1">Guidance with encouragement</p>
+        </div>
+      </div>
     </button>
-    
-    <button data-mode="Geriatric" class="mode-chip justify-center text-sm" aria-pressed="false">
-      <i class="fa-solid fa-person-cane text-[#28926D]"></i><span>Geriatric</span>
+    <button data-mode="Geriatric" class="mode-card group relative bg-white/80 backdrop-blur-sm border-2 border-slate-200 rounded-2xl p-5 text-left hover:border-[#28926D] hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1" aria-pressed="false">
+      <div class="flex items-start gap-3 mb-2">
+        <div class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
+          <i class="fa-solid fa-person-cane text-[#28926D] text-xl"></i>
+        </div>
+        <div class="flex-1">
+          <h3 class="font-bold text-lg text-slate-900">Geriatric</h3>
+          <p class="text-sm text-slate-600 mt-1">Larger text, simpler steps</p>
+        </div>
+      </div>
     </button>
-    <!-- New / extra category fits naturally -->
-    <button data-mode="EmotionalSupport" class="mode-chip justify-center text-sm" aria-pressed="false">
-      <i class="fa-solid fa-heart text-rose-700"></i><span>Emotional Support</span>
+    <button data-mode="EmotionalSupport" class="mode-card group relative bg-white/80 backdrop-blur-sm border-2 border-slate-200 rounded-2xl p-5 text-left hover:border-rose-300 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1" aria-pressed="false">
+      <div class="flex items-start gap-3 mb-2">
+        <div class="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center flex-shrink-0">
+          <i class="fa-solid fa-heart text-rose-700 text-xl"></i>
+        </div>
+        <div class="flex-1">
+          <h3 class="font-bold text-lg text-slate-900">Emotional Support</h3>
+          <p class="text-sm text-slate-600 mt-1">Validating, calm & gentle</p>
+        </div>
+      </div>
     </button>
   </div>
 </div>
@@ -436,13 +563,22 @@ body{ background:#f6f8fb; line-height: calc(1.55 * var(--line-scale)); letter-sp
 
 
 
-    <!-- Card -->
-    <section class="mt-6 bg-white border rounded-2xl shadow-sm overflow-hidden">
-      <div class="px-5 md:px-6 pt-5 flex items-start justify-between gap-3">
-        <div id="intro" class="chat-bubble chat-ai flex-1">
-Hi! Upload a file or ask a question. I’ll turn it into clear next steps.
+    <!-- Premium Chat Card with Glassmorphism -->
+    <section class="mt-8 bg-white/70 backdrop-blur-md border border-white/20 rounded-3xl shadow-2xl shadow-slate-900/5 overflow-hidden">
+      <div class="px-6 md:px-8 pt-6 pb-4 flex items-start justify-between gap-4">
+        <div class="flex items-start gap-4 flex-1">
+          <!-- AI Avatar -->
+          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#236092] to-[#1B5A8E] flex items-center justify-center flex-shrink-0 shadow-lg">
+            <i class="fa-solid fa-heart-pulse text-white text-lg"></i>
+          </div>
+          <!-- Friendly AI Message -->
+          <div id="intro" class="chat-bubble chat-ai flex-1 bg-white/90 backdrop-blur-sm border border-slate-100 rounded-2xl shadow-sm">
+            <p class="text-slate-800 leading-relaxed">
+              Hey, I'm here with you. Upload a document and I'll help you understand it in simple, calm steps.
+            </p>
+          </div>
         </div>
-        <span id="modeBadge" class="mode-badge text-slate-600" title="Current tone">
+        <span id="modeBadge" class="mode-badge text-slate-600 bg-white/80 backdrop-blur-sm border border-slate-200 shadow-sm" title="Current tone">
           <i class="fa-regular fa-message"></i><span>Caregiver</span>
         </span>
       </div>
@@ -464,10 +600,10 @@ Hi! Upload a file or ask a question. I’ll turn it into clear next steps.
         </div>
       </div>
 
-      <!-- Composer (cleaned, dashed dropzone) -->
-      <div class="border-t bg-slate-50/50">
-        <div class="px-3 md:px-4 py-3 md:py-4">
-          <div class="dropwrap p-3 md:p-3.5">
+      <!-- Composer (Premium Design) -->
+      <div class="border-t bg-gradient-to-b from-white/80 to-slate-50/60 backdrop-blur-sm">
+        <div class="px-4 md:px-6 py-4 md:py-5">
+          <div class="dropwrap p-4 md:p-5 bg-white/60 backdrop-blur-sm border-2 border-dashed border-slate-300 rounded-2xl hover:border-[#236092] transition-colors duration-200">
             <div id="dropZone" class="relative flex items-end gap-2">
               <input id="fileInput" type="file" class="hidden" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.heic,.webp" multiple />
               <button id="uploadBtn" class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-slate-100 hover:bg-slate-200 grid place-items-center" title="Upload a record" aria-label="Upload a medical record">
@@ -884,8 +1020,18 @@ function appendBubble({ message, isUser=false, timestamp=new Date() }) {
     });
 
     function selectMode(btn){
-      $$('#modeGroup button').forEach(b => { b.setAttribute('aria-pressed','false'); b.classList.remove('ring','ring-[#28926D]'); });
-      btn.setAttribute('aria-pressed','true'); btn.classList.add('ring','ring-[#28926D]');
+      $$('#modeGroup button').forEach(b => { 
+        b.setAttribute('aria-pressed','false'); 
+        b.classList.remove('ring-2','ring-[#236092]');
+        b.style.borderColor = '';
+        b.style.background = '';
+        b.style.boxShadow = '';
+      });
+      btn.setAttribute('aria-pressed','true'); 
+      btn.classList.add('ring-2','ring-[#236092]');
+      btn.style.borderColor = '#236092';
+      btn.style.background = 'linear-gradient(135deg, rgba(35,96,146,0.05) 0%, rgba(35,96,146,0.02) 100%)';
+      btn.style.boxShadow = '0 4px 12px rgba(35,96,146,0.15)';
       const mode = btn.dataset.mode;
       saveMode(mode);
       applyModeUI(mode);
@@ -1219,7 +1365,8 @@ typing.appendChild(node);
         guestTurnsUsed += 1;
         localStorage.setItem('nm_guest_turns', String(guestTurnsUsed));
         if(guestTurnsUsed === 1) { showPostResultInvite(); }
-        else if(guestTurnsUsed >= GUEST_TURNS_LIMIT){ showSignupGate(); }
+        // DISABLED - no longer needed
+        // else if(guestTurnsUsed >= GUEST_TURNS_LIMIT){ showSignupGate(); }
       }
       showGateAfterResponse=false;
     }
@@ -1248,7 +1395,8 @@ typing.appendChild(node);
 }
 
 
-    function showSignupGate(){ const m=$('#signupGate'); if(!m) return; m.classList.remove('hidden'); m.classList.add('flex'); track('signup_shown'); }
+    // DISABLED - no longer needed
+    // function showSignupGate(){ const m=$('#signupGate'); if(!m) return; m.classList.remove('hidden'); m.classList.add('flex'); track('signup_shown'); }
     function showPostResultInvite(){ $('#postResultInvite').classList.remove('hidden'); }
 
     async function showAuthNudgeIfGuest(){
@@ -1556,8 +1704,8 @@ typing.appendChild(node);
   <script>
 /* ---------- DEMO: wire the button + send FormData (no JSON) ---------- */
 
-// 1) Hook the button
-document.getElementById('ctaDemo')?.addEventListener('click', () => runDemo('er'));
+// 1) Hook the button (DISABLED - demo button removed)
+// document.getElementById('ctaDemo')?.addEventListener('click', () => runDemo('er'));
 
 // 2) Demo samples (short + readable)
 const DEMO_SAMPLES = {
@@ -1815,7 +1963,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-<!-- Signup Gate (shown to guests on first load) -->
+<!-- Signup Gate (DISABLED - no longer needed) -->
+<!--
 <div id="signupGate"
      class="fixed inset-0 z-[80] hidden items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
   <div class="w-full max-w-md rounded-2xl bg-white shadow-2xl border p-5">
@@ -1827,12 +1976,12 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 
     <p class="text-sm text-slate-700">
-      We’re currently in <strong>beta testing</strong>, which means you’re among the first to try it out.
+      Get started with NeuroMed AI and experience intelligent medical assistance powered by advanced AI.
     </p>
     <ul class="mt-3 text-sm text-slate-700 list-disc pl-5 space-y-1">
       <li>Save your files and summaries</li>
-      <li>Share feedback to improve accuracy</li>
-      <li>Keep everything secure while testing</li>
+      <li>Secure and private medical consultations</li>
+      <li>Access your chat history anytime</li>
     </ul>
 
     <a href="/signup"
@@ -1841,7 +1990,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </a>
 
     <div class="mt-3 text-xs text-slate-500">
-      Your insights help shape the future of NeuroMed AI. Thanks for building with us!
+      Join thousands of healthcare professionals using NeuroMed AI.
     </div>
 
     <div class="mt-3 text-center text-xs">
@@ -1850,9 +1999,12 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
   </div>
 </div>
+-->
 
 <script>
   // Hard gate: if not logged in, disable inputs and show the signup overlay immediately.
+  // DISABLED - no longer needed
+  /*
   document.addEventListener('DOMContentLoaded', async () => {
     try {
       const authed = await isAuthenticated(); // you already have this helper
@@ -1862,7 +2014,10 @@ document.addEventListener('DOMContentLoaded', () => {
       enforceSignupGate();
     }
   });
+  */
 
+  // DISABLED - no longer needed
+  /*
   function enforceSignupGate(){
     // 1) Show overlay
     showSignupGate();
@@ -1882,9 +2037,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3) Make primary CTAs go to /signup
     const up = document.getElementById('ctaUpload');
-    const demo = document.getElementById('ctaDemo');
+    // const demo = document.getElementById('ctaDemo'); // DISABLED - demo button removed
     if (up)   up.onclick   = () => { location.href = '/signup'; return false; };
-    if (demo) demo.onclick = () => { location.href = '/signup'; return false; };
+    // if (demo) demo.onclick = () => { location.href = '/signup'; return false; }; // DISABLED
 
     // 4) Block drag/drop from doing anything for guests
     const dz = document.getElementById('dropZone');
@@ -1897,6 +2052,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Optional: visually dim the main section behind the gate
     document.querySelector('main')?.classList.add('opacity-50', 'pointer-events-none');
   }
+  */
 </script>
 
   <!-- Footer with Privacy Policy and Data Usage Info -->

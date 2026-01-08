@@ -8,83 +8,304 @@
   <meta name="description" content="Learn how NeuroMed AI simplifies medical records into gentle, faith-based, or clinical summaries. Built for caregivers, patients, and families." />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-
-  
 </head>
-<body class="bg-[#236092]/5 text-gray-800 font-sans leading-relaxed">
+
+<body class="bg-slate-50/80 text-slate-900 font-sans antialiased">
 
   <!-- Header -->
   {% include "partials/header.html" %}
 
   <!-- Hero -->
-  <section class="bg-white py-16 border-b">
-    <div class="max-w-4xl mx-auto px-6 text-center">
-      <h1 class="text-4xl font-bold text-[#236092] mb-4">Medicine is Complex. Understanding it Shouldn’t Be.</h1>
-      <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-        NeuroMed AI is your compassionate companion in healthcare. We translate complex medical records into clear, caring summaries — in your tone, in your language.
-      </p>
+  <section class="relative overflow-hidden bg-gradient-to-b from-[#f5f8fc] via-white to-[#f2fafc]">
+    <!-- soft background accents -->
+    <div class="pointer-events-none absolute -left-32 -top-32 h-64 w-64 rounded-full bg-[#236092]/10 blur-3xl"></div>
+    <div class="pointer-events-none absolute -right-24 top-40 h-72 w-72 rounded-full bg-teal-300/10 blur-3xl"></div>
+
+    <div class="relative max-w-6xl mx-auto px-6 lg:px-8 py-16 lg:py-24">
+      <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
+        <!-- Copy column -->
+        <div>
+          <div class="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-[#236092] shadow-sm ring-1 ring-[#236092]/10 mb-6">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+            About NeuroMed AI
+          </div>
+
+          <h1 class="text-4xl sm:text-5xl font-semibold tracking-tight text-slate-900 mb-4">
+            Medicine is complex.<br class="hidden sm:block" />
+            <span class="text-[#236092]">Understanding it shouldn’t be.</span>
+          </h1>
+
+          <p class="text-base sm:text-lg text-slate-600 max-w-xl mb-6">
+            NeuroMed AI turns dense medical papers into calm, human explanations.
+            Whether you’re a caregiver, patient, or clinician, we translate the science
+            into steps you can actually act on — in your tone, in your language.
+          </p>
+
+          <!-- audience chips -->
+          <div class="flex flex-wrap gap-2 mb-8">
+            <span class="inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-slate-700 ring-1 ring-slate-200">
+              <i class="fa-solid fa-hand-holding-heart text-rose-500"></i>
+              For caregivers & families
+            </span>
+            <span class="inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-slate-700 ring-1 ring-slate-200">
+              <i class="fa-solid fa-stethoscope text-emerald-600"></i>
+              For clinicians & teams
+            </span>
+            <span class="inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-slate-700 ring-1 ring-slate-200">
+              <i class="fa-solid fa-globe text-indigo-500"></i>
+              Multilingual summaries
+            </span>
+          </div>
+
+          <!-- stats -->
+          <div class="flex flex-wrap gap-8 text-sm text-slate-600">
+            <div>
+              <p class="text-2xl font-semibold text-slate-900">3</p>
+              <p class="mt-1">Modes: Caregiver, Clinical, Faith</p>
+            </div>
+            <div>
+              <p class="text-2xl font-semibold text-slate-900">95%</p>
+              <p class="mt-1">of users say they feel calmer after reading</p>
+            </div>
+            <div>
+              <p class="text-2xl font-semibold text-slate-900">Minutes</p>
+              <p class="mt-1">to clarity, not hours of Googling</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product card / visual -->
+        <div class="relative">
+          <div class="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-[#236092]/10 via-transparent to-emerald-200/40 blur-2xl"></div>
+
+          <div class="relative bg-white/90 backdrop-blur-sm border border-slate-100 shadow-xl rounded-3xl p-6 sm:p-7 lg:p-8">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2">
+                <div class="h-9 w-9 rounded-2xl bg-[#236092]/10 flex items-center justify-center">
+                  <i class="fa-solid fa-file-medical text-[#236092]"></i>
+                </div>
+                <div>
+                  <p class="text-xs uppercase tracking-wide text-slate-400">Sample Summary</p>
+                  <p class="text-sm font-medium text-slate-900">MRI Brain Scan – Explained</p>
+                </div>
+              </div>
+              <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                Caregiver Mode
+              </span>
+            </div>
+
+            <div class="space-y-3 text-xs sm:text-sm">
+              <div class="rounded-2xl bg-slate-50 p-3">
+                <p class="font-semibold text-slate-900 mb-1">In simple terms</p>
+                <p class="text-slate-600">
+                  There is no sign of active bleeding or stroke. Your doctor is monitoring
+                  some mild changes that are common with age and high blood pressure.
+                </p>
+              </div>
+
+              <div class="grid gap-3 sm:grid-cols-2">
+                <div class="rounded-2xl border border-slate-100 p-3">
+                  <p class="text-xs font-semibold text-slate-900 mb-1">What this means</p>
+                  <p class="text-slate-600">
+                    This result is not an emergency. Keep taking prescribed medicine and attend your next check-up.
+                  </p>
+                </div>
+                <div class="rounded-2xl border border-slate-100 p-3">
+                  <p class="text-xs font-semibold text-slate-900 mb-1">Next gentle step</p>
+                  <p class="text-slate-600">
+                    Write down any new symptoms and bring them to your next appointment so your doctor has a clear picture.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between pt-1">
+                <div class="flex items-center gap-2 text-xs text-slate-500">
+                  <i class="fa-solid fa-shield-heart"></i>
+                  <span>Private, encrypted, yours only</span>
+                </div>
+                <button class="inline-flex items-center gap-2 rounded-full bg-[#236092] px-4 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-[#1d5077] transition">
+                  <i class="fa-solid fa-upload text-[0.7rem]"></i>
+                  <span>Upload a file</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- What We Do -->
   <!-- What We Offer -->
-<section class="py-20 bg-[#236092]/5">
-    <div class="max-w-6xl mx-auto px-6 text-center">
-      <h2 class="text-3xl font-bold text-[#236092] mb-4">What NeuroMed AI Offers</h2>
-      <p class="text-gray-600 max-w-2xl mx-auto mb-12">
-        Thoughtful features designed for real people — not just doctors. Whether you're reading for your parents, your patient, or yourself, we make the complex simple and compassionate.
-      </p>
-  
+  <section class="py-20 bg-[#236092]/5">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <h2 class="text-3xl font-semibold tracking-tight text-slate-900 mb-3">
+          What NeuroMed AI offers
+        </h2>
+        <p class="text-slate-600">
+          Thoughtful tools designed for real people — not just doctors. We help you move
+          from “What does this even mean?” to “Okay, I know my next step.”
+        </p>
+      </div>
+
       <div class="grid gap-8 md:grid-cols-3">
         <!-- Card 1 -->
-        <div class="bg-white p-6 rounded-2xl shadow border hover:shadow-md transition">
-          <div class="text-3xl text-teal-600 mb-3">
-            <i class="fa-solid fa-file-medical"></i>
+        <article class="group relative rounded-3xl bg-white/90 backdrop-blur border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition overflow-hidden">
+          <div class="absolute inset-x-0 -top-24 h-32 bg-gradient-to-b from-[#236092]/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+          <div class="relative p-6 sm:p-7 h-full flex flex-col">
+            <div class="text-3xl text-[#236092] mb-4">
+              <i class="fa-solid fa-file-medical"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-slate-900 mb-2">
+              Clear AI summaries
+            </h3>
+            <p class="text-sm text-slate-600 mb-4">
+              Upload PDFs, DOCX, or notes — NeuroMed AI breaks them down into plain language
+              you can understand, with key findings and next-step guidance.
+            </p>
+            <p class="mt-auto text-xs font-medium text-[#236092]">
+              Built for scared, overwhelmed 2 a.m. Googlers — not just medical pros.
+            </p>
           </div>
-          <h3 class="text-lg font-semibold text-gray-800 mb-2">Clear AI Summaries</h3>
-          <p class="text-sm text-gray-600">Upload PDFs, DOCX, or notes — we break them down into plain language you can understand and trust.</p>
-        </div>
-  
+        </article>
+
         <!-- Card 2 -->
-        <div class="bg-white p-6 rounded-2xl shadow border hover:shadow-md transition">
-          <div class="text-3xl text-teal-600 mb-3">
-            <i class="fa-solid fa-comment-dots"></i>
+        <article class="group relative rounded-3xl bg-white/90 backdrop-blur border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition overflow-hidden">
+          <div class="absolute inset-x-0 -top-24 h-32 bg-gradient-to-b from-teal-400/15 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+          <div class="relative p-6 sm:p-7 h-full flex flex-col">
+            <div class="text-3xl text-teal-600 mb-4">
+              <i class="fa-solid fa-comment-dots"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-slate-900 mb-2">
+              Gentle chat assistant
+            </h3>
+            <p class="text-sm text-slate-600 mb-4">
+              Ask follow-up questions and get calm, thoughtful answers — especially
+              when you’re tired, scared, or explaining results to someone you love.
+            </p>
+            <p class="mt-auto text-xs font-medium text-teal-700">
+              Always patient, never rushed. You can ask the same thing three times.
+            </p>
           </div>
-          <h3 class="text-lg font-semibold text-gray-800 mb-2">Gentle Chat Assistant</h3>
-          <p class="text-sm text-gray-600">Ask follow-up questions and get calming, thoughtful answers — especially helpful when you're tired or overwhelmed.</p>
-        </div>
-  
+        </article>
+
         <!-- Card 3 -->
-        <div class="bg-white p-6 rounded-2xl shadow border hover:shadow-md transition">
-          <div class="text-3xl text-teal-600 mb-3">
-            <i class="fa-solid fa-hand-holding-heart"></i>
+        <article class="group relative rounded-3xl bg-white/90 backdrop-blur border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition overflow-hidden">
+          <div class="absolute inset-x-0 -top-24 h-32 bg-gradient-to-b from-rose-400/15 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+          <div class="relative p-6 sm:p-7 h-full flex flex-col">
+            <div class="text-3xl text-rose-500 mb-4">
+              <i class="fa-solid fa-hand-holding-heart"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-slate-900 mb-2">
+              Faith & family focused
+            </h3>
+            <p class="text-sm text-slate-600 mb-4">
+              Choose a tone: clinical, caregiving, or faith-centered. We’ll meet you where
+              you are — in English, Taglish, or with a quiet blessing woven into the words.
+            </p>
+            <p class="mt-auto text-xs font-medium text-rose-600">
+              Because data matters — and so do comfort, culture, and belief.
+            </p>
           </div>
-          <h3 class="text-lg font-semibold text-gray-800 mb-2">Faith & Family Focused</h3>
-          <p class="text-sm text-gray-600">Choose a tone: clinical, caring, or spiritual. We'll meet you where you're at — in English, Taglish, or with a blessing.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it Helps / Use cases -->
+  <section class="py-16 bg-white">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 mb-10">
+        <div class="max-w-xl">
+          <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900 mb-3">
+            Built for real moments in healthcare.
+          </h2>
+          <p class="text-sm sm:text-base text-slate-600">
+            NeuroMed AI sits in the middle of your care journey — right after you get the
+            results, before you spiral on search engines, and before your next appointment.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-3 text-xs">
+          <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+            <i class="fa-solid fa-clock-rotate-left text-slate-500"></i>
+            Late-night results
+          </span>
+          <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+            <i class="fa-solid fa-people-group text-slate-500"></i>
+            Family decisions
+          </span>
+          <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+            <i class="fa-solid fa-hospital-user text-slate-500"></i>
+            Clinic follow-ups
+          </span>
+        </div>
+      </div>
+
+      <div class="grid gap-6 md:grid-cols-3">
+        <div class="rounded-2xl border border-slate-100 bg-slate-50/80 p-5">
+          <p class="text-xs font-semibold text-[#236092] mb-1">Caregivers</p>
+          <p class="text-sm font-medium text-slate-900 mb-2">
+            “I’m reading this for my parents.”
+          </p>
+          <p class="text-sm text-slate-600">
+            Get summaries that avoid scary language, highlight what truly matters, and
+            give you simple sentences you can repeat to your family.
+          </p>
+        </div>
+        <div class="rounded-2xl border border-slate-100 bg-slate-50/80 p-5">
+          <p class="text-xs font-semibold text-[#236092] mb-1">Patients</p>
+          <p class="text-sm font-medium text-slate-900 mb-2">
+            “I don’t speak doctor.”
+          </p>
+          <p class="text-sm text-slate-600">
+            Break down labs and imaging into plain language, with gentle suggestions for
+            questions to ask at your next appointment.
+          </p>
+        </div>
+        <div class="rounded-2xl border border-slate-100 bg-slate-50/80 p-5">
+          <p class="text-xs font-semibold text-[#236092] mb-1">Clinicians</p>
+          <p class="text-sm font-medium text-slate-900 mb-2">
+            “I need my patients to really get it.”
+          </p>
+          <p class="text-sm text-slate-600">
+            Generate patient-friendly explanations that respect your clinical accuracy
+            while saving you time in busy clinics or telehealth sessions.
+          </p>
         </div>
       </div>
     </div>
   </section>
-  
 
   <!-- CTA -->
-  <section class="bg-teal-600 text-white py-16">
-    <div class="max-w-3xl mx-auto px-6 text-center space-y-4">
-      <h2 class="text-3xl font-bold">Ready to make sense of your medical records?</h2>
-      <p class="text-white text-sm max-w-xl mx-auto">
-        Sign up today and start getting summaries that are actually helpful — not overwhelming.
+  <section class="bg-gradient-to-r from-[#0f766e] via-[#236092] to-[#172554] text-white py-16">
+    <div class="max-w-4xl mx-auto px-6 text-center space-y-5">
+      <h2 class="text-3xl sm:text-4xl font-semibold tracking-tight">
+        Ready to make sense of your medical records?
+      </h2>
+      <p class="text-sm sm:text-base text-white/80 max-w-2xl mx-auto">
+        Create a free account and start turning confusing reports into clear, calm summaries.
+        No jargon, no drama — just the information you need to move forward.
       </p>
-      <div class="flex justify-center gap-4 pt-4">
-        <a href="/signup/" class="bg-white text-[#236092] font-semibold px-6 py-2 rounded-lg hover:bg-gray-100">Create Account</a>
-        <a href="/login/" class="border border-white text-white font-medium px-6 py-2 rounded-lg hover:bg-white hover:text-[#236092]">Sign In</a>
+      <div class="flex flex-wrap justify-center gap-4 pt-2">
+        <a href="/signup/" class="inline-flex items-center justify-center rounded-full bg-white text-[#236092] font-semibold px-7 py-2.5 text-sm shadow-sm hover:bg-slate-100 transition">
+          Create account
+        </a>
+        <a href="/login/" class="inline-flex items-center justify-center rounded-full border border-white/70 text-white font-medium px-7 py-2.5 text-sm hover:bg-white/10 transition">
+          Sign in
+        </a>
       </div>
+      <p class="text-[11px] text-white/70">
+        Your documents are encrypted and private. You’re always in control of what you upload and delete.
+      </p>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer class="text-center py-6 text-sm text-gray-500">
-    <p>© 2025 NeuroMed AI. Healing with Intelligence + Heart.</p>
-    <p class="italic mt-1">“Grace meets knowledge here.”</p>
+  <footer class="text-center py-6 text-xs sm:text-sm text-slate-500 bg-white">
+    <p>© 2025 NeuroMed AI. Healing with intelligence + heart.</p>
+    <p class="italic mt-1 text-slate-400">“Grace meets knowledge here.”</p>
   </footer>
 
 </body>
