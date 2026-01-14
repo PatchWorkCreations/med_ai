@@ -361,7 +361,7 @@ def create_chat_session(request):
 
 @csrf_exempt
 @api_view(['POST'])
-@authentication_classes([TokenAuthentication])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
 @permission_classes([IsAuthenticated])
 @parser_classes([JSONParser, MultiPartParser, FormParser])
 def send_chat(request):

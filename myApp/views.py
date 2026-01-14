@@ -2506,13 +2506,37 @@ def get_user_settings(request):
     if request.user.first_name or request.user.last_name:
         full_name = f"{request.user.first_name or ''} {request.user.last_name or ''}".strip()
     
+    # Get settings from JSONField, with defaults
+    settings = profile.user_settings or {}
+    
     return JsonResponse({
         "display_name": profile.display_name or "",
         "first_name": request.user.first_name or "",
         "last_name": request.user.last_name or "",
         "full_name": full_name or profile.display_name or request.user.username,
         "profession": profile.profession or "",
-        "language": profile.language,  # ✅ include language
+        "language": profile.language,
+        # General settings
+        "appearance": settings.get("appearance", "system"),
+        "accent_color": settings.get("accent_color", "default"),
+        "spoken_language": settings.get("spoken_language", "auto"),
+        "voice": settings.get("voice", "spruce"),
+        "separate_voice_mode": settings.get("separate_voice_mode", False),
+        "show_additional_models": settings.get("show_additional_models", False),
+        # Personalization settings
+        "personalization": settings.get("personalization", {
+            "base_style_tone": "PlainClinical",
+            "characteristic_warm": "default",
+            "characteristic_enthusiastic": "default",
+            "characteristic_headers": "default",
+            "characteristic_emoji": "default",
+            "custom_instructions": "",
+            "nickname": "",
+            "occupation": "",
+            "more_about_you": "",
+            "reference_saved_memories": True,
+            "reference_chat_history": True
+        })
     })
 
 @login_required
@@ -2521,21 +2545,57 @@ def update_user_settings(request):
         try:
             data = json.loads(request.body)
             profile, _ = Profile.objects.get_or_create(user=request.user)
-            profile.display_name = data.get("display_name", profile.display_name)
-            profile.profession = data.get("profession", profile.profession)
-
-            if "language" in data:  # ✅ allow updates
+            
+            # Update basic profile fields
+            if "display_name" in data:
+                profile.display_name = data["display_name"]
+            if "profession" in data:
+                profile.profession = data["profession"]
+            if "language" in data:
                 profile.language = data["language"]
-
+            
+            # Update user model fields
+            if "first_name" in data:
+                request.user.first_name = data["first_name"]
+            if "last_name" in data:
+                request.user.last_name = data["last_name"]
+            if "email" in data:
+                request.user.email = data["email"]
+            if "first_name" in data or "last_name" in data or "email" in data:
+                request.user.save()
+            
+            # Initialize settings dict if it doesn't exist
+            if not profile.user_settings:
+                profile.user_settings = {}
+            
+            # Update settings from JSONField
+            if "appearance" in data:
+                profile.user_settings["appearance"] = data["appearance"]
+            if "accent_color" in data:
+                profile.user_settings["accent_color"] = data["accent_color"]
+            if "spoken_language" in data:
+                profile.user_settings["spoken_language"] = data["spoken_language"]
+            if "voice" in data:
+                profile.user_settings["voice"] = data["voice"]
+            if "separate_voice_mode" in data:
+                profile.user_settings["separate_voice_mode"] = bool(data["separate_voice_mode"])
+            if "show_additional_models" in data:
+                profile.user_settings["show_additional_models"] = bool(data["show_additional_models"])
+            if "personalization" in data:
+                profile.user_settings["personalization"] = data["personalization"]
+            
             profile.save()
-            return JsonResponse({"status": "success"})
-        except Exception:
+            return JsonResponse({"status": "success", "message": "Settings updated successfully"})
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
             return JsonResponse({
-                "message": "Hi! Our system is busy right now. Please try again in a few minutes."
+                "message": "Hi! Our system is busy right now. Please try again in a few minutes.",
+                "error": str(e)
             }, status=500)
 
     return JsonResponse({
-        "message": "Hi! That action isn’t available right now. Please try again in a few minutes."
+        "message": "Hi! That action isn't available right now. Please try again in a few minutes."
     }, status=400)
 
 

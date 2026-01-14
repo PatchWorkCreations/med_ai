@@ -28,6 +28,11 @@ urlpatterns = [
     path('api/mobile/chat/clear-session/', mobile_views.clear_session, name='mobile_api_clear_session'),
     path('api/mobile/send-chat/', mobile_views.send_chat, name='mobile_api_send_chat'),
     
+    # IMPORTANT: iOS app calls /api/send-chat/ directly, so we need to intercept it here
+    # This route must come BEFORE myApp.urls to take precedence
+    # We detect mobile requests by checking for TokenAuthentication header
+    path('api/send-chat/', mobile_views.send_chat, name='mobile_api_send_chat_legacy'),
+    
     # Tone management
     path('api/tones/', mobile_views.tones, name='mobile_api_tones'),
     path('api/tones/<str:tone_id>/', mobile_views.tone_detail, name='mobile_api_tone_detail'),

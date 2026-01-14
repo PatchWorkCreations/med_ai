@@ -6098,14 +6098,49 @@ function applyTheme(theme) {
 }
 
 async function loadSettings() {
-  // Load from localStorage first (for client-side settings)
-  const appearance = localStorage.getItem('nm_appearance') || 'system';
-  const accentColor = localStorage.getItem('nm_accent_color') || 'default';
-  const language = localStorage.getItem('nm_language') || 'auto';
-  const spokenLanguage = localStorage.getItem('nm_spoken_language') || 'auto';
-  const voice = localStorage.getItem('nm_voice') || 'spruce';
-  const separateVoiceMode = localStorage.getItem('nm_separate_voice_mode') === 'true';
-  const showAdditionalModels = localStorage.getItem('nm_show_additional_models') === 'true';
+  // First, try to load from server (for synced settings across devices)
+  let serverSettings = {};
+  try {
+    const res = await fetch('/api/user/settings/', { credentials: 'include' });
+    if (res.ok) {
+      serverSettings = await res.json();
+      // Sync server settings to localStorage for client-side access
+      if (serverSettings.appearance) localStorage.setItem('nm_appearance', serverSettings.appearance);
+      if (serverSettings.accent_color) localStorage.setItem('nm_accent_color', serverSettings.accent_color);
+      if (serverSettings.language) localStorage.setItem('nm_language', serverSettings.language);
+      if (serverSettings.spoken_language) localStorage.setItem('nm_spoken_language', serverSettings.spoken_language);
+      if (serverSettings.voice) localStorage.setItem('nm_voice', serverSettings.voice);
+      if (serverSettings.separate_voice_mode !== undefined) localStorage.setItem('nm_separate_voice_mode', serverSettings.separate_voice_mode.toString());
+      if (serverSettings.show_additional_models !== undefined) localStorage.setItem('nm_show_additional_models', serverSettings.show_additional_models.toString());
+      
+      // Sync personalization settings
+      if (serverSettings.personalization) {
+        const p = serverSettings.personalization;
+        if (p.base_style_tone) localStorage.setItem('nm_base_style_tone', p.base_style_tone);
+        if (p.characteristic_warm) localStorage.setItem('nm_characteristic_warm', p.characteristic_warm);
+        if (p.characteristic_enthusiastic) localStorage.setItem('nm_characteristic_enthusiastic', p.characteristic_enthusiastic);
+        if (p.characteristic_headers) localStorage.setItem('nm_characteristic_headers', p.characteristic_headers);
+        if (p.characteristic_emoji) localStorage.setItem('nm_characteristic_emoji', p.characteristic_emoji);
+        if (p.custom_instructions) localStorage.setItem('nm_custom_instructions', p.custom_instructions);
+        if (p.nickname) localStorage.setItem('nm_personalization_nickname', p.nickname);
+        if (p.occupation) localStorage.setItem('nm_personalization_occupation', p.occupation);
+        if (p.more_about_you) localStorage.setItem('nm_more_about_you', p.more_about_you);
+        if (p.reference_saved_memories !== undefined) localStorage.setItem('nm_reference_saved_memories', p.reference_saved_memories.toString());
+        if (p.reference_chat_history !== undefined) localStorage.setItem('nm_reference_chat_history', p.reference_chat_history.toString());
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load settings from server:', err);
+  }
+  
+  // Load from localStorage (fallback to defaults if server didn't provide)
+  const appearance = serverSettings.appearance || localStorage.getItem('nm_appearance') || 'system';
+  const accentColor = serverSettings.accent_color || localStorage.getItem('nm_accent_color') || 'default';
+  const language = serverSettings.language || localStorage.getItem('nm_language') || 'auto';
+  const spokenLanguage = serverSettings.spoken_language || localStorage.getItem('nm_spoken_language') || 'auto';
+  const voice = serverSettings.voice || localStorage.getItem('nm_voice') || 'spruce';
+  const separateVoiceMode = serverSettings.separate_voice_mode !== undefined ? serverSettings.separate_voice_mode : (localStorage.getItem('nm_separate_voice_mode') === 'true');
+  const showAdditionalModels = serverSettings.show_additional_models !== undefined ? serverSettings.show_additional_models : (localStorage.getItem('nm_show_additional_models') === 'true');
   
   // Set UI values
   const appearanceSelect = document.getElementById('appearanceSelect');
@@ -6143,33 +6178,36 @@ async function loadSettings() {
   const showAdditionalModelsToggle = document.getElementById('showAdditionalModels');
   if (showAdditionalModelsToggle) showAdditionalModelsToggle.checked = showAdditionalModels;
   
-  // Load personalization settings from localStorage
-  // Default to PlainClinical (Balanced) if not set
-  const baseStyleTone = localStorage.getItem('nm_base_style_tone') || localStorage.getItem('nm_mode') || 'PlainClinical';
-  const characteristicWarm = localStorage.getItem('nm_characteristic_warm') || 'default';
-  const characteristicEnthusiastic = localStorage.getItem('nm_characteristic_enthusiastic') || 'default';
-  const characteristicHeaders = localStorage.getItem('nm_characteristic_headers') || 'default';
-  const characteristicEmoji = localStorage.getItem('nm_characteristic_emoji') || 'default';
-  const customInstructions = localStorage.getItem('nm_custom_instructions') || '';
-  const personalizationNickname = localStorage.getItem('nm_personalization_nickname') || '';
-  const personalizationOccupation = localStorage.getItem('nm_personalization_occupation') || '';
-  const moreAboutYou = localStorage.getItem('nm_more_about_you') || '';
-  const referenceSavedMemories = localStorage.getItem('nm_reference_saved_memories') !== 'false'; // Default true
-  const referenceChatHistory = localStorage.getItem('nm_reference_chat_history') !== 'false'; // Default true
+  // Load personalization settings (from server or localStorage)
+  const personalization = serverSettings.personalization || {};
+  const baseStyleTone = personalization.base_style_tone || localStorage.getItem('nm_base_style_tone') || localStorage.getItem('nm_mode') || 'PlainClinical';
+  const characteristicWarm = personalization.characteristic_warm || localStorage.getItem('nm_characteristic_warm') || 'default';
+  const characteristicEnthusiastic = personalization.characteristic_enthusiastic || localStorage.getItem('nm_characteristic_enthusiastic') || 'default';
+  const characteristicHeaders = personalization.characteristic_headers || localStorage.getItem('nm_characteristic_headers') || 'default';
+  const characteristicEmoji = personalization.characteristic_emoji || localStorage.getItem('nm_characteristic_emoji') || 'default';
+  const customInstructions = personalization.custom_instructions || localStorage.getItem('nm_custom_instructions') || '';
+  const personalizationNickname = personalization.nickname || localStorage.getItem('nm_personalization_nickname') || '';
+  const personalizationOccupation = personalization.occupation || localStorage.getItem('nm_personalization_occupation') || '';
+  const moreAboutYou = personalization.more_about_you || localStorage.getItem('nm_more_about_you') || '';
+  const referenceSavedMemories = personalization.reference_saved_memories !== undefined ? personalization.reference_saved_memories : (localStorage.getItem('nm_reference_saved_memories') !== 'false');
+  const referenceChatHistory = personalization.reference_chat_history !== undefined ? personalization.reference_chat_history : (localStorage.getItem('nm_reference_chat_history') !== 'false');
   
-  // Load user name from server
-  try {
-    const res = await fetch('/api/user/settings/', { credentials: 'include' });
-    if (res.ok) {
-      const data = await res.json();
-      const userDisplayName = document.getElementById('userDisplayName');
-      if (userDisplayName) {
-        // Prioritize display_name (user's preferred name from Account settings), then full_name, then fallback
-        userDisplayName.textContent = data.display_name || data.full_name || 'User';
-      }
+  // Update user display name from server settings
+  if (serverSettings.display_name || serverSettings.full_name) {
+    const userDisplayName = document.getElementById('userDisplayName');
+    if (userDisplayName) {
+      userDisplayName.textContent = serverSettings.display_name || serverSettings.full_name || 'User';
     }
-  } catch (err) {
-    console.error('Failed to load user name:', err);
+    
+    // Also update account section fields
+    const displayNameInput = document.getElementById('displayName');
+    if (displayNameInput && serverSettings.display_name) {
+      displayNameInput.value = serverSettings.display_name;
+    }
+    const professionInput = document.getElementById('profession');
+    if (professionInput && serverSettings.profession) {
+      professionInput.value = serverSettings.profession;
+    }
   }
   
   // Set personalization UI values - base tone selector (buttons)
@@ -6282,7 +6320,11 @@ async function saveSettings() {
   
   // Get general settings
   const appearance = document.getElementById('appearanceSelect')?.value || 'system';
-  const accentColor = document.getElementById('accentColorSelect')?.value || 'default';
+  
+  // Handle accent color: check if "Default" radio is selected, otherwise use dropdown value
+  const accentColorRadio = document.querySelector('input[name="accentColor"]:checked');
+  const accentColor = accentColorRadio?.value === 'default' ? 'default' : (document.getElementById('accentColorSelect')?.value || 'default');
+  
   const language = document.getElementById('languageSelect')?.value || 'auto';
   const spokenLanguage = document.getElementById('spokenLanguageSelect')?.value || 'auto';
   const voice = document.getElementById('voiceSelect')?.value || 'spruce';
@@ -6391,8 +6433,9 @@ async function saveSettings() {
       if (userDisplayName) userDisplayName.textContent = name;
       }
       
-      // Apply appearance if changed using the theme system
+      // Apply appearance and accent color immediately
       applyTheme(appearance);
+      applyAccentColor(accentColor);
       
     } else {
       throw new Error('Save failed');

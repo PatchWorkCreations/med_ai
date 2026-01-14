@@ -102,6 +102,14 @@ class Profile(models.Model):
         choices=LANGUAGE_CHOICES,
         default='en-US'
     )
+    
+    # Settings stored as JSON for flexibility
+    # Note: Named 'user_settings' to avoid conflict with django.conf.settings
+    user_settings = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="User settings: appearance, accent_color, spoken_language, voice, separate_voice_mode, show_additional_models, personalization, etc."
+    )
 
     signup_ip = models.GenericIPAddressField(blank=True, null=True)
     last_login_ip = models.GenericIPAddressField(blank=True, null=True)
