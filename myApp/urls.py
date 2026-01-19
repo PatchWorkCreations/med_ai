@@ -2,6 +2,7 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
 from . import product_views
+from . import billing_views
 from django.views.generic import RedirectView
 from .views import LegalView, terms_redirect, privacy_redirect
 from .views import WarmLoginView 
@@ -31,7 +32,7 @@ urlpatterns = [
     path('auth/google/', views.google_oauth_login, name='google_oauth_login'),
     path('auth/google/callback/', views.google_oauth_callback, name='google_oauth_callback'),
     # Authenticated Dashboard
-    path('dashboard/', views.dashboard, name='dashboard'),
+    path('dashboard/', RedirectView.as_view(url='/dashboard/new/', permanent=False), name='dashboard'),  # Redirect to new dashboard
     path('dashboard/new/', views.new_dashboard, name='new_dashboard'),  # Premium dashboard
     path('dashboard/analytics/', views.analytics_dashboard, name='analytics'),
     path('dashboard/analytics/export/', views.analytics_export, name='analytics_export'),
@@ -41,8 +42,7 @@ urlpatterns = [
     path("api/smart-suggestions/", views.smart_suggestions, name="smart_suggestions"),
     path("api/answer-question/", views.answer_question, name="answer_question"),
     path("send-chat/", views.send_chat, name="send_chat"),
-    path("api/send-chat/", views.send_chat, name="send_chat_api"),
-    path("api/send_chat/", views.send_chat, name="send_chat_api_underscore"),  # alias for frontend underscore
+    path("webapp/api/send-chat/", views.send_chat, name="send_chat_api"),  # Web app endpoint (CSRF exempt)
 
 
      path('about/', views.about_page, name='about'),
@@ -52,6 +52,16 @@ urlpatterns = [
 
       path("api/user/settings/", views.get_user_settings, name="get_user_settings"),
     path("api/user/settings/update/", views.update_user_settings, name="update_user_settings"),
+    path("api/user/change-password/", views.change_password, name="change_password"),
+    path("api/user/export-data/", views.export_account_data, name="export_account_data"),
+    path("api/user/delete-account/", views.delete_account, name="delete_account"),
+    path("api/user/clear-chat-history/", views.clear_all_chat_history, name="clear_all_chat_history"),
+    path("api/user/chat-history-stats/", views.get_chat_history_stats, name="get_chat_history_stats"),
+    path("api/user/data-retention/", views.update_data_retention, name="update_data_retention"),
+    path("api/user/privacy-settings/", views.update_privacy_settings, name="update_privacy_settings"),
+    path("api/user/active-sessions/", views.get_active_sessions, name="get_active_sessions"),
+    path("api/user/revoke-session/", views.revoke_session, name="revoke_session"),
+    path("api/user/security-alerts/", views.update_security_alerts, name="update_security_alerts"),
     path("clear-session/", views.clear_session, name="clear-session"),
 
     path('accounts/login/', RedirectView.as_view(url='/login/', permanent=False)),
@@ -158,6 +168,18 @@ urlpatterns = [
     path("ops/launch-links/", product_views.launch_links, name="launch_links"),
     path("ops/launch-links/new", product_views.launch_links_new, name="launch_links_new"),
     path("ops/devices/revoke/<str:token_id>", product_views.launch_device_revoke, name="launch_device_revoke"),
+
+    # ------------------------------
+    # Billing & Subscription
+    # ------------------------------
+    path("settings/billing/", billing_views.billing_settings, name="billing_settings"),
+    path("api/billing/subscription/", billing_views.subscription_status, name="billing_subscription_status"),
+    path("api/billing/create-checkout-session/", billing_views.create_checkout_session, name="billing_create_checkout"),
+    path("api/billing/capture-order/", billing_views.capture_order, name="billing_capture_order"),
+    path("api/billing/webhook/", billing_views.paypal_webhook, name="billing_webhook"),
+    path("api/billing/history/", billing_views.billing_history, name="billing_history"),
+    path("api/billing/cancel/", billing_views.cancel_subscription, name="billing_cancel"),
+    path("api/billing/contact-clinical/", billing_views.contact_clinical, name="billing_contact_clinical"),
 
 ]
 

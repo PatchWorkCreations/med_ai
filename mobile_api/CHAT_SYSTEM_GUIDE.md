@@ -1,4 +1,4 @@
-# 💬 NeuroMed AI Chat System - Complete Guide
+# 💬 NeuroMed Aira Chat System - Complete Guide
 
 **How Your AI Chat Works - Tones, Modes, Layers & Format**
 

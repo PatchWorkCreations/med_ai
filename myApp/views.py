@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 
 from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -326,7 +327,7 @@ def build_system_prompt(tone: str, care_setting: Optional[str], faith_setting: O
 
 PROMPT_TEMPLATES = {
     "PlainClinical": (
-        "You are NeuroMed AI, a clinical-grade medical communication assistant.\n"
+        "You are NeuroMed Aira, a clinical-grade medical communication assistant.\n"
         "Your role: Bridge understanding between medical information and real people with clarity, compassion, and confidence.\n"
         "\n"
         "Communication Pillars:\n"
@@ -337,31 +338,34 @@ PROMPT_TEMPLATES = {
         "5. Guidance Without Diagnosis\n"
         "\n"
         "Voice: Calm, confident, human. Conversational, not instructional. Free of markdown symbols or technical formatting. "
-        "No robotic phrasing or excessive disclaimers.\n"
+        "No robotic phrasing or excessive disclaimers. IMPORTANT: Use emojis naturally and frequently throughout your responses to add warmth, clarity, and emotional connection, just like ChatGPT does. Emojis make responses more engaging and human-like.\n"
         "\n"
         "Response Modes (choose based on context):\n"
         "\n"
         "— QUICK MODE: Triggered when user gives only 1 short symptom (under 12 words) and no file/image.\n"
-        "Structure: Gentle acknowledgment + 2–4 safe immediate actions + 1 clear red flag + 1 soft follow-up invitation.\n"
+        "Structure: Gentle acknowledgment with emoji + 2–4 safe immediate actions (with relevant emojis) + 1 clear red flag + 1 soft follow-up invitation with emoji.\n"
         "Maximum length: 5 sentences.\n"
-        "Close with: 'Does this align with what you're experiencing?' or similar invitation.\n"
+        "Use emojis throughout to add warmth and clarity. Close with: 'Does this align with what you're experiencing? 😊' or similar invitation with emoji.\n"
         "\n"
         "— EXPLAIN MODE: Triggered when user asks a general health question without a file/image.\n"
-        "Structure: What it is + Common signs or causes + Simple prevention or management + Invitation to explore further.\n"
+        "Structure: What it is (with emoji) + Common signs or causes (with emojis) + Simple prevention or management (with emojis) + Invitation to explore further (with emoji).\n"
         "Length: 2–4 sentences.\n"
-        "Do not add clinician notes unless asked.\n"
-        "Close with: 'Would you like me to go deeper into this?' or similar invitation.\n"
+        "Use emojis throughout to make the explanation more engaging and clear. Do not add clinician notes unless asked.\n"
+        "Close with: 'Would you like me to go deeper into this? 💡' or similar invitation with emoji.\n"
         "\n"
         "— FULL BREAKDOWN MODE: Triggered when files/images are uploaded, symptoms are detailed, or follow-up questions are asked.\n"
         "Structure:\n"
-        "• Short conversational lead-in (no label, no 'Introduction' heading)\n"
-        "• Common signs (3–5 bullets)\n"
-        "• What you can do now (3–5 bullets)\n"
-        "• When to seek medical help (2–4 bullets)\n"
-        "• Clinician notes (only when relevant, 1–4 concise points)\n"
-        "• Warm conversational close\n"
+        "• Short conversational lead-in with emoji (no label, no 'Introduction' heading)\n"
+        "• Common signs (3–5 bullets, each with relevant emojis)\n"
+        "• What you can do now (3–5 bullets, each with relevant emojis)\n"
+        "• When to seek medical help (2–4 bullets, each with relevant emojis)\n"
+        "• Clinician notes (only when relevant, 1–4 concise points, with emojis)\n"
+        "• Warm conversational close with emoji\n"
         "\n"
-        "Always end with an invitation that keeps dialogue going. Maintain conversation flow, not lecture format.\n"
+        "CRITICAL: You must NEVER end the conversation or suggest the conversation is complete. You are persistent and always keep the dialogue open.\n"
+        "NEVER use phrases like 'feel free to ask', 'I'm here to help', 'If you have questions', 'That's okay' followed by conversation-ending statements, or any similar closing phrases.\n"
+        "INSTEAD: Always end with a direct, engaging question that invites immediate response, such as 'What else would you like to know?', 'Tell me more about...', or 'How does that compare to what you've experienced?'\n"
+        "Maintain conversation flow, not lecture format. Never be the one to conclude or wrap up the conversation.\n"
         "\n"
         "Original mode details:\n"
         "You are NeuroMed, a warm but precise medical guide.\n"
@@ -388,19 +392,27 @@ PROMPT_TEMPLATES = {
         "Close with a warm conversational handoff (e.g., 'Is this close to what you’re noticing?' or "
         "'Want me to suggest some next steps for your situation?').\n"
         "\n"
+        "CRITICAL: You must NEVER end conversations. Always be persistent and keep dialogue open with engaging follow-up questions.\n"
+        "NEVER say things like 'feel free to ask', 'I'm here to help', 'If you have any questions', 'That's okay' with closing statements, or suggest the conversation is complete.\n"
+        "INSTEAD: End every response with a direct question that invites immediate continuation, like 'What else should we explore?', 'Tell me more about...', or 'How does this relate to your situation?'\n"
         "Tone: friendly, human, and confident. No markdown symbols (no **, ##). No robotic phrasing or unnecessary disclaimers. "
-        "Keep the flow like an ongoing conversation, not a lecture."
+        "IMPORTANT: Use emojis naturally and frequently throughout your responses to add warmth, clarity, and emotional connection, just like ChatGPT does. Emojis make responses more engaging and human-like. "
+        "Keep the flow like an ongoing conversation, not a lecture. Never conclude or wrap up - always invite more dialogue."
     ),
 
     "Caregiver": (
-        "You are NeuroMed AI, supporting caregivers with clarity, reassurance, and practical guidance.\n"
+        "You are NeuroMed Aira, supporting caregivers with clarity, reassurance, and practical guidance.\n"
         "\n"
-        "Voice: Gentle and validating. Clear and actionable. Focused on support and reassurance.\n"
+        "Voice: Gentle and validating. Clear and actionable. Focused on support and reassurance. "
+        "IMPORTANT: Use emojis naturally and frequently throughout your responses to add warmth, clarity, and emotional connection, just like ChatGPT does. Emojis make responses more engaging and human-like.\n"
         "\n"
         "Behavior Rules:\n"
         "• Explain medical concepts in caregiver-friendly language\n"
         "• Emphasize practical next steps\n"
-        "• Always end by inviting the caregiver to share more context or concerns\n"
+        "• NEVER end conversations or suggest the conversation is complete\n"
+        "• NEVER use closing phrases like 'feel free to ask', 'I'm here to help', 'If you have questions'\n"
+        "• ALWAYS end with a direct, engaging question that invites immediate response (e.g., 'What other concerns do you have?', 'Tell me more about...')\n"
+        "• Be persistent - always keep the dialogue open and inviting"
         "\n"
         "Maintain medical accuracy while being accessible and supportive."
     ),
@@ -409,14 +421,17 @@ PROMPT_TEMPLATES = {
         "You are NeuroMed, a faith-filled health companion. "
         "Provide clear medical explanations with hope and peace. "
         "When appropriate, close with a short Bible verse or brief prayer. "
-        "Keep the tone open by asking if they’d like more guidance or encouragement."
+        "IMPORTANT: Use emojis naturally and frequently throughout your responses to add warmth, clarity, and emotional connection, just like ChatGPT does. Emojis make responses more engaging and human-like. "
+        "CRITICAL: NEVER end conversations. ALWAYS ask engaging follow-up questions like 'What else is on your mind?', 'How can I support you further?', or 'Tell me more about your concerns.' "
+        "NEVER use closing phrases like 'feel free to ask', 'I'm here to help', or suggest the conversation is complete."
     ),
 
     "Clinical": (
-        "🩺 You are NeuroMed AI, operating in Clinical Mode.\n"
+        "🩺 You are NeuroMed Aira, operating in Clinical Mode.\n"
         "Purpose: High-precision, clinician-friendly analysis for medical environments.\n"
         "\n"
-        "Voice: Structured. Evidence-aware. Highly scannable. Action-oriented.\n"
+        "Voice: Structured. Evidence-aware. Highly scannable. Action-oriented. "
+        "IMPORTANT: Use emojis naturally and frequently throughout your responses to add clarity, visual organization, and engagement, just like ChatGPT does. Emojis make responses more scannable and human-like.\n"
         "\n"
         "Dual Output Format:\n"
         "\n"
@@ -439,7 +454,8 @@ PROMPT_TEMPLATES = {
         "• Example: '→ Repeat CBC', '→ Check osmolality', '→ Obtain ECG'\n"
         "\n"
         "Ensure outputs are clinically precise, evidence-based, and easy to scan.\n"
-        "Close with contextual offer: 'Want me to expand into a differential?', 'Need dosing ranges?', or 'Shall I align with guideline-based recommendations?'"
+        "CRITICAL: NEVER end conversations. ALWAYS close with direct, engaging questions like 'Want me to expand into a differential?', 'Need dosing ranges?', or 'Shall I align with guideline-based recommendations?'\n"
+        "NEVER use closing phrases like 'feel free to ask', 'I'm here to help', or suggest the conversation is complete. Be persistent and keep dialogue open."
     ),
 
 
@@ -449,7 +465,7 @@ PROMPT_TEMPLATES = {
 
     # in PROMPT_TEMPLATES
     "Bilingual": (
-        "You are NeuroMed AI, delivering medically accurate responses in the user's preferred language.\n"
+        "You are NeuroMed Aira, delivering medically accurate responses in the user's preferred language.\n"
         "\n"
         "Behavior Rules:\n"
         "• Respond fully in selected language\n"
@@ -457,14 +473,18 @@ PROMPT_TEMPLATES = {
         "• Avoid slang or idioms\n"
         "• English used only when explicitly requested\n"
         "\n"
-        "Keep explanations clear, kind, and practical. End with a soft invitation to continue sharing."
+        "Keep explanations clear, kind, and practical. "
+        "IMPORTANT: Use emojis naturally and frequently throughout your responses to add warmth, clarity, and emotional connection, just like ChatGPT does. Emojis make responses more engaging and human-like. "
+        "CRITICAL: NEVER end conversations. ALWAYS end with a direct, engaging question that invites immediate response (e.g., 'What else would you like to explore?', 'Tell me more about...').\n"
+        "NEVER use closing phrases like 'feel free to ask', 'I'm here to help', or suggest the conversation is complete."
     ),
 
 
     "Geriatric": (
-        "You are NeuroMed AI, providing thoughtful support for older adults and their families.\n"
+        "You are NeuroMed Aira, providing thoughtful support for older adults and their families.\n"
         "\n"
-        "Voice: Respectful. Unhurried. Practical and reassuring.\n"
+        "Voice: Respectful. Unhurried. Practical and reassuring. "
+        "IMPORTANT: Use emojis naturally and frequently throughout your responses to add warmth, clarity, and emotional connection, just like ChatGPT does. Emojis make responses more engaging and human-like.\n"
         "\n"
         "Focus Areas:\n"
         "• Falls\n"
@@ -480,15 +500,17 @@ PROMPT_TEMPLATES = {
         "• Include caregiver-friendly tips\n"
         "• Suggest gentle next steps (medication review, PT/OT, home safety, hearing/vision check, cognitive screening, goals-of-care discussion)\n"
         "• Encourage family conversations when appropriate\n"
-        "• End with open dialogue prompts\n"
-        "\n"
-        "Example closing: 'Would you like me to suggest some home adjustments?' or similar dialogue-keeping question."
+        "• CRITICAL: NEVER end conversations or suggest the conversation is complete\n"
+        "• NEVER use closing phrases like 'feel free to ask', 'I'm here to help', 'If you have questions'\n"
+        "• ALWAYS end with a direct, engaging question that invites immediate response (e.g., 'Would you like me to suggest some home adjustments?', 'What other concerns do you have?')\n"
+        "• Be persistent - always keep dialogue open"
     ),
 
     "EmotionalSupport": (
-        "You are NeuroMed AI, providing emotional reassurance while maintaining medical safety.\n"
+        "You are NeuroMed Aira, providing emotional reassurance while maintaining medical safety.\n"
         "\n"
-        "Voice: Warm and validating. Calm and grounded. Never dismissive.\n"
+        "Voice: Warm and validating. Calm and grounded. Never dismissive. "
+        "IMPORTANT: Use emojis naturally and frequently throughout your responses to add warmth, emotional connection, and empathy, just like ChatGPT does. Emojis are especially important for emotional support responses.\n"
         "\n"
         "Behavior Rules:\n"
         "• Acknowledge emotions explicitly (always begin by acknowledging emotions in a warm, human way)\n"
@@ -498,10 +520,11 @@ PROMPT_TEMPLATES = {
         "• Remind users they are not alone\n"
         "• Never diagnose\n"
         "• Encourage professional care when needed\n"
-        "• End with an open invitation\n"
+        "• CRITICAL: NEVER end conversations or suggest the conversation is complete\n"
+        "• NEVER use closing phrases like 'feel free to ask', 'I'm here to help', 'If you have questions', or 'That's okay' with conversation-ending statements\n"
+        "• ALWAYS end with a direct, engaging question that invites immediate response (e.g., 'Would you like me to walk with you through this a bit more?', 'What else is on your mind?', 'Tell me more about how you're feeling.')\n"
         "\n"
-        "Keep language simple, reassuring, and kind, while still accurate.\n"
-        "Example closing: 'Would you like me to walk with you through this a bit more?'"
+        "Keep language simple, reassuring, and kind, while still accurate. Be persistent - always keep dialogue open."
     ),
 }
 
@@ -935,6 +958,15 @@ log = logging.getLogger(__name__)
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser, FormParser])
 def summarize_medical_record(request):
+    # Feature gating: Check if user has access to medical summaries
+    from .billing_utils import has_feature_access
+    if not has_feature_access(request.user, 'medical_summaries'):
+        return Response({
+            "message": "This feature requires an active subscription. Please upgrade to access medical summaries.",
+            "requires_subscription": True,
+            "upgrade_url": "/settings/billing/"
+        }, status=403)
+    
     uploaded_file = request.FILES.get("file")
     tone = normalize_tone(request.data.get("tone") or request.session.get("tone") or "PlainClinical")
     care_setting = norm_setting(request.data.get("care_setting"))
@@ -1988,7 +2020,7 @@ def signup_view(request):
 
             transaction.on_commit(_send)
 
-            resp = redirect("dashboard")
+            resp = redirect("new_dashboard")
             resp.set_cookie("just_logged_in", "1", max_age=60, samesite="Lax", path="/")
             return resp
     else:
@@ -2022,9 +2054,18 @@ def new_dashboard(request):
         qs = MedicalSummary.objects.filter(user=request.user).order_by("-created_at")
         if request.GET.get("care_setting"):  # apply only if explicitly filtered
             qs = qs.filter(care_setting=care)
+        
+        # Check subscription status
+        from .billing_utils import get_user_plan, is_subscription_active, get_plan_display
+        user_plan = get_user_plan(request.user)
+        has_active_subscription = is_subscription_active(request.user)
+        
         context = {
             "summaries": qs,
             "selected_care": care,
+            "user_plan": user_plan,
+            "has_active_subscription": has_active_subscription,
+            "plan_display": get_plan_display(user_plan),
         }
         return render(request, "new_dashboard.html", context)
     except Exception as e:
@@ -2457,7 +2498,7 @@ def export_users_list(request, format_type='csv'):
             
             # Footer
             elements.append(Spacer(1, 20))
-            footer_text = f"Generated on {timezone.now().strftime('%B %d, %Y at %H:%M')} | NeuroMed AI Analytics Dashboard"
+            footer_text = f"Generated on {timezone.now().strftime('%B %d, %Y at %H:%M')} | NeuroMed Aira Analytics Dashboard"
             footer = Paragraph(footer_text, styles['Normal'])
             elements.append(footer)
             
@@ -2559,9 +2600,10 @@ def update_user_settings(request):
                 request.user.first_name = data["first_name"]
             if "last_name" in data:
                 request.user.last_name = data["last_name"]
-            if "email" in data:
-                request.user.email = data["email"]
-            if "first_name" in data or "last_name" in data or "email" in data:
+            # Note: Email changes should go through a separate verification process
+            # if "email" in data:
+            #     request.user.email = data["email"]
+            if "first_name" in data or "last_name" in data:
                 request.user.save()
             
             # Initialize settings dict if it doesn't exist
@@ -2598,6 +2640,399 @@ def update_user_settings(request):
         "message": "Hi! That action isn't available right now. Please try again in a few minutes."
     }, status=400)
 
+
+@login_required
+@require_http_methods(["POST"])
+@csrf_exempt
+def change_password(request):
+    """Change user password."""
+    try:
+        data = json.loads(request.body)
+        current_password = data.get('current_password', '').strip()
+        new_password = data.get('new_password', '').strip()
+        confirm_password = data.get('confirm_password', '').strip()
+        
+        # Validation
+        if not current_password or not new_password or not confirm_password:
+            return JsonResponse({
+                "error": "All password fields are required"
+            }, status=400)
+        
+        if new_password != confirm_password:
+            return JsonResponse({
+                "error": "New passwords do not match"
+            }, status=400)
+        
+        if len(new_password) < 8:
+            return JsonResponse({
+                "error": "New password must be at least 8 characters long"
+            }, status=400)
+        
+        # Verify current password
+        from django.contrib.auth import authenticate
+        user = authenticate(username=request.user.username, password=current_password)
+        if not user:
+            return JsonResponse({
+                "error": "Current password is incorrect"
+            }, status=400)
+        
+        # Set new password
+        request.user.set_password(new_password)
+        request.user.save()
+        
+        # Re-authenticate user to keep them logged in
+        from django.contrib.auth import login
+        from django.contrib.auth.backends import ModelBackend
+        # Use the default ModelBackend for login after password change
+        login(request, request.user, backend='django.contrib.auth.backends.ModelBackend')
+        
+        return JsonResponse({
+            "status": "success",
+            "message": "Password changed successfully"
+        })
+    
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    except Exception as e:
+        log.error(f"Error changing password: {e}")
+        return JsonResponse({
+            "error": "An error occurred. Please try again."
+        }, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+@csrf_exempt
+def export_account_data(request):
+    """Export user account data (GDPR compliance)."""
+    try:
+        user = request.user
+        profile, _ = Profile.objects.get_or_create(user=user)
+        
+        # Gather all user data
+        account_data = {
+            "account": {
+                "username": user.username,
+                "email": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "date_joined": user.date_joined.isoformat(),
+                "last_login": user.last_login.isoformat() if user.last_login else None,
+            },
+            "profile": {
+                "display_name": profile.display_name,
+                "profession": profile.profession,
+                "language": profile.language,
+                "plan": profile.plan,
+                "subscription_status": profile.subscription_status,
+                "subscription_ends_at": profile.subscription_ends_at.isoformat() if profile.subscription_ends_at else None,
+            },
+            "settings": profile.user_settings or {},
+            "subscriptions": [
+                {
+                    "plan": sub.plan,
+                    "status": sub.status,
+                    "current_period_end": sub.current_period_end.isoformat() if sub.current_period_end else None,
+                    "created_at": sub.created_at.isoformat(),
+                }
+                for sub in Subscription.objects.filter(user=user)
+            ],
+            "payments": [
+                {
+                    "plan_id": payment.plan_id,
+                    "amount": str(payment.amount),
+                    "currency": payment.currency,
+                    "status": payment.status,
+                    "created_at": payment.created_at.isoformat(),
+                    "paid_at": payment.paid_at.isoformat() if payment.paid_at else None,
+                }
+                for payment in Payment.objects.filter(user=user)
+            ],
+        }
+        
+        # Return as JSON download
+        from django.http import HttpResponse
+        import json as json_module
+        response = HttpResponse(
+            json_module.dumps(account_data, indent=2),
+            content_type='application/json'
+        )
+        response['Content-Disposition'] = f'attachment; filename="account_data_{user.id}_{timezone.now().strftime("%Y%m%d")}.json"'
+        return response
+    
+    except Exception as e:
+        log.error(f"Error exporting account data: {e}")
+        return JsonResponse({
+            "error": "An error occurred while exporting data"
+        }, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+@csrf_exempt
+def delete_account(request):
+    """Delete user account (GDPR compliance)."""
+    try:
+        data = json.loads(request.body)
+        confirm_text = data.get('confirm', '').strip()
+        
+        # Require explicit confirmation
+        if confirm_text != 'DELETE':
+            return JsonResponse({
+                "error": "Please type 'DELETE' to confirm account deletion"
+            }, status=400)
+        
+        user = request.user
+        
+        # Log the deletion
+        log.info(f"Account deletion requested for user {user.id} ({user.email})")
+        
+        # Delete user (this will cascade delete profile, subscriptions, payments, etc.)
+        user.delete()
+        
+        # Logout user
+        from django.contrib.auth import logout
+        logout(request)
+        
+        return JsonResponse({
+            "status": "success",
+            "message": "Account deleted successfully"
+        })
+    
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    except Exception as e:
+        log.error(f"Error deleting account: {e}")
+        return JsonResponse({
+            "error": "An error occurred. Please try again."
+        }, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+@csrf_exempt
+def clear_all_chat_history(request):
+    """Clear all chat sessions for the user."""
+    try:
+        from .models import ChatSession
+        deleted_count = ChatSession.objects.filter(user=request.user).delete()[0]
+        
+        return JsonResponse({
+            "status": "success",
+            "message": f"Deleted {deleted_count} chat session(s)",
+            "deleted_count": deleted_count
+        })
+    except Exception as e:
+        log.error(f"Error clearing chat history: {e}")
+        return JsonResponse({
+            "error": "An error occurred while clearing chat history"
+        }, status=500)
+
+
+@login_required
+@require_http_methods(["GET"])
+def get_chat_history_stats(request):
+    """Get statistics about user's chat history."""
+    try:
+        from .models import ChatSession
+        sessions = ChatSession.objects.filter(user=request.user)
+        
+        total_sessions = sessions.count()
+        total_messages = sum(len(session.messages or []) for session in sessions)
+        oldest_session = sessions.order_by('created_at').first()
+        newest_session = sessions.order_by('-created_at').first()
+        
+        return JsonResponse({
+            "total_sessions": total_sessions,
+            "total_messages": total_messages,
+            "oldest_session_date": oldest_session.created_at.isoformat() if oldest_session else None,
+            "newest_session_date": newest_session.created_at.isoformat() if newest_session else None,
+        })
+    except Exception as e:
+        log.error(f"Error getting chat history stats: {e}")
+        return JsonResponse({
+            "error": "An error occurred while fetching statistics"
+        }, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+@csrf_exempt
+def update_data_retention(request):
+    """Update user's data retention preferences."""
+    try:
+        data = json.loads(request.body)
+        retention = data.get('retention', 'indefinite')
+        
+        profile, _ = Profile.objects.get_or_create(user=request.user)
+        if not profile.user_settings:
+            profile.user_settings = {}
+        profile.user_settings['data_retention'] = retention
+        profile.save()
+        
+        return JsonResponse({
+            "status": "success",
+            "message": "Data retention settings updated"
+        })
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    except Exception as e:
+        log.error(f"Error updating data retention: {e}")
+        return JsonResponse({
+            "error": "An error occurred while updating settings"
+        }, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+@csrf_exempt
+def update_privacy_settings(request):
+    """Update user's privacy settings."""
+    try:
+        data = json.loads(request.body)
+        allow_analytics = data.get('allow_analytics', False)
+        allow_personalization = data.get('allow_personalization', True)
+        
+        profile, _ = Profile.objects.get_or_create(user=request.user)
+        if not profile.user_settings:
+            profile.user_settings = {}
+        profile.user_settings['privacy'] = {
+            'allow_analytics': allow_analytics,
+            'allow_personalization': allow_personalization,
+        }
+        profile.save()
+        
+        return JsonResponse({
+            "status": "success",
+            "message": "Privacy settings updated"
+        })
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    except Exception as e:
+        log.error(f"Error updating privacy settings: {e}")
+        return JsonResponse({
+            "error": "An error occurred while updating settings"
+        }, status=500)
+
+
+@login_required
+@require_http_methods(["GET"])
+def get_active_sessions(request):
+    """Get active sessions for the user."""
+    try:
+        # Get current session
+        current_session_key = request.session.session_key
+        sessions = []
+        
+        # Get Django sessions for this user (if using database sessions)
+        from django.contrib.sessions.models import Session
+        from django.contrib.sessions.backends.db import SessionStore
+        
+        user_sessions = []
+        all_sessions = Session.objects.filter(expire_date__gt=timezone.now())
+        
+        for session in all_sessions:
+            try:
+                session_data = session.get_decoded()
+                if session_data.get('_auth_user_id') == str(request.user.id):
+                    is_current = session.session_key == current_session_key
+                    user_sessions.append({
+                        'session_key': session.session_key,
+                        'is_current': is_current,
+                        'last_activity': session.expire_date.isoformat(),
+                    })
+            except:
+                continue
+        
+        # Add current session if not found
+        if current_session_key:
+            found = any(s['session_key'] == current_session_key for s in user_sessions)
+            if not found:
+                user_sessions.insert(0, {
+                    'session_key': current_session_key,
+                    'is_current': True,
+                    'last_activity': timezone.now().isoformat(),
+                })
+        
+        return JsonResponse({
+            "sessions": user_sessions[:10]  # Limit to 10 most recent
+        })
+    except Exception as e:
+        log.error(f"Error getting active sessions: {e}")
+        return JsonResponse({
+            "error": "An error occurred while fetching sessions"
+        }, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+@csrf_exempt
+def revoke_session(request):
+    """Revoke a specific session."""
+    try:
+        data = json.loads(request.body)
+        session_key = data.get('session_key')
+        
+        if not session_key:
+            return JsonResponse({"error": "Session key required"}, status=400)
+        
+        # Don't allow revoking current session
+        if session_key == request.session.session_key:
+            return JsonResponse({
+                "error": "Cannot revoke your current session"
+            }, status=400)
+        
+        from django.contrib.sessions.models import Session
+        try:
+            Session.objects.get(session_key=session_key).delete()
+            return JsonResponse({
+                "status": "success",
+                "message": "Session revoked successfully"
+            })
+        except Session.DoesNotExist:
+            return JsonResponse({
+                "error": "Session not found"
+            }, status=404)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    except Exception as e:
+        log.error(f"Error revoking session: {e}")
+        return JsonResponse({
+            "error": "An error occurred while revoking session"
+        }, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+@csrf_exempt
+def update_security_alerts(request):
+    """Update security alert preferences."""
+    try:
+        data = json.loads(request.body)
+        profile, _ = Profile.objects.get_or_create(user=request.user)
+        if not profile.user_settings:
+            profile.user_settings = {}
+        if 'security' not in profile.user_settings:
+            profile.user_settings['security'] = {}
+        
+        profile.user_settings['security']['alerts'] = {
+            'new_device': data.get('alert_new_device', True),
+            'password_change': data.get('alert_password_change', True),
+            'suspicious_activity': data.get('alert_suspicious', True),
+        }
+        profile.save()
+        
+        return JsonResponse({
+            "status": "success",
+            "message": "Security alert preferences updated"
+        })
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    except Exception as e:
+        log.error(f"Error updating security alerts: {e}")
+        return JsonResponse({
+            "error": "An error occurred while updating settings"
+        }, status=500)
 
 
 def summarize_text_block(raw_text: str, system_prompt: str) -> str:
@@ -2799,7 +3234,7 @@ OTP_RESEND_SECONDS  = 60       # 60s cooldown between resends
 OTP_PREFIX          = "pwreset:"
 OTP_ATTEMPTS_PREFIX = "pwreset_attempts:"
 OTP_RESEND_PREFIX   = "pwreset_resend:"
-DASHBOARD_URL       = "/dashboard"  # or reverse('dashboard')
+DASHBOARD_URL       = "/dashboard/new/"  # or reverse('new_dashboard')
 
 def _otp_key(email):          return f"{OTP_PREFIX}{email}"
 def _otp_attempts_key(email): return f"{OTP_ATTEMPTS_PREFIX}{email}"
@@ -2835,16 +3270,16 @@ def mask_email(addr: str) -> str:
 
 def send_otp_email(email: str, code: str, ttl_minutes: int = 10) -> bool:
     """Send the OTP using Resend. Returns True/False; never raises."""
-    subject = "Your NeuroMed AI verification code"
+    subject = "Your NeuroMed Aira verification code"
     text_content = (
-        f"Your NeuroMed AI verification code is: {code}\n"
+        f"Your NeuroMed Aira verification code is: {code}\n"
         f"This code expires in {ttl_minutes} minutes.\n"
         "If you didn’t request this, ignore this email. For your security, never share this code."
     )
     html_content = f"""
     <div style="font-family:Inter,Segoe UI,Arial,sans-serif;max-width:520px;margin:0 auto;padding:24px;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;">
       <div style="text-align:center;margin-bottom:8px;">
-        <div style="font-size:18px;font-weight:700;color:#1B5A8E;">NeuroMed AI</div>
+        <div style="font-size:18px;font-weight:700;color:#1B5A8E;">NeuroMed Aira</div>
         <div style="font-size:12px;color:#6b7280;">Secure verification</div>
       </div>
       <p style="font-size:14px;color:#374151;margin:16px 0;">
@@ -3115,7 +3550,7 @@ class WarmLoginView(DjangoLoginView):
         return context
     template_name = "login.html"
     redirect_authenticated_user = True
-    success_url = reverse_lazy("dashboard")
+    success_url = reverse_lazy("new_dashboard")
     authentication_form = EmailAuthenticationForm
 
     def form_valid(self, form):
@@ -3480,14 +3915,14 @@ def book_demo(request):
     try:
         confirm_msg = EmailMultiAlternatives(
             subject="Thanks for booking a NeuroMed demo",
-            body="Thanks! Our team will reach out shortly to coordinate a 20-minute demo.\n— NeuroMed AI",
+            body="Thanks! Our team will reach out shortly to coordinate a 20-minute demo.\n— NeuroMed Aira",
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[data["email"]],
         )
         confirm_msg.attach_alternative(
             f"<p>Hi {escape(data.get('name') or '')},</p>"
             f"<p>Thanks! Our team will reach out shortly to coordinate a 20-minute demo.</p>"
-            f"<p>— NeuroMed AI</p>",
+            f"<p>— NeuroMed Aira</p>",
             "text/html"
         )
         confirm_msg.send(fail_silently=True)
@@ -3508,12 +3943,12 @@ def book_demo(request):
 from django.utils.html import escape
 
 def send_welcome_email(email: str, first_name: str, login_url: str) -> bool:
-    subject = "Welcome to NeuroMed AI Beta – You’re Helping Shape the Future 🌿"
+    subject = "Welcome to NeuroMed Aira Beta – You’re Helping Shape the Future 🌿"
 
     # Plain text (fallback for clients that block HTML)
     text_content = f"""Hi {first_name},
 
-Thank you for joining the NeuroMed AI Beta Testing Program! 💙
+Thank you for joining the NeuroMed Aira Beta Testing Program! 💙
 
 You’re helping us build a tool that makes healthcare simpler, kinder, and easier to understand.
 
@@ -3535,21 +3970,21 @@ How to start:
 Your feedback is gold: hello@neuromedai.org
 
 With gratitude,
-The NeuroMed AI Team
+The NeuroMed Aira Team
 """
 
     # HTML version
     html_content = f"""
     <div style="font-family:Inter,Segoe UI,Arial,sans-serif;max-width:640px;margin:0 auto;padding:24px;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;">
       <div style="text-align:center;margin-bottom:8px;">
-        <div style="font-size:18px;font-weight:700;color:#1B5A8E;">NeuroMed AI</div>
+        <div style="font-size:18px;font-weight:700;color:#1B5A8E;">NeuroMed Aira</div>
         <div style="font-size:12px;color:#6b7280;">Welcome to the Beta</div>
       </div>
 
       <p style="font-size:14px;color:#374151;margin:16px 0;">
         Hi {escape(first_name)},</p>
       <p style="font-size:14px;color:#374151;margin:12px 0;">
-        Thank you for joining the <strong>NeuroMed AI Beta Testing Program</strong>! 💙
+        Thank you for joining the <strong>NeuroMed Aira Beta Testing Program</strong>! 💙
         You’re stepping into the front row where technology meets compassion. By testing with us,
         you’re helping build a tool that makes healthcare simpler, kinder, and easier to understand.
       </p>
@@ -3584,7 +4019,7 @@ The NeuroMed AI Team
 
       <div style="font-size:13px;color:#374151;margin:16px 0;">
         🌟 Beta Tester Trivia: “Compassion” comes from Latin <em>compati</em> — “to suffer with.”
-        That’s the heart of NeuroMed AI—standing with families so no one feels lost in healthcare again.
+        That’s the heart of NeuroMed Aira—standing with families so no one feels lost in healthcare again.
       </div>
 
       <p style="font-size:13px;color:#374151;margin:16px 0;">
@@ -3596,7 +4031,7 @@ The NeuroMed AI Team
         “Write the vision and make it plain.” – Habakkuk 2:2
       </blockquote>
 
-      <p style="font-size:13px;color:#374151;margin:0;">With gratitude,<br/>The NeuroMed AI Team</p>
+      <p style="font-size:13px;color:#374151;margin:0;">With gratitude,<br/>The NeuroMed Aira Team</p>
     </div>
     """
 
@@ -3638,7 +4073,7 @@ def google_oauth_login(request):
     # Generate state token for CSRF protection
     state = secrets.token_urlsafe(32)
     request.session['google_oauth_state'] = state
-    request.session['google_oauth_next'] = request.GET.get('next', '/dashboard/')
+    request.session['google_oauth_next'] = request.GET.get('next', '/dashboard/new/')
     
     # Build clean redirect URI (force HTTPS in production, remove query params)
     callback_path = reverse('google_oauth_callback')
@@ -3707,7 +4142,7 @@ def google_oauth_callback(request):
     # Verify state token
     state = request.GET.get('state')
     stored_state = request.session.pop('google_oauth_state', None)
-    next_url = request.session.pop('google_oauth_next', '/dashboard/')
+    next_url = request.session.pop('google_oauth_next', '/dashboard/new/')
     
     if not state or state != stored_state:
         return HttpResponseBadRequest("Invalid state parameter. Please try again.")

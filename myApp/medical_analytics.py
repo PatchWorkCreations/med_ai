@@ -1,5 +1,5 @@
 """
-Medical AI Analytics - Comprehensive metrics for NeuroMed AI usage
+Medical AI Analytics - Comprehensive metrics for NeuroMed Aira usage
 This module calculates all medical AI-specific analytics.
 """
 from django.db.models import Count, Sum, Q, Avg, Max, Min, F

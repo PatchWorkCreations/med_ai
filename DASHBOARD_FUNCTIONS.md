@@ -1,4 +1,4 @@
-# NeuroMed AI Dashboard - Complete Function List
+# NeuroMed Aira Dashboard - Complete Function List
 
 ## Overview
 The dashboard is the main authenticated interface where users can chat with the AI, manage their medical summaries, and access various features.

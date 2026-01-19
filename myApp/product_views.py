@@ -58,7 +58,7 @@ OTP_RESEND_SECONDS = 60            # 60s cooldown between resends
 OTP_PREFIX = "pwreset:"
 OTP_ATTEMPTS_PREFIX = "pwreset_attempts:"
 OTP_RESEND_PREFIX = "pwreset_resend:"
-DASHBOARD_URL = "/dashboard"       # change to reverse('dashboard') if you have a named route
+DASHBOARD_URL = "/dashboard/new/"       # change to reverse('new_dashboard') if you have a named route
 
 def _otp_key(email): return f"{OTP_PREFIX}{email}"
 def _otp_attempts_key(email): return f"{OTP_ATTEMPTS_PREFIX}{email}"
@@ -254,7 +254,7 @@ def portal_reset_password(request):
 # Product mockup & demo dashboard
 # -----------------------------
 def product_mockup(request):
-    """Render the static NeuroMed AI dashboard mockup."""
+    """Render the static NeuroMed Aira dashboard mockup."""
     return render(request, "products/mockup.html")
 
 # --- Demo Dashboard (shell + per-section include) ---
@@ -297,7 +297,7 @@ def demo_dashboard(request, section="clinical"):
     sec = (section or "clinical").lower()
     section_template = SECTION_MAP.get(sec, SECTION_MAP["clinical"])
 
-    brand_name = request.GET.get("brand", "NeuroMed AI")
+    brand_name = request.GET.get("brand", "NeuroMed Aira")
     scenario   = request.GET.get("scenario", "Knee MRI (Outpatient)")
     language   = request.GET.get("lang", "en-US")
 
@@ -620,11 +620,11 @@ def _portal_login_url_for(org: Org) -> str:
 
 def _email_credentials(to_email: str, org: Org, password: Optional[str]):
     try:
-        subject = f"Your NeuroMed AI Portal Access – {org.name}"
+        subject = f"Your NeuroMed Aira Portal Access – {org.name}"
         login_url = _portal_login_url_for(org)
         if password:
             text = (
-                f"Welcome to {org.name} on NeuroMed AI.\n\n"
+                f"Welcome to {org.name} on NeuroMed Aira.\n\n"
                 f"Portal: {login_url}\n"
                 f"Email: {to_email}\n"
                 f"Temporary Password: {password}\n\n"
@@ -632,7 +632,7 @@ def _email_credentials(to_email: str, org: Org, password: Optional[str]):
             )
         else:
             text = (
-                f"Your NeuroMed AI portal is ready for {org.name}.\n\n"
+                f"Your NeuroMed Aira portal is ready for {org.name}.\n\n"
                 f"Portal: {login_url}\n"
                 f"Email: {to_email}\n\n"
                 "If you need a password reset, reply to this email."

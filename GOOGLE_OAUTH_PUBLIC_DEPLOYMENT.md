@@ -32,7 +32,7 @@ Click **Create** or **Edit App**
 
 **App name:**
 ```
-NeuroMed AI
+NeuroMed Aira
 ```
 
 **User support email:**
@@ -41,7 +41,7 @@ Your email address (e.g., hello@neuromedai.org)
 ```
 
 **App logo (optional):**
-- Upload your NeuroMed AI logo if you have one
+- Upload your NeuroMed Aira logo if you have one
 
 **App domain:**
 ```

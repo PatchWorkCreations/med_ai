@@ -133,6 +133,42 @@ class Profile(models.Model):
         help_text="User who referred this account (via referral code)"
     )
 
+    # Subscription fields
+    plan = models.CharField(
+        max_length=20,
+        default='free',
+        choices=[
+            ('free', 'Free'),
+            ('monthly', 'Monthly'),
+            ('annual', 'Annual'),
+            ('clinical', 'Clinical'),
+        ],
+        help_text="User's subscription plan"
+    )
+    subscription_status = models.CharField(
+        max_length=20,
+        default='inactive',
+        choices=[
+            ('active', 'Active'),
+            ('past_due', 'Past Due'),
+            ('canceled', 'Canceled'),
+            ('inactive', 'Inactive'),
+            ('manual', 'Manual'),
+        ],
+        help_text="Current subscription status"
+    )
+    subscription_ends_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="When the subscription period ends"
+    )
+    paypal_customer_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="PayPal customer ID (Payer ID)"
+    )
+
     def __str__(self):
         return f"{self.display_name or self.user.username} Profile"
 from django.utils import timezone
@@ -541,3 +577,111 @@ class Campaign(models.Model):
     
     def __str__(self):
         return f"{self.name} ({self.utm_campaign})"
+
+
+# =============================
+# Subscription & Payment Models
+# =============================
+
+class Subscription(models.Model):
+    """Tracks user subscriptions"""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="subscriptions")
+    plan = models.CharField(
+        max_length=20,
+        choices=[
+            ('monthly', 'Monthly'),
+            ('annual', 'Annual'),
+            ('clinical', 'Clinical'),
+        ]
+    )
+    paypal_subscription_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        unique=True,
+        help_text="PayPal subscription ID"
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('active', 'Active'),
+            ('past_due', 'Past Due'),
+            ('canceled', 'Canceled'),
+            ('inactive', 'Inactive'),
+            ('manual', 'Manual'),
+        ],
+        default='inactive'
+    )
+    current_period_end = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="When the current billing period ends"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} - {self.plan} ({self.status})"
+
+
+class Payment(models.Model):
+    """Tracks payment transactions"""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="payments")
+    subscription = models.ForeignKey(
+        Subscription,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="payments"
+    )
+    paypal_order_id = models.CharField(
+        max_length=255,
+        unique=True,
+        help_text="PayPal order ID"
+    )
+    paypal_transaction_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="PayPal transaction ID"
+    )
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        help_text="Payment amount in USD"
+    )
+    currency = models.CharField(max_length=3, default='USD')
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Pending'),
+            ('completed', 'Completed'),
+            ('failed', 'Failed'),
+            ('refunded', 'Refunded'),
+        ],
+        default='pending'
+    )
+    plan_id = models.CharField(
+        max_length=20,
+        help_text="Plan ID (monthly, annual, clinical)"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    paid_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['status']),
+            models.Index(fields=['paypal_order_id']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} - ${self.amount} - {self.status}"

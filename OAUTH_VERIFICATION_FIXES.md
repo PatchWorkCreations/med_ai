@@ -15,7 +15,7 @@ Based on: [Google OAuth App Homepage Requirements](https://support.google.com/cl
 - ✅ Links to `/privacy` which should match your OAuth consent screen
 
 ### 2. App Purpose & Google Data Usage
-- ✅ Added "About NeuroMed AI" section explaining app functionality
+- ✅ Added "About NeuroMed Aira" section explaining app functionality
 - ✅ Added "How We Use Google Account Information" section
 - ✅ Clearly explains:
   - What data is collected (email, name, profile)
@@ -144,7 +144,7 @@ Based on [Google's requirements](https://support.google.com/cloud/answer/1380737
 ### Issue: "Homepage does not explain app functionality"
 
 **Solution:**
-- ✅ Fixed: Added "About NeuroMed AI" section
+- ✅ Fixed: Added "About NeuroMed Aira" section
 - ✅ Fixed: Added "How We Use Google Account Information" section
 - Both sections clearly explain app purpose and data usage
 

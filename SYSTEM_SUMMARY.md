@@ -1,10 +1,10 @@
-# System Summary: NeuroMed AI Platform
+# System Summary: NeuroMed Aira Platform
 
 ## Overall System Function
 
-**NeuroMed AI** is a medical AI assistant platform that provides intelligent health guidance through multiple interaction modes. The system serves both individual users and healthcare organizations with:
+**NeuroMed Aira** is a medical AI assistant platform that provides intelligent health guidance through multiple interaction modes. The system serves both individual users and healthcare organizations with:
 
-1. **Main Neuromed AI Chat** - Core conversational AI for medical questions
+1. **Main NeuroMed Aira Chat** - Core conversational AI for medical questions
 2. **Dashboard Analytics** - Comprehensive analytics for tracking usage and engagement
 3. **Main Website** - Public-facing landing pages and user authentication
 4. **Organizational Portal** - Multi-tenant healthcare organization management (with various staff apps)
@@ -13,7 +13,7 @@
 
 ## Core Components (Active & Important)
 
-### 1. **Main Neuromed AI Chat** (`/api/send-chat/`)
+### 1. **Main NeuroMed Aira Chat** (`/api/send-chat/`)
 **Location:** `myApp/views.py` - `send_chat()` function
 
 **Function:**
@@ -222,7 +222,7 @@ myApp/
 ## Summary
 
 **Active & Important:**
-✅ Main Neuromed AI Chat - Core functionality  
+✅ Main NeuroMed Aira Chat - Core functionality  
 ✅ Dashboard Analytics - Comprehensive tracking  
 ✅ Main Website - User-facing interface  
 ✅ Organizational Portal - If in use  

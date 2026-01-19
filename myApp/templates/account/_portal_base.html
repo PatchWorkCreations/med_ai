@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>{% block title %}{{ org.name|default:"NeuroMed AI" }} Portal{% endblock %}</title>
+  <title>{% block title %}{{ org.name|default:"NeuroMed Aira" }} Portal{% endblock %}</title>
 
   <!-- Tailwind (CDN for speed in demo) -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -34,7 +34,7 @@
           </div>
         {% endif %}
         <div class="leading-tight">
-          <div class="font-semibold">{{ org.name|default:"NeuroMed AI" }}</div>
+          <div class="font-semibold">{{ org.name|default:"NeuroMed Aira" }}</div>
           <div class="text-xs text-slate-500">
             {{ request.get_host }} • <span class="badge bg-emerald-50 text-emerald-700">{{ org.plan|default:"standard" }}</span>
           </div>
@@ -61,7 +61,7 @@
   {% block content %}{% endblock %}
 
   <footer class="mt-12 py-8 text-center text-xs text-slate-500">
-    © {{ now|date:"Y" }} {{ org.name|default:"NeuroMed AI" }} • Powered by NeuroMed
+    © {{ now|date:"Y" }} {{ org.name|default:"NeuroMed Aira" }} • Powered by NeuroMed
   </footer>
 </body>
 </html>

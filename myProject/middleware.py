@@ -11,8 +11,8 @@ class DisableCSRFForAPI(MiddlewareMixin):
     Main website API endpoints still use CSRF protection.
     """
     def process_request(self, request):
-        # Only disable CSRF for mobile API paths to avoid affecting main website
-        if request.path.startswith('/api/mobile/'):
+        # Disable CSRF for mobile API paths and webapp API endpoints
+        if request.path.startswith('/api/mobile/') or request.path.startswith('/webapp/api/'):
             setattr(request, '_dont_enforce_csrf_checks', True)
         return None
 

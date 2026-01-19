@@ -157,7 +157,7 @@ Once domain is verified:
 - Links to `/privacy` route
 
 ✅ **App Purpose:**
-- Added "About NeuroMed AI" section
+- Added "About NeuroMed Aira" section
 - Explains functionality clearly
 - Describes features and capabilities
 

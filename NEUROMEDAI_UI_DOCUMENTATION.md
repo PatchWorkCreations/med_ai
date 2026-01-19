@@ -1,4 +1,4 @@
-# NeuroMed AI - Landing Page & Dashboard Documentation
+# NeuroMed Aira - Landing Page & Dashboard Documentation
 
 ## Table of Contents
 1. [Landing Page Overview](#landing-page-overview)
@@ -11,7 +11,7 @@
 
 ## Landing Page Overview
 
-The landing page (`landing_page.html`) serves as the main entry point for NeuroMed AI, providing a clean, accessible interface for users to interact with the medical AI assistant.
+The landing page (`landing_page.html`) serves as the main entry point for NeuroMed Aira, providing a clean, accessible interface for users to interact with the medical AI assistant.
 
 ### Key Features
 
@@ -23,7 +23,7 @@ The landing page (`landing_page.html`) serves as the main entry point for NeuroM
   - "Try a quick demo" button
 
 #### Header Navigation
-- **Brand Logo**: NeuroMed AI logo with link to home
+- **Brand Logo**: NeuroMed Aira logo with link to home
 - **Desktop Controls**:
   - Font size controls (A− / A＋)
   - Easy Read toggle (hidden by default)

@@ -3,7 +3,7 @@
 Standalone tenant bootstrapper.
 
 Usage examples:
-  python tools/create_sample_org.py --name "NeuroMed AI (Demo)" --slug neuromed --domain neuromed.neuromedai.org --owner-email founder@neuromedai.org --owner-staff --seed-demo --send-email
+  python tools/create_sample_org.py --name "NeuroMed Aira (Demo)" --slug neuromed --domain neuromed.neuromedai.org --owner-email founder@neuromedai.org --owner-staff --seed-demo --send-email
   python tools/create_sample_org.py --name "Neuromed Local" --slug neurolocal --domain http://neurolocal.localtest.me:8000 --owner-email you@example.com --seed-demo --http
 """
 
@@ -76,10 +76,10 @@ def portal_login_url(host: str, force_http: bool = False) -> str:
 def email_credentials(to_email: str, org: Org, login_url: str, password: str | None):
     """Safe best-effort: never crash provisioning over email issues."""
     try:
-        subject = f"Your NeuroMed AI Portal Access – {org.name}"
+        subject = f"Your NeuroMed Aira Portal Access – {org.name}"
         if password:
             body = (
-                f"Welcome to {org.name} on NeuroMed AI.\n\n"
+                f"Welcome to {org.name} on NeuroMed Aira.\n\n"
                 f"Portal: {login_url}\n"
                 f"Email: {to_email}\n"
                 f"Temporary Password: {password}\n\n"
@@ -87,7 +87,7 @@ def email_credentials(to_email: str, org: Org, login_url: str, password: str | N
             )
         else:
             body = (
-                f"Your NeuroMed AI portal is ready for {org.name}.\n\n"
+                f"Your NeuroMed Aira portal is ready for {org.name}.\n\n"
                 f"Portal: {login_url}\n"
                 f"Email: {to_email}\n\n"
                 "If you need a password reset, reply to this email."
@@ -183,7 +183,7 @@ def create_org_and_owner(
 
 def parse_args(argv=None):
     p = argparse.ArgumentParser(description="Create an Org + primary domain + owner user (optional demo data).")
-    p.add_argument("--name", default="NeuroMed AI (Demo)", help="Org display name (e.g., 'Green Valley Clinic').")
+    p.add_argument("--name", default="NeuroMed Aira (Demo)", help="Org display name (e.g., 'Green Valley Clinic').")
     p.add_argument("--slug", default="neuromed", help="Unique slug (e.g., 'greenvalley').")
     p.add_argument("--domain", default="neuromed.neuromedai.org", help="Primary host or URL (e.g., 'greenvalley.neuromedai.org' or 'http://neurolocal.localtest.me:8000').")
     p.add_argument("--owner-email", default="founder@neuromedai.org", help="Email for the owner account.")

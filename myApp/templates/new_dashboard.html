@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>NeuroMed AI - Premium Dashboard</title>
+  <title>NeuroMed Aira - Premium Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   {# PWA manifest temporarily disabled to avoid 500s in production #}
   {# <link rel="manifest" href="{% static 'pwa/manifest.webmanifest' %}"> #}
@@ -1341,7 +1341,7 @@ body {
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  z-index: 100;
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2095,7 +2095,7 @@ body.geriatric-zoom button {
           <div class="flex items-center gap-2 justify-center flex-1 sidebar-logo-container overflow-hidden">
             <!-- Heart Logo (shown when expanded) -->
             <img src="https://res.cloudinary.com/djzks0atj/image/upload/v1759412135/NeuroMed_AI_Logo-10_yassi6.png" 
-                 alt="NeuroMed AI" 
+                 alt="NeuroMed Aira" 
                  class="h-8 sidebar-logo sidebar-logo-heart" />
             <!-- Sidebar Icon (shown when collapsed) -->
             <button id="sidebarIconBtn" type="button" class="p-1.5 hover:bg-gray-100 rounded-lg transition sidebar-logo-icon hidden" aria-label="Open sidebar">
@@ -2213,13 +2213,32 @@ body.geriatric-zoom button {
       </div>
       
       <!-- Sidebar Footer -->
-      <div class="p-4 border-t border-gray-200/80">
+      <div class="p-4 border-t border-gray-200/80 space-y-2">
+        {% if not has_active_subscription %}
+        <!-- Subscription Prompt Banner -->
+        <a href="{% url 'billing_settings' %}" class="block w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-sm">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-crown"></i>
+            <div class="flex-1">
+              <div class="text-xs font-semibold">Upgrade to Premium</div>
+              <div class="text-xs opacity-90">Unlock all features</div>
+            </div>
+            <i class="fa-solid fa-arrow-right text-xs"></i>
+          </div>
+        </a>
+        {% endif %}
+        
         <button id="userMenuBtn" class="w-full flex items-center justify-center md:justify-start gap-3 p-2 hover:bg-gray-100 rounded-lg transition sidebar-user-btn">
           <div class="w-8 h-8 rounded-full bg-token-primary flex items-center justify-center text-white font-semibold sidebar-user-icon">
             <i class="fa-solid fa-user"></i>
           </div>
           <div class="flex-1 text-left sidebar-footer-text">
-            <div class="text-sm font-medium text-gray-800" id="userDisplayName">User</div>
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-medium text-gray-800" id="userDisplayName">User</span>
+              {% if has_active_subscription %}
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium tracking-wider uppercase text-emerald-700 bg-emerald-50 border border-emerald-200/60">PRO</span>
+              {% endif %}
+            </div>
             <div class="text-xs text-gray-500">Settings & Logout</div>
           </div>
           <i class="fa-solid fa-chevron-right text-gray-400 sidebar-footer-text"></i>
@@ -2243,11 +2262,10 @@ body.geriatric-zoom button {
               Open sidebar
             </button>
             
-            <!-- Logo on mobile, text on desktop -->
+            <!-- Logo on mobile -->
             <img src="https://res.cloudinary.com/djzks0atj/image/upload/v1759412135/NeuroMed_AI_Logo-10_yassi6.png" 
-                 alt="NeuroMed AI" 
+                 alt="NeuroMed Aira" 
                  class="md:hidden h-6 w-auto" />
-            <h1 class="hidden md:block text-xl font-semibold text-gray-800">NeuroMed AI</h1>
             
             <!-- Active chips (tone, care, faith, language) -->
             <div id="activeChips" class="hidden md:flex items-center gap-2">
@@ -2521,10 +2539,10 @@ body.geriatric-zoom button {
           <option value="notifications">🔔 Notifications</option>
           <option value="personalization">🎨 Personalization</option>
           <option value="apps">📱 Apps</option>
-          <option value="schedules">📅 Schedules</option>
           <option value="data">💾 Data controls</option>
           <option value="security">🔐 Security</option>
           <option value="parental">👨‍👩‍👧 Parental controls</option>
+          <option value="billing">💳 Billing & Subscription</option>
           <option value="account">👤 Account</option>
         </select>
         <!-- Close button - positioned beside dropdown -->
@@ -2556,10 +2574,6 @@ body.geriatric-zoom button {
               <i class="fa-solid fa-th-large text-gray-600"></i>
               <span class="text-sm font-medium">Apps</span>
             </button>
-            <button class="settings-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-left" data-section="schedules">
-              <i class="fa-regular fa-calendar text-gray-600"></i>
-              <span class="text-sm font-medium">Schedules</span>
-            </button>
             <button class="settings-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-left" data-section="data">
               <i class="fa-solid fa-database text-gray-600"></i>
               <span class="text-sm font-medium">Data controls</span>
@@ -2571,6 +2585,10 @@ body.geriatric-zoom button {
             <button class="settings-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-left" data-section="parental">
               <i class="fa-solid fa-users text-gray-600"></i>
               <span class="text-sm font-medium">Parental controls</span>
+            </button>
+            <button class="settings-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-left" data-section="billing">
+              <i class="fa-solid fa-credit-card text-gray-600"></i>
+              <span class="text-sm font-medium">Billing & Subscription</span>
             </button>
             <button class="settings-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-left" data-section="account">
               <i class="fa-regular fa-user text-gray-600"></i>
@@ -2925,19 +2943,233 @@ body.geriatric-zoom button {
           <div class="text-gray-500 text-sm">Apps settings coming soon...</div>
         </div>
         
-        <div id="settingsSection-schedules" class="settings-section hidden">
-          <h3 class="text-2xl font-semibold text-gray-800 mb-6">Schedules</h3>
-          <div class="text-gray-500 text-sm">Schedules settings coming soon...</div>
-        </div>
-        
+        <!-- Data Controls Settings -->
         <div id="settingsSection-data" class="settings-section hidden">
-          <h3 class="text-2xl font-semibold text-gray-800 mb-6">Data controls</h3>
-          <div class="text-gray-500 text-sm">Data controls settings coming soon...</div>
+          <h3 class="text-2xl font-semibold text-gray-800 mb-6">Data Controls</h3>
+          
+          <div class="space-y-8">
+            <!-- Export Data -->
+            <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-download text-gray-600"></i>
+                Export Your Data
+              </h4>
+              <p class="text-sm text-gray-600 mb-4">
+                Download a copy of all your account data, including chat history, settings, and subscription information.
+              </p>
+              <button onclick="exportAccountData()" class="px-4 py-2.5 bg-[#28926D] hover:bg-[#237a5a] text-white rounded-lg font-medium transition flex items-center gap-2">
+                <i class="fa-solid fa-file-export"></i>
+                <span>Export All Data</span>
+              </button>
         </div>
         
+            <!-- Chat History Management -->
+            <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-comments text-gray-600"></i>
+                Chat History
+              </h4>
+              <p class="text-sm text-gray-600 mb-4">
+                Manage your chat sessions and conversation history.
+              </p>
+              <div class="space-y-3">
+                <button onclick="clearAllChatHistory()" class="w-full px-4 py-2.5 border border-red-300 text-red-600 hover:bg-red-50 rounded-lg transition flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-trash text-red-600"></i>
+                    <span>Clear All Chat History</span>
+                  </div>
+                  <i class="fa-solid fa-chevron-right text-red-400 text-xs"></i>
+                </button>
+                <div id="chatHistoryStats" class="text-sm text-gray-500 mt-2">
+                  <i class="fa-solid fa-spinner fa-spin"></i> Loading statistics...
+                </div>
+              </div>
+        </div>
+        
+            <!-- Data Retention -->
+            <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-clock text-gray-600"></i>
+                Data Retention
+              </h4>
+              <p class="text-sm text-gray-600 mb-4">
+                Configure how long your data is stored on our servers.
+              </p>
+              <div class="space-y-3">
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="radio" name="retention" value="indefinite" checked class="w-4 h-4 text-[#28926D] focus:ring-[#28926D]" />
+                  <div>
+                    <div class="font-medium text-gray-900">Keep indefinitely</div>
+                    <div class="text-xs text-gray-500">Your data will be stored until you delete it</div>
+                  </div>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="radio" name="retention" value="1year" class="w-4 h-4 text-[#28926D] focus:ring-[#28926D]" />
+                  <div>
+                    <div class="font-medium text-gray-900">1 year</div>
+                    <div class="text-xs text-gray-500">Automatically delete data older than 1 year</div>
+                  </div>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="radio" name="retention" value="6months" class="w-4 h-4 text-[#28926D] focus:ring-[#28926D]" />
+                  <div>
+                    <div class="font-medium text-gray-900">6 months</div>
+                    <div class="text-xs text-gray-500">Automatically delete data older than 6 months</div>
+                  </div>
+                </label>
+              </div>
+              <button onclick="saveDataRetention()" class="mt-4 px-4 py-2 bg-[#28926D] hover:bg-[#237a5a] text-white rounded-lg font-medium transition">
+                Save Retention Settings
+              </button>
+            </div>
+
+            <!-- Privacy Settings -->
+            <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved text-gray-600"></i>
+                Privacy Settings
+              </h4>
+              <div class="space-y-4">
+                <label class="flex items-center justify-between cursor-pointer">
+                  <div>
+                    <div class="font-medium text-gray-900">Analytics & Usage Data</div>
+                    <div class="text-xs text-gray-500">Allow us to collect anonymous usage data to improve the service</div>
+                  </div>
+                  <input type="checkbox" id="allowAnalytics" class="w-11 h-6 bg-gray-200 rounded-full appearance-none cursor-pointer relative transition-colors checked:bg-[#28926D]" />
+                </label>
+                <label class="flex items-center justify-between cursor-pointer">
+                  <div>
+                    <div class="font-medium text-gray-900">Personalized Recommendations</div>
+                    <div class="text-xs text-gray-500">Use your data to provide personalized features and suggestions</div>
+                  </div>
+                  <input type="checkbox" id="allowPersonalization" checked class="w-11 h-6 bg-gray-200 rounded-full appearance-none cursor-pointer relative transition-colors checked:bg-[#28926D]" />
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Security Settings -->
         <div id="settingsSection-security" class="settings-section hidden">
           <h3 class="text-2xl font-semibold text-gray-800 mb-6">Security</h3>
-          <div class="text-gray-500 text-sm">Security settings coming soon...</div>
+          
+          <div class="space-y-8">
+            <!-- Change Password -->
+            <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-lock text-gray-600"></i>
+                Password
+              </h4>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
+                  <input type="password" id="securityCurrentPassword" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#28926D]/40 bg-white transition" placeholder="Enter your current password" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                  <input type="password" id="securityNewPassword" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#28926D]/40 bg-white transition" placeholder="Enter new password" />
+                  <p class="text-xs text-gray-500 mt-1">Must be at least 8 characters long</p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
+                  <input type="password" id="securityConfirmPassword" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#28926D]/40 bg-white transition" placeholder="Confirm new password" />
+                </div>
+                <button onclick="changePasswordFromSecurity()" class="w-full px-4 py-2.5 bg-[#28926D] hover:bg-[#237a5a] text-white rounded-lg font-medium transition flex items-center justify-center gap-2">
+                  <i class="fa-solid fa-key"></i>
+                  <span>Update Password</span>
+                </button>
+                <div id="securityPasswordMessage" class="hidden text-sm mt-2"></div>
+              </div>
+            </div>
+
+            <!-- Active Sessions -->
+            <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-desktop text-gray-600"></i>
+                Active Sessions
+              </h4>
+              <p class="text-sm text-gray-600 mb-4">
+                Manage devices where you're currently logged in. Sign out from any device you don't recognize.
+              </p>
+              <div id="activeSessionsList" class="space-y-3 mb-4">
+                <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
+                  <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-desktop text-gray-400"></i>
+                    <div>
+                      <div class="font-medium text-gray-900">Current Session</div>
+                      <div class="text-xs text-gray-500">This device • Just now</div>
+                    </div>
+                  </div>
+                  <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Active</span>
+                </div>
+              </div>
+              <button onclick="loadActiveSessions()" class="w-full px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+                <i class="fa-solid fa-refresh mr-2"></i>
+                Refresh Sessions
+              </button>
+            </div>
+
+            <!-- Security Alerts -->
+            <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-bell text-gray-600"></i>
+                Security Alerts
+              </h4>
+              <p class="text-sm text-gray-600 mb-4">
+                Get notified about important security events on your account.
+              </p>
+              <div class="space-y-3">
+                <label class="flex items-center justify-between cursor-pointer">
+                  <div>
+                    <div class="font-medium text-gray-900">Login from new device</div>
+                    <div class="text-xs text-gray-500">Get notified when someone logs in from a new device</div>
+                  </div>
+                  <input type="checkbox" id="alertNewDevice" checked class="w-11 h-6 bg-gray-200 rounded-full appearance-none cursor-pointer relative transition-colors checked:bg-[#28926D]" />
+                </label>
+                <label class="flex items-center justify-between cursor-pointer">
+                  <div>
+                    <div class="font-medium text-gray-900">Password changed</div>
+                    <div class="text-xs text-gray-500">Get notified when your password is changed</div>
+                  </div>
+                  <input type="checkbox" id="alertPasswordChange" checked class="w-11 h-6 bg-gray-200 rounded-full appearance-none cursor-pointer relative transition-colors checked:bg-[#28926D]" />
+                </label>
+                <label class="flex items-center justify-between cursor-pointer">
+                  <div>
+                    <div class="font-medium text-gray-900">Suspicious activity</div>
+                    <div class="text-xs text-gray-500">Get notified about unusual account activity</div>
+                  </div>
+                  <input type="checkbox" id="alertSuspicious" checked class="w-11 h-6 bg-gray-200 rounded-full appearance-none cursor-pointer relative transition-colors checked:bg-[#28926D]" />
+                </label>
+              </div>
+              <button onclick="saveSecurityAlerts()" class="mt-4 px-4 py-2 bg-[#28926D] hover:bg-[#237a5a] text-white rounded-lg font-medium transition">
+                Save Alert Preferences
+              </button>
+            </div>
+
+            <!-- Two-Factor Authentication -->
+            <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-shield text-gray-600"></i>
+                Two-Factor Authentication
+              </h4>
+              <p class="text-sm text-gray-600 mb-4">
+                Add an extra layer of security to your account with two-factor authentication.
+              </p>
+              <div class="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200">
+                <div>
+                  <div class="font-medium text-gray-900">2FA Status</div>
+                  <div class="text-xs text-gray-500" id="twoFactorStatus">Not enabled</div>
+                </div>
+                <button onclick="toggleTwoFactor()" class="px-4 py-2 bg-[#28926D] hover:bg-[#237a5a] text-white rounded-lg font-medium transition text-sm">
+                  <span id="twoFactorButtonText">Enable 2FA</span>
+                </button>
+              </div>
+              <p class="text-xs text-gray-500 mt-3">
+                <i class="fa-solid fa-info-circle mr-1"></i>
+                Two-factor authentication adds an extra security step when logging in from new devices.
+              </p>
+            </div>
+          </div>
         </div>
         
         <div id="settingsSection-parental" class="settings-section hidden">
@@ -2945,32 +3177,172 @@ body.geriatric-zoom button {
           <div class="text-gray-500 text-sm">Parental controls settings coming soon...</div>
         </div>
         
+        <!-- Billing & Subscription Settings -->
+        <div id="settingsSection-billing" class="settings-section hidden">
+          <h3 class="text-2xl font-semibold text-gray-800 mb-6">Billing & Subscription</h3>
+          <div class="space-y-6">
+            <!-- Current Plan -->
+            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h4 class="text-lg font-semibold text-gray-800">Current Plan</h4>
+                  <p id="currentPlanLabel" class="text-2xl font-bold text-gray-900 mt-1">
+                    {% if has_active_subscription %}Pro Account{% else %}Free{% endif %}
+                  </p>
+                  {% if has_active_subscription %}
+                  <p class="text-sm text-green-600 mt-1">
+                    <i class="fa-solid fa-check-circle"></i> Active
+                  </p>
+                  {% else %}
+                  <p class="text-sm text-gray-500 mt-1">No active subscription</p>
+                  {% endif %}
+                </div>
+                {% if not has_active_subscription %}
+                <a href="{% url 'billing_settings' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+                  Upgrade Now
+                </a>
+                {% endif %}
+              </div>
+            </div>
+            
+            <!-- Plan Benefits -->
+            <div>
+              <h4 class="text-lg font-semibold text-gray-800 mb-4">What's Included</h4>
+              <div class="grid md:grid-cols-2 gap-4">
+                <div class="border rounded-lg p-4">
+                  <h5 class="font-semibold text-gray-800 mb-2">Pro Account</h5>
+                  <ul class="text-sm text-gray-600 space-y-1">
+                    <li><i class="fa-solid fa-check text-green-600 mr-2"></i>Unlimited medical summaries</li>
+                    <li><i class="fa-solid fa-check text-green-600 mr-2"></i>Voice features</li>
+                    <li><i class="fa-solid fa-check text-green-600 mr-2"></i>30 days chat history</li>
+                  </ul>
+                </div>
+                <div class="border rounded-lg p-4">
+                  <h5 class="font-semibold text-gray-800 mb-2">Annual Plan - $199/year</h5>
+                  <ul class="text-sm text-gray-600 space-y-1">
+                    <li><i class="fa-solid fa-check text-green-600 mr-2"></i>Everything in Monthly</li>
+                    <li><i class="fa-solid fa-check text-green-600 mr-2"></i>365 days chat history</li>
+                    <li><i class="fa-solid fa-check text-green-600 mr-2"></i>Save 17% vs monthly</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="flex gap-3">
+              <a href="{% url 'billing_settings' %}" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors text-center">
+                <i class="fa-solid fa-credit-card mr-2"></i>Manage Billing
+              </a>
+              {% if has_active_subscription %}
+              <button onclick="window.location.href='{% url 'billing_settings' %}';" class="px-6 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium rounded-lg transition-colors">
+                View History
+              </button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        
         <!-- Account Settings -->
         <div id="settingsSection-account" class="settings-section hidden">
           <h3 class="text-2xl font-semibold text-gray-800 mb-6">Account</h3>
-      <div class="space-y-6">
+          
+          <div class="space-y-8">
+            <!-- Profile Information -->
+            <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-user text-gray-600"></i>
+                Profile Information
+              </h4>
+              <div class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Display Name</label>
-          <input type="text" id="displayName" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#28926D]/40" />
+                  <input type="text" id="displayName" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#28926D]/40 bg-white transition" placeholder="Your display name" />
+                  <p class="text-xs text-gray-500 mt-1">This is how your name appears throughout the platform</p>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                  <input type="email" id="accountEmail" readonly class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed" />
+                  <p class="text-xs text-gray-500 mt-1">Email cannot be changed. Contact support if needed.</p>
         </div>
         
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Profession</label>
-          <input type="text" id="profession" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#28926D]/40" />
+                  <input type="text" id="profession" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#28926D]/40 bg-white transition" placeholder="e.g., Physician, Nurse, Researcher" />
+                  <p class="text-xs text-gray-500 mt-1">Your professional role or specialty</p>
+                </div>
+              </div>
         </div>
         
+            <!-- Change Password -->
+            <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-lock text-gray-600"></i>
+                Security
+              </h4>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
+                  <input type="password" id="currentPassword" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#28926D]/40 bg-white transition" placeholder="Enter your current password" />
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                  <input type="password" id="newPassword" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#28926D]/40 bg-white transition" placeholder="Enter new password" />
+                  <p class="text-xs text-gray-500 mt-1">Must be at least 8 characters long</p>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
+                  <input type="password" id="confirmPassword" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#28926D]/40 bg-white transition" placeholder="Confirm new password" />
+                </div>
+                
+                <button onclick="changePassword()" class="w-full px-4 py-2.5 bg-[#28926D] hover:bg-[#237a5a] text-white rounded-lg font-medium transition flex items-center justify-center gap-2">
+                  <i class="fa-solid fa-key"></i>
+                  <span>Update Password</span>
+                </button>
+                <div id="passwordChangeMessage" class="hidden text-sm mt-2"></div>
+              </div>
+            </div>
+
+            <!-- Account Actions -->
+            <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-gear text-gray-600"></i>
+                Account Actions
+              </h4>
+              <div class="space-y-3">
+                <button onclick="exportAccountData()" class="w-full px-4 py-2.5 border border-gray-300 text-gray-700 hover:bg-gray-100 rounded-lg transition flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-download text-gray-600"></i>
+                    <span>Export Account Data</span>
+                  </div>
+                  <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
+                </button>
+                
+                <button onclick="deleteAccount()" class="w-full px-4 py-2.5 border border-red-300 text-red-600 hover:bg-red-50 rounded-lg transition flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-trash text-red-600"></i>
+                    <span>Delete Account</span>
+                  </div>
+                  <i class="fa-solid fa-chevron-right text-red-400 text-xs"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Footer Actions -->
         <div class="flex items-center justify-between pt-4 border-t">
-          <button onclick="logoutUser()" class="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition flex items-center gap-2">
+              <button onclick="logoutUser()" class="px-4 py-2.5 text-red-600 hover:bg-red-50 rounded-lg transition flex items-center gap-2 font-medium">
             <i class="fa-solid fa-right-from-bracket"></i>
             <span>Logout</span>
           </button>
           <div class="flex items-center gap-3">
-            <button onclick="closeSettingsModal()" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+                <button onclick="closeSettingsModal()" class="px-4 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition font-medium">
               Cancel
             </button>
-            <button onclick="saveSettings()" class="btn-primary">
+                <button onclick="saveAccountSettings()" class="px-4 py-2.5 bg-[#28926D] hover:bg-[#237a5a] text-white rounded-lg font-medium transition flex items-center gap-2">
               <i class="fa-solid fa-check"></i>
-              <span>Save</span>
+                  <span>Save Changes</span>
             </button>
               </div>
             </div>
@@ -3928,8 +4300,8 @@ async function openSession(id) {
     // Load messages
     const messages = Array.isArray(data.messages) ? data.messages : [];
     if (messages.length === 0) {
-      // No messages in session, show AI greeting instead of empty state
-      await greetUser(true);
+      // No messages in session, show centered first message view (the greeting)
+      await showFirstMessageView();
     } else {
       // Session has messages - ensure first message view is definitely hidden
       transitionToNormalChat();
@@ -4824,7 +5196,7 @@ async function sendChat() {
     }
     
     // Send request
-    const res = await fetch('/api/send-chat/', {
+    const res = await fetch('/webapp/api/send-chat/', {
       method: 'POST',
       headers: { 'X-CSRFToken': getCSRFToken() },
       body: formData,
@@ -5508,6 +5880,12 @@ function updateActiveChips() {
       langMenu.style.top = `${top}px`;
       langMenu.style.left = `${left}px`;
       langMenu.style.zIndex = '1000';
+      // Close language menu if tutorial is open
+      const tutorialOverlay = document.getElementById('tutorialOverlay');
+      if (tutorialOverlay && !tutorialOverlay.classList.contains('hidden')) {
+        langMenu.classList.add('hidden');
+        return;
+      }
       langMenu.classList.remove('hidden');
       
       // Focus search input if it exists
@@ -5664,6 +6042,12 @@ function initLanguagePicker() {
     langMenu.style.top = `${top}px`;
     langMenu.style.right = `${right}px`;
     langMenu.style.zIndex = '1000';
+    // Close language menu if tutorial is open
+    const tutorialOverlay = document.getElementById('tutorialOverlay');
+    if (tutorialOverlay && !tutorialOverlay.classList.contains('hidden')) {
+      langMenu.classList.add('hidden');
+      return;
+    }
     langMenu.classList.toggle('hidden');
     
       // Focus search if opening
@@ -6267,6 +6651,12 @@ async function loadSettings() {
       
       if (nameInput && data.display_name) nameInput.value = data.display_name;
       if (profInput && data.profession) profInput.value = data.profession;
+      
+      // Load email
+      const accountEmailInput = document.getElementById('accountEmail');
+      if (accountEmailInput && data.email) {
+        accountEmailInput.value = data.email;
+      }
       
       // Load personalization from server if available
       if (data.personalization) {
@@ -7382,10 +7772,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       try {
         await openSession(sid);
         console.log('Session restored successfully');
-        // If session has no messages, show greeting
+        // If session has no messages, show centered first message view (the greeting)
         const chatWindow = document.getElementById('chatWindow');
         if (chatWindow && chatWindow.children.length === 0) {
-          await greetUser(true);
+          // Show the centered first message view instead of greeting bubble
+          await showFirstMessageView();
         } else {
           // Session has messages - ensure first message view is definitely hidden
           transitionToNormalChat();
@@ -7393,7 +7784,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       } catch (err) {
         console.error('Failed to restore session:', err);
         clearSessionId();
-        // Automatically create new session and show greeting
+        // Automatically create new session and show centered greeting
         await initializeNewChat();
       }
     } else {
@@ -7411,6 +7802,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     console.log('Dashboard initialized successfully');
+    
+    // Check subscription status and show payment modal if needed
+    checkSubscriptionStatus();
   } catch (error) {
     console.error('Dashboard initialization error:', error);
     // Show user-friendly error message
@@ -7429,6 +7823,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 window.quickPrompt = quickPrompt;
 window.closeSettingsModal = closeSettingsModal;
 window.saveSettings = saveSettings;
+window.showPaymentModal = showPaymentModal;
+window.hidePaymentModal = hidePaymentModal;
+window.goToBilling = goToBilling;
 window.closeSummaryModal = closeSummaryModal;
 window.copySummary = copySummary;
 window.closeDeleteModal = closeDeleteModal;
@@ -7446,6 +7843,576 @@ window.openBulkDeleteModal = openBulkDeleteModal;
 window.closeBulkDeleteModal = closeBulkDeleteModal;
 window.confirmBulkDelete = confirmBulkDelete;
 window.updateSelectedCount = updateSelectedCount;
+// =============================
+// Payment/Subscription Modal
+// =============================
+let paymentModalShown = false;
+const PAYMENT_MODAL_DISMISSED_KEY = 'nm_payment_modal_dismissed';
+const PAYMENT_MODAL_DELAY = 3000; // Show after 3 seconds
+
+function showPaymentModal() {
+  const modal = document.getElementById('paymentModal');
+  if (modal && !paymentModalShown) {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    paymentModalShown = true;
+  }
+}
+
+function hidePaymentModal() {
+  const modal = document.getElementById('paymentModal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    // Remember dismissal for this session
+    sessionStorage.setItem(PAYMENT_MODAL_DISMISSED_KEY, 'true');
+  }
+}
+
+function goToBilling() {
+  window.location.href = '{% url "billing_settings" %}';
+}
+
+// Check if user needs to see payment modal
+function checkSubscriptionStatus() {
+  {% if not has_active_subscription %}
+  // User doesn't have active subscription
+  const wasDismissed = sessionStorage.getItem(PAYMENT_MODAL_DISMISSED_KEY);
+  
+  // Show modal after delay if not dismissed
+  if (!wasDismissed) {
+    setTimeout(() => {
+      showPaymentModal();
+    }, PAYMENT_MODAL_DELAY);
+  }
+  {% endif %}
+}
+
+// Account Settings Functions
+async function saveAccountSettings() {
+  const nameInput = document.getElementById('displayName');
+  const profInput = document.getElementById('profession');
+  
+  if (!nameInput) return;
+  
+  const name = nameInput.value.trim();
+  const profession = profInput ? profInput.value.trim() : '';
+  
+  if (!name) {
+    showToast('Display name is required', 'error');
+    nameInput.focus();
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/user/settings/update/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken(),
+      },
+      body: JSON.stringify({
+        display_name: name,
+        profession: profession,
+      }),
+    });
+    
+    const data = await response.json();
+    if (data.status === 'success') {
+      showToast('Account settings saved successfully', 'success');
+      // Update display name in UI
+      const userDisplayName = document.getElementById('userDisplayName');
+      if (userDisplayName) {
+        userDisplayName.textContent = name;
+      }
+      closeSettingsModal();
+    } else {
+      showToast(data.error || 'Failed to save settings', 'error');
+    }
+  } catch (error) {
+    showToast('Error saving settings: ' + error.message, 'error');
+  }
+}
+
+async function changePassword() {
+  const currentPassword = document.getElementById('currentPassword')?.value;
+  const newPassword = document.getElementById('newPassword')?.value;
+  const confirmPassword = document.getElementById('confirmPassword')?.value;
+  const messageDiv = document.getElementById('passwordChangeMessage');
+  
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    if (messageDiv) {
+      messageDiv.className = 'text-sm mt-2 text-red-600';
+      messageDiv.textContent = 'All password fields are required';
+      messageDiv.classList.remove('hidden');
+    }
+    return;
+  }
+  
+  if (newPassword !== confirmPassword) {
+    if (messageDiv) {
+      messageDiv.className = 'text-sm mt-2 text-red-600';
+      messageDiv.textContent = 'New passwords do not match';
+      messageDiv.classList.remove('hidden');
+    }
+    return;
+  }
+  
+  if (newPassword.length < 8) {
+    if (messageDiv) {
+      messageDiv.className = 'text-sm mt-2 text-red-600';
+      messageDiv.textContent = 'Password must be at least 8 characters long';
+      messageDiv.classList.remove('hidden');
+    }
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/user/change-password/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken(),
+      },
+      body: JSON.stringify({
+        current_password: currentPassword,
+        new_password: newPassword,
+        confirm_password: confirmPassword,
+      }),
+    });
+    
+    const data = await response.json();
+    if (data.status === 'success') {
+      if (messageDiv) {
+        messageDiv.className = 'text-sm mt-2 text-green-600';
+        messageDiv.textContent = 'Password changed successfully!';
+        messageDiv.classList.remove('hidden');
+      }
+      // Clear password fields
+      document.getElementById('currentPassword').value = '';
+      document.getElementById('newPassword').value = '';
+      document.getElementById('confirmPassword').value = '';
+      setTimeout(() => {
+        if (messageDiv) messageDiv.classList.add('hidden');
+      }, 3000);
+    } else {
+      if (messageDiv) {
+        messageDiv.className = 'text-sm mt-2 text-red-600';
+        messageDiv.textContent = data.error || 'Failed to change password';
+        messageDiv.classList.remove('hidden');
+      }
+    }
+  } catch (error) {
+    if (messageDiv) {
+      messageDiv.className = 'text-sm mt-2 text-red-600';
+      messageDiv.textContent = 'Error: ' + error.message;
+      messageDiv.classList.remove('hidden');
+    }
+  }
+}
+
+async function exportAccountData() {
+  if (!confirm('This will download your account data as a JSON file. Continue?')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/user/export-data/', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCSRFToken(),
+      },
+    });
+    
+    if (response.ok) {
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `account_data_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      showToast('Account data exported successfully', 'success');
+    } else {
+      const data = await response.json();
+      showToast(data.error || 'Failed to export data', 'error');
+    }
+  } catch (error) {
+    showToast('Error exporting data: ' + error.message, 'error');
+  }
+}
+
+async function deleteAccount() {
+  const confirmText = prompt('This action cannot be undone. Type "DELETE" to confirm account deletion:');
+  
+  if (confirmText !== 'DELETE') {
+    if (confirmText !== null) {
+      showToast('Account deletion cancelled', 'info');
+    }
+    return;
+  }
+  
+  if (!confirm('Are you absolutely sure? This will permanently delete your account and all associated data.')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/user/delete-account/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken(),
+      },
+      body: JSON.stringify({ confirm: 'DELETE' }),
+    });
+    
+    const data = await response.json();
+    if (data.status === 'success') {
+      alert('Your account has been deleted. You will be redirected to the login page.');
+      window.location.href = '/login/';
+    } else {
+      showToast(data.error || 'Failed to delete account', 'error');
+    }
+  } catch (error) {
+    showToast('Error deleting account: ' + error.message, 'error');
+  }
+}
+
+// Data Controls Functions
+async function clearAllChatHistory() {
+  if (!confirm('Are you sure you want to delete ALL your chat history? This action cannot be undone.')) {
+    return;
+  }
+  
+  if (!confirm('This will permanently delete all your conversations. Are you absolutely sure?')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/user/clear-chat-history/', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCSRFToken(),
+      },
+    });
+    
+    const data = await response.json();
+    if (data.status === 'success') {
+      showToast(`Successfully deleted ${data.deleted_count} chat session(s)`, 'success');
+      // Refresh chat history in sidebar
+      if (typeof refreshSessionList === 'function') {
+        refreshSessionList();
+      }
+      // Clear current chat
+      if (typeof clearSessionId === 'function') {
+        clearSessionId();
+      }
+      loadChatHistoryStats();
+    } else {
+      showToast(data.error || 'Failed to clear chat history', 'error');
+    }
+  } catch (error) {
+    showToast('Error: ' + error.message, 'error');
+  }
+}
+
+async function loadChatHistoryStats() {
+  const statsDiv = document.getElementById('chatHistoryStats');
+  if (!statsDiv) return;
+  
+  try {
+    const response = await fetch('/api/user/chat-history-stats/', {
+      credentials: 'include',
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      statsDiv.innerHTML = `
+        <i class="fa-solid fa-chart-bar mr-2"></i>
+        <strong>${data.total_sessions}</strong> sessions • 
+        <strong>${data.total_messages}</strong> messages
+      `;
+    } else {
+      statsDiv.innerHTML = '<span class="text-red-500">Failed to load statistics</span>';
+    }
+  } catch (error) {
+    statsDiv.innerHTML = '<span class="text-red-500">Error loading statistics</span>';
+  }
+}
+
+async function saveDataRetention() {
+  const selected = document.querySelector('input[name="retention"]:checked');
+  if (!selected) {
+    showToast('Please select a retention period', 'error');
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/user/data-retention/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken(),
+      },
+      body: JSON.stringify({ retention: selected.value }),
+    });
+    
+    const data = await response.json();
+    if (data.status === 'success') {
+      showToast('Data retention settings saved', 'success');
+    } else {
+      showToast(data.error || 'Failed to save settings', 'error');
+    }
+  } catch (error) {
+    showToast('Error: ' + error.message, 'error');
+  }
+}
+
+async function savePrivacySettings() {
+  const allowAnalytics = document.getElementById('allowAnalytics')?.checked || false;
+  const allowPersonalization = document.getElementById('allowPersonalization')?.checked || false;
+  
+  try {
+    const response = await fetch('/api/user/privacy-settings/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken(),
+      },
+      body: JSON.stringify({
+        allow_analytics: allowAnalytics,
+        allow_personalization: allowPersonalization,
+      }),
+    });
+    
+    const data = await response.json();
+    if (data.status === 'success') {
+      showToast('Privacy settings saved', 'success');
+    } else {
+      showToast(data.error || 'Failed to save settings', 'error');
+    }
+  } catch (error) {
+    showToast('Error: ' + error.message, 'error');
+  }
+}
+
+// Security Functions
+async function changePasswordFromSecurity() {
+  const currentPassword = document.getElementById('securityCurrentPassword')?.value;
+  const newPassword = document.getElementById('securityNewPassword')?.value;
+  const confirmPassword = document.getElementById('securityConfirmPassword')?.value;
+  const messageDiv = document.getElementById('securityPasswordMessage');
+  
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    if (messageDiv) {
+      messageDiv.className = 'text-sm mt-2 text-red-600';
+      messageDiv.textContent = 'All password fields are required';
+      messageDiv.classList.remove('hidden');
+    }
+    return;
+  }
+  
+  if (newPassword !== confirmPassword) {
+    if (messageDiv) {
+      messageDiv.className = 'text-sm mt-2 text-red-600';
+      messageDiv.textContent = 'New passwords do not match';
+      messageDiv.classList.remove('hidden');
+    }
+    return;
+  }
+  
+  if (newPassword.length < 8) {
+    if (messageDiv) {
+      messageDiv.className = 'text-sm mt-2 text-red-600';
+      messageDiv.textContent = 'Password must be at least 8 characters long';
+      messageDiv.classList.remove('hidden');
+    }
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/user/change-password/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken(),
+      },
+      body: JSON.stringify({
+        current_password: currentPassword,
+        new_password: newPassword,
+        confirm_password: confirmPassword,
+      }),
+    });
+    
+    const data = await response.json();
+    if (data.status === 'success') {
+      if (messageDiv) {
+        messageDiv.className = 'text-sm mt-2 text-green-600';
+        messageDiv.textContent = 'Password changed successfully!';
+        messageDiv.classList.remove('hidden');
+      }
+      // Clear password fields
+      document.getElementById('securityCurrentPassword').value = '';
+      document.getElementById('securityNewPassword').value = '';
+      document.getElementById('securityConfirmPassword').value = '';
+      setTimeout(() => {
+        if (messageDiv) messageDiv.classList.add('hidden');
+      }, 3000);
+    } else {
+      if (messageDiv) {
+        messageDiv.className = 'text-sm mt-2 text-red-600';
+        messageDiv.textContent = data.error || 'Failed to change password';
+        messageDiv.classList.remove('hidden');
+      }
+    }
+  } catch (error) {
+    if (messageDiv) {
+      messageDiv.className = 'text-sm mt-2 text-red-600';
+      messageDiv.textContent = 'Error: ' + error.message;
+      messageDiv.classList.remove('hidden');
+    }
+  }
+}
+
+async function loadActiveSessions() {
+  const sessionsList = document.getElementById('activeSessionsList');
+  if (!sessionsList) return;
+  
+  sessionsList.innerHTML = '<div class="text-center py-4"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
+  
+  try {
+    const response = await fetch('/api/user/active-sessions/', {
+      credentials: 'include',
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.sessions && data.sessions.length > 0) {
+        sessionsList.innerHTML = data.sessions.map(session => `
+          <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-desktop text-gray-400"></i>
+              <div>
+                <div class="font-medium text-gray-900">${session.is_current ? 'Current Session' : 'Other Device'}</div>
+                <div class="text-xs text-gray-500">${new Date(session.last_activity).toLocaleString()}</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              ${session.is_current ? '<span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Active</span>' : ''}
+              ${!session.is_current ? `<button onclick="revokeSession('${session.session_key}')" class="px-3 py-1 text-red-600 hover:bg-red-50 rounded text-sm transition">Revoke</button>` : ''}
+            </div>
+          </div>
+        `).join('');
+      } else {
+        sessionsList.innerHTML = '<div class="text-center py-4 text-gray-500">No active sessions found</div>';
+      }
+    } else {
+      sessionsList.innerHTML = '<div class="text-center py-4 text-red-500">Failed to load sessions</div>';
+    }
+  } catch (error) {
+    sessionsList.innerHTML = '<div class="text-center py-4 text-red-500">Error loading sessions</div>';
+  }
+}
+
+async function revokeSession(sessionKey) {
+  if (!confirm('Are you sure you want to sign out from this device?')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/user/revoke-session/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken(),
+      },
+      body: JSON.stringify({ session_key: sessionKey }),
+    });
+    
+    const data = await response.json();
+    if (data.status === 'success') {
+      showToast('Session revoked successfully', 'success');
+      loadActiveSessions();
+    } else {
+      showToast(data.error || 'Failed to revoke session', 'error');
+    }
+  } catch (error) {
+    showToast('Error: ' + error.message, 'error');
+  }
+}
+
+async function saveSecurityAlerts() {
+  const alertNewDevice = document.getElementById('alertNewDevice')?.checked || false;
+  const alertPasswordChange = document.getElementById('alertPasswordChange')?.checked || false;
+  const alertSuspicious = document.getElementById('alertSuspicious')?.checked || false;
+  
+  try {
+    const response = await fetch('/api/user/security-alerts/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken(),
+      },
+      body: JSON.stringify({
+        alert_new_device: alertNewDevice,
+        alert_password_change: alertPasswordChange,
+        alert_suspicious: alertSuspicious,
+      }),
+    });
+    
+    const data = await response.json();
+    if (data.status === 'success') {
+      showToast('Security alert preferences saved', 'success');
+    } else {
+      showToast(data.error || 'Failed to save settings', 'error');
+    }
+  } catch (error) {
+    showToast('Error: ' + error.message, 'error');
+  }
+}
+
+function toggleTwoFactor() {
+  showToast('Two-factor authentication is coming soon!', 'info');
+  // TODO: Implement 2FA when ready
+}
+
+// Load data when sections are opened
+document.addEventListener('DOMContentLoaded', function() {
+  // Load chat history stats when data section is opened
+  const dataSection = document.getElementById('settingsSection-data');
+  if (dataSection) {
+    const observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (!dataSection.classList.contains('hidden')) {
+          loadChatHistoryStats();
+        }
+      });
+    });
+    observer.observe(dataSection, { attributes: true, attributeFilter: ['class'] });
+  }
+  
+  // Load active sessions when security section is opened
+  const securitySection = document.getElementById('settingsSection-security');
+  if (securitySection) {
+    const observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (!securitySection.classList.contains('hidden')) {
+          loadActiveSessions();
+        }
+      });
+    });
+    observer.observe(securitySection, { attributes: true, attributeFilter: ['class'] });
+  }
+  
+  // Save privacy settings when toggles change
+  const allowAnalytics = document.getElementById('allowAnalytics');
+  const allowPersonalization = document.getElementById('allowPersonalization');
+  if (allowAnalytics) allowAnalytics.addEventListener('change', savePrivacySettings);
+  if (allowPersonalization) allowPersonalization.addEventListener('change', savePrivacySettings);
+});
+
 window.logoutUser = function() {
   if (confirm('Are you sure you want to log out?')) {
     const logoutUrl = '{% url "logout" %}';
@@ -7468,5 +8435,814 @@ window.logoutUser = function() {
 window.toggleMobileSidebar = toggleMobileSidebar;
 window.initMobileSidebar = initMobileSidebar;
   </script>
+<!-- Payment/Subscription Modal -->
+{% if not has_active_subscription %}
+<div id="paymentModal" class="hidden fixed inset-0 z-[1100] flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-t-2xl">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <i class="fa-solid fa-crown text-2xl"></i>
+          <h2 class="text-2xl font-bold">Upgrade to Premium</h2>
+        </div>
+        <button onclick="hidePaymentModal()" class="text-white hover:text-gray-200 transition-colors">
+          <i class="fa-solid fa-times text-xl"></i>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Content -->
+    <div class="p-6">
+      <p class="text-gray-700 mb-4">
+        You're currently on the <strong>{{ plan_display }}</strong> plan. Upgrade now to unlock full access to all features:
+      </p>
+      
+      <ul class="space-y-2 mb-6">
+        <li class="flex items-start gap-2">
+          <i class="fa-solid fa-check-circle text-green-600 mt-1"></i>
+          <span class="text-gray-700">Unlimited medical summaries</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <i class="fa-solid fa-check-circle text-green-600 mt-1"></i>
+          <span class="text-gray-700">Voice interaction features</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <i class="fa-solid fa-check-circle text-green-600 mt-1"></i>
+          <span class="text-gray-700">Extended chat history</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <i class="fa-solid fa-check-circle text-green-600 mt-1"></i>
+          <span class="text-gray-700">Priority support</span>
+        </li>
+      </ul>
+      
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div class="flex items-center gap-2 mb-2">
+          <i class="fa-solid fa-star text-yellow-500"></i>
+          <span class="font-semibold text-gray-900">Popular Choice</span>
+        </div>
+        <p class="text-sm text-gray-700">
+          <strong>Annual Plan:</strong> Save 17% compared to monthly
+        </p>
+      </div>
+      
+      <!-- Actions -->
+      <div class="flex gap-3">
+        <button 
+          onclick="goToBilling()" 
+          class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2">
+          <i class="fa-solid fa-arrow-right"></i>
+          View Plans
+        </button>
+        <button 
+          onclick="hidePaymentModal()" 
+          class="px-6 py-3 text-gray-600 hover:text-gray-800 font-medium transition-colors">
+          Maybe Later
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+  <!-- Tutorial Overlay System -->
+  <div id="tutorialOverlay" class="hidden fixed inset-0 pointer-events-none" style="z-index: 999998 !important;">
+    <!-- Spotlight/Backdrop - Subtle and clean -->
+    <div id="tutorialBackdrop" class="absolute inset-0 bg-black/30 transition-opacity duration-300"></div>
+    
+    <!-- Tutorial Card - Clean and professional -->
+    <div id="tutorialCard" class="fixed bg-white rounded-xl shadow-xl max-w-md w-[90%] md:w-[500px] pointer-events-auto transition-all duration-300" style="top: 50%; left: 50%; transform: translate(-50%, -50%); border: 1px solid rgba(0, 0, 0, 0.1); z-index: 999999 !important; max-height: 90vh; overflow: visible;">
+      <!-- Header -->
+      <div class="bg-gray-900 text-white p-5 rounded-t-xl border-b border-gray-200">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-xl font-semibold">Welcome to NeuroMed Aira</h3>
+          <button id="tutorialClose" class="text-gray-400 hover:text-white transition p-1.5 -mr-1.5 rounded hover:bg-gray-800">
+            <i class="fa-solid fa-times text-lg"></i>
+          </button>
+        </div>
+        <div class="flex items-center gap-2 text-gray-300 text-xs font-medium">
+          <span id="tutorialStepNumber">Step 1</span>
+          <span>of</span>
+          <span id="tutorialTotalSteps">8</span>
+        </div>
+      </div>
+      
+      <!-- Content -->
+      <div class="p-6" style="max-height: calc(90vh - 180px); overflow-y: auto;">
+        <div id="tutorialContent" class="mb-6">
+          <!-- Content will be populated by JS -->
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="mb-6">
+          <div class="w-full bg-gray-200 rounded-full h-2.5">
+            <div id="tutorialProgress" class="bg-[#28926D] h-2.5 rounded-full transition-all duration-300" style="width: 12.5%"></div>
+          </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="flex items-center justify-between gap-3">
+          <button id="tutorialSkip" class="px-4 py-2.5 text-gray-600 hover:text-gray-800 font-medium transition">
+            Skip Tutorial
+          </button>
+          <div class="flex items-center gap-2">
+            <button id="tutorialPrev" class="px-4 py-2.5 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-medium transition hidden">
+              <i class="fa-solid fa-arrow-left mr-2"></i>Previous
+            </button>
+            <button id="tutorialNext" class="px-4 py-2.5 bg-[#28926D] hover:bg-[#237a5a] text-white rounded-lg font-medium transition flex items-center gap-2">
+              Next
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+            <button id="tutorialFinish" class="px-4 py-2.5 bg-[#28926D] hover:bg-[#237a5a] text-white rounded-lg font-medium transition hidden">
+              <i class="fa-solid fa-check mr-2"></i>Got it!
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Spotlight Element (for highlighting) - Clean and subtle -->
+    <div id="tutorialSpotlight" class="absolute border-2 border-[#28926D] rounded-lg transition-all duration-300 pointer-events-none" style="box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.3), 0 0 0 2px rgba(40, 146, 109, 0.8); background: rgba(40, 146, 109, 0.05);"></div>
+  </div>
+
+  <style>
+    /* Tutorial Styles */
+    #tutorialOverlay {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    
+    #tutorialCard {
+      animation: tutorialSlideIn 0.3s ease-out;
+      position: fixed !important;
+      z-index: 999999 !important;
+    }
+    
+    @keyframes tutorialSlideIn {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -48%);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+      }
+    }
+    
+    #tutorialSpotlight {
+      z-index: 1999;
+      /* No animation - clean and static */
+    }
+    
+    .tutorial-content {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #1f2937;
+    }
+    
+    .tutorial-content h4 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0;
+    }
+    
+    .tutorial-content p {
+      margin: 0;
+      line-height: 1.6;
+    }
+    
+    /* Remove old list styles - now using flex layout */
+    .tutorial-content ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .tutorial-content li {
+      padding: 0;
+      margin: 0;
+      position: static;
+    }
+    
+    .tutorial-content li:before {
+      display: none;
+    }
+  </style>
+
+  <script>
+    // Tutorial System
+    const tutorialSteps = [
+      {
+        title: "Welcome to NeuroMed Aira",
+        content: `
+          <div class="tutorial-content text-center">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-5">
+              <i class="fa-solid fa-heart text-gray-600 text-2xl"></i>
+            </div>
+            <h4 class="text-lg font-semibold text-gray-900 mb-3">Your AI Medical Assistant</h4>
+            <p class="text-sm text-gray-600 mb-4 leading-relaxed">NeuroMed Aira helps you understand medical documents, get answers to health questions, and organize your healthcare information.</p>
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 mt-4">
+              <p class="text-sm font-medium text-gray-700">This quick tour will show you how to use the system.</p>
+            </div>
+          </div>
+        `,
+        highlight: null,
+        position: 'center'
+      },
+      {
+        title: "Your Chat History",
+        content: `
+          <div class="tutorial-content">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-list text-gray-600 text-lg"></i>
+              </div>
+              <h4 class="text-lg font-semibold text-gray-900">Sidebar - Your Conversations</h4>
+            </div>
+            <p class="text-sm text-gray-600 mb-4 leading-relaxed">On the left side, you'll see all your past conversations. This is called the <strong>sidebar</strong>.</p>
+            <div class="bg-gray-50 rounded-lg p-3 space-y-2.5">
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">Click any conversation to open it</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">Your chats are saved automatically</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">You can search through your history</span>
+              </div>
+            </div>
+          </div>
+        `,
+        highlight: '#sidebar',
+        position: 'left'
+      },
+      {
+        title: "Start a New Conversation",
+        content: `
+          <div class="tutorial-content">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-plus text-gray-600 text-lg"></i>
+              </div>
+              <h4 class="text-lg font-semibold text-gray-900">New Chat Button</h4>
+            </div>
+            <p class="text-sm text-gray-600 mb-4 leading-relaxed">To start a fresh conversation, click the <strong>"New Chat"</strong> button at the top of the sidebar.</p>
+            <div class="bg-gray-50 rounded-lg p-3 space-y-2.5">
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">Creates a new, empty conversation</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">Your old chats remain saved</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">You can have multiple conversations</span>
+              </div>
+            </div>
+          </div>
+        `,
+        highlight: '#sidebarNewChat',
+        position: 'left'
+      },
+      {
+        title: "Type Your Question",
+        content: `
+          <div class="tutorial-content">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-keyboard text-gray-600 text-lg"></i>
+              </div>
+              <h4 class="text-lg font-semibold text-gray-900">Message Box</h4>
+            </div>
+            <p class="text-sm text-gray-600 mb-4 leading-relaxed">At the bottom of the screen, you'll find the message box. This is where you type your questions or messages.</p>
+            <div class="bg-gray-50 rounded-lg p-3 space-y-2.5">
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">Simply click in the box and start typing</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">You can ask about medical documents, health questions, or anything else</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">The AI will respond to help you understand</span>
+              </div>
+            </div>
+          </div>
+        `,
+        highlight: '#composer',
+        position: 'bottom'
+      },
+      {
+        title: "Send Your Message",
+        content: `
+          <div class="tutorial-content">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-paper-plane text-gray-600 text-lg"></i>
+              </div>
+              <h4 class="text-lg font-semibold text-gray-900">Send Button</h4>
+            </div>
+            <p class="text-sm text-gray-600 mb-4 leading-relaxed">After typing your message, click the <strong>black circle button</strong> with an arrow (→) to send it.</p>
+            <div class="bg-gray-50 rounded-lg p-3 space-y-2.5">
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">You can also press <strong>Enter</strong> on your keyboard</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">The AI will process your question and respond</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">Wait a moment for the answer to appear</span>
+              </div>
+            </div>
+          </div>
+        `,
+        highlight: '#sendBtn',
+        position: 'bottom'
+      },
+      {
+        title: "Attach Files",
+        content: `
+          <div class="tutorial-content">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-paperclip text-gray-600 text-lg"></i>
+              </div>
+              <h4 class="text-lg font-semibold text-gray-900">Upload Documents</h4>
+            </div>
+            <p class="text-sm text-gray-600 mb-4 leading-relaxed">You can upload medical documents like PDFs, images, or Word files. Click the <strong>plus (+) button</strong> in the message box.</p>
+            <div class="bg-gray-50 rounded-lg p-3 space-y-2.5">
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">Supports PDF, Word documents, and images</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">You can upload up to 15 files at once</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">The AI will read and explain your documents</span>
+              </div>
+            </div>
+          </div>
+        `,
+        highlight: '#attachBtn',
+        position: 'bottom'
+      },
+      {
+        title: "Settings & Preferences",
+        content: `
+          <div class="tutorial-content">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-gear text-gray-600 text-lg"></i>
+              </div>
+              <h4 class="text-lg font-semibold text-gray-900">Customize Your Experience</h4>
+            </div>
+            <p class="text-sm text-gray-600 mb-4 leading-relaxed">Click the <strong>user profile button</strong> at the bottom of the sidebar to access settings.</p>
+            <div class="bg-gray-50 rounded-lg p-3 space-y-2.5">
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">Change your display name and preferences</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">Adjust language and appearance</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">Manage your account and security</span>
+              </div>
+            </div>
+          </div>
+        `,
+        highlight: '#userMenuBtn',
+        position: 'top-right'
+      },
+      {
+        title: "You're All Set!",
+        content: `
+          <div class="tutorial-content text-center">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-5">
+              <i class="fa-solid fa-check-circle text-gray-600 text-2xl"></i>
+            </div>
+            <h4 class="text-lg font-semibold text-gray-900 mb-3">Ready to Get Started</h4>
+            <p class="text-sm text-gray-600 mb-4 leading-relaxed">You now know the basics of using NeuroMed Aira!</p>
+            <div class="bg-gray-50 rounded-lg p-5 space-y-3 max-w-md mx-auto text-left">
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">Type questions in the message box</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">Upload documents for explanations</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">Review your chat history anytime</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>
+                <span class="text-gray-700 text-sm">Access settings to customize your experience</span>
+              </div>
+            </div>
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 mt-4">
+              <p class="text-sm font-medium text-gray-700">Need help? Look for the help icon or contact support.</p>
+            </div>
+          </div>
+        `,
+        highlight: null,
+        position: 'center'
+      }
+    ];
+
+    let currentTutorialStep = 0;
+    let tutorialCompleted = localStorage.getItem('tutorial_completed') === 'true';
+
+    function showTutorial(stepIndex = 0) {
+      if (tutorialCompleted && stepIndex === 0) {
+        // Ask if user wants to restart
+        if (!confirm('Would you like to view the tutorial again?')) {
+          return;
+        }
+      }
+      
+      // Close any open dropdowns/modals before showing tutorial
+      const langMenu = document.getElementById('langMenu');
+      if (langMenu) {
+        langMenu.classList.add('hidden');
+        langMenu.style.display = 'none';
+      }
+      const settingsModal = document.getElementById('settingsModal');
+      if (settingsModal) {
+        settingsModal.classList.add('hidden');
+      }
+      const searchModal = document.getElementById('searchModal');
+      if (searchModal) {
+        searchModal.classList.add('hidden');
+      }
+      
+      currentTutorialStep = stepIndex;
+      const overlay = document.getElementById('tutorialOverlay');
+      const step = tutorialSteps[stepIndex];
+      
+      if (!overlay || !step) return;
+      
+      // Update content
+      document.getElementById('tutorialStepNumber').textContent = `Step ${stepIndex + 1}`;
+      document.getElementById('tutorialTotalSteps').textContent = tutorialSteps.length;
+      document.getElementById('tutorialContent').innerHTML = step.content;
+      
+      // Update progress
+      const progress = ((stepIndex + 1) / tutorialSteps.length) * 100;
+      document.getElementById('tutorialProgress').style.width = `${progress}%`;
+      
+      // Show/hide navigation buttons
+      document.getElementById('tutorialPrev').classList.toggle('hidden', stepIndex === 0);
+      document.getElementById('tutorialNext').classList.toggle('hidden', stepIndex === tutorialSteps.length - 1);
+      document.getElementById('tutorialFinish').classList.toggle('hidden', stepIndex !== tutorialSteps.length - 1);
+      
+      // Highlight element first (to get its position)
+      let highlightedElement = null;
+      if (step.highlight) {
+        highlightedElement = highlightElement(step.highlight);
+        // Wait for scroll and highlight to complete, then position card
+        // Use longer timeout to ensure element is fully scrolled and positioned
+        setTimeout(() => {
+          if (highlightedElement) {
+            positionTutorialCard(step.position, highlightedElement);
+          }
+        }, 500);
+      } else {
+        hideSpotlight();
+        // Position immediately if no element to highlight
+        // Use a small delay to ensure card dimensions are calculated
+        setTimeout(() => {
+          positionTutorialCard(step.position, null);
+        }, 50);
+      }
+      
+      // Show overlay
+      overlay.classList.remove('hidden');
+    }
+
+    function positionTutorialCard(position, highlightedElement = null) {
+      const card = document.getElementById('tutorialCard');
+      if (!card) return;
+      
+      // If we have a highlighted element, position smartly next to it
+      if (highlightedElement) {
+        const rect = highlightedElement.getBoundingClientRect();
+        const cardRect = card.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const spacing = 24; // Space between element and card
+        const cardWidth = 500; // max-w-md
+        const cardHeight = cardRect.height || 400;
+        
+        // Calculate element position
+        const elementCenterX = rect.left + rect.width / 2;
+        const elementCenterY = rect.top + rect.height / 2;
+        const elementRight = rect.right;
+        const elementLeft = rect.left;
+        const elementTop = rect.top;
+        const elementBottom = rect.bottom;
+        
+        // Check if element is near bottom of viewport (within 200px from bottom)
+        const isNearBottom = elementBottom > viewportHeight - 200;
+        const isNearTop = elementTop < 200;
+        
+        let cardX, cardY;
+        
+        // If element is near bottom, place card ABOVE it
+        if (isNearBottom) {
+          // Center horizontally
+          cardX = (viewportWidth - cardWidth) / 2;
+          if (cardX < 20) cardX = 20;
+          if (cardX + cardWidth > viewportWidth - 20) {
+            cardX = viewportWidth - cardWidth - 20;
+          }
+          
+          // Place above the element with spacing
+          cardY = elementTop - cardHeight - spacing;
+          
+          // If not enough space above, place it higher up in the viewport
+          if (cardY < 20) {
+            cardY = 20;
+          }
+        }
+        // If element is near top, place card BELOW it
+        else if (isNearTop) {
+          // Center horizontally
+          cardX = (viewportWidth - cardWidth) / 2;
+          if (cardX < 20) cardX = 20;
+          if (cardX + cardWidth > viewportWidth - 20) {
+            cardX = viewportWidth - cardWidth - 20;
+          }
+          
+          // Place below the element with spacing
+          cardY = elementBottom + spacing;
+          
+          // If not enough space below, place it lower in the viewport
+          if (cardY + cardHeight > viewportHeight - 20) {
+            cardY = viewportHeight - cardHeight - 20;
+          }
+        }
+        // Otherwise, place card beside the element
+        else {
+          // Horizontal positioning: place card next to element
+          if (elementLeft < viewportWidth / 2) {
+            // Element is on left side, place card to the right
+            cardX = elementRight + spacing;
+            if (cardX + cardWidth > viewportWidth - 20) {
+              // Not enough space on right, place on left instead
+              cardX = elementLeft - cardWidth - spacing;
+              if (cardX < 20) {
+                // Still not enough space, center it
+                cardX = (viewportWidth - cardWidth) / 2;
+              }
+            }
+          } else {
+            // Element is on right side, place card to the left
+            cardX = elementLeft - cardWidth - spacing;
+            if (cardX < 20) {
+              // Not enough space on left, place on right instead
+              cardX = elementRight + spacing;
+              if (cardX + cardWidth > viewportWidth - 20) {
+                // Still not enough space, center it
+                cardX = (viewportWidth - cardWidth) / 2;
+              }
+            }
+          }
+          
+          // Vertical positioning: align with element center, but keep in viewport
+          cardY = elementCenterY - cardHeight / 2;
+          if (cardY < 20) {
+            cardY = 20;
+          } else if (cardY + cardHeight > viewportHeight - 20) {
+            cardY = viewportHeight - cardHeight - 20;
+          }
+        }
+        
+        // Ensure card is always fully visible
+        if (cardX < 20) cardX = 20;
+        if (cardX + cardWidth > viewportWidth - 20) {
+          cardX = viewportWidth - cardWidth - 20;
+        }
+        if (cardY < 20) cardY = 20;
+        if (cardY + cardHeight > viewportHeight - 20) {
+          cardY = viewportHeight - cardHeight - 20;
+        }
+        
+        // Apply positioning
+        card.style.left = `${cardX}px`;
+        card.style.top = `${cardY}px`;
+        card.style.right = 'auto';
+        card.style.bottom = 'auto';
+        card.style.transform = 'none';
+        card.style.margin = '0';
+        card.style.zIndex = '999999'; // Ensure it's above everything
+        
+        return;
+      }
+      
+      // Fallback to predefined positions if no element
+      const positions = {
+        'center': () => {
+          // Center with proper viewport bounds checking
+          const viewportWidth = window.innerWidth;
+          const viewportHeight = window.innerHeight;
+          
+          // Force a reflow to get accurate dimensions
+          card.style.visibility = 'hidden';
+          card.style.display = 'block';
+          const cardRect = card.getBoundingClientRect();
+          card.style.visibility = 'visible';
+          
+          const cardWidth = cardRect.width || 500;
+          // Use actual card height, but ensure it fits in viewport
+          const maxCardHeight = viewportHeight - 40; // 20px padding top and bottom
+          const actualCardHeight = Math.min(cardRect.height || 400, maxCardHeight);
+          
+          // Ensure the content area is scrollable if needed
+          const contentArea = card.querySelector('.p-6');
+          if (contentArea) {
+            contentArea.style.maxHeight = `${maxCardHeight - 120}px`; // Subtract header height
+            contentArea.style.overflowY = 'auto';
+          }
+          
+          const cardHeight = actualCardHeight;
+          
+          // Center the card
+          const cardX = (viewportWidth - cardWidth) / 2;
+          const cardY = (viewportHeight - cardHeight) / 2;
+          
+          // Ensure it's within viewport bounds
+          const finalX = Math.max(20, Math.min(cardX, viewportWidth - cardWidth - 20));
+          const finalY = Math.max(20, Math.min(cardY, viewportHeight - cardHeight - 20));
+          
+          card.style.left = `${finalX}px`;
+          card.style.top = `${finalY}px`;
+          card.style.right = 'auto';
+          card.style.bottom = 'auto';
+          card.style.transform = 'none';
+          card.style.maxHeight = `${viewportHeight - 40}px`;
+        },
+        'left': { top: '50%', left: '20px', right: 'auto', transform: 'translateY(-50%)' },
+        'right': { top: '50%', right: '20px', left: 'auto', transform: 'translateY(-50%)' },
+        'top': { top: '20px', left: '50%', right: 'auto', transform: 'translateX(-50%)' },
+        'bottom': { bottom: '20px', top: 'auto', left: '50%', right: 'auto', transform: 'translateX(-50%)' },
+        'top-right': { top: '20px', right: '20px', left: 'auto', transform: 'none' }
+      };
+      
+      const pos = positions[position] || positions.center;
+      if (typeof pos === 'function') {
+        pos();
+      } else {
+        Object.assign(card.style, pos);
+      }
+    }
+
+    function highlightElement(selector) {
+      const element = document.querySelector(selector);
+      const spotlight = document.getElementById('tutorialSpotlight');
+      
+      if (!element || !spotlight) {
+        hideSpotlight();
+        return null;
+      }
+      
+      const rect = element.getBoundingClientRect();
+      const padding = 16; // Increased padding for better visibility
+      
+      // Add a bright highlight class to the element itself
+      element.style.transition = 'all 0.3s ease';
+      element.style.position = 'relative';
+      element.style.zIndex = '10001';
+      
+      // Make sure element is visible
+      element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      
+      // Wait a bit for scroll to complete, then highlight
+      setTimeout(() => {
+        const updatedRect = element.getBoundingClientRect();
+        spotlight.style.width = `${updatedRect.width + padding * 2}px`;
+        spotlight.style.height = `${updatedRect.height + padding * 2}px`;
+        spotlight.style.left = `${updatedRect.left - padding}px`;
+        spotlight.style.top = `${updatedRect.top - padding}px`;
+        spotlight.style.display = 'block';
+        
+        // Add subtle highlight to the element itself
+        element.style.boxShadow = '0 0 0 2px rgba(40, 146, 109, 0.3)';
+        element.style.transition = 'box-shadow 0.3s ease';
+      }, 300);
+      
+      return element;
+    }
+
+    function hideSpotlight() {
+      const spotlight = document.getElementById('tutorialSpotlight');
+      if (spotlight) {
+        spotlight.style.display = 'none';
+      }
+      
+      // Remove highlight from any previously highlighted elements
+      const previouslyHighlighted = document.querySelectorAll('[style*="box-shadow"]');
+      previouslyHighlighted.forEach(el => {
+        if (el.style.boxShadow && el.style.boxShadow.includes('146, 109')) {
+          el.style.boxShadow = '';
+        }
+      });
+    }
+
+    function nextTutorialStep() {
+      if (currentTutorialStep < tutorialSteps.length - 1) {
+        showTutorial(currentTutorialStep + 1);
+      }
+    }
+
+    function prevTutorialStep() {
+      if (currentTutorialStep > 0) {
+        showTutorial(currentTutorialStep - 1);
+      }
+    }
+
+    function closeTutorial() {
+      const overlay = document.getElementById('tutorialOverlay');
+      if (overlay) {
+        overlay.classList.add('hidden');
+      }
+      hideSpotlight();
+    }
+
+    function finishTutorial() {
+      localStorage.setItem('tutorial_completed', 'true');
+      tutorialCompleted = true;
+      closeTutorial();
+      if (typeof showToast === 'function') {
+        showToast('Tutorial completed! You can restart it anytime from the help menu.', 'success');
+      }
+    }
+
+    function skipTutorial() {
+      if (confirm('Skip the tutorial? You can restart it anytime from the help menu.')) {
+        closeTutorial();
+      }
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      const overlay = document.getElementById('tutorialOverlay');
+      if (!overlay) return;
+      
+      document.getElementById('tutorialNext')?.addEventListener('click', nextTutorialStep);
+      document.getElementById('tutorialPrev')?.addEventListener('click', prevTutorialStep);
+      document.getElementById('tutorialFinish')?.addEventListener('click', finishTutorial);
+      document.getElementById('tutorialClose')?.addEventListener('click', skipTutorial);
+      document.getElementById('tutorialSkip')?.addEventListener('click', skipTutorial);
+      
+      // Show tutorial on first visit (after a short delay)
+      if (!tutorialCompleted) {
+        setTimeout(() => {
+          showTutorial(0);
+        }, 1000);
+      }
+      
+      // Make tutorial available globally
+      window.showTutorial = showTutorial;
+      window.restartTutorial = function() {
+        localStorage.removeItem('tutorial_completed');
+        tutorialCompleted = false;
+        showTutorial(0);
+      };
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+      const overlay = document.getElementById('tutorialOverlay');
+      if (overlay && !overlay.classList.contains('hidden')) {
+        const step = tutorialSteps[currentTutorialStep];
+        let highlightedElement = null;
+        if (step && step.highlight) {
+          highlightedElement = highlightElement(step.highlight);
+        }
+        if (step) {
+          positionTutorialCard(step.position, highlightedElement);
+        }
+      }
+    });
+  </script>
+
 </body>
 </html>

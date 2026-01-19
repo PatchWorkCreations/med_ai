@@ -1,0 +1,641 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Billing & Subscription – NeuroMed Aira</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID|default:'YOUR_CLIENT_ID' }}&currency=USD"></script>
+  <style>
+    .paypal-button-container {
+      min-height: 50px;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  
+  <!-- Header -->
+  <header class="bg-white shadow-sm border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <a href="{% url 'new_dashboard' %}" class="text-gray-600 hover:text-gray-900">
+            <i class="fa-solid fa-arrow-left"></i>
+          </a>
+          <h1 class="text-2xl font-bold text-gray-900">Billing & Subscription</h1>
+        </div>
+        <a href="{% url 'dashboard' %}" class="text-gray-600 hover:text-gray-900">
+          <i class="fa-solid fa-times text-xl"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Page Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Upgrade your plan</h1>
+      <p class="text-gray-600">Choose the plan that's right for you</p>
+    </div>
+
+    <!-- Pricing Plans Grid -->
+    <div class="grid md:grid-cols-4 gap-6 mb-8">
+      
+      <!-- Free Plan -->
+      <div class="bg-white rounded-xl border-2 {% if current_plan == 'free' %}border-blue-500 shadow-lg{% else %}border-gray-200{% endif %} p-6 relative flex flex-col">
+        {% if current_plan == 'free' %}
+        <div class="absolute top-4 right-4 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
+          Your current plan
+        </div>
+        {% endif %}
+        <div class="mb-4">
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Free</h3>
+          <p class="text-sm text-gray-600 mb-4">See what AI can do</p>
+          <div class="mb-4">
+            <span class="text-3xl font-bold text-gray-900">$0</span>
+            <span class="text-gray-600">/month</span>
+          </div>
+        </div>
+        {% if current_plan == 'free' %}
+        <button disabled class="w-full px-4 py-3 bg-gray-200 text-gray-600 rounded-lg font-medium cursor-not-allowed mt-auto">
+          Your current plan
+        </button>
+        {% else %}
+        <button disabled class="w-full px-4 py-3 bg-gray-100 text-gray-400 rounded-lg font-medium cursor-not-allowed mt-auto">
+          Current Plan
+        </button>
+        {% endif %}
+        <ul class="mt-6 space-y-3 text-sm text-gray-700 flex-grow">
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-green-600 mt-0.5"></i>
+            <span>Get simple explanations</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-green-600 mt-0.5"></i>
+            <span>Have short chats for common questions</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-green-600 mt-0.5"></i>
+            <span>Try out basic features</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-green-600 mt-0.5"></i>
+            <span>Limited access to premium features</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Monthly Plan -->
+      <div class="bg-white rounded-xl border-2 {% if current_plan == 'monthly' %}border-blue-500 shadow-lg{% else %}border-gray-200{% endif %} p-6 relative flex flex-col">
+        {% if current_plan == 'monthly' %}
+        <div class="absolute top-4 right-4 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
+          Your current plan
+        </div>
+        {% endif %}
+        <div class="mb-4">
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Monthly</h3>
+          <p class="text-sm text-gray-600 mb-4">Keep chatting with expanded access</p>
+          <div class="mb-4">
+            <span class="text-3xl font-bold text-gray-900">$1</span>
+            <span class="text-gray-600">/month</span>
+          </div>
+        </div>
+        {% if current_plan == 'monthly' %}
+        <button disabled class="w-full px-4 py-3 bg-gray-200 text-gray-600 rounded-lg font-medium cursor-not-allowed mt-auto">
+          Your current plan
+        </button>
+        {% else %}
+        <button 
+          id="upgradeMonthlyBtn"
+          class="w-full px-4 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors mt-auto">
+          {% if current_plan == 'free' %}Upgrade to Monthly{% else %}Switch to Monthly{% endif %}
+        </button>
+        {% endif %}
+        <ul class="mt-6 space-y-3 text-sm text-gray-700 flex-grow">
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-green-600 mt-0.5"></i>
+            <span>Unlimited medical summaries</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-green-600 mt-0.5"></i>
+            <span>Chat longer and upload more content</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-green-600 mt-0.5"></i>
+            <span>Voice interaction features</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-green-600 mt-0.5"></i>
+            <span>30 days chat history</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-green-600 mt-0.5"></i>
+            <span>Priority support</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Annual Plan -->
+      <div class="bg-white rounded-xl border-2 {% if current_plan == 'annual' %}border-blue-500 shadow-lg{% else %}border-gray-200{% endif %} p-6 relative flex flex-col">
+        {% if current_plan == 'annual' %}
+        <div class="absolute top-4 right-4 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
+          Your current plan
+        </div>
+        {% elif current_plan != 'annual' and current_plan != 'clinical' %}
+        <div class="absolute top-4 right-4 bg-purple-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
+          POPULAR
+        </div>
+        {% endif %}
+        <div class="mb-4">
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Annual</h3>
+          <p class="text-sm text-gray-600 mb-4">Unlock the full experience</p>
+          <div class="mb-4">
+            <span class="text-3xl font-bold text-gray-900">$199</span>
+            <span class="text-gray-600">/year</span>
+          </div>
+          <p class="text-xs text-gray-500">Save 17% vs monthly</p>
+        </div>
+        {% if current_plan == 'annual' %}
+        <button disabled class="w-full px-4 py-3 bg-gray-200 text-gray-600 rounded-lg font-medium cursor-not-allowed mt-auto">
+          Your current plan
+        </button>
+        {% else %}
+        <button 
+          id="upgradeAnnualBtn"
+          class="w-full px-4 py-3 {% if current_plan != 'annual' and current_plan != 'clinical' %}bg-purple-600 hover:bg-purple-700{% else %}bg-gray-900 hover:bg-gray-800{% endif %} text-white rounded-lg font-medium transition-colors mt-auto">
+          {% if current_plan == 'free' %}Get Annual{% else %}Switch to Annual{% endif %}
+        </button>
+        {% endif %}
+        <ul class="mt-6 space-y-3 text-sm text-gray-700 flex-grow">
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-green-600 mt-0.5"></i>
+            <span>Everything in Monthly</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-green-600 mt-0.5"></i>
+            <span>365 days chat history</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-green-600 mt-0.5"></i>
+            <span>Save 17% compared to monthly</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-green-600 mt-0.5"></i>
+            <span>Priority support</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-green-600 mt-0.5"></i>
+            <span>Best value for long-term use</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Clinical Plan -->
+      <div class="bg-white rounded-xl border-2 {% if current_plan == 'clinical' %}border-blue-500 shadow-lg{% else %}border-gray-200{% endif %} p-6 relative flex flex-col">
+        {% if current_plan == 'clinical' %}
+        <div class="absolute top-4 right-4 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
+          Your current plan
+        </div>
+        {% endif %}
+        <div class="mb-4">
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Clinical</h3>
+          <p class="text-sm text-gray-600 mb-4">Create your own experience</p>
+          <div class="mb-4">
+            <span class="text-3xl font-bold text-gray-900">Custom</span>
+          </div>
+          <p class="text-xs text-gray-500">Contact us for pricing</p>
+        </div>
+        {% if current_plan == 'clinical' %}
+        <button disabled class="w-full px-4 py-3 bg-gray-200 text-gray-600 rounded-lg font-medium cursor-not-allowed mt-auto">
+          Your current plan
+        </button>
+        {% else %}
+        <button 
+          id="contactClinicalBtn"
+          class="w-full px-4 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors mt-auto">
+          Contact Us
+        </button>
+        {% endif %}
+        <ul class="mt-6 space-y-3 text-sm text-gray-700 flex-grow">
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-green-600 mt-0.5"></i>
+            <span>Everything in Annual</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-green-600 mt-0.5"></i>
+            <span>Unlimited chat history</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-green-600 mt-0.5"></i>
+            <span>Custom features & integrations</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-green-600 mt-0.5"></i>
+            <span>Dedicated support team</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-green-600 mt-0.5"></i>
+            <span>Team accounts & audit logs</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-green-600 mt-0.5"></i>
+            <span>Custom contract terms</span>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Current Plan Details (if active) -->
+    {% if is_active and subscription_ends_at %}
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-1">Active Subscription</h3>
+          <p class="text-sm text-gray-600">
+            Your {{ current_plan_display }} plan is active until {{ subscription_ends_at|date:"F d, Y" }}
+          </p>
+        </div>
+        {% if current_plan != 'clinical' %}
+        <button 
+          id="cancelSubscriptionBtn"
+          class="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 border border-red-300 rounded-lg hover:bg-red-50">
+          Cancel Subscription
+        </button>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Payment Messages -->
+    {% if payment_error %}
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">Payment Failed</h3>
+          <div class="mt-2 text-sm text-red-700">
+            <p>{{ payment_error }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    
+    {% if payment_success %}
+    <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-green-800">Payment Successful</h3>
+          <div class="mt-2 text-sm text-green-700">
+            <p>Your subscription has been activated successfully!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Billing History Section -->
+    <div class="bg-white rounded-lg shadow-sm border p-6">
+      <h2 class="text-xl font-semibold text-gray-900 mb-4">Billing History</h2>
+      {% if payments %}
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            {% for payment in payments %}
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ payment.created_at|date:"M d, Y" }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ payment.plan_id|capfirst }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                ${{ payment.amount }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                  {% if payment.status == 'completed' %}bg-green-100 text-green-800
+                  {% elif payment.status == 'pending' %}bg-yellow-100 text-yellow-800
+                  {% elif payment.status == 'failed' %}bg-red-100 text-red-800
+                  {% else %}bg-gray-100 text-gray-800{% endif %}">
+                  {{ payment.status|capfirst }}
+                </span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-gray-500 text-center py-8">No payment history yet.</p>
+      {% endif %}
+    </div>
+
+  </main>
+
+  <!-- PayPal Button Container (hidden by default) -->
+  <div id="paypal-button-container" class="hidden"></div>
+
+  <script>
+    // Get CSRF token
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    // Handle Monthly upgrade
+    document.getElementById('upgradeMonthlyBtn')?.addEventListener('click', async function() {
+      try {
+        const response = await fetch('{% url "billing_create_checkout" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken,
+          },
+          body: JSON.stringify({ plan_id: 'monthly' }),
+        });
+        
+        const data = await response.json();
+        if (data.checkout_url) {
+          window.location.href = data.checkout_url;
+        } else {
+          alert('Error: ' + (data.error || 'Failed to create checkout session'));
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    });
+
+    // Handle Annual upgrade
+    document.getElementById('upgradeAnnualBtn')?.addEventListener('click', async function() {
+      try {
+        const response = await fetch('{% url "billing_create_checkout" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken,
+          },
+          body: JSON.stringify({ plan_id: 'annual' }),
+        });
+        
+        const data = await response.json();
+        if (data.checkout_url) {
+          window.location.href = data.checkout_url;
+        } else {
+          alert('Error: ' + (data.error || 'Failed to create checkout session'));
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    });
+
+    // Handle Clinical contact - Open modal
+    document.getElementById('contactClinicalBtn')?.addEventListener('click', function() {
+      document.getElementById('clinicalContactModal').classList.remove('hidden');
+    });
+
+    // Close modal
+    function closeClinicalModal() {
+      document.getElementById('clinicalContactModal').classList.add('hidden');
+    }
+    
+    document.getElementById('closeClinicalModal')?.addEventListener('click', closeClinicalModal);
+    document.getElementById('closeClinicalModalBtn')?.addEventListener('click', closeClinicalModal);
+
+    // Close modal on backdrop click
+    document.getElementById('clinicalContactModal')?.addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.classList.add('hidden');
+      }
+    });
+
+    // Handle form submission
+    document.getElementById('clinicalContactForm')?.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('submitClinicalContact');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending...';
+      
+      const formData = {
+        name: document.getElementById('clinicalName').value,
+        email: document.getElementById('clinicalEmail').value,
+        company: document.getElementById('clinicalCompany').value,
+        phone: document.getElementById('clinicalPhone').value,
+        message: document.getElementById('clinicalMessage').value,
+      };
+      
+      try {
+        const response = await fetch('{% url "billing_contact_clinical" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken,
+          },
+          body: JSON.stringify(formData),
+        });
+        
+        const data = await response.json();
+        if (data.status === 'success') {
+          alert('Thank you! We\'ll get back to you soon.');
+          document.getElementById('clinicalContactForm').reset();
+          document.getElementById('clinicalContactModal').classList.add('hidden');
+        } else {
+          alert('Error: ' + (data.error || 'Failed to send message'));
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    });
+
+    // Handle Cancel Subscription
+    document.getElementById('cancelSubscriptionBtn')?.addEventListener('click', async function() {
+      if (!confirm('Are you sure you want to cancel your subscription? Your access will continue until the end of the billing period.')) {
+        return;
+      }
+      
+      try {
+        const response = await fetch('{% url "billing_cancel" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken,
+          },
+        });
+        
+        const data = await response.json();
+        if (data.status === 'success') {
+          alert('Subscription canceled successfully. ' + data.message);
+          window.location.reload();
+        } else {
+          alert('Error: ' + (data.error || 'Failed to cancel subscription'));
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    });
+
+    // Handle PayPal return (if orderID is in URL)
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderID = urlParams.get('token');
+    const payerID = urlParams.get('PayerID');
+    
+    if (orderID && payerID) {
+      // Capture the order
+      (async function() {
+        try {
+          const response = await fetch('{% url "billing_capture_order" %}', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrftoken,
+            },
+            body: JSON.stringify({ orderID: orderID }),
+          });
+          
+          const data = await response.json();
+          if (data.status === 'success') {
+            alert('Payment successful! Your subscription is now active.');
+            window.location.href = '{% url "billing_settings" %}';
+          } else {
+            alert('Error: ' + (data.error || 'Payment failed'));
+          }
+        } catch (error) {
+          alert('Error: ' + error.message);
+        }
+      })();
+    }
+  </script>
+
+  <!-- Clinical Plan Contact Modal -->
+  <div id="clinicalContactModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+      <div class="p-6">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-gray-900">Contact Us for Clinical Plan</h2>
+          <button id="closeClinicalModal" class="text-gray-400 hover:text-gray-600 transition">
+            <i class="fa-solid fa-times text-xl"></i>
+          </button>
+        </div>
+
+        <!-- Form -->
+        <form id="clinicalContactForm" class="space-y-4">
+          <div>
+            <label for="clinicalName" class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+            <input 
+              type="text" 
+              id="clinicalName" 
+              name="name" 
+              required
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="John Doe"
+            />
+          </div>
+
+          <div>
+            <label for="clinicalEmail" class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+            <input 
+              type="email" 
+              id="clinicalEmail" 
+              name="email" 
+              required
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="john@example.com"
+            />
+          </div>
+
+          <div>
+            <label for="clinicalCompany" class="block text-sm font-medium text-gray-700 mb-1">Company/Organization</label>
+            <input 
+              type="text" 
+              id="clinicalCompany" 
+              name="company"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Acme Healthcare"
+            />
+          </div>
+
+          <div>
+            <label for="clinicalPhone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+            <input 
+              type="tel" 
+              id="clinicalPhone" 
+              name="phone"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="+1 (555) 123-4567"
+            />
+          </div>
+
+          <div>
+            <label for="clinicalMessage" class="block text-sm font-medium text-gray-700 mb-1">Message *</label>
+            <textarea 
+              id="clinicalMessage" 
+              name="message" 
+              required
+              rows="4"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              placeholder="Tell us about your needs and requirements..."
+            ></textarea>
+          </div>
+
+          <div class="flex gap-3 pt-2">
+            <button 
+              type="button" 
+              id="closeClinicalModalBtn"
+              class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              id="submitClinicalContact"
+              class="flex-1 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition font-medium"
+            >
+              Send Message
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
+

@@ -29,7 +29,7 @@
     <div class="hidden lg:flex items-center gap-6 text-sm text-gray-700">
       {% if request.user.is_authenticated %}
       <nav class="space-x-5">
-        <a href="/dashboard/" class="hover:text-[#236092] hover:underline underline-offset-4 transition">Dashboard</a>
+        <a href="/dashboard/new/" class="hover:text-[#236092] hover:underline underline-offset-4 transition">Dashboard</a>
       </nav>
       <div class="flex items-center gap-4">
         <span class="font-medium text-gray-600">👋 Welcome, {{ request.user.first_name|default:request.user.username }}</span>
@@ -56,7 +56,7 @@
   <!-- Mobile Nav -->
   <div x-show="open" x-cloak class="lg:hidden px-4 pb-4 space-y-4 text-sm text-gray-700">
     {% if request.user.is_authenticated %}
-    <a href="/dashboard/" class="block hover:text-[#236092] transition">Dashboard</a>
+    <a href="/dashboard/new/" class="block hover:text-[#236092] transition">Dashboard</a>
     <div class="border-t pt-2">
       <span class="block font-medium text-gray-600">👋 Welcome, {{ request.user.first_name|default:request.user.username }}</span>
       <form method="POST" action="{% url 'logout' %}" class="mt-2">

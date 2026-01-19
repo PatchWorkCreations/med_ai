@@ -1,4 +1,4 @@
-# NeuroMed AI - Color Palette Documentation
+# NeuroMed Aira - Color Palette Documentation
 
 **Last Updated:** Current  
 **Version:** 1.0

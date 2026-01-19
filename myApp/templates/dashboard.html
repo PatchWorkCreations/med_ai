@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>NeuroMed AI Dashboard</title>
+  <title>NeuroMed Aira Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="manifest" href="/static/pwa/manifest.webmanifest">
   <link rel="apple-touch-icon" href="/static/pwa/icons/apple-touch-icon-180.png">
@@ -358,14 +358,14 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
             
             <h1 class="cursor-help">
   <img src="https://res.cloudinary.com/djzks0atj/image/upload/v1759412135/NeuroMed_AI_Logo-10_yassi6.png" 
-       alt="NeuroMed AI Logo" 
+       alt="NeuroMed Aira Logo" 
        class="h-10 object-contain"/>
 </h1>
 
 
             <!-- tooltip -->
             <div class="absolute -bottom-12 left-0 z-10 w-max max-w-xs px-3 py-2 text-base text-white bg-gray-800 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none shadow-md">
-              NeuroMed AI simplifies complex medical records into compassionate, easy-to-understand summaries.
+              NeuroMed Aira simplifies complex medical records into compassionate, easy-to-understand summaries.
             </div>
           </div>
 
@@ -591,7 +591,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
       <div class="px-5 py-4 border-b flex items-center justify-between">
         <div class="flex items-center gap-3">
           <i class="fa-solid fa-heart text-[#236092] text-xl"></i>
-          <h3 class="text-lg font-semibold">NeuroMed AI — Quick Feedback</h3>
+          <h3 class="text-lg font-semibold">NeuroMed Aira — Quick Feedback</h3>
         </div>
         <button id="feedbackClose" class="text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
       </div>
@@ -599,7 +599,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
       <!-- Body -->
       <form id="feedbackForm" class="px-5 py-4 overflow-y-auto space-y-4" enctype="multipart/form-data">
         <p class="text-sm text-gray-600 -mt-1">
-          Thanks for trying NeuroMed AI! Please use <b>synthetic or public sample data</b> only — no Personal Health Information (PHI).
+          Thanks for trying NeuroMed Aira! Please use <b>synthetic or public sample data</b> only — no Personal Health Information (PHI).
         </p>
 
         <!-- Consent -->
@@ -682,7 +682,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-sm" for="nps">How likely are you to recommend NeuroMed AI? (0–10)</label>
+            <label class="text-sm" for="nps">How likely are you to recommend NeuroMed Aira? (0–10)</label>
             <input id="nps" name="nps" type="number" min="0" max="10" class="mt-1 w-full border rounded p-2" required>
             <div class="text-xs text-gray-500 mt-1">0 = Not at all likely • 10 = Extremely likely</div>
           </div>
@@ -740,7 +740,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
         <div>
           <h3 class="text-xl font-semibold text-gray-800">Thanks for the feedback! 💜</h3>
           <p id="fbSuccessMsg" class="text-sm text-gray-600 mt-1">
-            We’ve received your submission. Your input helps make NeuroMed AI kinder and sharper.
+            We’ve received your submission. Your input helps make NeuroMed Aira kinder and sharper.
           </p>
         </div>
       </div>
@@ -959,7 +959,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
   function openFbSuccess(data){
     if (!okModal){ showToast(); return; }
     okMeta?.classList.add('hidden');
-    if (okMsg) okMsg.textContent = 'We’ve received your submission. Your input helps make NeuroMed AI kinder and sharper.';
+    if (okMsg) okMsg.textContent = 'We’ve received your submission. Your input helps make NeuroMed Aira kinder and sharper.';
     okModal.classList.remove('hidden');
     okModal.classList.add('flex');
   }
@@ -2097,7 +2097,7 @@ async function sendChat() {
     // 🔑 include CSRF
     const csrftoken = getCookie('csrftoken');
 
-    const res  = await fetch('/api/send-chat/', { 
+    const res  = await fetch('/webapp/api/send-chat/', { 
       method: 'POST', 
       headers: { "X-CSRFToken": csrftoken },
       body: formData,

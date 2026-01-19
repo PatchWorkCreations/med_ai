@@ -1,7 +1,7 @@
 # 📊 Mobile API Backend - Status Report
 
 **Date:** October 24, 2025  
-**Project:** NeuroMed AI - Mobile API Integration  
+**Project:** NeuroMed Aira - Mobile API Integration  
 **Database:** PostgreSQL (Railway - Production)  
 **Backend:** Django 5.1.2 + Django REST Framework
 

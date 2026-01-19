@@ -1,4 +1,4 @@
-# NeuroMed AI Signup Setup Documentation
+# NeuroMed Aira Signup Setup Documentation
 
 **Last Updated:** Generated from codebase analysis  
 **Purpose:** Complete documentation of the user signup/registration system
@@ -20,7 +20,7 @@
 
 ## Overview
 
-The NeuroMed AI signup system allows new users to create accounts with email, username, password, and optional profession information. The system includes automatic login, welcome emails, and comprehensive analytics tracking.
+The NeuroMed Aira signup system allows new users to create accounts with email, username, password, and optional profession information. The system includes automatic login, welcome emails, and comprehensive analytics tracking.
 
 **Key Features:**
 - Email-based registration with uniqueness validation
@@ -199,7 +199,7 @@ transaction.on_commit(_send)
 - `first_name` (str) - User's first name
 - `login_url` (str) - Fully qualified login URL
 
-**Subject:** "Welcome to NeuroMed AI Beta – You're Helping Shape the Future 🌿"
+**Subject:** "Welcome to NeuroMed Aira Beta – You're Helping Shape the Future 🌿"
 
 **Content Includes:**
 - Welcome message
@@ -237,7 +237,7 @@ transaction.on_commit(_send)
 
 ### Design Features
 - Tailwind CSS styling
-- NeuroMed AI branding (logo from Cloudinary)
+- NeuroMed Aira branding (logo from Cloudinary)
 - Responsive grid layout (1 column mobile, 2 columns desktop)
 - Font Awesome icons for form fields
 - Password visibility toggle

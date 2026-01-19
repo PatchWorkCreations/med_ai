@@ -3,8 +3,9 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.db.models import Exists, OuterRef
+from django.contrib import messages
 
-from .models import Profile, BetaFeedback
+from .models import Profile, BetaFeedback, Subscription, Payment
 
 User = get_user_model()
 
@@ -103,3 +104,20 @@ class UserAdmin(BaseUserAdmin):
         self.message_user(request, f"Ensured profiles for {created} user(s).", level=messages.SUCCESS)
 
 admin.site.register(User, UserAdmin)
+
+# Subscription and Payment admin
+@admin.register(Subscription)
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = ('user', 'plan', 'status', 'current_period_end', 'created_at')
+    list_filter = ('plan', 'status', 'created_at')
+    search_fields = ('user__username', 'user__email', 'paypal_subscription_id')
+    readonly_fields = ('created_at', 'updated_at')
+    ordering = ('-created_at',)
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'plan_id', 'amount', 'currency', 'status', 'created_at', 'paid_at')
+    list_filter = ('status', 'plan_id', 'created_at')
+    search_fields = ('user__username', 'user__email', 'paypal_order_id', 'paypal_transaction_id')
+    readonly_fields = ('created_at',)
+    ordering = ('-created_at',)

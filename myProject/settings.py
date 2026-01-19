@@ -314,3 +314,57 @@ GOOGLE_OAUTH_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET", "")
 # Local: GOOGLE_OAUTH_ENABLED=true
 # Production: GOOGLE_OAUTH_ENABLED=false (until verified)
 GOOGLE_OAUTH_ENABLED = os.getenv("GOOGLE_OAUTH_ENABLED", "true").lower() in ("true", "1", "yes")
+
+# PayPal Configuration
+PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID", "")
+PAYPAL_CLIENT_SECRET = os.getenv("PAYPAL_CLIENT_SECRET", "")
+PAYPAL_API_BASE = os.getenv("PAYPAL_API_BASE", "https://api-m.paypal.com")  # Production API
+PAYPAL_WEBHOOK_ID = os.getenv("PAYPAL_WEBHOOK_ID", "")
+
+# Subscription Plans (canonical source of truth - server-side only)
+SUBSCRIPTION_PLANS = {
+    "monthly": {
+        "name": "Monthly",
+        "billing": "Monthly subscription",
+        "price": 1.00,  # Testing: $1 instead of $20
+        "price_id": None,  # Not used for PayPal, but kept for consistency
+    },
+    "annual": {
+        "name": "Annual",
+        "billing": "Annual subscription",
+        "price": 199.00,
+        "price_id": None,
+    },
+    "clinical": {
+        "name": "Clinical",
+        "billing": "Custom contract",
+        "price": None,  # Contact us
+        "price_id": None,
+    },
+}
+
+# Plan Capabilities (feature gating)
+PLAN_CAPABILITIES = {
+    "free": {
+        "medical_summaries": False,
+        "voice": False,
+        "history_days": 0,
+    },
+    "monthly": {
+        "medical_summaries": True,
+        "voice": True,
+        "history_days": 30,
+    },
+    "annual": {
+        "medical_summaries": True,
+        "voice": True,
+        "history_days": 365,
+    },
+    "clinical": {
+        "medical_summaries": True,
+        "voice": True,
+        "history_days": None,  # Unlimited
+        "audit_logs": True,
+        "team_accounts": True,
+    },
+}

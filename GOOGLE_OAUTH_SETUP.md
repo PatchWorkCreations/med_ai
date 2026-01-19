@@ -1,6 +1,6 @@
 # Google OAuth Setup Guide
 
-This guide explains how to configure Google OAuth for NeuroMed AI signup and login.
+This guide explains how to configure Google OAuth for NeuroMed Aira signup and login.
 
 ## ✅ Implementation Complete
 
@@ -20,7 +20,7 @@ The following has been implemented:
 4. Click **Create Credentials** → **OAuth client ID**
 5. Configure:
    - **Application type:** Web application
-   - **Name:** NeuroMed AI
+   - **Name:** NeuroMed Aira
    - **Authorized JavaScript origins:**
      - `http://localhost:8000`
      - `http://127.0.0.1:8000`

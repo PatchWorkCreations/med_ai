@@ -236,7 +236,7 @@ async function sendChat() {
   chatWindow.scrollTop = chatWindow.scrollHeight;
 
   try {
-    const response = await fetch("/api/send-chat/", {
+    const response = await fetch("/webapp/api/send-chat/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
