@@ -3,279 +3,259 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NeuroMed Aira — Welcome to NeuroMed Aira</title>
+  <title>NeuroMed Aira — Medical Results Explained Simply</title>
   <link rel="manifest" href="/static/pwa/manifest.webmanifest">
-  <link rel="apple-touch-icon" href="/static/pwa/icons/apple-touch-icon-180.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/static/pwa/icons/favicon-32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/static/pwa/icons/favicon-16.png">
+  <link rel="apple-touch-icon" href="https://res.cloudinary.com/dk52yeq9x/image/upload/v1768919639/NeuroMed_AI_Logo-13-12_vgfarp.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://res.cloudinary.com/dk52yeq9x/image/upload/v1768919639/NeuroMed_AI_Logo-13-12_vgfarp.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://res.cloudinary.com/dk52yeq9x/image/upload/v1768919639/NeuroMed_AI_Logo-13-12_vgfarp.png">
   <meta name="theme-color" content="#236092">
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Markdown parser -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <!-- XSS sanitizer -->
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
-
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
 
 <style>
-
-/* ===== Ultra-compact AI markdown (kills rogue spacing) ===== */
-
-/* AI bubble: do NOT preserve raw newlines */
+/* ===== Markdown Styles ===== */
 .chat-ai.chat-bubble { white-space: normal; line-height: 1.40; padding: 10px 12px; }
-
-/* Markdown inside AI bubble */
 .chat-ai .md-prose { font-size: .98rem; line-height: 1.40; }
-
-/* Trim outer edges so bubbles don't look gappy */
 .chat-ai .md-prose > :first-child { margin-top: 0 !important; }
-.chat-ai .md-prose > :last-child  { margin-bottom: 0 !important; }
-
-/* Headings: tight */
-.chat-ai .md-prose h1,
-.chat-ai .md-prose h2,
-.chat-ai .md-prose h3,
-.chat-ai .md-prose h4 { margin: .22em 0 .14em !important; line-height: 1.18; }
+.chat-ai .md-prose > :last-child { margin-bottom: 0 !important; }
+.chat-ai .md-prose h1, .chat-ai .md-prose h2, .chat-ai .md-prose h3, .chat-ai .md-prose h4 { 
+  margin: .22em 0 .14em !important; line-height: 1.18; 
+}
 .chat-ai .md-prose h1 { font-size: 1.18rem; }
 .chat-ai .md-prose h2 { font-size: 1.08rem; }
 .chat-ai .md-prose h3 { font-size: 1.02rem; }
 .chat-ai .md-prose h4 { font-size: .98rem; }
-
-/* Paragraphs */
 .chat-ai .md-prose p { margin: .12em 0 !important; }
 .chat-ai .md-prose p + p { margin-top: .10em !important; }
 .chat-ai .md-prose p:empty { display: none; }
-
-/* Adjacent spacing logic */
 .chat-ai .md-prose :is(h1,h2,h3,h4) + :is(p,ul,ol,table,blockquote) { margin-top: .16em !important; }
 .chat-ai .md-prose :is(p,ul,ol,table,blockquote) + :is(h1,h2,h3,h4) { margin-top: .24em !important; }
-
-/* Lists */
-.chat-ai .md-prose ul,
-.chat-ai .md-prose ol { margin: .14em 0 .2em 1em !important; }
+.chat-ai .md-prose ul, .chat-ai .md-prose ol { margin: .14em 0 .2em 1em !important; }
 .chat-ai .md-prose li { margin: .04em 0 !important; }
-
-/* Blockquotes */
 .chat-ai .md-prose blockquote {
   border-left: 2px solid #e2e8f0;
   padding-left: .45rem;
   margin: .18em 0 !important;
   color: #475569;
 }
-
-/* Code */
 .chat-ai .md-prose code { background:#0f172a0d; padding:.04rem .18rem; border-radius:.3rem; }
-.chat-ai .md-prose pre  { background:#0f172a0d; padding:.5rem; border-radius:.6rem; margin:.22rem 0 !important; }
-
-/* Tables */
+.chat-ai .md-prose pre { background:#0f172a0d; padding:.5rem; border-radius:.6rem; margin:.22rem 0 !important; }
 .chat-ai .md-prose table { width:100%; border-collapse: collapse; margin:.22rem 0 !important; font-size:.93rem; }
 .chat-ai .md-prose th, .chat-ai .md-prose td { border:1px solid #e2e8f0; padding:.28rem .4rem; }
 .chat-ai .md-prose thead th { background:#f8fafc; }
 
-
-/* ---------- Base theme & layout ---------- */
+/* ===== Base 44 Inspired Design ===== */
 :root{
   --brand:#236092;
   --brand-dark:#1B4A7A;
-  --brand-light:#2D7BB8;
-  --accent-warm:#F59E0B;
-  --accent-coral:#F87171;
-  --accent-lavender:#A78BFA;
-  --font-scale: 1.125;              /* 18px base for readability */
-  --line-scale: 1.08;
-  --max-ch: 68ch;
-  --tour-blur: 6px;
-  --tour-wash: rgba(255,255,255,.26);
-  --tour-dim:  rgba(2,6,23,.18);
-  --gradient-bg: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 25%, #f6f8fb 50%, #fef3f2 100%);
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.18);
+  --accent-orange:#F59E0B;
+  --gradient-bg: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 25%, #fef3c7 50%, #fde68a 100%);
 }
-html{ font-size: calc(16px * var(--font-scale)); }
+
+html{ font-size: 16px; }
 body{ 
   background: var(--gradient-bg);
   background-attachment: fixed;
-  line-height: calc(1.55 * var(--line-scale)); 
-  letter-spacing:.1px; 
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
-.easy-read{ --font-scale: 1.2; --line-scale: 1.12; } /* toggle-able bump */
-.hc *{ color:#000 !important; border-color:#0003 !important }
-.hc .chat-ai{ background:#fff !important; }
-.hc .chat-user{ background:#111 !important; color:#fff !important; }
 
-.chip{ border:1px solid rgba(0,0,0,.08); }
 .chat-bubble{
-  border-radius:18px; padding:12px 16px; line-height:1.55;
-  box-shadow:0 1px 4px rgba(0,0,0,.04); max-width:80%;
-  white-space:pre-wrap; word-break:break-word; font-size:1.05rem;
+  border-radius: 18px;
+  padding: 12px 16px;
+  line-height: 1.55;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04);
+  max-width: 80%;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 1.05rem;
 }
-@media (min-width:640px){ .chat-bubble{ max-width: var(--max-ch); } }
-.chat-user{ background:#0f172a; color:#fff; border-bottom-right-radius:6px!important; margin-left:auto }
-.chat-ai{ background:#ffffff; color:#111827; border:1px solid rgba(0,0,0,.05); border-bottom-left-radius:6px!important; margin-right:auto }
+@media (min-width:640px){ .chat-bubble{ max-width: 68ch; } }
+.chat-user{ 
+  background:#0f172a; 
+  color:#fff; 
+  border-bottom-right-radius:6px!important; 
+  margin-left:auto;
+}
+.chat-ai{ 
+  background:#ffffff; 
+  color:#111827; 
+  border:1px solid rgba(0,0,0,.05); 
+  border-bottom-left-radius:6px!important; 
+  margin-right:auto;
+}
 
-.pulse{ animation:pulse 1.1s ease-in-out infinite }
+.pulse{ animation:pulse 1.1s ease-in-out infinite; }
 @keyframes pulse{ 0%,100%{opacity:.55} 50%{opacity:1} }
 
-.mode-badge{display:inline-flex;align-items:center;gap:.5rem;font-size:.75rem;border-radius:999px;padding:.25rem .6rem;border:1px solid rgba(0,0,0,.08);background:#fff}
-.toast{transform:translateY(-10px);opacity:0;transition:transform .2s ease,opacity .2s ease}
-.toast.show{transform:translateY(0);opacity:1}
-.shimmer{position:relative;overflow:hidden}
-.shimmer::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.7) 50%,rgba(255,255,255,0) 100%);transform:translateX(-100%);animation:shimmer 900ms ease forwards}
-@keyframes shimmer{to{transform:translateX(100%)}}
-
-#modeGroup{ gap:.6rem; }
-#modeGroup button{ min-height:42px; padding:.6rem .75rem; letter-spacing:.1px; }
-.suggestion{ padding:.6rem .8rem; font-size:.98rem; }
-#suggestionsList.compact > .suggestion:nth-child(n+4){ display:none; }
-
-#uploadBtn,#micBtn,#sendBtn{ min-width:44px; min-height:44px; }
-:focus-visible{ outline:3px solid #236092; outline-offset:2px; border-radius:.5rem; }
-
-/* dropzone clearer for elders */
-.dropwrap{ border:2px dashed #cbd5e1; border-radius:16px; background:#fff; }
-
-@media (prefers-reduced-motion: reduce){
-  .pulse, .dotty::after{ animation:none!important; content:"..."; }
-  .shimmer::after{ animation:none!important; }
-  * { scroll-behavior:auto; }
+.toast{
+  transform:translateY(-10px);
+  opacity:0;
+  transition:transform .2s ease,opacity .2s ease;
+}
+.toast.show{
+  transform:translateY(0);
+  opacity:1;
 }
 
-/* Spotlight Tour */
-.nm-tour-overlay{ position:fixed; inset:0; z-index:10050; pointer-events:auto; }
-.nm-tour-dim{ position:absolute; inset:0; pointer-events:auto; }
-.nm-slab{ position:absolute; background: var(--tour-wash);
-  backdrop-filter: blur(var(--tour-blur)) saturate(110%);
-  -webkit-backdrop-filter: blur(var(--tour-blur)) saturate(110%); }
-.nm-tour-hole{ position:absolute; border-radius:12px; border:2px solid rgba(255,255,255,.95);
-  box-shadow:0 0 0 1px rgba(2,6,23,.05), 0 8px 28px rgba(2,6,23,.22), 0 0 0 200vmax var(--tour-dim);
-  background:transparent; pointer-events:none; transition: top .18s ease, left .18s ease, width .18s ease, height .18s ease; }
-.nm-tour-pop{
-  position:fixed; z-index:10051; max-width:min(92vw, 340px); border-radius:16px;
-  background: rgba(255,255,255,.94); border:1px solid rgba(2,6,23,.06);
-  box-shadow:0 24px 48px rgba(2,6,23,.22); padding:14px; }
-#nmTitle{ font-weight:700; font-size:1.05rem; color:#0f172a; margin-bottom:6px; }
-#nmBody{ color:#475569; font-size:.95rem; line-height:1.55; }
-#nmPop .btn{ padding:.45rem .85rem; border-radius:10px; font-weight:600; }
-#nmPop .btn-text{ color:#475569; background:transparent; border:1px solid rgba(2,6,23,.08); }
-#nmPop .btn-primary{ color:#fff; background:#236092; border:1px solid #0d6e67; }
-.nm-tour-sr-only{ position:absolute!important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
-#nmTourHelp{ position:fixed; left:12px; bottom:12px; z-index:10052; width:44px; height:44px; border-radius:9999px; display:grid; place-items:center; font-weight:700; background:#0f172a; color:#fff; box-shadow:0 8px 20px rgba(2,6,23,.22); }
-#nmTourHelp:hover{ filter:brightness(1.05); }
+.shimmer{
+  position:relative;
+  overflow:hidden;
+}
+.shimmer::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.7) 50%,rgba(255,255,255,0) 100%);
+  transform:translateX(-100%);
+  animation:shimmer 900ms ease forwards;
+}
+@keyframes shimmer{ to{transform:translateX(100%)} }
 
-/* action bar buttons start disabled */
-.is-disabled{ opacity:.5; pointer-events:none }
+.is-disabled{ opacity:.5; pointer-events:none; }
 
-/* --- Mobile tweaks --- */
-@media (max-width: 767px){
-  #modeGroup{ display:none !important; }
-  #modeSelectWrap{ display:block !important; }
-  #chatWindow{ max-height: 60vh; }
-}
-@media (min-width: 768px){
-  #modeSelectWrap{ display:none !important; }
-}
-
-/* Premium Mode Cards */
-.mode-card{
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.mode-card[aria-pressed="true"]{
-  border-color: var(--brand) !important;
-  background: linear-gradient(135deg, rgba(35,96,146,0.05) 0%, rgba(35,96,146,0.02) 100%);
-  box-shadow: 0 4px 12px rgba(35,96,146,0.15);
-}
-.mode-card:hover{
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-}
-
-/* Premium Button Styles */
-#ctaUpload{
+/* Modern Input Field */
+.main-input-wrapper {
   position: relative;
-  overflow: hidden;
+  max-width: 800px;
+  margin: 0 auto;
 }
-#ctaUpload::before{
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
+
+.main-input {
   width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  transition: left 0.5s;
-}
-#ctaUpload:hover::before{
-  left: 100%;
-}
-
-/* Glassmorphism Chat Card */
-.chat-ai.chat-bubble{
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  padding: 20px 72px 20px 24px;
+  font-size: 1.1rem;
+  border: 2px solid rgba(0,0,0,.08);
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 4px 20px rgba(0,0,0,.08);
 }
 
-/* Airier mode chips */
-.mode-chip{
-  display:inline-flex; align-items:center; gap:.5rem;
-  padding:.6rem .85rem;
-  border:1px solid rgba(2,6,23,.08);
-  background:#fff; border-radius:.75rem;
-  box-shadow:0 1px 2px rgba(2,6,23,.03);
-  transition:box-shadow .15s ease, transform .06s ease;
-  white-space:nowrap;
+.main-input:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 4px 24px rgba(35,96,146,.15);
 }
-.mode-chip:hover{ box-shadow:0 6px 20px rgba(2,6,23,.08); }
-.mode-chip:active{ transform:translateY(1px); }
-.mode-chip i{ min-width:1em; }
 
-#modeGroup{ gap:.75rem; }
-@media (min-width: 640px){ #modeGroup{ gap:.9rem; } }
+.send-button-main {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--accent-orange);
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
 
+.send-button-main:hover:not(:disabled) {
+  background: #d97706;
+}
+
+.send-button-main:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.suggestion-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: white;
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,.04);
+}
+
+.suggestion-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,.1);
+  border-color: var(--brand);
+}
+
+.mode-selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: white;
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #1e293b;
+}
+
+.mode-selector:hover:not([aria-pressed="true"]) {
+  border-color: var(--brand);
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+.mode-selector[aria-pressed="true"] {
+  background: var(--brand);
+  color: white;
+  border-color: var(--brand);
+  box-shadow: 0 2px 8px rgba(35,96,146,.2);
+}
+
+.mode-selector[aria-pressed="true"] i {
+  color: white !important;
+}
+
+@media (max-width: 767px){
+  .main-input { padding: 16px 60px 16px 20px; font-size: 1rem; }
+  .send-button-main { width: 44px; height: 44px; }
+  .suggestion-chip { padding: 10px 16px; font-size: 0.9rem; }
+}
 </style>
 
 </head>
 <body class="text-slate-800">
-  <!-- Premium Top Bar -->
-  <header class="w-full border-b border-slate-200/50 bg-white/90 backdrop-blur-md shadow-sm">
-    <div class="max-w-6xl mx-auto px-5 py-3 flex items-center justify-between">
-      <!-- Brand -->
+  <!-- Navigation Bar -->
+  <header class="w-full border-b border-white/20 bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between">
+      <!-- Logo -->
       <a href="/" class="flex items-center gap-3">
   <img src="https://res.cloudinary.com/djzks0atj/image/upload/v1759412135/NeuroMed_AI_Logo-10_yassi6.png" 
        alt="NeuroMed Aira Logo" 
        class="h-8 object-contain"/>
 </a>
 
-
-      <!-- Desktop controls -->
-      <div class="hidden md:flex items-center gap-2">
-        <button id="fontMinus" class="px-3 py-1 rounded-full border" title="Smaller">A−</button>
-        <button id="fontPlus"  class="px-3 py-1 rounded-full border" title="Larger">A＋</button>
-        <button id="easyReadBtn" class="px-3 py-1 rounded-full border hidden" aria-pressed="false" title="Easy Read">Easy</button>
-        <button id="highContrast" class="px-3 py-1 rounded-full border" aria-pressed="false" title="High contrast">Contrast</button>
-        <a href="/signup" class="ml-2 text-slate-600 hover:text-slate-900">Sign up</a>
-        <a href="/login" class="rounded-full px-3 py-1.5 border hover:bg-slate-50">Log in</a>
-        <!-- LANG: Desktop picker -->
+      <!-- Desktop Navigation -->
+      <div class="hidden md:flex items-center gap-6">
+        <button id="fontMinus" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-sm" title="Smaller">A−</button>
+        <button id="fontPlus" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-sm" title="Larger">A＋</button>
+        <button id="highContrast" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-sm" aria-pressed="false" title="High contrast">Contrast</button>
+        <a href="/signup" class="text-slate-700 hover:text-slate-900 text-sm font-medium">Sign up</a>
+        <a href="/login" class="px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-800 text-sm font-medium transition">Log in</a>
+        <!-- Language Picker -->
 <div class="relative">
-  <button id="langBtn"
-          class="px-3 py-1 rounded-full border flex items-center gap-2"
-          aria-haspopup="menu" aria-expanded="false" title="Language">
-    <i class="fa-solid fa-globe"></i>
+          <button id="langBtn" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-2 text-sm" aria-haspopup="menu" aria-expanded="false">
+            <i class="fa-solid fa-globe text-sm"></i>
     <span id="langBtnLabel">English</span>
-    <i class="fa-solid fa-caret-down opacity-70"></i>
+            <i class="fa-solid fa-caret-down opacity-70 text-xs"></i>
   </button>
-  <div id="langMenu"
-       class="hidden absolute right-0 mt-2 w-56 max-h-72 overflow-auto bg-white border rounded-xl shadow-lg z-50">
-    <!-- options injected by JS -->
+          <div id="langMenu" class="hidden absolute right-0 mt-2 w-56 max-h-72 overflow-auto bg-white border rounded-xl shadow-lg z-50"></div>
   </div>
 </div>
 
-
-      </div>
-
-      <!-- Mobile hamburger -->
-      <button id="nmMenuBtn"
-              class="md:hidden inline-flex items-center justify-center rounded-lg p-2 border border-slate-200 text-slate-700 hover:bg-slate-50"
-              aria-label="Open menu" aria-controls="nmMobileMenu" aria-expanded="false">
+      <!-- Mobile Menu Button -->
+      <button id="nmMenuBtn" class="md:hidden inline-flex items-center justify-center rounded-lg p-2 border border-slate-200 text-slate-700 hover:bg-slate-50" aria-label="Open menu">
         <svg id="nmIconOpen" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-width="2" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/>
         </svg>
@@ -285,464 +265,727 @@ body{
       </button>
     </div>
 
-    <!-- Mobile menu panel -->
+    <!-- Mobile Menu -->
     <div id="nmMobileMenu" class="md:hidden hidden border-t bg-white/95 backdrop-blur">
-      <div class="max-w-6xl mx-auto px-5 py-3 grid gap-3">
+      <div class="max-w-7xl mx-auto px-5 py-4 grid gap-3">
         <div class="flex items-center gap-2">
-          <button id="mFontMinus" class="px-3 py-1 rounded-full border w-full">A−</button>
-          <button id="mFontPlus"  class="px-3 py-1 rounded-full border w-full">A＋</button>
-          <button id="mEasyReadBtn"  class="px-3 py-1 rounded-full border w-full hidden" aria-pressed="false">Easy</button>
-          <button id="mHighContrast" class="px-3 py-1 rounded-full border w-full" aria-pressed="false">Contrast</button>
+          <button id="mFontMinus" class="px-3 py-2 rounded-lg border w-full text-sm">A−</button>
+          <button id="mFontPlus" class="px-3 py-2 rounded-lg border w-full text-sm">A＋</button>
+          <button id="mHighContrast" class="px-3 py-2 rounded-lg border w-full text-sm" aria-pressed="false">Contrast</button>
         </div>
         <div class="flex items-center gap-2">
-          <a href="/signup" class="flex-1 text-center rounded-full px-3 py-2 border hover:bg-slate-50">Sign up</a>
-          <a href="/login"  class="flex-1 text-center rounded-full px-3 py-2 border hover:bg-slate-50">Log in</a>
+          <a href="/signup" class="flex-1 text-center rounded-lg px-4 py-2 border hover:bg-slate-50 text-sm">Sign up</a>
+          <a href="/login" class="flex-1 text-center rounded-lg px-4 py-2 border hover:bg-slate-50 text-sm">Log in</a>
         </div>
-        <!-- LANG: Mobile picker -->
 <div class="grid gap-2">
-  <button id="mLangBtn"
-          class="px-3 py-2 rounded-lg border w-full flex items-center justify-between">
+          <button id="mLangBtn" class="px-3 py-2 rounded-lg border w-full flex items-center justify-between text-sm">
     <span class="flex items-center gap-2">
       <i class="fa-solid fa-globe"></i>
       <span id="mLangBtnLabel">English</span>
     </span>
     <i class="fa-solid fa-caret-down opacity-70"></i>
   </button>
-  <div id="mLangMenu"
-       class="hidden border rounded-xl bg-white shadow-lg max-h-72 overflow-auto">
-    <!-- options injected by JS -->
+          <div id="mLangMenu" class="hidden border rounded-xl bg-white shadow-lg max-h-72 overflow-auto"></div>
   </div>
-</div>
-
       </div>
     </div>
   </header>
 
-
-  <!-- Main -->
-  <main class="max-w-5xl mx-auto px-4 md:px-5 pt-8 md:pt-16 pb-24">
-    <!-- Hero (Premium Redesign) -->
-    <div id="heroIntro" class="text-center relative">
-      <!-- Subtle background elements for depth -->
-      <div class="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-200/20 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl"></div>
-      </div>
-      
-      <!-- Premium Headline -->
-      <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 mb-6 leading-[1.1]">
-        <span class="block">Medical results,</span>
-        <span class="block text-[#236092]">finally explained</span>
-        <span class="block">in plain language.</span>
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 md:px-6 pt-12 md:pt-20 pb-16">
+    <!-- Hero Section -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 mb-6 max-w-4xl mx-auto leading-tight">
+        Medical results,<br>
+        finally explained<br>
+        in plain language.
       </h1>
-      
-      <!-- Refined Subheading -->
-      <p class="mt-6 text-lg md:text-xl text-slate-600 max-w-[65ch] mx-auto leading-relaxed font-light">
+      <p class="text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto mb-8">
         Upload any medical document. We'll summarize it clearly. You get next steps explained in plain English.
       </p>
       
-      <!-- Trust Bar -->
-      <div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-slate-500">
-        <div class="flex items-center gap-2">
-          <i class="fa-solid fa-shield-halved text-[#236092]"></i>
-          <span>Your files are encrypted and never shared</span>
-        </div>
-        <span class="hidden sm:inline">•</span>
-        <div class="flex items-center gap-2">
-          <i class="fa-solid fa-users text-[#236092]"></i>
-          <span>Used by caregivers & clinicians worldwide</span>
-        </div>
-      </div>
-      
-      <!-- Premium CTA -->
-      <div class="mt-8 flex justify-center items-center">
-        <button id="ctaUpload" class="group relative px-8 py-4 rounded-2xl bg-[#236092] text-white font-semibold text-lg shadow-lg shadow-[#236092]/25 hover:shadow-xl hover:shadow-[#236092]/30 hover:bg-[#1B5A8E] transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0">
-          <i class="fa-solid fa-upload mr-2"></i>
-          Upload a file
+      <!-- Mode Selector -->
+      <div class="flex items-center justify-center gap-3 mb-8">
+        <span class="text-sm text-slate-600">Tone:</span>
+        <div id="modeSelectWrap" class="flex items-center gap-2 flex-wrap justify-center">
+          <button data-mode="PlainClinical" class="mode-selector" aria-pressed="true">
+            <i class="fa-regular fa-message text-[#236092]"></i>
+            <span>Balanced</span>
         </button>
+          <button data-mode="Caregiver" class="mode-selector" aria-pressed="false">
+            <i class="fa-solid fa-hands-holding-child text-amber-700"></i>
+            <span>Caregiver</span>
+    </button>
+          <button data-mode="Clinical" class="mode-selector" aria-pressed="false">
+            <i class="fa-solid fa-stethoscope text-slate-800"></i>
+            <span>Clinical</span>
+    </button>
+          <button data-mode="Faith" class="mode-selector" aria-pressed="false">
+            <i class="fa-solid fa-hands-praying text-indigo-700"></i>
+            <span>Faith</span>
+    </button>
+          <button data-mode="Geriatric" class="mode-selector" aria-pressed="false">
+            <i class="fa-solid fa-person-cane text-[#28926D]"></i>
+            <span>Geriatric</span>
+    </button>
+          <button data-mode="EmotionalSupport" class="mode-selector" aria-pressed="false">
+            <i class="fa-solid fa-heart text-rose-700"></i>
+            <span>Emotional Support</span>
+    </button>
+        </div>
+        </div>
       </div>
       
-      <!-- Privacy Note -->
-      <p class="mt-6 text-xs text-slate-500 max-w-2xl mx-auto">
-        NeuroMed Aira uses your Google account information (email and name) to create and manage your account. <a href="{% url 'privacy' %}" class="text-[#236092] hover:underline font-medium">View our Privacy Policy</a> to learn more.
-      </p>
+    <!-- Intro Message -->
+    <div class="max-w-4xl mx-auto mb-8">
+      <div class="w-full flex">
+        <div id="intro" class="chat-bubble chat-ai shimmer mr-auto">
+          <p class="text-slate-800 leading-relaxed">
+            Hi there! You're in Balanced Mode. I can help you with clear explanations and add clinician notes when useful.
+          </p>
+        </div>
+      </div>
     </div>
 
+    <!-- Chat Window -->
+    <div id="chatWindow" class="max-w-4xl mx-auto mb-6 space-y-4 min-h-[100px]"></div>
 
-    <!-- Mode switcher (Premium Card Design) -->
-<div class="mt-12">
-  <div class="text-center mb-6">
-    <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-2">Choose your tone</h2>
-    <p class="text-slate-600">Pick how you'd like information explained. You can change anytime.</p>
-  </div>
-
-  <!-- Premium mode cards with descriptions -->
-  <div id="modeGroup"
-       class="mx-auto max-w-5xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-    <button data-mode="Caregiver" class="mode-card group relative bg-white/80 backdrop-blur-sm border-2 border-slate-200 rounded-2xl p-5 text-left hover:border-amber-300 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1" aria-pressed="true">
-      <div class="flex items-start gap-3 mb-2">
-        <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
-          <i class="fa-solid fa-hands-holding-child text-amber-700 text-xl"></i>
-        </div>
-        <div class="flex-1">
-          <h3 class="font-bold text-lg text-slate-900">Caregiver</h3>
-          <p class="text-sm text-slate-600 mt-1">Gentle, practical steps for families</p>
-        </div>
-      </div>
+    <!-- Main Input Field -->
+    <div class="main-input-wrapper mb-8">
+      <input 
+        type="file" 
+        id="fileInput" 
+        class="hidden" 
+        accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.heic,.webp" 
+        multiple 
+      />
+      <div class="relative">
+        <textarea 
+          id="chatInput" 
+          class="main-input" 
+          rows="1" 
+          placeholder="Type your question or upload a medical document..."
+          aria-label="Message"
+        ></textarea>
+        <div class="absolute right-[68px] top-1/2 -translate-y-1/2 flex items-center gap-2 z-10">
+          <button id="uploadBtn" class="w-10 h-10 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center" title="Upload file">
+            <i class="fa-solid fa-paperclip text-slate-600"></i>
+          </button>
+          <button id="micBtn" class="w-10 h-10 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center" title="Voice input">
+            <i class="fa-solid fa-microphone text-slate-600"></i>
     </button>
-    <button data-mode="PlainClinical" class="mode-card group relative bg-white/80 backdrop-blur-sm border-2 border-slate-200 rounded-2xl p-5 text-left hover:border-[#236092] hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1" aria-pressed="false">
-      <div class="flex items-start gap-3 mb-2">
-        <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
-          <i class="fa-regular fa-message text-[#236092] text-xl"></i>
         </div>
-        <div class="flex-1">
-          <h3 class="font-bold text-lg text-slate-900">Balanced</h3>
-          <p class="text-sm text-slate-600 mt-1">Clear + calm explanations</p>
-        </div>
-      </div>
-    </button>
-    <button data-mode="Clinical" class="mode-card group relative bg-white/80 backdrop-blur-sm border-2 border-slate-200 rounded-2xl p-5 text-left hover:border-slate-400 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1" aria-pressed="false">
-      <div class="flex items-start gap-3 mb-2">
-        <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0">
-          <i class="fa-solid fa-stethoscope text-slate-800 text-xl"></i>
-        </div>
-        <div class="flex-1">
-          <h3 class="font-bold text-lg text-slate-900">Clinical</h3>
-          <p class="text-sm text-slate-600 mt-1">Concise & technical</p>
-        </div>
-      </div>
-    </button>
-    <button data-mode="Faith" class="mode-card group relative bg-white/80 backdrop-blur-sm border-2 border-slate-200 rounded-2xl p-5 text-left hover:border-indigo-300 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1" aria-pressed="false">
-      <div class="flex items-start gap-3 mb-2">
-        <div class="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
-          <i class="fa-solid fa-hands-praying text-indigo-700 text-xl"></i>
-        </div>
-        <div class="flex-1">
-          <h3 class="font-bold text-lg text-slate-900">Faith</h3>
-          <p class="text-sm text-slate-600 mt-1">Guidance with encouragement</p>
-        </div>
-      </div>
-    </button>
-    <button data-mode="Geriatric" class="mode-card group relative bg-white/80 backdrop-blur-sm border-2 border-slate-200 rounded-2xl p-5 text-left hover:border-[#28926D] hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1" aria-pressed="false">
-      <div class="flex items-start gap-3 mb-2">
-        <div class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
-          <i class="fa-solid fa-person-cane text-[#28926D] text-xl"></i>
-        </div>
-        <div class="flex-1">
-          <h3 class="font-bold text-lg text-slate-900">Geriatric</h3>
-          <p class="text-sm text-slate-600 mt-1">Larger text, simpler steps</p>
-        </div>
-      </div>
-    </button>
-    <button data-mode="EmotionalSupport" class="mode-card group relative bg-white/80 backdrop-blur-sm border-2 border-slate-200 rounded-2xl p-5 text-left hover:border-rose-300 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1" aria-pressed="false">
-      <div class="flex items-start gap-3 mb-2">
-        <div class="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center flex-shrink-0">
-          <i class="fa-solid fa-heart text-rose-700 text-xl"></i>
-        </div>
-        <div class="flex-1">
-          <h3 class="font-bold text-lg text-slate-900">Emotional Support</h3>
-          <p class="text-sm text-slate-600 mt-1">Validating, calm & gentle</p>
-        </div>
-      </div>
-    </button>
-  </div>
-</div>
-
-
-
-    <!-- Mobile tone selector (compact) -->
-<!-- Mobile tone picker -->
-<div id="modeSelectWrap" class="mt-3 hidden md:hidden">
-  <!-- trigger -->
-  <button id="modePickerBtn"
-          class="w-full rounded-xl border bg-white px-3 py-2.5 flex items-center justify-between shadow-sm active:scale-[.99] transition">
-    <span class="flex items-center gap-2">
-      <i id="modePickerIcon" class="fa-regular fa-message text-[#236092]"></i>
-      <span id="modePickerLabel" class="text-sm font-medium">Caregiver</span>
-    </span>
-    <span class="text-slate-400"><i class="fa-solid fa-sliders"></i></span>
+        <button id="sendBtn" class="send-button-main z-10" title="Send" aria-label="Send" disabled>
+          <i class="fa-solid fa-arrow-up"></i>
   </button>
-
-  <!-- accessible, hidden fallback -->
-  <select id="modeSelect" class="sr-only" aria-hidden="true" tabindex="-1">
-    <option value="Caregiver">Caregiver</option>
-    <option value="PlainClinical">Balanced</option>
-    <option value="Clinical">Clinical</option>
-    <option value="Faith">Faith</option>
-  
-    <option value="Geriatric">Geriatric</option>
-    <option value="EmotionalSupport">Emotional Support</option>
-
-  </select>
-
-  <!-- bottom sheet -->
-  <div id="modeSheet" class="fixed inset-0 z-[70] hidden">
-    <!-- backdrop -->
-    <button id="modeSheetBackdrop" class="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></button>
-
-    <!-- sheet panel -->
-    <div id="modeSheetPanel"
-         class="absolute inset-x-0 bottom-0 rounded-t-2xl bg-white border-t shadow-2xl translate-y-full transition-transform duration-200 ease-out">
-      <div class="px-4 pt-3 pb-2 flex items-center justify-between">
-        <div class="text-sm font-semibold">Choose a tone</div>
-        <button id="modeSheetClose" class="p-2 text-slate-500"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-
-      <div class="divide-y">
-        <!-- option -->
-        <button class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 text-left"
-                data-mode="Caregiver">
-          <i class="fa-solid fa-hands-holding-child text-amber-700"></i>
-          <div class="min-w-0">
-            <div class="text-[15px] font-medium">Caregiver</div>
-            <div class="text-xs text-slate-500 truncate">Gentle, practical steps</div>
-          </div>
-          <i class="fa-solid fa-check ml-auto text-[#28926D] hidden"></i>
-        </button>
-
-        <button class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 text-left"
-                data-mode="PlainClinical">
-          <i class="fa-regular fa-message text-[#236092]"></i>
-          <div class="min-w-0">
-            <div class="text-[15px] font-medium">Balanced</div>
-            <div class="text-xs text-slate-500 truncate">Clear + calm explanations</div>
-          </div>
-          <i class="fa-solid fa-check ml-auto text-[#28926D] hidden"></i>
-        </button>
-
-        <button class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 text-left"
-                data-mode="Clinical">
-          <i class="fa-solid fa-stethoscope text-slate-800"></i>
-          <div class="min-w-0">
-            <div class="text-[15px] font-medium">Clinical</div>
-            <div class="text-xs text-slate-500 truncate">Concise & technical</div>
-          </div>
-          <i class="fa-solid fa-check ml-auto text-[#28926D] hidden"></i>
-        </button>
-
-        <button class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 text-left"
-                data-mode="Faith">
-          <i class="fa-solid fa-hands-praying text-indigo-700"></i>
-          <div class="min-w-0">
-            <div class="text-[15px] font-medium">Faith</div>
-            <div class="text-xs text-slate-500 truncate">Guidance with encouragement</div>
-          </div>
-          <i class="fa-solid fa-check ml-auto text-[#28926D] hidden"></i>
-        </button>
-
-        
-
-        <button class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 text-left"
-                data-mode="Geriatric">
-          <i class="fa-solid fa-person-cane text-[#28926D]"></i>
-          <div class="min-w-0">
-            <div class="text-[15px] font-medium">Geriatric</div>
-            <div class="text-xs text-slate-500 truncate">Larger text, simpler steps</div>
-          </div>
-          <i class="fa-solid fa-check ml-auto text-[#28926D] hidden"></i>
-        </button>
-
-        <button class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 text-left"
-              data-mode="EmotionalSupport">
-        <i class="fa-solid fa-heart text-rose-700"></i>
-        <div class="min-w-0">
-          <div class="text-[15px] font-medium">Emotional Support</div>
-          <div class="text-xs text-slate-500 truncate">Validating, calm & gentle</div>
+        <div id="fileChips" class="absolute -bottom-8 left-0 flex flex-wrap gap-2 mt-2"></div>
         </div>
-        <i class="fa-solid fa-check ml-auto text-[#28926D] hidden"></i>
-      </button>
-
       </div>
-
-      <div class="p-4">
-        <button id="modeSheetDone" class="w-full rounded-xl bg-black text-white py-2.5">Done</button>
+      
+    <!-- Suggestions -->
+    <div class="text-center mb-8">
+      <p class="text-sm text-slate-600 mb-4">Not sure where to start? Try one of these:</p>
+      <div id="suggestionsList" class="flex flex-wrap items-center justify-center gap-3">
+        <button class="suggestion-chip" role="listitem">
+          <i class="fa-regular fa-hospital text-[#236092]"></i>
+          <span>Simplify this ER discharge for my family</span>
+        </button>
+        <button class="suggestion-chip" role="listitem">
+          <i class="fa-solid fa-vial-circle-check text-[#236092]"></i>
+          <span>Explain these labs in plain English</span>
+        </button>
+        <button class="suggestion-chip" role="listitem">
+          <i class="fa-solid fa-pills text-[#236092]"></i>
+          <span>Make a daily medication schedule</span>
+        </button>
+        <button class="suggestion-chip" role="listitem">
+          <i class="fa-regular fa-clipboard text-[#236092]"></i>
+          <span>Questions to ask my doctor</span>
+        </button>
+        <button class="suggestion-chip" role="listitem">
+          <i class="fa-solid fa-language text-[#236092]"></i>
+          <span>Translate this for my lola (Taglish)</span>
+        </button>
       </div>
     </div>
-  </div>
-</div>
+  </main>
 
+  <!-- Product Intro Section -->
+  <section class="py-20 bg-gradient-to-b from-white via-slate-50 to-white">
+    <div class="max-w-7xl mx-auto px-4 md:px-6">
+      <div class="text-center mb-12">
+        <h2 class="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-6">
+          Understand medical information at the speed of thought.
+        </h2>
+        <p class="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto mb-8">
+          Upload any medical document and instantly get a clean, easy-to-understand summary—highlighting what matters, what it means, and what to do next.
+        </p>
+        <a href="/signup" class="inline-flex items-center px-8 py-4 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition shadow-lg text-lg">
+          Start building clarity with NeuroMed Aira
+        </a>
+    </div>
+    </div>
+  </section>
 
-
-    <!-- Premium Chat Card with Glassmorphism -->
-    <section class="mt-8 bg-white/70 backdrop-blur-md border border-white/20 rounded-3xl shadow-2xl shadow-slate-900/5 overflow-hidden">
-      <div class="px-6 md:px-8 pt-6 pb-4 flex items-start justify-between gap-4">
-        <div class="flex items-start gap-4 flex-1">
-          <!-- AI Avatar -->
-          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#236092] to-[#1B5A8E] flex items-center justify-center flex-shrink-0 shadow-lg">
-            <i class="fa-solid fa-heart-pulse text-white text-lg"></i>
+  <!-- Two Panel Section: Product Demo -->
+  <section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 md:px-6">
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center gap-2 mb-4">
+          <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm">
+            <img src="https://res.cloudinary.com/dk52yeq9x/image/upload/v1768919639/NeuroMed_AI_Logo-13-12_vgfarp.png" 
+                 alt="NeuroMed Aira Icon" 
+                 class="w-6 h-6 object-contain"/>
           </div>
-          <!-- Friendly AI Message -->
-          <div id="intro" class="chat-bubble chat-ai flex-1 bg-white/90 backdrop-blur-sm border border-slate-100 rounded-2xl shadow-sm">
-            <p class="text-slate-800 leading-relaxed">
-              Hey, I'm here with you. Upload a document and I'll help you understand it in simple, calm steps.
+          <h2 class="text-3xl font-bold text-slate-900">NeuroMed Aira</h2>
+        </div>
+        <p class="text-lg text-slate-600 mb-8">Your AI Medical Summary Assistant</p>
+      </div>
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <!-- Left Panel: Text -->
+        <div>
+          <div class="bg-slate-50 rounded-2xl p-6 mb-6 border border-slate-200">
+            <p class="text-lg text-slate-700 italic mb-4">
+              "Explain this lab result in simple terms for my elderly mother."
+            </p>
+            <p class="text-base text-slate-600">
+              Aira translates complex medical language into explanations anyone can understand—patients, caregivers, and families alike.
             </p>
           </div>
-        </div>
-        <span id="modeBadge" class="mode-badge text-slate-600 bg-white/80 backdrop-blur-sm border border-slate-200 shadow-sm" title="Current tone">
-          <i class="fa-regular fa-message"></i><span>Caregiver</span>
-        </span>
-      </div>
-
-      <!-- Chat area -->
-      <div id="chatWindow" class="px-5 md:px-6 pb-3 pt-3 max-h-[55vh] overflow-y-auto scroll-smooth"></div>
-
-      <!-- Suggestions (trimmed) -->
-      <div class="px-5 md:px-6 pb-3">
-        <div id="suggestionsList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 compact" role="list">
-          <button class="chip w-full text-left px-3 py-2 rounded-full text-sm hover:bg-slate-50 suggestion" role="listitem"><i class="fa-regular fa-hospital mr-2"></i>Simplify this ER discharge for my family</button>
-          <button class="chip w-full text-left px-3 py-2 rounded-full text-sm hover:bg-slate-50 suggestion" role="listitem"><i class="fa-solid fa-vial-circle-check mr-2"></i>Explain these labs in plain English</button>
-          <button class="chip w-full text-left px-3 py-2 rounded-full text-sm hover:bg-slate-50 suggestion" role="listitem"><i class="fa-solid fa-pills mr-2"></i>Make a daily medication schedule</button>
-          <button class="chip w-full text-left px-3 py-2 rounded-full text-sm hover:bg-slate-50 suggestion" role="listitem"><i class="fa-regular fa-clipboard mr-2"></i>Questions to ask my doctor</button>
-          <button class="chip w-full text-left px-3 py-2 rounded-full text-sm hover:bg-slate-50 suggestion" role="listitem"><i class="fa-solid fa-language mr-2"></i>Translate this for my lola (Taglish)</button>
-        </div>
-        <div class="mt-2 text-center">
-          <button id="toggleSuggestions" class="text-sm text-slate-600 underline" type="button">Show more</button>
-        </div>
-      </div>
-
-      <!-- Composer (Premium Design) -->
-      <div class="border-t bg-gradient-to-b from-white/80 to-slate-50/60 backdrop-blur-sm">
-        <div class="px-4 md:px-6 py-4 md:py-5">
-          <div class="dropwrap p-4 md:p-5 bg-white/60 backdrop-blur-sm border-2 border-dashed border-slate-300 rounded-2xl hover:border-[#236092] transition-colors duration-200">
-            <div id="dropZone" class="relative flex items-end gap-2">
-              <input id="fileInput" type="file" class="hidden" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.heic,.webp" multiple />
-              <button id="uploadBtn" class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-slate-100 hover:bg-slate-200 grid place-items-center" title="Upload a record" aria-label="Upload a medical record">
-                <i class="fa-solid fa-paperclip"></i>
-              </button>
-
-              <div class="flex-1 min-w-0">
-                <textarea id="chatInput" rows="1" class="w-full resize-none px-3 py-2 outline-none placeholder-slate-400" placeholder="Type your question… (Shift+Enter for new line)" aria-label="Message"></textarea>
-                <div class="flex flex-wrap gap-2 mt-1" id="fileChips"></div>
+          <div class="space-y-4">
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 rounded-lg bg-[#236092] flex items-center justify-center flex-shrink-0">
+                <i class="fa-solid fa-plus text-white text-sm"></i>
               </div>
-
-              <div class="flex items-center gap-2">
-                <button id="micBtn" class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-slate-100 hover:bg-slate-200 grid place-items-center" title="Dictate" aria-label="Dictate">
-                  <i class="fa-solid fa-microphone"></i>
-                </button>
-                <button id="sendBtn" class="w-16 h-9 md:h-10 rounded-xl bg-black text-white hover:bg-slate-900 grid place-items-center disabled:opacity-40 disabled:cursor-not-allowed" title="Send" aria-label="Send" disabled>
-                  <i class="fa-solid fa-paper-plane"></i>
-                </button>
+              <div>
+                <h3 class="font-semibold text-slate-900 mb-1">Add context</h3>
+                <p class="text-sm text-slate-600">Ask your question naturally—just like you'd ask a doctor.</p>
               </div>
-
-              <div id="dropHint" class="pointer-events-none hidden absolute inset-0 rounded-xl ring-2 ring-[#28926D]/50 bg-[#28926D]/10 grid place-items-center text-[#1F4E3E] text-sm font-medium">
-                Drop your file to attach
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 rounded-lg bg-[#236092] flex items-center justify-center flex-shrink-0">
+                <i class="fa-solid fa-sparkles text-white text-sm"></i>
+              </div>
+              <div>
+                <h3 class="font-semibold text-slate-900 mb-1">Improve your prompt</h3>
+                <p class="text-sm text-slate-600">Aira refines your request to get the most accurate, helpful explanation.</p>
               </div>
             </div>
           </div>
+  </div>
 
-          <!-- gentle line; removed broken /how-to-share link -->
-          <div class="px-1 pt-2 text-[12px] text-slate-500">
-            Educational use only.
+        <!-- Right Panel: Demo UI -->
+        <div class="relative">
+          <div class="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-[#236092]/10 via-transparent to-amber-200/20 blur-2xl"></div>
+          <div class="relative bg-white/90 backdrop-blur-sm border border-slate-200 shadow-2xl rounded-3xl p-6 overflow-hidden">
+            <!-- App Header -->
+            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200">
+              <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm">
+                <img src="https://res.cloudinary.com/dk52yeq9x/image/upload/v1768919639/NeuroMed_AI_Logo-13-12_vgfarp.png" 
+                     alt="NeuroMed Aira Icon" 
+                     class="w-6 h-6 object-contain"/>
+        </div>
+              <div>
+                <p class="font-semibold text-slate-900">NeuroMed Aira</p>
+                <p class="text-xs text-slate-500">Medical Summary Assistant</p>
+        </div>
+      </div>
+
+            <!-- Prompt Box -->
+            <div class="bg-white border-2 border-slate-200 rounded-2xl p-4 mb-4 shadow-lg">
+              <p class="text-sm text-slate-700 mb-3">
+                "Explain this lab result in simple terms for my elderly mother"
+              </p>
+              <div class="flex items-center gap-2">
+                <button class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center">
+                  <i class="fa-solid fa-plus text-xs text-slate-600"></i>
+    </button>
+                <button class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-medium text-slate-700 flex items-center gap-1">
+                  <i class="fa-solid fa-pencil text-xs"></i>
+                  <span>Add context</span>
+                </button>
+                <button class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-medium text-slate-700 flex items-center gap-1">
+                  <i class="fa-solid fa-sparkles text-xs"></i>
+                  <span>Improve prompt</span>
+                </button>
+                <button class="ml-auto w-10 h-10 rounded-xl bg-[#F59E0B] hover:bg-[#d97706] flex items-center justify-center shadow-md">
+                  <i class="fa-solid fa-arrow-up text-white text-sm"></i>
+                </button>
+        </div>
+        </div>
+
+            <!-- Summary Preview -->
+            <div class="space-y-3">
+              <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                <p class="text-xs font-semibold text-slate-900 mb-1">In simple terms</p>
+                <p class="text-xs text-slate-600">
+                  Your lab results fall within normal ranges. No immediate concerns—just continue routine check-ups.
+                </p>
+      </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div class="bg-white rounded-lg p-2 border border-slate-100">
+                  <p class="text-xs font-semibold text-slate-900 mb-1">What this means</p>
+                  <p class="text-xs text-slate-600">Everything looks stable and healthy.</p>
+        </div>
+                <div class="bg-white rounded-lg p-2 border border-slate-100">
+                  <p class="text-xs font-semibold text-slate-900 mb-1">Next steps</p>
+                  <p class="text-xs text-slate-600">Schedule your next follow-up as planned.</p>
+        </div>
+      </div>
+        </div>
+        </div>
+      </div>
+        </div>
+        </div>
+  </section>
+
+  <!-- Backend Built-in Section -->
+  <section class="py-20 bg-gradient-to-b from-slate-50 to-white">
+    <div class="max-w-7xl mx-auto px-4 md:px-6">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <!-- Left: Visual -->
+        <div class="relative order-2 lg:order-1">
+          <div class="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-blue-200/20 via-transparent to-purple-200/20 blur-2xl"></div>
+          <div class="relative bg-white/90 backdrop-blur-sm border border-slate-200 shadow-2xl rounded-3xl p-6">
+            <!-- Task List -->
+            <div class="space-y-3 mb-6">
+              <div class="flex items-center gap-3">
+                <div class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
+                  <i class="fa-solid fa-check text-white text-xs"></i>
+      </div>
+                <p class="text-sm text-slate-700">Encrypting your documents</p>
+        </div>
+              <div class="flex items-center gap-3">
+                <div class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
+                  <i class="fa-solid fa-check text-white text-xs"></i>
+        </div>
+                <p class="text-sm text-slate-700">Securing your data</p>
+      </div>
+              <div class="flex items-center gap-3">
+                <div class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
+                  <i class="fa-solid fa-check text-white text-xs"></i>
+                </div>
+                <p class="text-sm text-slate-700">Protecting your privacy</p>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
+                  <i class="fa-solid fa-check text-white text-xs"></i>
+                </div>
+                <p class="text-sm text-slate-700">Generating secure summaries</p>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
+                  <i class="fa-solid fa-check text-white text-xs"></i>
+                </div>
+                <p class="text-sm text-slate-700">Ensuring HIPAA compliance</p>
+  </div>
+</div>
+
+            <!-- Prompt Box -->
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+              <p class="text-xs font-medium text-slate-700 mb-2">What would you change?</p>
+              <div class="flex items-center gap-2">
+                <input type="text" placeholder="Add your request..." class="flex-1 text-xs px-3 py-2 rounded-lg border border-slate-200 bg-white">
+                <button class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-medium text-slate-700 flex items-center gap-1">
+                  <i class="fa-solid fa-pencil text-xs"></i>
+                  <span>Add styling</span>
+  </button>
+                <button class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-medium text-slate-700 flex items-center gap-1">
+                  <i class="fa-solid fa-sparkles text-xs"></i>
+                  <span>Improve prompt</span>
+                </button>
+                <button class="w-8 h-8 rounded-xl bg-[#F59E0B] hover:bg-[#d97706] flex items-center justify-center">
+                  <i class="fa-solid fa-arrow-up text-white text-xs"></i>
+                </button>
+      </div>
           </div>
+          </div>
+          </div>
+
+        <!-- Right: Text -->
+        <div class="order-1 lg:order-2">
+          <h2 class="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-6">
+            Your privacy isn't an add-on. It's built in.
+          </h2>
+          <div class="space-y-4 mb-6">
+            <div class="flex items-start gap-3">
+              <i class="fa-solid fa-shield-halved text-[#236092] mt-1"></i>
+              <div>
+                <p class="font-semibold text-slate-900">End-to-end encryption</p>
+          </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <i class="fa-solid fa-shield-halved text-[#236092] mt-1"></i>
+              <div>
+                <p class="font-semibold text-slate-900">HIPAA-compliant processing</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <i class="fa-solid fa-shield-halved text-[#236092] mt-1"></i>
+              <div>
+                <p class="font-semibold text-slate-900">Secure document handling</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <i class="fa-solid fa-shield-halved text-[#236092] mt-1"></i>
+              <div>
+                <p class="font-semibold text-slate-900">Private, protected summaries—always</p>
+              </div>
+            </div>
+          </div>
+          <p class="text-lg text-slate-600 mb-8 leading-relaxed">
+            Everything happens automatically behind the scenes, so you can focus on understanding—not worrying. Your data stays yours. Period.
+          </p>
+        </div>
+          </div>
+        </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 md:px-6">
+      <div class="text-center mb-12">
+        <h2 class="text-5xl md:text-6xl font-bold tracking-tight text-slate-900 mb-4">
+          NeuroMed Aira changed how I care for my family.
+        </h2>
+        <p class="text-lg text-slate-600 mb-6">
+          Real people. Real clarity. Real relief.
+        </p>
+          </div>
+
+      <!-- Testimonials Grid -->
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Testimonial 1 -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition">
+          <p class="text-sm text-slate-700 mb-4">
+            "NeuroMed Aira looks perfect for caregivers who want to understand medical results without feeling overwhelmed."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-[#236092] flex items-center justify-center text-white font-semibold">
+              M
+        </div>
+            <div>
+              <p class="font-semibold text-slate-900 text-sm">Maria Santos</p>
+              <p class="text-xs text-slate-500">@marias_care</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 2 -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition">
+          <p class="text-sm text-slate-700 mb-4">
+            "You can finally understand complex medical reports without a medical degree. This tool just makes sense."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-semibold">
+              J
+            </div>
+            <div>
+              <p class="font-semibold text-slate-900 text-sm">John Chen</p>
+              <p class="text-xs text-slate-500">@johnhealth</p>
+            </div>
+          </div>
+      </div>
+
+        <!-- Testimonial 3 -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition">
+          <p class="text-sm text-slate-700 mb-4">
+            "No jargon. No confusion. Just clear explanations when you need them most."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-rose-500 flex items-center justify-center text-white font-semibold">
+              S
+      </div>
+            <div>
+              <p class="font-semibold text-slate-900 text-sm">Sarah Johnson</p>
+              <p class="text-xs text-slate-500">@sarahcaregiver</p>
+    </div>
+  </div>
+</div>
+
+        <!-- Testimonial 4 -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition">
+          <p class="text-sm text-slate-700 mb-4">
+            "Thoughtfully designed with patients in mind. Secure, accurate, and genuinely useful."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold">
+              D
+          </div>
+            <div>
+              <p class="font-semibold text-slate-900 text-sm">Dr. David Park</p>
+              <p class="text-xs text-slate-500">@drpark</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 5 -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition">
+          <p class="text-sm text-slate-700 mb-4">
+            "Exactly what I needed to manage my parents' medical records with confidence."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-white font-semibold">
+              L
+          </div>
+            <div>
+              <p class="font-semibold text-slate-900 text-sm">Lisa Martinez</p>
+              <p class="text-xs text-slate-500">@lisafamily</p>
+        </div>
+          </div>
+      </div>
+
+        <!-- Testimonial 6 -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition">
+          <p class="text-sm text-slate-700 mb-4">
+            "Fast answers, even late at night. This should exist everywhere."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-teal-500 flex items-center justify-center text-white font-semibold">
+              R
+        </div>
+            <div>
+              <p class="font-semibold text-slate-900 text-sm">Robert Kim</p>
+              <p class="text-xs text-slate-500">@robertkim</p>
+        </div>
+      </div>
+        </div>
         </div>
       </div>
     </section>
 
-    <!-- Actions (start disabled) -->
-    
-  </main>
+  <!-- Pricing Section -->
+  <section class="py-20 bg-gradient-to-b from-[#236092] via-[#1B5A8E] to-[#172554] text-white relative overflow-hidden">
+    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-teal-400"></div>
+    <div class="max-w-7xl mx-auto px-4 md:px-6">
+      <!-- Header -->
+      <div class="text-center mb-12">
+        <h2 class="text-5xl md:text-6xl font-bold tracking-tight mb-4">
+          Plans for <span class="text-emerald-400">every need</span>
+        </h2>
+          <p class="text-lg text-white/80 max-w-3xl mx-auto">
+          Start free. Upgrade when you're ready. Grow at your own pace.
+        </p>
+      </div>
 
-  <!-- Toast -->
+      <!-- Pricing Cards Grid -->
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Free Plan -->
+        <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-6 shadow-xl flex flex-col">
+          <div class="mb-6">
+            <h3 class="text-2xl font-bold mb-2">Free</h3>
+            <p class="text-sm text-white/80 mb-4">See what AI clarity feels like</p>
+            <div class="mb-4">
+              <span class="text-4xl font-bold">$0</span>
+              <span class="text-white/70">/month</span>
+            </div>
+          </div>
+          <a href="/signup" class="block w-full text-center px-6 py-3 rounded-xl bg-white/20 hover:bg-white/30 text-white font-semibold transition mb-6 border border-white/30">
+            Get Started
+          </a>
+          <ul class="space-y-3 flex-grow">
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+              <span class="text-sm">Simple medical explanations</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+              <span class="text-sm">Short chats for common questions</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+              <span class="text-sm">Basic document summaries</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-times text-red-400 mt-0.5"></i>
+              <span class="text-sm text-white/60">Limited premium access</span>
+            </li>
+          </ul>
+              </div>
+
+        <!-- Monthly Plan -->
+        <div class="bg-white/10 backdrop-blur-sm border-2 border-white/30 rounded-3xl p-6 shadow-xl flex flex-col relative">
+          <div class="mb-6">
+            <h3 class="text-2xl font-bold mb-2">Monthly</h3>
+            <p class="text-sm text-white/80 mb-4">For ongoing peace of mind</p>
+            <div class="mb-4">
+              <span class="text-4xl font-bold">$20</span>
+              <span class="text-white/70">/month</span>
+            </div>
+          </div>
+          <a href="/signup" class="block w-full text-center px-6 py-3 rounded-xl bg-white text-[#236092] font-semibold hover:bg-slate-100 transition shadow-lg mb-6">
+            Upgrade to Monthly
+          </a>
+          <ul class="space-y-3 flex-grow">
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+              <span class="text-sm">Unlimited medical summaries</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+              <span class="text-sm">Longer chats & larger uploads</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+              <span class="text-sm">Voice interaction</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+              <span class="text-sm">30-day chat history</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+              <span class="text-sm">Priority support</span>
+            </li>
+          </ul>
+              </div>
+
+        <!-- Annual Plan -->
+        <div class="bg-white/10 backdrop-blur-sm border-2 border-purple-400/50 rounded-3xl p-6 shadow-xl flex flex-col relative">
+          <div class="absolute top-4 right-4 bg-purple-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
+            ⭐ Most Popular
+              </div>
+          <div class="mb-6">
+            <h3 class="text-2xl font-bold mb-2">Annual</h3>
+            <p class="text-sm text-white/80 mb-4">The best value for long-term care</p>
+            <div class="mb-2">
+              <span class="text-4xl font-bold">$199</span>
+              <span class="text-white/70">/year</span>
+            </div>
+            <p class="text-xs text-emerald-400 font-medium">Save 17% compared to monthly</p>
+          </div>
+          <a href="/signup" class="block w-full text-center px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold transition shadow-lg mb-6">
+            Get Annual
+          </a>
+          <ul class="space-y-3 flex-grow">
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+              <span class="text-sm">Everything in Monthly</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+              <span class="text-sm">365-day chat history</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+              <span class="text-sm">Priority support</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+              <span class="text-sm">Designed for continuous use</span>
+            </li>
+          </ul>
+          </div>
+
+        <!-- Enterprise Plan -->
+        <div class="bg-white/10 backdrop-blur-sm border-2 border-emerald-400/50 rounded-3xl p-6 shadow-xl flex flex-col relative">
+          <div class="mb-6">
+            <h3 class="text-2xl font-bold mb-2">Enterprise</h3>
+            <p class="text-sm text-white/80 mb-4">Build your own medical AI system</p>
+            <div class="mb-2">
+              <span class="text-4xl font-bold">Custom</span>
+          </div>
+            <p class="text-xs text-emerald-400 font-medium">pricing</p>
+          </div>
+          <a href="/signup" class="block w-full text-center px-6 py-3 rounded-xl border-2 border-emerald-400 text-emerald-400 hover:bg-emerald-400/10 font-semibold transition mb-6">
+            Contact Us
+          </a>
+          <ul class="space-y-3 flex-grow">
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+              <span class="text-sm">Everything in Annual</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+              <span class="text-sm">Unlimited chat history</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+              <span class="text-sm">Custom features & integrations</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+              <span class="text-sm">Team access & audit logs</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+              <span class="text-sm">Dedicated support</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+              <span class="text-sm">Flexible contract terms</span>
+            </li>
+          </ul>
+        </div>
+        </div>
+      </div>
+    </section>
+
+  <!-- Final CTA Section -->
+  <section class="py-20 bg-gradient-to-b from-white via-slate-50 to-white">
+    <div class="max-w-4xl mx-auto px-4 md:px-6 text-center">
+      <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 mb-6">
+        Start understanding in minutes.
+      </h2>
+      <p class="text-xl md:text-2xl text-slate-600 mb-8 max-w-2xl mx-auto">
+        No jargon. No guessing. Just clarity—when it matters most.
+      </p>
+      <a href="/signup" class="inline-flex items-center px-8 py-4 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition shadow-lg text-lg">
+        Start building with NeuroMed Aira
+      </a>
+    </div>
+  </section>
+
+  <!-- Toast Notification -->
   <div id="toast" class="toast fixed top-4 right-4 z-[60] hidden">
-    <div class="bg-white border shadow-lg rounded-xl px-3 py-2 text-sm flex items-center gap-2">
+    <div class="bg-white border shadow-lg rounded-xl px-4 py-3 text-sm flex items-center gap-2">
       <i id="toastIcon" class="fa-regular fa-message text-[#236092]" aria-hidden="true"></i>
       <span id="toastText" class="text-slate-800">Mode set</span>
     </div>
   </div>
 
-  <!-- Help button for tour (opt-in) -->
-  <button id="nmTourHelp" title="Quick tour">?</button>
-
-  <!-- Post-result invite (kept) -->
+  <!-- Post-result invite -->
   <div id="postResultInvite" class="fixed bottom-4 right-4 z-[60] hidden">
-    <div class="bg-white border shadow-xl rounded-2xl p-4 max-w-sm">
-      <div class="font-semibold">Like this summary?</div>
-      <p class="text-sm text-slate-600 mt-1">Create a free account to keep your history and download PDFs.</p>
-      <div class="mt-3 flex gap-2">
-        <a href="/signup" class="px-3 py-1.5 rounded-lg bg-[#236092] text-white text-sm">Create free account</a>
-        <button class="px-3 py-1.5 rounded-lg border text-sm" onclick="document.getElementById('postResultInvite').classList.add('hidden')">Not now</button>
+    <div class="bg-white border shadow-xl rounded-2xl p-5 max-w-sm">
+      <div class="font-semibold text-slate-900">Like this summary?</div>
+      <p class="text-sm text-slate-600 mt-2">Create a free account to keep your history and download PDFs.</p>
+      <div class="mt-4 flex gap-2">
+        <a href="/signup" class="px-4 py-2 rounded-lg bg-[#236092] text-white text-sm font-medium hover:bg-[#1B5A8E] transition">Create free account</a>
+        <button class="px-4 py-2 rounded-lg border text-sm hover:bg-slate-50" onclick="document.getElementById('postResultInvite').classList.add('hidden')">Not now</button>
       </div>
     </div>
   </div>
 
   <script>
-
+// Language Support
 const LANGUAGE_CHOICES = [
-  ['en-US','English'],
-  ['ja-JP','Japanese'],
-  ['es-ES','Spanish'],
-  ['fr-FR','French'],
-  ['de-DE','German'],
-  ['it-IT','Italian'],
-  ['pt-PT','Portuguese (Portugal)'],
-  ['pt-BR','Portuguese (Brazil)'],
-  ['ru-RU','Russian'],
-  ['zh-CN','Chinese (Simplified)'],
-  ['zh-TW','Chinese (Traditional)'],
-  ['ko-KR','Korean'],
-  ['ar-SA','Arabic (Saudi Arabia)'],
-  ['tr-TR','Turkish'],
-  ['nl-NL','Dutch'],
-  ['sv-SE','Swedish'],
-  ['pl-PL','Polish'],
-  ['da-DK','Danish'],
-  ['no-NO','Norwegian'],
-  ['fi-FI','Finnish'],
-  ['he-IL','Hebrew'],
-  ['th-TH','Thai'],
-  ['hi-IN','Hindi'],
-  ['cs-CZ','Czech'],
-  ['ro-RO','Romanian'],
-  ['hu-HU','Hungarian'],
-  ['sk-SK','Slovak'],
-  ['bg-BG','Bulgarian'],
-  ['uk-UA','Ukrainian'],
-  ['vi-VN','Vietnamese'],
-  ['id-ID','Indonesian'],
-  ['ms-MY','Malay'],
-  ['sr-RS','Serbian'],
-  ['hr-HR','Croatian'],
-  ['el-GR','Greek'],
-  ['lt-LT','Lithuanian'],
-  ['lv-LV','Latvian'],
-  ['et-EE','Estonian'],
-  ['sl-SI','Slovenian'],
-  ['is-IS','Icelandic'],
-  ['sq-AL','Albanian'],
-  ['mk-MK','Macedonian'],
-  ['bs-BA','Bosnian'],
-  ['ca-ES','Catalan'],
-  ['gl-ES','Galician'],
-  ['eu-ES','Basque'],
-  ['hy-AM','Armenian'],
-  ['fa-IR','Persian'],
-  ['sw-KE','Swahili'],
-  ['ta-IN','Tamil'],
-  ['te-IN','Telugu'],
-  ['kn-IN','Kannada'],
-  ['ml-IN','Malayalam'],
-  ['mr-IN','Marathi'],
-  ['pa-IN','Punjabi'],
-  ['gu-IN','Gujarati'],
-  ['or-IN','Odia'],
-  ['as-IN','Assamese'],
-  ['ne-NP','Nepali'],
-  ['si-LK','Sinhala'],
+  ['en-US','English'], ['ja-JP','Japanese'], ['es-ES','Spanish'], ['fr-FR','French'],
+  ['de-DE','German'], ['it-IT','Italian'], ['pt-PT','Portuguese (Portugal)'], ['pt-BR','Portuguese (Brazil)'],
+  ['ru-RU','Russian'], ['zh-CN','Chinese (Simplified)'], ['zh-TW','Chinese (Traditional)'], ['ko-KR','Korean'],
+  ['ar-SA','Arabic'], ['tr-TR','Turkish'], ['nl-NL','Dutch'], ['sv-SE','Swedish'],
+  ['pl-PL','Polish'], ['da-DK','Danish'], ['no-NO','Norwegian'], ['fi-FI','Finnish'],
+  ['he-IL','Hebrew'], ['th-TH','Thai'], ['hi-IN','Hindi'], ['cs-CZ','Czech'],
+  ['ro-RO','Romanian'], ['hu-HU','Hungarian'], ['sk-SK','Slovak'], ['bg-BG','Bulgarian'],
+  ['uk-UA','Ukrainian'], ['vi-VN','Vietnamese'], ['id-ID','Indonesian'], ['ms-MY','Malay'],
+  ['sr-RS','Serbian'], ['hr-HR','Croatian'], ['el-GR','Greek'], ['lt-LT','Lithuanian'],
+  ['lv-LV','Latvian'], ['et-EE','Estonian'], ['sl-SI','Slovenian'], ['is-IS','Icelandic'],
+  ['sq-AL','Albanian'], ['mk-MK','Macedonian'], ['bs-BA','Bosnian'], ['ca-ES','Catalan'],
+  ['gl-ES','Galician'], ['eu-ES','Basque'], ['hy-AM','Armenian'], ['fa-IR','Persian'],
+  ['sw-KE','Swahili'], ['ta-IN','Tamil'], ['te-IN','Telugu'], ['kn-IN','Kannada'],
+  ['ml-IN','Malayalam'], ['mr-IN','Marathi'], ['pa-IN','Punjabi'], ['gu-IN','Gujarati'],
+  ['or-IN','Odia'], ['as-IN','Assamese'], ['ne-NP','Nepali'], ['si-LK','Sinhala'],
 ];
 
 function guessBrowserLang(){
   const nav = (navigator.languages && navigator.languages[0]) || navigator.language || 'en-US';
-  // Only return if supported; else fallback:
   return LANGUAGE_CHOICES.find(([code]) => code === nav) ? nav : 'en-US';
 }
 function loadLang(){ return localStorage.getItem('nm_lang') || guessBrowserLang(); }
 function saveLang(code){ localStorage.setItem('nm_lang', code); }
-
 function labelForLang(code){
   const found = LANGUAGE_CHOICES.find(([c])=>c===code);
   return found ? found[1] : code;
 }
-
 function buildLangMenu(menuEl, onPick){
   if (!menuEl) return;
   menuEl.innerHTML = '';
@@ -751,164 +994,31 @@ function buildLangMenu(menuEl, onPick){
     btn.type = 'button';
     btn.className = 'w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center gap-2';
     btn.dataset.lang = code;
-    btn.innerHTML = `<span class="flex-1 truncate">${label}</span>
-                     <span class="text-xs text-slate-500">${code}</span>`;
+    btn.innerHTML = `<span class="flex-1 truncate">${label}</span><span class="text-xs text-slate-500">${code}</span>`;
     btn.addEventListener('click', () => onPick(code));
     menuEl.appendChild(btn);
   });
 }
-
 function toggleMenu(el, open){
   if (!el) return;
   el.classList.toggle('hidden', !open);
 }
-
 function applyLangUI(code){
   const label = labelForLang(code);
   const b1 = document.getElementById('langBtnLabel');
   const b2 = document.getElementById('mLangBtnLabel');
   if (b1) b1.textContent = label;
   if (b2) b2.textContent = label;
-  // Optional toast:
-  if (typeof showToast === 'function'){
-    showToast(`Language set: ${label}`, 'fa-solid fa-globe', 'text-[#236092]');
-  }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const desktopBtn  = document.getElementById('langBtn');
-  const desktopMenu = document.getElementById('langMenu');
-  const mobileBtn   = document.getElementById('mLangBtn');
-  const mobileMenu  = document.getElementById('mLangMenu');
-
-  const current = loadLang();
-  applyLangUI(current);
-  buildLangMenu(desktopMenu, pickLang);
-  buildLangMenu(mobileMenu,  pickLang);
-
-  function pickLang(code){
-    saveLang(code);
-    applyLangUI(code);
-    toggleMenu(desktopMenu, false);
-    toggleMenu(mobileMenu, false);
-  }
-
-  // Open/close handlers
-  desktopBtn?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isOpen = desktopMenu && desktopMenu.classList.contains('hidden') === false;
-    toggleMenu(desktopMenu, !isOpen);
-  });
-  mobileBtn?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isOpen = mobileMenu && mobileMenu.classList.contains('hidden') === false;
-    toggleMenu(mobileMenu, !isOpen);
-  });
-
-  // close on outside click / Esc
-  document.addEventListener('click', (e) => {
-    if (!desktopMenu && !mobileMenu) return;
-    if (desktopMenu && !desktopMenu.contains(e.target) && e.target !== desktopBtn) toggleMenu(desktopMenu, false);
-    if (mobileMenu  && !mobileMenu.contains(e.target)  && e.target !== mobileBtn ) toggleMenu(mobileMenu,  false);
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape'){ toggleMenu(desktopMenu, false); toggleMenu(mobileMenu, false); }
-  });
-});
-
-// Expose for other scripts
-window.__nmLang = () => loadLang();
-    // ---------------- Utilities
+// Utilities
     function getCSRFToken(){ const m=document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)'); return m?m.pop():''; }
     const $ = sel => document.querySelector(sel);
     const $$ = sel => Array.from(document.querySelectorAll(sel));
     function track(ev, data={}){ try{ navigator.sendBeacon('/api/track', new Blob([JSON.stringify({ ev, ...data })], {type:'application/json'})); }catch{} }
 
-    function appendAttachmentBubble(fileList){
-  const chatWindow = document.getElementById('chatWindow');
-
-  const wrap = document.createElement('div');
-  wrap.className = 'w-full flex mb-3';
-
-  const bubble = document.createElement('div');
-  bubble.className = 'chat-bubble chat-user';   // same look as user text
-
-  const grid = document.createElement('div');
-  grid.className = 'grid grid-cols-2 gap-2';
-
-  const isImg = f => (f.type?.startsWith('image/') || /\.(png|jpe?g|webp)$/i.test(f.name));
-
-  fileList.forEach(f => {
-    if (isImg(f)) {
-      const url = URL.createObjectURL(f);
-      const img = document.createElement('img');
-      img.src = url;
-      img.alt = f.name;
-      img.className = 'max-w-[160px] max-h-[120px] rounded-lg object-cover border';
-      img.onload = () => URL.revokeObjectURL(url);
-      grid.appendChild(img);
-    } else {
-      const row = document.createElement('div');
-      row.className = 'flex items-center gap-2 rounded-md border bg-white/90 px-2 py-1 text-sm';
-      row.innerHTML = `<i class="${iconFor(f.name)}"></i><span class="truncate max-w-[180px]" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</span>`;
-      grid.appendChild(row);
-    }
-  });
-
-  // Title + grid
-  const title = document.createElement('div');
-  title.className = 'text-[13px] mb-1 opacity-90';
-  title.textContent = fileList.length > 1 ? 'You sent attachments' : 'You sent an attachment';
-
-  bubble.appendChild(title);
-  bubble.appendChild(grid);
-
-  const meta = document.createElement('div');
-  meta.className = 'text-[11px] text-slate-300 mt-1 text-right ml-auto pr-1';
-  meta.innerText = new Intl.DateTimeFormat(
-  (typeof __nmLang === 'function' ? __nmLang() : undefined),
-  { hour:'2-digit', minute:'2-digit' }
-).format(new Date());
-
-
-  const col = document.createElement('div');
-  col.className = 'flex flex-col items-end ml-auto';
-  col.appendChild(bubble);
-  col.appendChild(meta);
-
-  wrap.appendChild(col);
-  chatWindow.appendChild(wrap);
-  chatWindow.scrollTop = chatWindow.scrollHeight;
-}
-
-function appendBubble({ message, isUser=false, timestamp=new Date() }) {
-  const chatWindow = document.getElementById('chatWindow');
-
-  const wrap = document.createElement('div');
-  wrap.className = 'w-full flex mb-3';
-
-  const bubble = document.createElement('div');
-  bubble.className = `chat-bubble ${isUser ? 'chat-user' : 'chat-ai'}`;
-  bubble.innerText = message;
-
-  const meta = document.createElement('div');
-  meta.className = 'text-[11px] text-slate-400 mt-1 ' + (isUser ? 'text-right ml-auto pr-1' : 'pl-1');
-  meta.innerText = new Intl.DateTimeFormat(undefined,{ hour:'2-digit', minute:'2-digit' }).format(timestamp);
-
-  const col = document.createElement('div');
-  col.className = 'flex flex-col ' + (isUser ? 'items-end ml-auto' : 'items-start mr-auto');
-  col.appendChild(bubble);
-  col.appendChild(meta);
-
-  wrap.appendChild(col);
-  chatWindow.appendChild(wrap);
-  chatWindow.scrollTop = chatWindow.scrollHeight;
-}
-
-
     function setSendDisabled(disabled){ $('#sendBtn').disabled = disabled; }
-
-    function loadMode(){ return localStorage.getItem('nm_mode') || 'Caregiver'; }
+function loadMode(){ return localStorage.getItem('nm_mode') || 'PlainClinical'; } // Default to Balanced
     function saveMode(m){ localStorage.setItem('nm_mode', m); }
 
     async function isAuthenticated(){
@@ -923,121 +1033,38 @@ function appendBubble({ message, isUser=false, timestamp=new Date() }) {
     let abortController = null;
     let showGateAfterResponse = false;
     let guestTurnsUsed = parseInt(localStorage.getItem('nm_guest_turns') || '0', 10);
-    const GUEST_TURNS_LIMIT = 3;
 
-    // Readability & a11y
+// Readability Controls
     (function(){
       const root = document.documentElement;
       const body = document.body;
       $('#fontMinus')?.addEventListener('click', () => {
-        const curr = parseFloat(getComputedStyle(root).getPropertyValue('font-size')) || 18;
-        root.style.setProperty('font-size', Math.max(16, curr - 1) + 'px');
+    const curr = parseFloat(getComputedStyle(root).getPropertyValue('font-size')) || 16;
+    root.style.setProperty('font-size', Math.max(14, curr - 1) + 'px');
       });
       $('#fontPlus')?.addEventListener('click', () => {
-        const curr = parseFloat(getComputedStyle(root).getPropertyValue('font-size')) || 18;
+    const curr = parseFloat(getComputedStyle(root).getPropertyValue('font-size')) || 16;
         root.style.setProperty('font-size', Math.min(22, curr + 1) + 'px');
-      });
-      $('#easyReadBtn')?.addEventListener('click', () => {
-        body.classList.toggle('easy-read');
-        $('#easyReadBtn').setAttribute('aria-pressed', body.classList.contains('easy-read') ? 'true' : 'false');
       });
       $('#highContrast')?.addEventListener('click', ()=> {
         body.classList.toggle('hc');
         $('#highContrast').setAttribute('aria-pressed', body.classList.contains('hc') ? 'true' : 'false');
       });
-    })();
+  $('#mFontMinus')?.addEventListener('click', () => {
+    const curr = parseFloat(getComputedStyle(root).getPropertyValue('font-size')) || 16;
+    root.style.setProperty('font-size', Math.max(14, curr - 1) + 'px');
+  });
+  $('#mFontPlus')?.addEventListener('click', () => {
+    const curr = parseFloat(getComputedStyle(root).getPropertyValue('font-size')) || 16;
+    root.style.setProperty('font-size', Math.min(22, curr + 1) + 'px');
+  });
+  $('#mHighContrast')?.addEventListener('click', ()=> {
+    body.classList.toggle('hc');
+    $('#mHighContrast').setAttribute('aria-pressed', body.classList.contains('hc') ? 'true' : 'false');
+  });
+})();
 
-    // Suggestions toggle
-    (function(){
-      const list = $('#suggestionsList');
-      const toggle = $('#toggleSuggestions');
-      if (list && toggle){
-        let expanded = false;
-        const update = () => {
-          if (expanded){ list.classList.remove('compact'); toggle.textContent = 'Show fewer'; }
-          else { list.classList.add('compact'); toggle.textContent = 'Show more'; }
-        };
-        toggle.addEventListener('click', () => { expanded = !expanded; update(); });
-        update();
-      }
-    })();
-
-    // Init
-    document.addEventListener('DOMContentLoaded', () => {
-      // Mode buttons
-      const savedMode = loadMode();
-      $$('#modeGroup button').forEach(btn => {
-        const mode = btn.dataset.mode;
-        if(mode === savedMode){ selectMode(btn); }
-        btn.addEventListener('click', () => selectMode(btn));
-      });
-
-      // Suggestions -> input
-      $$('.suggestion').forEach(btn => btn.addEventListener('click', () => {
-        $('#chatInput').value = btn.innerText.trim(); autosize(); toggleSend(); $('#chatInput').focus();
-      }));
-
-      // Input events
-      $('#chatInput').addEventListener('input', () => { autosize(); toggleSend(); });
-      $('#chatInput').addEventListener('keydown', (e) => { if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendChat(); }});
-      $('#sendBtn').addEventListener('click', sendChat);
-
-      // Upload controls
-      $('#ctaUpload').addEventListener('click', () => $('#fileInput').click());
-      $('#uploadBtn').addEventListener('click', () => $('#fileInput').click());
-      $('#fileInput').addEventListener('change', (e) => { if(e.target.files?.length){ for(const f of e.target.files){ addFile(f); } e.target.value=''; } });
-
-      // Drag & drop
-      const dz = $('#dropZone');
-      ;['dragenter','dragover'].forEach(evt => dz.addEventListener(evt, (e)=>{ e.preventDefault(); $('#dropHint').classList.remove('hidden'); }));
-      ;['dragleave','drop'].forEach(evt => dz.addEventListener(evt, (e)=>{ e.preventDefault(); if(evt==='drop'){ const dt=e.dataTransfer; if(dt?.files?.length){ for(const f of dt.files){ addFile(f); } } } $('#dropHint').classList.add('hidden'); }));
-
-      // Paste image/file
-      document.addEventListener('paste', (e)=>{ const items=e.clipboardData?.items || []; for(const it of items){ if(it.kind==='file'){ addFile(it.getAsFile()); } } });
-
-      // Mic
-      $('#micBtn').addEventListener('click', startDictation);
-
-      autosize(); toggleSend();
-      setTimeout(()=>$('#chatInput').focus(), 200);
-
-      // Help button triggers tour on demand (no auto unless first run)
-      startChatTourAuto();
-
-      showAuthNudgeIfGuest();
-
-      // Actions
-      $('#btnPdf')?.addEventListener('click', ()=> { if (!hasSummary()) return; window.open('/api/export/pdf/latest', '_blank'); track('export_clicked', {type:'pdf'}); });
-      $('#btnShare')?.addEventListener('click', doShareLink);
-      document.querySelectorAll('#langSwitch [data-lang]').forEach(btn=>{
-        btn.addEventListener('click', async ()=>{
-          const lang = btn.dataset.lang;
-          const r = await fetch('/api/translate/latest?lang='+encodeURIComponent(lang), { credentials:'include' });
-          const j = await r.json();
-          if(j?.translation){ appendBubble({ message: j.translation, isUser:false }); }
-        });
-      });
-    });
-
-    function selectMode(btn){
-      $$('#modeGroup button').forEach(b => { 
-        b.setAttribute('aria-pressed','false'); 
-        b.classList.remove('ring-2','ring-[#236092]');
-        b.style.borderColor = '';
-        b.style.background = '';
-        b.style.boxShadow = '';
-      });
-      btn.setAttribute('aria-pressed','true'); 
-      btn.classList.add('ring-2','ring-[#236092]');
-      btn.style.borderColor = '#236092';
-      btn.style.background = 'linear-gradient(135deg, rgba(35,96,146,0.05) 0%, rgba(35,96,146,0.02) 100%)';
-      btn.style.boxShadow = '0 4px 12px rgba(35,96,146,0.15)';
-      const mode = btn.dataset.mode;
-      saveMode(mode);
-      applyModeUI(mode);
-      track('mode_chosen', { mode });
-    }
-
+// Mode Selection
     const MODE_META = {
   'PlainClinical': { 
     icon: 'fa-regular fa-message', 
@@ -1059,11 +1086,11 @@ function appendBubble({ message, isUser=false, timestamp=new Date() }) {
   color: 'text-slate-800', 
   intro: `# 🩺 NeuroMed Aira — Clinical Mode
 
-Welcome to **Clinical Mode**. I’ll process notes, labs, and reports with a structured, medical-first lens.
+Welcome to **Clinical Mode**. I'll process notes, labs, and reports with a structured, medical-first lens.
 
 **Think:** SOAP format, focused differentials, and evidence-based clarity—minus the clutter.
 
-### What I’ll do
+### What I'll do
 - 📝 Organize findings into **Subjective, Objective, Assessment, Plan**.
 - 🔬 **Flag key abnormalities** or patterns worth noting.
 - 📊 Provide **concise interpretations** to speed rounds and documentation.
@@ -1072,8 +1099,6 @@ Your expertise leads; I make the information faster, sharper, and more usable.
 
 **Upload your first report to begin.**`
 },
-
-
   'Geriatric': { 
     icon: 'fa-solid fa-person-cane', 
     color: 'text-[#28926D]', 
@@ -1086,26 +1111,28 @@ Your expertise leads; I make the information faster, sharper, and more usable.
   }
 };
 
+function selectMode(btn){
+  $$('#modeSelectWrap button').forEach(b => { 
+    b.setAttribute('aria-pressed','false');
+  });
+  btn.setAttribute('aria-pressed','true');
+  const mode = btn.dataset.mode;
+  saveMode(mode);
+  applyModeUI(mode);
+  track('mode_chosen', { mode });
+}
 
     function applyModeUI(mode){
-      const meta = MODE_META[mode] || MODE_META['Caregiver'];
-      const badge = $('#modeBadge');
-      badge.querySelector('i').className = meta.icon + ' ' + meta.color;
-      badge.querySelector('span').textContent =
-  mode === 'PlainClinical' ? 'Balanced' :
-  mode === 'EmotionalSupport' ? 'Emotional Support' :
-  mode;
+  const meta = MODE_META[mode] || MODE_META['PlainClinical'];
       const intro = $('#intro');
 intro.classList.add('shimmer');
 setTimeout(() => {
-  intro.innerHTML = '';                               // clear previous
+    intro.innerHTML = '';
   const node = renderAssistantMarkdown(meta.intro || '');
-  intro.appendChild(node);                            // inject markdown → HTML
+    intro.appendChild(node);
   intro.classList.remove('shimmer');
 }, 220);
-
-      showToast(`${mode} mode applied` , meta.icon, meta.color);
-
+  showToast(`${mode === 'PlainClinical' ? 'Balanced' : mode === 'EmotionalSupport' ? 'Emotional Support' : mode} mode applied`, meta.icon, meta.color);
       if (mode === 'Geriatric'){
         document.body.classList.add('easy-read');
       }
@@ -1127,28 +1154,20 @@ setTimeout(() => {
       return 'fa-regular fa-file';
     }
 
-    const MAX_FILES = 15; // Allow up to 15 files (more than required 10)
+const MAX_FILES = 15;
     
     function addFile(file){
       if(!file) return;
-      
-      // Check if we've reached the maximum
       if(files.length >= MAX_FILES) {
         showToast(`Maximum ${MAX_FILES} files allowed`, 'fa-solid fa-exclamation-triangle', 'text-amber-600');
         return;
       }
-      
-      // Check for duplicate files (by name and size)
       const isDuplicate = files.some(f => f.name === file.name && f.size === file.size);
       if(isDuplicate) {
         showToast('This file is already added', 'fa-solid fa-info-circle', 'text-blue-600');
         return;
       }
-      
-      // Add file to array
       files.push(file);
-      
-      // Create chip for this file
       const chip = document.createElement('span');
       chip.className = 'text-xs bg-slate-100 border rounded-full px-2 py-1 inline-flex items-center gap-1';
       chip.dataset.fileName = file.name;
@@ -1159,7 +1178,6 @@ setTimeout(() => {
       x.innerHTML='&times;'; 
       x.setAttribute('aria-label','Remove attachment');
       x.addEventListener('click', ()=>{ 
-        // Remove this specific file
         files = files.filter(f => !(f.name === file.name && f.size === file.size));
         chip.remove(); 
         toggleSend(); 
@@ -1179,73 +1197,103 @@ setTimeout(() => {
     }
 
     function toggleSend(){
-      const hasText = ( $('#chatInput').value || '' ).trim().length > 0;
+  const hasText = ($('#chatInput').value || '').trim().length > 0;
       const hasFile = files.length > 0;
       setSendDisabled(!(hasText || hasFile));
     }
 
-    function hasSummary(){
-      // enabled buttons mean we’ve produced at least one summary this session
-      return !$('#btnPdf').classList.contains('is-disabled');
+function appendBubble({ message, isUser=false, timestamp=new Date() }) {
+  const chatWindow = document.getElementById('chatWindow');
+  const wrap = document.createElement('div');
+  wrap.className = 'w-full flex mb-3';
+  const bubble = document.createElement('div');
+  bubble.className = `chat-bubble ${isUser ? 'chat-user' : 'chat-ai'}`;
+  bubble.innerText = message;
+  const meta = document.createElement('div');
+  meta.className = 'text-[11px] text-slate-400 mt-1 ' + (isUser ? 'text-right ml-auto pr-1' : 'pl-1');
+  meta.innerText = new Intl.DateTimeFormat((typeof __nmLang === 'function' ? __nmLang() : undefined),{ hour:'2-digit', minute:'2-digit' }).format(timestamp);
+  const col = document.createElement('div');
+  col.className = 'flex flex-col ' + (isUser ? 'items-end ml-auto' : 'items-start mr-auto');
+  col.appendChild(bubble);
+  col.appendChild(meta);
+  wrap.appendChild(col);
+  chatWindow.appendChild(wrap);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+function appendAttachmentBubble(fileList){
+  const chatWindow = document.getElementById('chatWindow');
+  const wrap = document.createElement('div');
+  wrap.className = 'w-full flex mb-3';
+  const bubble = document.createElement('div');
+  bubble.className = 'chat-bubble chat-user';
+  const grid = document.createElement('div');
+  grid.className = 'grid grid-cols-2 gap-2';
+  const isImg = f => (f.type?.startsWith('image/') || /\.(png|jpe?g|webp)$/i.test(f.name));
+  fileList.forEach(f => {
+    if (isImg(f)) {
+      const url = URL.createObjectURL(f);
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = f.name;
+      img.className = 'max-w-[160px] max-h-[120px] rounded-lg object-cover border';
+      img.onload = () => URL.revokeObjectURL(url);
+      grid.appendChild(img);
+    } else {
+      const row = document.createElement('div');
+      row.className = 'flex items-center gap-2 rounded-md border bg-white/90 px-2 py-1 text-sm';
+      row.innerHTML = `<i class="${iconFor(f.name)}"></i><span class="truncate max-w-[180px]" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</span>`;
+      grid.appendChild(row);
+    }
+  });
+  const title = document.createElement('div');
+  title.className = 'text-[13px] mb-1 opacity-90';
+  title.textContent = fileList.length > 1 ? 'You sent attachments' : 'You sent an attachment';
+  bubble.appendChild(title);
+  bubble.appendChild(grid);
+  const meta = document.createElement('div');
+  meta.className = 'text-[11px] text-slate-300 mt-1 text-right ml-auto pr-1';
+  meta.innerText = new Intl.DateTimeFormat((typeof __nmLang === 'function' ? __nmLang() : undefined),{ hour:'2-digit', minute:'2-digit' }).format(new Date());
+  const col = document.createElement('div');
+  col.className = 'flex flex-col items-end ml-auto';
+  col.appendChild(bubble);
+  col.appendChild(meta);
+  wrap.appendChild(col);
+  chatWindow.appendChild(wrap);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 
   function renderAssistantMarkdown(mdText){
-  // Normalize: trim, collapse large gaps, and shrink space before headings/lists
   const normalized = (mdText ?? '')
     .trim()
     .replace(/\r\n/g, '\n')
-    .replace(/[ \t]+\n/g, '\n')          // trim trailing spaces
-    .replace(/\n{3,}/g, '\n\n')          // 3+ blank lines -> 1
-    .replace(/\n\s*\n(?=\s*#{1,4}\s)/g, '\n')  // shrink before headings
-    .replace(/\n\s*\n(?=\s*([-*] |\d+\. ))/g, '\n'); // shrink before lists
-
-  // Parse Markdown (no auto <br> on single newlines)
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/\n\s*\n(?=\s*#{1,4}\s)/g, '\n')
+    .replace(/\n\s*\n(?=\s*([-*] |\d+\. ))/g, '\n');
   const raw = marked.parse(normalized, {
     gfm: true,
-    breaks: false,          // <— this is the big one
+    breaks: false,
     headerIds: false
   });
-
   const safe = DOMPurify.sanitize(raw, { USE_PROFILES: { html: true } });
-
   const container = document.createElement('div');
   container.className = 'md-prose';
   container.innerHTML = safe;
-
-  // Remove empty <p> nodes that sometimes sneak in
   container.querySelectorAll('p').forEach(p => { if (!p.textContent.trim()) p.remove(); });
-
-  // External links: open safely
   container.querySelectorAll('a[href]').forEach(a => {
     try {
       const url = new URL(a.getAttribute('href'), location.href);
       if (url.origin !== location.origin) a.target = '_blank', a.rel = 'noopener noreferrer';
     } catch {}
   });
-
-  // Optional copy buttons on code blocks
-  container.querySelectorAll('pre > code').forEach(code => {
-    const pre = code.parentElement;
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.textContent = 'Copy';
-    btn.className = 'text-xs px-2 py-1 rounded-md border bg-white/70 hover:bg-white absolute right-2 top-2';
-    pre.style.position = 'relative';
-    btn.addEventListener('click', async () => {
-      try { await navigator.clipboard.writeText(code.innerText); btn.textContent = 'Copied!'; setTimeout(()=>btn.textContent='Copy', 900); } catch {}
-    });
-    pre.appendChild(btn);
-  });
-
   return container;
 }
 
-
-
     async function sendChat(){
-  const msg   = (document.getElementById('chatInput').value || '').trim();
-  const mode  = loadMode();
-  const lang  = (typeof __nmLang === 'function' ? __nmLang() : (navigator.language || 'en-US'));
+  const msg = ($('#chatInput').value || '').trim();
+  const mode = loadMode();
+  const lang = (typeof __nmLang === 'function' ? __nmLang() : (navigator.language || 'en-US'));
   if(!msg && files.length===0) return;
 
   if(!firstSendAttempted){
@@ -1254,75 +1302,39 @@ setTimeout(() => {
     if(!authed){ showGateAfterResponse = true; }
   }
 
-  // after rendering user message / attachments:
   if (window.innerWidth < 768) {
-    // hide the intro prompt
     document.getElementById('intro')?.classList.add('hidden');
-
-    // OPTIONAL: also collapse suggestions area on mobile to save space
-    document.getElementById('suggestionsList')?.classList.add('hidden');
-    document.getElementById('toggleSuggestions')?.classList.add('hidden');
   }
 
-  // Hide hero + prompt + suggestions on first message (mobile only)
-  if (window.innerWidth < 768) {
-    document.getElementById('heroIntro')?.classList.add('hidden'); // ⬅️ hides the hero
-    document.getElementById('intro')?.classList.add('hidden');     // ⬅️ hides the prompt
-    document.getElementById('suggestionsList')?.classList.add('hidden');
-    document.getElementById('toggleSuggestions')?.classList.add('hidden');
-  }
-
-  // snapshot files for this send (so we can safely clear UI chips)
   const filesToSend = [...files];
-
-  // render user bubbles
   if (msg) appendBubble({ message: msg, isUser:true });
   if (filesToSend.length){
     appendAttachmentBubble(filesToSend);
-    document.getElementById('fileChips').innerHTML = '';
+    $('#fileChips').innerHTML = '';
   }
 
-  document.getElementById('chatInput').value=''; 
+  $('#chatInput').value=''; 
   autosize(); 
   toggleSend();
 
-  // typing bubble
-  const chatWindow = document.getElementById('chatWindow');
-
-// Wrapper
+  const chatWindow = $('#chatWindow');
 const typingWrap = document.createElement('div');
 typingWrap.className = 'w-full flex mb-3';
-
-// Align left bubble
 const col = document.createElement('div');
 col.className = 'flex flex-col items-start mr-auto';
-
-// Bubble
 const typing = document.createElement('div');
 typing.className = 'chat-bubble chat-ai flex items-center gap-2 text-slate-600 bg-slate-100 px-3 py-2 rounded-2xl shadow-sm';
-
-// Spinner
-typing.innerHTML = `
-  <i class="fa-solid fa-spinner fa-spin text-slate-500"></i>
-  <span class="dotty">Thinking</span>
-`;
-
-
+  typing.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-slate-500"></i><span class="dotty">Thinking</span>`;
 col.appendChild(typing);
 typingWrap.appendChild(col);
 chatWindow.appendChild(typingWrap);
-
-// Auto scroll
 chatWindow.scrollTop = chatWindow.scrollHeight;
 
-
-  // always use FormData to avoid 415 and send all files
   const fd = new FormData();
   if (msg) fd.append('message', msg);
   fd.append('tone', mode);
-  fd.append('lang', lang); // ✅ pass selected language to backend
+  fd.append('lang', lang);
   if (filesToSend.length) {
-    // backend supports files[] OR file (single). Prefer files[].
     for (const f of filesToSend) fd.append('files[]', f);
   }
 
@@ -1333,7 +1345,7 @@ chatWindow.scrollTop = chatWindow.scrollHeight;
       method:'POST',
       headers:{ 
         'X-CSRFToken': getCSRFToken(),
-        'Accept-Language': lang  // optional but nice-to-have
+        'Accept-Language': lang
       },
       body: fd,
       credentials:'include',
@@ -1342,21 +1354,17 @@ chatWindow.scrollTop = chatWindow.scrollHeight;
     const data = await res.json();
    typing.classList.remove('text-slate-600'); 
 typing.classList.add('text-slate-800');
-typing.innerHTML = ''; // clear spinner
+    typing.innerHTML = '';
 const node = renderAssistantMarkdown(data.reply || '⚠️ No reply received.');
 typing.appendChild(node);
-
-
-    const ok = !!(data && typeof data.reply === 'string' && data.reply.trim().length);
-    document.getElementById('btnPdf')?.classList.toggle('is-disabled', !ok);
-    document.getElementById('btnShare')?.classList.toggle('is-disabled', !ok);
     track('result_rendered', { mode, lang, hasFiles: filesToSend.length>0 });
   }catch(e){
-    typing.classList.remove('text-slate-600'); typing.classList.add('text-red-700','bg-red-100');
-    typing.innerText = 'I couldn’t finish that—want me to try a lighter summary or split the file?';
+    typing.classList.remove('text-slate-600'); 
+    typing.classList.add('text-red-700','bg-red-100');
+    typing.innerText = 'I couldn\'t finish that—want me to try a lighter summary or split the file?';
   }finally{
-    files = []; // clear for next turn
-    document.getElementById('fileChips').innerHTML='';
+    files = [];
+    $('#fileChips').innerHTML='';
     toggleSend();
 
     if(showGateAfterResponse){
@@ -1364,739 +1372,163 @@ typing.appendChild(node);
       if(!authed){
         guestTurnsUsed += 1;
         localStorage.setItem('nm_guest_turns', String(guestTurnsUsed));
-        if(guestTurnsUsed === 1) { showPostResultInvite(); }
-        // DISABLED - no longer needed
-        // else if(guestTurnsUsed >= GUEST_TURNS_LIMIT){ showSignupGate(); }
+        if(guestTurnsUsed === 1) { $('#postResultInvite').classList.remove('hidden'); }
       }
       showGateAfterResponse=false;
     }
-  }
-}
-
-
-    async function doShareLink(){
-      if ($('#btnShare').classList.contains('is-disabled')) return;
-      try{
-        const r = await fetch('/api/share/latest', { method:'POST', credentials:'include' });
-        const j = await r.json();
-        if(j?.url){ await navigator.clipboard.writeText(j.url); showToast('Share link copied', 'fa-regular fa-copy', 'text-[#236092]'); }
-        track('export_clicked', {type:'share'});
-      }catch(e){
-        showToast('Could not create link', 'fa-regular fa-circle-xmark', 'text-red-600');
       }
     }
 
     function startDictation(){
   if(!('webkitSpeechRecognition' in window)){ alert('Speech recognition works best in Chrome.'); return; }
   const rec = new webkitSpeechRecognition();
-  rec.lang = (typeof __nmLang === 'function' ? __nmLang() : 'en-US');  // ✅ use selected lang
+  rec.lang = (typeof __nmLang === 'function' ? __nmLang() : 'en-US');
   rec.onresult = (e)=>{ $('#chatInput').value = e.results[0][0].transcript; autosize(); toggleSend(); };
   rec.start();
 }
 
-
-    // DISABLED - no longer needed
-    // function showSignupGate(){ const m=$('#signupGate'); if(!m) return; m.classList.remove('hidden'); m.classList.add('flex'); track('signup_shown'); }
-    function showPostResultInvite(){ $('#postResultInvite').classList.remove('hidden'); }
-
-    async function showAuthNudgeIfGuest(){
-      try{
-        const authed = await isAuthenticated();
-        const dismissed = localStorage.getItem('nm_auth_nudge_dismissed') === '1';
-        if(!authed && !dismissed){
-          setTimeout(()=>{
-            // keep your existing nudge if you have it on the page
-            const n = document.getElementById('authNudge');
-            if(!n) return;
-            n.classList.remove('hidden');
-            document.getElementById('authNudgeClose')?.addEventListener('click', ()=>{
-              localStorage.setItem('nm_auth_nudge_dismissed','1');
-              n.classList.add('hidden');
-            });
-          }, 2000);
-        }
-      }catch{}
-    }
-
-    // ---------- Minimal Spotlight Tour (opt-in only)
-    (function(){
-      const KEY = 'nm_chat_tour_done_v1';
-      // your existing overlay code is fine; only call it when pressing the ? button
-      window.startChatTourAuto = function(){
-        // only auto-run if never seen (gentle)
-        if (!localStorage.getItem(KEY)){
-          document.getElementById('nmTourHelp')?.addEventListener('click', ()=> startTour(true));
-        }else{
-          document.getElementById('nmTourHelp')?.addEventListener('click', ()=> startTour(true));
-        }
-      };
-      function startTour(){ alert('Quick tips:\n1) Upload or type.\n2) Pick a tone.\n3) Get summary, then Download or Share.'); }
-    })();
-
-
-    (function(){
-  const KEY = 'nm_chat_tour_done_v2'; // bumped so new steps show once for everyone
-
-  // --- tiny helpers
-  const $ = s => document.querySelector(s);
-  function isVisible(el){
-    if(!el) return false;
-    const cs = getComputedStyle(el);
-    if(cs.display === 'none' || cs.visibility === 'hidden' || +cs.opacity === 0) return false;
-    const r = el.getBoundingClientRect(), vw = innerWidth, vh = innerHeight;
-    return r.width>0 && r.height>0 && r.bottom>0 && r.top<vh && r.right>0 && r.left<vw;
-  }
-  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
-
-  // allow selector as string | string[] | () => Element | null
-  function resolveTarget(sel){
-    if (!sel) return null;
-    if (typeof sel === 'function') return sel();
-    if (Array.isArray(sel)){
-      for (const s of sel){ const el = document.querySelector(s); if (isVisible(el)) return el; }
-      // fall back to first even if not visible
-      return document.querySelector(sel[0]);
-    }
-    return document.querySelector(sel);
-  }
-
-  // --- build overlay DOM once
-  function ensureOverlay(){
-    let root = $('#nmTour');
-    if (root) return root;
-
-    root = document.createElement('div');
-    root.id = 'nmTour';
-    root.className = 'nm-tour-overlay hidden';
-    root.innerHTML = `
-      <div class="nm-tour-dim" aria-hidden="true">
-        <div id="nmSlabN" class="nm-slab"></div>
-        <div id="nmSlabW" class="nm-slab"></div>
-        <div id="nmSlabE" class="nm-slab"></div>
-        <div id="nmSlabS" class="nm-slab"></div>
-      </div>
-      <div id="nmHole" class="nm-tour-hole" aria-hidden="true"></div>
-      <div id="nmPop" class="nm-tour-pop">
-        <div id="nmTitle" class="text-base font-semibold mb-1"></div>
-        <div id="nmBody"  class="text-slate-700 text-sm leading-relaxed"></div>
-        <div class="mt-3 flex items-center justify-between gap-2">
-          <button id="nmSkip" class="btn btn-text">Skip</button>
-          <div class="flex items-center gap-2">
-            <button id="nmPrev" class="btn btn-text">Back</button>
-            <button id="nmNext" class="btn btn-primary">Next</button>
-          </div>
-        </div>
-      </div>
-      <span id="nmA11y" class="nm-tour-sr-only" role="status" aria-live="polite"></span>
-    `;
-    document.body.appendChild(root);
-    return root;
-  }
-
-  // --- layout helpers
-  function setRect(el, top, left, width, height){
-    el.style.top    = `${Math.max(0, top)}px`;
-    el.style.left   = `${Math.max(0, left)}px`;
-    el.style.width  = `${Math.max(0, width)}px`;
-    el.style.height = `${Math.max(0, height)}px`;
-  }
-
-  // --- steps (now includes A−/A＋ + Sign up/Log in)
-  const STEPS = [
-    { selector: null, placement:'center',
-      title: 'Welcome to NeuroMed 👋',
-      body:  'We turn medical papers into clear next steps you can use and share.' },
-
-    { selector: ['#fontMinus','#fontPlus','#easyReadBtn'],
-      title: 'Make text comfortable',
-      body:  'Use A−/A＋ to change size. “Easy” adds spacing; “Contrast” boosts visibility.' },
-
-    { selector: '#modeGroup',
-      title: 'Pick your tone',
-      body:  'Caregiver, Balanced, Clinical, Faith, Geriatric, or Emotional Support. Switch anytime.' },
-
-
-    { selector: '#dropZone',
-      title: 'Add a file or just type',
-      body:  'Click the paperclip or drag & drop PDFs/images. Pasting from clipboard works too.' },
-
-    { selector: '#suggestionsList',
-      title: 'Quick starters',
-      body:  'Tap a suggestion, then edit it to fit your case.' },
-
-    { selector: () => document.querySelector('a[href="/signup"]') || document.querySelector('a[href="/login"]'),
-      title: 'Save your progress',
-      body:  'Sign up or Log in to keep your history and download/share summaries.' },
-
-    { selector: '#chatInput',
-      title: 'Ask your question',
-      body:  'One or two sentences is enough. Press Enter to send (Shift+Enter for a new line).' },
-
-    { selector: '#sendBtn',
-      title: 'Get your plan',
-      body:  'You’ll get a plain-English summary, watch-outs, and next steps.' },
-
-    { selector: null, placement:'center',
-      title: 'You’re all set ✅',
-      body:  'Hit “?” anytime to replay this tour.' },
-  ];
-
-  // --- tour controller
-  const Tour = {
-    i: 0, running: false,
-
-    start(force=false){
-      ensureOverlay().classList.remove('hidden');
-      this.running = true;
-      this.i = 0;
-      this.bind();
-      this.goto(0);
-      if (!force) localStorage.setItem(KEY, '1');
-    },
-    end(){
-      const ov = $('#nmTour'); if(ov) ov.classList.add('hidden');
-      this.unbind(); this.running = false;
-    },
-    next(){
-      if (this.i >= STEPS.length - 1) return this.end();
-      let j = this.i + 1;
-      while (j < STEPS.length){
-        const s = STEPS[j];
-        const el = resolveTarget(s.selector);
-        if (!s.selector || s.placement === 'center' || isVisible(el)) break;
-        j++;
-      }
-      this.goto(Math.min(j, STEPS.length - 1));
-    },
-    prev(){
-      if (this.i <= 0) return;
-      let j = this.i - 1;
-      while (j >= 0){
-        const s = STEPS[j];
-        const el = resolveTarget(s.selector);
-        if (!s.selector || s.placement === 'center' || isVisible(el)) break;
-        j--;
-      }
-      this.goto(Math.max(0, j));
-    },
-    goto(idx){
-      this.i = idx;
-      requestAnimationFrame(()=> placeStep(STEPS[this.i], this.i));
-    },
-    bind(){
-      window.addEventListener('resize', this.recalc, { passive:true });
-      window.addEventListener('scroll', this.recalc, { passive:true });
-      $('#nmNext').onclick = () => this.next();
-      $('#nmPrev').onclick = () => this.prev();
-      $('#nmSkip').onclick = () => this.end();
-      document.addEventListener('keydown', this.onKey);
-    },
-    unbind(){
-      window.removeEventListener('resize', this.recalc);
-      window.removeEventListener('scroll', this.recalc);
-      document.removeEventListener('keydown', this.onKey);
-    },
-    recalc: () => { if (Tour.running) placeStep(STEPS[Tour.i], Tour.i); },
-    onKey(e){
-      if(!Tour.running) return;
-      if(e.key === 'Escape') Tour.end();
-      if(e.key === 'Enter' || e.key === ' ') Tour.next();
-      if(e.key === 'ArrowRight') Tour.next();
-      if(e.key === 'ArrowLeft') Tour.prev();
-    }
-  };
-
-  // --- position current step
-  function placeStep(step, idx){
-    const hole = $('#nmHole');
-    const pop  = $('#nmPop');
-    const a11y = $('#nmA11y');
-    const slabN = $('#nmSlabN'), slabW = $('#nmSlabW'), slabE = $('#nmSlabE'), slabS = $('#nmSlabS');
-
-    // content
-    $('#nmTitle').textContent = step.title || '';
-    $('#nmBody').innerHTML    = step.body  || '';
-    a11y.textContent = `Step ${idx+1}: ${step.title || ''}`;
-
-    const vw = innerWidth, vh = innerHeight, pad = 8;
-
-    // center step (no target)
-    if (!step.selector || step.placement === 'center'){
-      setRect(slabN, 0, 0, vw, vh);
-      setRect(slabW, 0, 0, 0, 0);
-      setRect(slabE, 0, 0, 0, 0);
-      setRect(slabS, 0, 0, 0, 0);
-      setRect(hole, -9999, -9999, 0, 0);
-      pop.style.left = '50%'; pop.style.top = '50%'; pop.style.transform = 'translate(-50%, -50%)';
-      return;
-    }
-
-    // target step
-    const target = resolveTarget(step.selector);
-    if (!isVisible(target)){
-      try { target?.scrollIntoView({ block:'center', inline:'center', behavior:'smooth' }); } catch {}
-    }
-    const r = target?.getBoundingClientRect() || {top:vh/2,left:vw/2,width:0,height:0,right:vw/2,bottom:vh/2};
-
-    // hole rectangle
-    const hTop = clamp(r.top - pad, 6, vh - 12);
-    const hLeft = clamp(r.left - pad, 6, vw - 12);
-    const hW = Math.min(vw - 12, r.width + pad*2);
-    const hH = Math.min(vh - 12, r.height + pad*2);
-
-    setRect(hole, hTop, hLeft, hW, hH);
-    setRect(slabN, 0, 0, vw, hTop);
-    setRect(slabW, hTop, 0, hLeft, hH);
-    setRect(slabE, hTop, hLeft + hW, vw - (hLeft + hW), hH);
-    setRect(slabS, hTop + hH, 0, vw, vh - (hTop + hH));
-
-    // pop near target with fallbacks
-    const margin = 10;
-    pop.style.transform = 'none';
-
-    const canBottom = (r.bottom + margin + pop.offsetHeight) <= vh;
-    const canTop    = (r.top    - margin - pop.offsetHeight) >= 0;
-    const canRight  = (r.right  + margin + Math.min(pop.offsetWidth, 360)) <= vw;
-    const canLeft   = (r.left   - margin - Math.min(pop.offsetWidth, 360)) >= 0;
-
-    if (canBottom){
-      pop.style.top  = (r.bottom + margin) + 'px';
-      pop.style.left = clamp(r.left, 8, vw - pop.offsetWidth - 8) + 'px';
-    } else if (canTop){
-      pop.style.top  = (r.top - pop.offsetHeight - margin) + 'px';
-      pop.style.left = clamp(r.left, 8, vw - pop.offsetWidth - 8) + 'px';
-    } else if (canRight){
-      pop.style.top  = clamp(r.top, 8, vh - pop.offsetHeight - 8) + 'px';
-      pop.style.left = (r.right + margin) + 'px';
-    } else if (canLeft){
-      pop.style.top  = clamp(r.top, 8, vh - pop.offsetHeight - 8) + 'px';
-      pop.style.left = (r.left - pop.offsetWidth - margin) + 'px';
-    } else {
-      pop.style.left = '50%'; pop.style.top = '50%'; pop.style.transform = 'translate(-50%, -50%)';
-    }
-  }
-
-  // --- public hook (keep your call to startChatTourAuto() after DOMContentLoaded)
-  window.startChatTourAuto = function(){
-    // wire the help button every time
-    document.getElementById('nmTourHelp')?.addEventListener('click', () => {
-      ensureOverlay();
-      Tour.start(true);     // user-triggered
-    });
-
-    // auto-run once per browser (gentle delay so layout is ready)
-    if (!localStorage.getItem(KEY)){
-      setTimeout(() => { ensureOverlay(); Tour.start(false); }, 700);
-    }
-  };
-})();
-
-  </script>
-
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/sw.js").catch(console.warn);
-      });
-    }
-  </script>
-
-  <script>
-/* ---------- DEMO: wire the button + send FormData (no JSON) ---------- */
-
-// 1) Hook the button (DISABLED - demo button removed)
-// document.getElementById('ctaDemo')?.addEventListener('click', () => runDemo('er'));
-
-// 2) Demo samples (short + readable)
-const DEMO_SAMPLES = {
-  er: `Please summarize this ER discharge note for a caregiver with clear steps:
-
-Reason for visit: Dizziness and dehydration.
-Diagnosis: Viral gastroenteritis, mild dehydration.
-What was done: IV fluids 1L, ondansetron 4 mg IV, basic labs.
-Key labs: Na 139, K 3.6, Cr 0.9, WBC 8.2.
-Medications: Ondansetron 4 mg tablet PO q8h PRN nausea (12 tabs). Continue home meds.
-Red flags: Worsening vomiting, blood in stool, fever >101.5°F, confusion, no urination in 8–10 hrs.
-Follow-up: PCP in 2–3 days. Hydration: 2–3 L/day small sips. Diet: BRAT for 24–48 hrs.
-Please provide: (1) plain-English summary, (2) what to watch, (3) step-by-step home plan, (4) 5 questions for the doctor.`,
-  labs: `Explain these labs in plain English and note what to watch and next steps:
-
-CBC: WBC 6.1, Hgb 11.2 (L), Hct 34% (L), Plt 250.
-CMP: Na 137, K 4.1, Cl 102, CO2 25, BUN 12, Cr 0.8, Glucose 96.
-LFTs: AST 22, ALT 24, Alk Phos 90, T. bili 0.6, Albumin 3.9.
-Lipids: TC 210 (H), LDL 138 (H), HDL 46, TG 140.
-TSH 2.1.
-
-Make it caregiver-friendly; add watch-outs, lifestyle tips, and 3 doctor questions.`
-};
-
-// 3) Helper to add a quick user bubble (short and clean)
-function addUserNote(text){
-  const chatWindow = document.getElementById('chatWindow');
-  const wrap = document.createElement('div'); wrap.className = 'w-full flex mb-3';
-  const bubble = document.createElement('div'); bubble.className = 'chat-bubble chat-user'; bubble.innerText = text;
-  const meta = document.createElement('div'); meta.className = 'text-[11px] text-slate-400 mt-1 text-right ml-auto pr-1';
-  meta.innerText = new Intl.DateTimeFormat(undefined,{ hour:'2-digit', minute:'2-digit' }).format(new Date());
-  const col = document.createElement('div'); col.className = 'flex flex-col items-end ml-auto';
-  col.appendChild(bubble); col.appendChild(meta); wrap.appendChild(col); chatWindow.appendChild(wrap);
-  chatWindow.scrollTop = chatWindow.scrollHeight;
-}
-
-// 4) Minimal typing bubble (same visual as your sendChat)
-function addTypingBubble(){
-  const chatWindow = document.getElementById('chatWindow');
-  const wrap = document.createElement('div'); wrap.className='w-full flex mb-2';
-  const bubble = document.createElement('div'); bubble.className='chat-bubble chat-ai text-slate-600';
-  bubble.innerHTML = '<i class="fa-solid fa-spinner pulse mr-2" aria-hidden="true"></i><span class="dotty">Thinking</span>';
-  const col = document.createElement('div'); col.className='flex flex-col items-start mr-auto';
-  col.appendChild(bubble); wrap.appendChild(col); chatWindow.appendChild(wrap);
-  chatWindow.scrollTop = chatWindow.scrollHeight;
-  return bubble; // so we can replace its text later
-}
-
-// 5) Run the demo
-async function runDemo(kind = 'er'){
-  const mode = (typeof loadMode === 'function' ? loadMode() : 'Caregiver');
-  const sample = DEMO_SAMPLES[kind] || DEMO_SAMPLES.er;
-
-  // UX: short user note (don’t dump the big prompt in the chat)
-  addUserNote(kind === 'labs' ? 'Running lab results demo…' : 'Running ER discharge demo…');
-
-  // typing bubble
-  const typing = addTypingBubble();
-
-  // Always use FormData for this endpoint
-  const fd = new FormData();
-  fd.append('tone', mode);
-  fd.append('message', sample);
-
-  fd.append('lang', (typeof __nmLang === 'function' ? __nmLang() : 'en-US'));
-
-  try{
-    const res = await fetch('/webapp/api/send-chat/', {
-      method:'POST',
-      headers:{ 'X-CSRFToken': (typeof getCSRFToken === 'function' ? getCSRFToken() : '') },
-      body: fd,
-      credentials:'include'
-    });
-    const data = await res.json();
-    typing.classList.remove('text-slate-600'); typing.classList.add('text-slate-800');
-    typing.innerText = data?.reply || '⚠️ No reply received.';
-    // if you still have action buttons, enable them on success
-    document.getElementById('btnPdf')?.classList.toggle('is-disabled', !(data?.reply?.trim()));
-    document.getElementById('btnShare')?.classList.toggle('is-disabled', !(data?.reply?.trim()));
-    try{ track('demo_started', { kind }); }catch{}
-  }catch(e){
-    typing.classList.remove('text-slate-600'); typing.classList.add('text-red-700','bg-red-100');
-    typing.innerText = 'Demo failed to run. Try again or switch modes.';
-  }
-}
-
+// Initialize
 document.addEventListener('DOMContentLoaded', () => {
-  const btn   = document.getElementById('nmMenuBtn');
-  const menu  = document.getElementById('nmMobileMenu');
-  const icoOpen  = document.getElementById('nmIconOpen');
-  const icoClose = document.getElementById('nmIconClose');
+  // Language
+  const desktopBtn = $('#langBtn');
+  const desktopMenu = $('#langMenu');
+  const mobileBtn = $('#mLangBtn');
+  const mobileMenu = $('#mLangMenu');
+  const current = loadLang();
+  applyLangUI(current);
+  buildLangMenu(desktopMenu, pickLang);
+  buildLangMenu(mobileMenu, pickLang);
+  function pickLang(code){
+    saveLang(code);
+    applyLangUI(code);
+    toggleMenu(desktopMenu, false);
+    toggleMenu(mobileMenu, false);
+  }
+  desktopBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = desktopMenu && !desktopMenu.classList.contains('hidden');
+    toggleMenu(desktopMenu, !isOpen);
+  });
+  mobileBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = mobileMenu && !mobileMenu.classList.contains('hidden');
+    toggleMenu(mobileMenu, !isOpen);
+  });
+  document.addEventListener('click', (e) => {
+    if (desktopMenu && !desktopMenu.contains(e.target) && e.target !== desktopBtn) toggleMenu(desktopMenu, false);
+    if (mobileMenu && !mobileMenu.contains(e.target) && e.target !== mobileBtn) toggleMenu(mobileMenu, false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape'){ toggleMenu(desktopMenu, false); toggleMenu(mobileMenu, false); }
+  });
+  window.__nmLang = () => loadLang();
 
+  // Mode buttons
+  const savedMode = loadMode();
+  $$('#modeSelectWrap button').forEach(btn => {
+    const mode = btn.dataset.mode;
+    if(mode === savedMode){ selectMode(btn); }
+    btn.addEventListener('click', () => selectMode(btn));
+  });
+
+  // Suggestions
+  $$('.suggestion-chip').forEach(btn => btn.addEventListener('click', () => {
+    $('#chatInput').value = btn.querySelector('span').textContent.trim(); 
+    autosize(); 
+    toggleSend(); 
+    $('#chatInput').focus();
+  }));
+
+  // Input events
+  $('#chatInput').addEventListener('input', () => { autosize(); toggleSend(); });
+  $('#chatInput').addEventListener('keydown', (e) => { 
+    if(e.key === 'Enter' && !e.shiftKey){ 
+      e.preventDefault(); 
+      sendChat(); 
+    }
+  });
+  $('#sendBtn').addEventListener('click', sendChat);
+
+  // Upload
+  $('#uploadBtn').addEventListener('click', () => $('#fileInput').click());
+  $('#fileInput').addEventListener('change', (e) => { 
+    if(e.target.files?.length){ 
+      for(const f of e.target.files){ addFile(f); } 
+      e.target.value=''; 
+    } 
+  });
+
+  // Drag & drop
+  const dz = $('#chatInput').parentElement;
+  ['dragenter','dragover'].forEach(evt => dz.addEventListener(evt, (e)=>{ e.preventDefault(); }));
+  ['dragleave','drop'].forEach(evt => dz.addEventListener(evt, (e)=>{ 
+    e.preventDefault(); 
+    if(evt==='drop'){ 
+      const dt=e.dataTransfer; 
+      if(dt?.files?.length){ 
+        for(const f of dt.files){ addFile(f); } 
+      } 
+    } 
+  }));
+
+  // Paste
+  document.addEventListener('paste', (e)=>{ 
+    const items=e.clipboardData?.items || []; 
+    for(const it of items){ 
+      if(it.kind==='file'){ addFile(it.getAsFile()); } 
+    } 
+  });
+
+  // Mic
+  $('#micBtn').addEventListener('click', startDictation);
+
+  autosize(); 
+  toggleSend();
+  setTimeout(()=>$('#chatInput').focus(), 200);
+
+  // Mobile menu
+  const btn = $('#nmMenuBtn');
+  const menu = $('#nmMobileMenu');
+  const icoOpen = $('#nmIconOpen');
+  const icoClose = $('#nmIconClose');
   function setOpen(isOpen){
     menu.classList.toggle('hidden', !isOpen);
     btn.setAttribute('aria-expanded', String(isOpen));
-    icoOpen.classList.toggle('hidden',  isOpen);
+    icoOpen.classList.toggle('hidden', isOpen);
     icoClose.classList.toggle('hidden', !isOpen);
   }
-
   btn?.addEventListener('click', () => setOpen(menu.classList.contains('hidden')));
-
-  // Close on outside click
   document.addEventListener('click', (e) => {
     if (!menu || menu.classList.contains('hidden')) return;
     const within = menu.contains(e.target) || btn.contains(e.target);
     if (!within) setOpen(false);
   });
-
-  // Close on Esc
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') setOpen(false);
   });
-
-  // Mirror readability controls for mobile
-  const root = document.documentElement, body = document.body;
-
-  function bumpFont(delta){
-    const curr = parseFloat(getComputedStyle(root).getPropertyValue('font-size')) || 18;
-    root.style.setProperty('font-size', Math.max(16, Math.min(22, curr + delta)) + 'px');
-  }
-
-  document.getElementById('mFontMinus')?.addEventListener('click', () => bumpFont(-1));
-  document.getElementById('mFontPlus') ?.addEventListener('click', () => bumpFont(1));
-
-  document.getElementById('mEasyReadBtn')?.addEventListener('click', (ev) => {
-    body.classList.toggle('easy-read');
-    ev.currentTarget.setAttribute('aria-pressed', body.classList.contains('easy-read') ? 'true' : 'false');
-  });
-
-  document.getElementById('mHighContrast')?.addEventListener('click', (ev) => {
-    body.classList.toggle('hc');
-    ev.currentTarget.setAttribute('aria-pressed', body.classList.contains('hc') ? 'true' : 'false');
-  });
 });
-
-
-// keep your existing loadMode/saveMode/selectMode/applyModeUI
-
-function syncMobileSelect(mode){
-  const sel = document.getElementById('modeSelect');
-  if (sel && sel.value !== mode) sel.value = mode;
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const sheet   = document.getElementById('modeSheet');
-  const panel   = document.getElementById('modeSheetPanel');
-  const btn     = document.getElementById('modePickerBtn');
-  const close   = document.getElementById('modeSheetClose');
-  const done    = document.getElementById('modeSheetDone');
-  const backdrop= document.getElementById('modeSheetBackdrop');
-  const iconEl  = document.getElementById('modePickerIcon');
-  const labelEl = document.getElementById('modePickerLabel');
-
-  const MODE_ICON = {
-    'Caregiver':     'fa-solid fa-hands-holding-child text-amber-700',
-    'PlainClinical': 'fa-regular fa-message text-[#236092]',
-    'Clinical':      'fa-solid fa-stethoscope text-slate-800',
-    'Faith':         'fa-solid fa-hands-praying text-indigo-700',
-    
-    'Geriatric':     'fa-solid fa-person-cane text-[#28926D]',
-    'EmotionalSupport': 'fa-solid fa-heart text-rose-700'
-  };
-
-  function labelFor(mode){
-  if (mode === 'PlainClinical')    return 'Balanced';
-  if (mode === 'EmotionalSupport') return 'Emotional Support';
-  return mode;
-}
-
-
-  function updateTrigger(mode){
-    if (!iconEl || !labelEl) return;
-    iconEl.className = MODE_ICON[mode] || 'fa-regular fa-message text-[#236092]';
-    labelEl.textContent = labelFor(mode);
-    // reflect on hidden select for a11y state
-    const sel = document.getElementById('modeSelect');
-    if (sel) sel.value = mode;
-    // highlight checkmarks in list
-    document.querySelectorAll('#modeSheet [data-mode]').forEach(item => {
-      const check = item.querySelector('.fa-check');
-      if (check) check.classList.toggle('hidden', item.dataset.mode !== mode);
-    });
-  }
-
-  function openSheet(){
-    if (!sheet) return;
-    sheet.classList.remove('hidden');
-    document.body.classList.add('lock-scroll');
-    // animate up
-    requestAnimationFrame(() => { panel.classList.remove('translate-y-full'); });
-  }
-
-  function closeSheet(){
-    if (!sheet) return;
-    panel.classList.add('translate-y-full');
-    setTimeout(() => {
-      sheet.classList.add('hidden');
-      document.body.classList.remove('lock-scroll');
-    }, 180);
-  }
-
-  // init from saved mode
-  const current = (typeof loadMode === 'function') ? loadMode() : 'Caregiver';
-  updateTrigger(current);
-
-  // open/close handlers
-  btn?.addEventListener('click', openSheet);
-  close?.addEventListener('click', closeSheet);
-  done?.addEventListener('click', closeSheet);
-  backdrop?.addEventListener('click', closeSheet);
-
-  // option clicks
-  document.querySelectorAll('#modeSheet [data-mode]').forEach(item => {
-    item.addEventListener('click', () => {
-      const mode = item.dataset.mode;
-      if (typeof selectModeFromValue === 'function') {
-        selectModeFromValue(mode);       // updates app + saves + toast
-      } else {
-        // fallback if helper isn't present
-        if (typeof saveMode === 'function') saveMode(mode);
-        if (typeof applyModeUI === 'function') applyModeUI(mode);
-      }
-      updateTrigger(mode);
-      // subtle haptic-esque feedback
-      item.classList.add('bg-[#28926D]/10');
-      setTimeout(() => item.classList.remove('bg-[#28926D]/10'), 180);
-    });
-  });
-
-  // keep trigger in sync if desktop buttons change the mode
-  document.querySelectorAll('#modeGroup button').forEach(b => {
-    b.addEventListener('click', () => updateTrigger((typeof loadMode === 'function') ? loadMode() : 'Caregiver'));
-  });
-});
-
-
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('modeBadge')?.addEventListener('click', () => {
-    if (window.innerWidth < 768) {
-      document.getElementById('modeSelect')?.focus();
-    }
-  });
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-  if (window.innerWidth < 768) {
-    const ta = document.getElementById('chatInput');
-    if (ta) ta.placeholder = 'Type a question…';
-  }
-});
-
-
-
 </script>
-
-
-
-<!-- Signup Gate (DISABLED - no longer needed) -->
-<!--
-<div id="signupGate"
-     class="fixed inset-0 z-[80] hidden items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-  <div class="w-full max-w-md rounded-2xl bg-white shadow-2xl border p-5">
-    <div class="flex items-center gap-3 mb-2">
-  <img src="https://res.cloudinary.com/djzks0atj/image/upload/v1759411614/NeuroMed_AI_Logo-08_ufo9on.png" 
-       alt="NeuroMed Aira Logo" 
-       class="h-6 w-6 object-contain"/>
-  <h2 class="text-lg font-semibold">✨ Welcome to NeuroMed Aira!</h2>
-</div>
-
-    <p class="text-sm text-slate-700">
-      Get started with NeuroMed Aira and experience intelligent medical assistance powered by advanced AI.
-    </p>
-    <ul class="mt-3 text-sm text-slate-700 list-disc pl-5 space-y-1">
-      <li>Save your files and summaries</li>
-      <li>Secure and private medical consultations</li>
-      <li>Access your chat history anytime</li>
-    </ul>
-
-    <a href="/signup"
-       class="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#236092] hover:bg-[#1B5A8E] text-white font-medium py-2.5">
-      👉 Create Account <span class="text-xs opacity-90">(fast & free)</span>
-    </a>
-
-    <div class="mt-3 text-xs text-slate-500">
-      Join thousands of healthcare professionals using NeuroMed Aira.
-    </div>
-
-    <div class="mt-3 text-center text-xs">
-      Already have an account?
-      <a class="underline text-slate-700 hover:text-slate-900" href="/login">Log in</a>
-    </div>
-  </div>
-</div>
--->
 
 <script>
-  // Hard gate: if not logged in, disable inputs and show the signup overlay immediately.
-  // DISABLED - no longer needed
-  /*
-  document.addEventListener('DOMContentLoaded', async () => {
-    try {
-      const authed = await isAuthenticated(); // you already have this helper
-      if (!authed) enforceSignupGate();
-    } catch {
-      // If the status check fails, be safe and gate anyway
-      enforceSignupGate();
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js").catch(console.warn);
+      });
     }
-  });
-  */
-
-  // DISABLED - no longer needed
-  /*
-  function enforceSignupGate(){
-    // 1) Show overlay
-    showSignupGate();
-
-    // 2) Disable interactive bits (composer, upload, mic, suggestions)
-    const disable = (el) => { if(!el) return; el.setAttribute('disabled',''); el.classList.add('is-disabled'); };
-    disable(document.getElementById('sendBtn'));
-    disable(document.getElementById('uploadBtn'));
-    disable(document.getElementById('micBtn'));
-    const ta = document.getElementById('chatInput');
-    if (ta) ta.setAttribute('readonly','');
-
-    // suggestions become promos
-    document.querySelectorAll('.suggestion').forEach(btn => {
-      btn.addEventListener('click', () => location.href='/signup', { once:true });
-    });
-
-    // 3) Make primary CTAs go to /signup
-    const up = document.getElementById('ctaUpload');
-    // const demo = document.getElementById('ctaDemo'); // DISABLED - demo button removed
-    if (up)   up.onclick   = () => { location.href = '/signup'; return false; };
-    // if (demo) demo.onclick = () => { location.href = '/signup'; return false; }; // DISABLED
-
-    // 4) Block drag/drop from doing anything for guests
-    const dz = document.getElementById('dropZone');
-    if (dz){
-      ['dragenter','dragover','dragleave','drop'].forEach(ev =>
-        dz.addEventListener(ev, (e)=>{ e.preventDefault(); e.stopPropagation(); }, { passive:false })
-      );
-    }
-
-    // Optional: visually dim the main section behind the gate
-    document.querySelector('main')?.classList.add('opacity-50', 'pointer-events-none');
-  }
-  */
 </script>
 
-  <!-- Footer with Privacy Policy and Data Usage Info -->
+
+  <!-- Footer -->
   <footer class="max-w-4xl mx-auto px-4 md:px-5 py-8 mt-12 border-t border-slate-200">
-    <div class="space-y-4">
-      <!-- App Purpose & Google Data Usage -->
-      <div class="bg-slate-50 rounded-xl p-6 border border-slate-200">
-        <h3 class="text-lg font-semibold text-slate-900 mb-3">About NeuroMed Aira</h3>
-        <p class="text-sm text-slate-700 mb-3">
-          NeuroMed Aira helps patients and caregivers understand medical records by converting complex medical documents into clear, easy-to-understand language. Our AI-powered platform provides personalized summaries in multiple tones (Plain, Caregiver, Faith-based, Clinical, Bilingual) and supports over 40 languages.
-        </p>
-        <h4 class="text-base font-semibold text-slate-900 mt-4 mb-2">How We Use Google Account Information</h4>
-        <p class="text-sm text-slate-700 mb-2">
-          When you sign in with Google, we use your Google account information to:
-        </p>
-        <ul class="text-sm text-slate-700 list-disc pl-5 space-y-1 mb-3">
-          <li><strong>Email address:</strong> To create and manage your account, send you important updates about your medical summaries, and provide customer support.</li>
-          <li><strong>Name:</strong> To personalize your experience and display your name in your account dashboard.</li>
-          <li><strong>Profile information:</strong> To enhance your account setup and provide a better user experience.</li>
-        </ul>
-        <p class="text-sm text-slate-700">
-          We do not share your Google account information with third parties. Your medical data and summaries are stored securely and are only accessible to you. We use your information solely to provide and improve our medical document summarization services.
-        </p>
-      </div>
-
-      <!-- Privacy Policy Link (Prominently Displayed) -->
       <div class="flex flex-wrap items-center justify-center gap-4 text-sm">
-        <a href="{% url 'privacy' %}" class="text-[#236092] hover:text-[#1B5A8E] font-medium underline">
-          Privacy Policy
-        </a>
+      <a href="{% url 'privacy' %}" class="text-[#236092] hover:text-[#1B5A8E] font-medium underline">Privacy Policy</a>
         <span class="text-slate-400">•</span>
-        <a href="{% url 'terms' %}" class="text-[#236092] hover:text-[#1B5A8E] font-medium underline">
-          Terms of Use
-        </a>
+      <a href="{% url 'terms' %}" class="text-[#236092] hover:text-[#1B5A8E] font-medium underline">Terms of Use</a>
         <span class="text-slate-400">•</span>
-        <a href="/about" class="text-slate-600 hover:text-slate-900">
-          About
-        </a>
+      <a href="/about" class="text-slate-600 hover:text-slate-900">About</a>
       </div>
-
-      <!-- Copyright -->
-      <div class="text-center text-xs text-slate-500">
+    <div class="text-center text-xs text-slate-500 mt-4">
         © 2025 NeuroMed Aira. All rights reserved.
-      </div>
     </div>
   </footer>
 

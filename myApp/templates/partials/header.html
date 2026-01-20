@@ -1,78 +1,154 @@
-<!-- Include Alpine.js for toggle behavior -->
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-<header class="bg-white border-b shadow-md sticky top-0 z-50" x-data="{ open: false }">
-  <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-
-    <!-- Brand -->
-    <a href="/" class="text-2xl font-extrabold text-[#236092] tracking-tight hover:drop-shadow-sm transition">
-      NeuroMed<span class="text-gray-700"> AI</span>
+<!-- Navigation Bar -->
+<header class="w-full border-b border-white/20 bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between">
+    <!-- Logo -->
+    <a href="/" class="flex items-center gap-3">
+      <img src="https://res.cloudinary.com/djzks0atj/image/upload/v1759412135/NeuroMed_AI_Logo-10_yassi6.png" 
+           alt="NeuroMed Aira Logo" 
+           class="h-8 object-contain"/>
     </a>
 
-    <!-- Hamburger button (shown on mobile) -->
-    <button
-      @click="open = !open"
-      class="lg:hidden text-gray-700 focus:outline-none"
-      aria-label="Toggle navigation"
-    >
-      <svg x-show="!open" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
-        viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 6h16M4 12h16M4 18h16"></path>
+    <!-- Desktop Navigation -->
+    <div class="hidden md:flex items-center gap-6">
+      <button id="fontMinus" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-sm" title="Smaller">A−</button>
+      <button id="fontPlus" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-sm" title="Larger">A＋</button>
+      <button id="highContrast" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-sm" aria-pressed="false" title="High contrast">Contrast</button>
+      
+      {% if request.user.is_authenticated %}
+      <a href="/dashboard/new/" class="text-slate-700 hover:text-slate-900 text-sm font-medium">Dashboard</a>
+      <span class="text-slate-600 text-sm">👋 {{ request.user.first_name|default:request.user.username }}</span>
+      <form method="POST" action="{% url 'logout' %}" class="inline">
+        {% csrf_token %}
+        <button type="submit" class="px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-800 text-sm font-medium transition">Log out</button>
+      </form>
+      {% else %}
+      <a href="{% url 'about' %}" class="text-slate-700 hover:text-slate-900 text-sm font-medium">About</a>
+      <a href="{% url 'signup' %}" class="text-slate-700 hover:text-slate-900 text-sm font-medium">Sign up</a>
+      <a href="{% url 'login' %}" class="px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-800 text-sm font-medium transition">Log in</a>
+      {% endif %}
+      
+      <!-- Language Picker -->
+      <div class="relative">
+        <button id="langBtn" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-2 text-sm" aria-haspopup="menu" aria-expanded="false">
+          <i class="fa-solid fa-globe text-sm"></i>
+          <span id="langBtnLabel">English</span>
+          <i class="fa-solid fa-caret-down opacity-70 text-xs"></i>
+        </button>
+        <div id="langMenu" class="hidden absolute right-0 mt-2 w-56 max-h-72 overflow-auto bg-white border rounded-xl shadow-lg z-50"></div>
+      </div>
+    </div>
+
+    <!-- Mobile Menu Button -->
+    <button id="nmMenuBtn" class="md:hidden inline-flex items-center justify-center rounded-lg p-2 border border-slate-200 text-slate-700 hover:bg-slate-50" aria-label="Open menu" aria-controls="nmMobileMenu" aria-expanded="false">
+      <svg id="nmIconOpen" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-width="2" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/>
       </svg>
-      <svg x-show="open" x-cloak class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
-        viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M6 18L18 6M6 6l12 12"></path>
+      <svg id="nmIconClose" class="h-5 w-5 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-width="2" stroke-linecap="round" d="M6 6l12 12M18 6l-12 12"/>
       </svg>
     </button>
+  </div>
 
-    <!-- Desktop Nav -->
-    <div class="hidden lg:flex items-center gap-6 text-sm text-gray-700">
+  <!-- Mobile Menu -->
+  <div id="nmMobileMenu" class="md:hidden hidden border-t bg-white/95 backdrop-blur">
+    <div class="max-w-7xl mx-auto px-5 py-4 grid gap-3">
+      <div class="flex items-center gap-2">
+        <button id="mFontMinus" class="px-3 py-2 rounded-lg border w-full text-sm">A−</button>
+        <button id="mFontPlus" class="px-3 py-2 rounded-lg border w-full text-sm">A＋</button>
+        <button id="mHighContrast" class="px-3 py-2 rounded-lg border w-full text-sm" aria-pressed="false">Contrast</button>
+      </div>
+      
       {% if request.user.is_authenticated %}
-      <nav class="space-x-5">
-        <a href="/dashboard/new/" class="hover:text-[#236092] hover:underline underline-offset-4 transition">Dashboard</a>
-      </nav>
-      <div class="flex items-center gap-4">
-        <span class="font-medium text-gray-600">👋 Welcome, {{ request.user.first_name|default:request.user.username }}</span>
-        <form method="POST" action="{% url 'logout' %}">
+      <div class="flex items-center gap-2">
+        <a href="/dashboard/new/" class="flex-1 text-center rounded-lg px-4 py-2 border hover:bg-slate-50 text-sm">Dashboard</a>
+        <form method="POST" action="{% url 'logout' %}" class="flex-1">
           {% csrf_token %}
-          <button
-            type="submit"
-            class="bg-teal-600 hover:bg-[#1B5A8E] text-white px-4 py-1.5 rounded-md text-sm font-medium transition shadow"
-          >
-            Logout
-          </button>
+          <button type="submit" class="w-full rounded-lg px-4 py-2 border hover:bg-slate-50 text-sm">Log out</button>
         </form>
       </div>
+      <div class="text-sm text-slate-600 px-2">👋 {{ request.user.first_name|default:request.user.username }}</div>
       {% else %}
-      <nav class="flex items-center gap-4">
-        <a href="{% url 'about' %}" class="hover:text-[#236092] transition">About</a>
-        <a href="{% url 'login' %}" class="px-3 py-1.5 bg-white border border-teal-600 text-[#236092] rounded-md hover:bg-teal-50 transition">Login</a>
-        <a href="{% url 'signup' %}" class="px-3 py-1.5 bg-teal-600 text-white rounded-md hover:bg-[#1B5A8E] transition">Signup</a>
-      </nav>
+      <div class="flex items-center gap-2">
+        <a href="{% url 'about' %}" class="flex-1 text-center rounded-lg px-4 py-2 border hover:bg-slate-50 text-sm">About</a>
+        <a href="{% url 'signup' %}" class="flex-1 text-center rounded-lg px-4 py-2 border hover:bg-slate-50 text-sm">Sign up</a>
+        <a href="{% url 'login' %}" class="flex-1 text-center rounded-lg px-4 py-2 border hover:bg-slate-50 text-sm">Log in</a>
+      </div>
       {% endif %}
-    </div>
-  </div>
-
-  <!-- Mobile Nav -->
-  <div x-show="open" x-cloak class="lg:hidden px-4 pb-4 space-y-4 text-sm text-gray-700">
-    {% if request.user.is_authenticated %}
-    <a href="/dashboard/new/" class="block hover:text-[#236092] transition">Dashboard</a>
-    <div class="border-t pt-2">
-      <span class="block font-medium text-gray-600">👋 Welcome, {{ request.user.first_name|default:request.user.username }}</span>
-      <form method="POST" action="{% url 'logout' %}" class="mt-2">
-        {% csrf_token %}
-        <button
-          type="submit"
-          class="w-full bg-teal-600 hover:bg-[#1B5A8E] text-white py-2 rounded-md text-sm font-medium transition shadow"
-        >
-          Logout
+      
+      <!-- Language Picker Mobile -->
+      <div class="grid gap-2">
+        <button id="mLangBtn" class="px-3 py-2 rounded-lg border w-full flex items-center justify-between text-sm">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-globe"></i>
+            <span id="mLangBtnLabel">English</span>
+          </span>
+          <i class="fa-solid fa-caret-down opacity-70"></i>
         </button>
-      </form>
+        <div id="mLangMenu" class="hidden border rounded-xl bg-white shadow-lg max-h-72 overflow-auto"></div>
+      </div>
     </div>
-    {% else %}
-    <a href="{% url 'about' %}" class="block hover:text-[#236092] transition">About</a>
-    <a href="{% url 'login' %}" class="block px-3 py-2 bg-white border border-teal-600 text-[#236092] rounded-md hover:bg-teal-50 transition">Login</a>
-    <a href="{% url 'signup' %}" class="block px-3 py-2 bg-teal-600 text-white rounded-md hover:bg-[#1B5A8E] transition">Signup</a>
-    {% endif %}
   </div>
 </header>
+
+<script>
+// Font size controls
+(function(){
+  const root = document.documentElement;
+  const body = document.body;
+  
+  function bumpFont(delta) {
+    const curr = parseFloat(getComputedStyle(root).getPropertyValue('font-size')) || 16;
+    root.style.setProperty('font-size', Math.max(14, Math.min(22, curr + delta)) + 'px');
+  }
+  
+  document.getElementById('fontMinus')?.addEventListener('click', () => bumpFont(-1));
+  document.getElementById('fontPlus')?.addEventListener('click', () => bumpFont(1));
+  document.getElementById('mFontMinus')?.addEventListener('click', () => bumpFont(-1));
+  document.getElementById('mFontPlus')?.addEventListener('click', () => bumpFont(1));
+  
+  document.getElementById('highContrast')?.addEventListener('click', () => {
+    body.classList.toggle('hc');
+    const btn = document.getElementById('highContrast');
+    const mBtn = document.getElementById('mHighContrast');
+    if (btn) btn.setAttribute('aria-pressed', body.classList.contains('hc') ? 'true' : 'false');
+    if (mBtn) mBtn.setAttribute('aria-pressed', body.classList.contains('hc') ? 'true' : 'false');
+  });
+  
+  document.getElementById('mHighContrast')?.addEventListener('click', () => {
+    body.classList.toggle('hc');
+    const btn = document.getElementById('highContrast');
+    const mBtn = document.getElementById('mHighContrast');
+    if (btn) btn.setAttribute('aria-pressed', body.classList.contains('hc') ? 'true' : 'false');
+    if (mBtn) mBtn.setAttribute('aria-pressed', body.classList.contains('hc') ? 'true' : 'false');
+  });
+})();
+
+// Mobile menu toggle
+(function(){
+  const btn = document.getElementById('nmMenuBtn');
+  const menu = document.getElementById('nmMobileMenu');
+  const icoOpen = document.getElementById('nmIconOpen');
+  const icoClose = document.getElementById('nmIconClose');
+  
+  if (!btn || !menu) return;
+  
+  function setOpen(isOpen){
+    menu.classList.toggle('hidden', !isOpen);
+    btn.setAttribute('aria-expanded', String(isOpen));
+    if (icoOpen) icoOpen.classList.toggle('hidden', isOpen);
+    if (icoClose) icoClose.classList.toggle('hidden', !isOpen);
+  }
+  
+  btn.addEventListener('click', () => setOpen(menu.classList.contains('hidden')));
+  
+  document.addEventListener('click', (e) => {
+    if (!menu || menu.classList.contains('hidden')) return;
+    const within = menu.contains(e.target) || btn.contains(e.target);
+    if (!within) setOpen(false);
+  });
+  
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') setOpen(false);
+  });
+})();
+</script>

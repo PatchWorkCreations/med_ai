@@ -173,7 +173,7 @@ def billing_settings(request):
             'monthly': {
                 'id': 'monthly',
                 'name': 'Monthly',
-                'price': 1.00,  # Testing: $1 instead of $20
+                'price': 20.00,
                 'display': get_plan_display('monthly'),
             },
             'annual': {
@@ -184,7 +184,7 @@ def billing_settings(request):
             },
             'clinical': {
                 'id': 'clinical',
-                'name': 'Clinical',
+                'name': 'Enterprise',
                 'display': get_plan_display('clinical'),
             },
         },
@@ -608,7 +608,7 @@ def cancel_subscription(request):
 @require_http_methods(["POST"])
 @csrf_exempt
 def contact_clinical(request):
-    """Handle clinical plan contact request and send email."""
+    """Handle enterprise plan contact request and send email."""
     try:
         data = json.loads(request.body)
         name = data.get('name', '').strip()
@@ -634,7 +634,7 @@ def contact_clinical(request):
         # Email to sales team
         email_subject = f"Clinical Plan Inquiry from {name}"
         email_body = f"""
-New Clinical Plan Inquiry
+New Enterprise Plan Inquiry
 
 Contact Information:
 - Name: {name}
@@ -654,7 +654,7 @@ This inquiry was submitted through the billing settings page.
 """
         
         # Send email to sales team
-        sales_email = getattr(settings, 'CLINICAL_SALES_EMAIL', 'sales@neuromedai.org')
+        sales_email = getattr(settings, 'CLINICAL_SALES_EMAIL', 'sales@neuromedai.org')  # Keep variable name for backward compatibility
         email_sent = send_via_resend(
             to=sales_email,
             subject=email_subject,
@@ -663,17 +663,17 @@ This inquiry was submitted through the billing settings page.
         )
         
         if not email_sent:
-            log.error(f"Failed to send clinical plan inquiry email for user {user.id}")
+            log.error(f"Failed to send enterprise plan inquiry email for user {user.id}")
             return JsonResponse({
                 "error": "Failed to send email. Please try again or contact us directly."
             }, status=500)
         
         # Send confirmation email to user
-        confirmation_subject = "Thank you for your Clinical Plan inquiry"
+        confirmation_subject = "Thank you for your Enterprise Plan inquiry"
         confirmation_body = f"""
 Hi {name},
 
-Thank you for your interest in our Clinical Plan. We've received your inquiry and our team will get back to you within 24-48 hours.
+Thank you for your interest in our Enterprise Plan. We've received your inquiry and our team will get back to you within 24-48 hours to discuss creating your custom AI system.
 
 Your inquiry details:
 - Company: {company or 'Not provided'}
@@ -699,7 +699,7 @@ NeuroMed Aira Team
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON"}, status=400)
     except Exception as e:
-        log.error(f"Error processing clinical plan contact: {e}")
+        log.error(f"Error processing enterprise plan contact: {e}")
         return JsonResponse({
             "error": "An error occurred. Please try again or contact us directly."
         }, status=500)

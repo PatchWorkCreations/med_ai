@@ -326,7 +326,7 @@ SUBSCRIPTION_PLANS = {
     "monthly": {
         "name": "Monthly",
         "billing": "Monthly subscription",
-        "price": 1.00,  # Testing: $1 instead of $20
+        "price": 20.00,
         "price_id": None,  # Not used for PayPal, but kept for consistency
     },
     "annual": {
@@ -336,7 +336,7 @@ SUBSCRIPTION_PLANS = {
         "price_id": None,
     },
     "clinical": {
-        "name": "Clinical",
+        "name": "Enterprise",
         "billing": "Custom contract",
         "price": None,  # Contact us
         "price_id": None,

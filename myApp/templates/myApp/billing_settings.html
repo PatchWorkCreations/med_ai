@@ -99,7 +99,7 @@
           <h3 class="text-xl font-bold text-gray-900 mb-2">Monthly</h3>
           <p class="text-sm text-gray-600 mb-4">Keep chatting with expanded access</p>
           <div class="mb-4">
-            <span class="text-3xl font-bold text-gray-900">$1</span>
+            <span class="text-3xl font-bold text-gray-900">$20</span>
             <span class="text-gray-600">/month</span>
           </div>
         </div>
@@ -193,7 +193,7 @@
         </ul>
       </div>
 
-      <!-- Clinical Plan -->
+      <!-- Enterprise Plan -->
       <div class="bg-white rounded-xl border-2 {% if current_plan == 'clinical' %}border-blue-500 shadow-lg{% else %}border-gray-200{% endif %} p-6 relative flex flex-col">
         {% if current_plan == 'clinical' %}
         <div class="absolute top-4 right-4 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
@@ -201,8 +201,8 @@
         </div>
         {% endif %}
         <div class="mb-4">
-          <h3 class="text-xl font-bold text-gray-900 mb-2">Clinical</h3>
-          <p class="text-sm text-gray-600 mb-4">Create your own experience</p>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Enterprise</h3>
+          <p class="text-sm text-gray-600 mb-4">Want to create your own AI system?</p>
           <div class="mb-4">
             <span class="text-3xl font-bold text-gray-900">Custom</span>
           </div>
@@ -543,13 +543,13 @@
     }
   </script>
 
-  <!-- Clinical Plan Contact Modal -->
+  <!-- Enterprise Plan Contact Modal -->
   <div id="clinicalContactModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
       <div class="p-6">
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold text-gray-900">Contact Us for Clinical Plan</h2>
+          <h2 class="text-2xl font-bold text-gray-900">Contact Us for Enterprise Plan</h2>
           <button id="closeClinicalModal" class="text-gray-400 hover:text-gray-600 transition">
             <i class="fa-solid fa-times text-xl"></i>
           </button>
