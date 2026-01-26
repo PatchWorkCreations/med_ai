@@ -42,7 +42,7 @@ from .models import ChatSession
 
 # myApp/emailer.py
 import json, logging, requests
-from typing import Iterable, Optional, Union
+from typing import Iterable, Optional, Union, Dict
 from django.conf import settings
 
 log = logging.getLogger(__name__)
@@ -322,6 +322,60 @@ def build_system_prompt(tone: str, care_setting: Optional[str], faith_setting: O
         full = base
 
     return f"{full}\n\n(Always respond in {lang} unless told otherwise.)"
+
+
+def build_adaptive_system_prompt(
+    tone: str,
+    care_setting: Optional[str],
+    faith_setting: Optional[str],
+    lang: str,
+    profile=None,
+    strategies: Optional[Dict[str, str]] = None
+) -> str:
+    """
+    Builds system prompt with adaptive style modifiers.
+    Maintains all safety constraints while adjusting style.
+    """
+    from django.conf import settings
+    
+    # Get base prompt (existing logic)
+    base_prompt = get_system_prompt(tone)
+    
+    # Add care/faith settings (existing logic)
+    if tone == "Faith" and faith_setting:
+        system_prompt = get_faith_prompt(base_prompt, faith_setting)
+    elif tone in ("Clinical", "Caregiver"):
+        system_prompt = get_setting_prompt(base_prompt, care_setting)
+    else:
+        system_prompt = base_prompt
+    
+    # Add language instruction (existing logic)
+    system_prompt = _add_language_instruction(system_prompt, lang)
+    
+    # NEW: Add adaptive style modifiers (if profile exists and feature enabled)
+    if settings.ENABLE_ADAPTIVE_RESPONSE and profile and strategies:
+        style_modifiers = strategies.get('style_modifiers', [])
+        if style_modifiers:
+            modifier_text = "\n\n=== Adaptive Style Preferences ===\n"
+            modifier_text += "The following preferences affect ONLY:\n"
+            modifier_text += "- sentence length\n"
+            modifier_text += "- emotional acknowledgment\n"
+            modifier_text += "- structural formatting\n"
+            modifier_text += "- vocabulary complexity\n\n"
+            modifier_text += "They MUST NOT affect:\n"
+            modifier_text += "- medical reasoning\n"
+            modifier_text += "- advice selection\n"
+            modifier_text += "- urgency thresholds\n"
+            modifier_text += "- red flags\n"
+            modifier_text += "- diagnoses or interpretations\n\n"
+            modifier_text += "Style adjustments:\n"
+            for modifier in style_modifiers:
+                modifier_text += f"- {modifier}\n"
+            modifier_text += "\n⚠️ CRITICAL: These preferences are style-only. Medical safety, accuracy, and diagnostic boundaries are absolute and never modified.\n"
+            
+            system_prompt += modifier_text
+    
+    return system_prompt
 
 
 
@@ -1388,6 +1442,28 @@ def send_chat(request):
     else:
         lang = lang or "en-US"
 
+    # --- Adaptive Response System (if enabled)
+    interaction_profile = None
+    adaptive_strategies = None
+    
+    if settings.ENABLE_ADAPTIVE_RESPONSE:
+        try:
+            from .preference_inference import PreferenceInference, SignalExtractor, ResponseStrategyResolver
+            
+            # Get or create interaction profile
+            session_id = request.data.get("session_id") or request.session.get("active_chat_session_id")
+            interaction_profile = PreferenceInference.get_default_profile(
+                user=request.user if request.user.is_authenticated else None,
+                session_id=session_id if not request.user.is_authenticated else None
+            )
+        except Exception as e:
+            # Graceful degradation - if adaptive system fails, continue without it
+            import logging
+            log = logging.getLogger(__name__)
+            log.warning(f"Adaptive response system error: {e}")
+            interaction_profile = None
+            adaptive_strategies = None
+
     # --- System prompt
     base_prompt = get_system_prompt(tone)
 
@@ -1417,7 +1493,7 @@ def send_chat(request):
         }, status=400)
     
     has_files = bool(files)
-
+    
     # --- Mode header
     mode, topic_hint = _classify_mode(user_message, has_files, request.session)
     header = f"ResponseMode: {mode}" + (f"\nTopicHint: {topic_hint}" if topic_hint else "")
@@ -1425,6 +1501,8 @@ def send_chat(request):
     # --- Decide persistence
     use_db = request.user.is_authenticated
     session_obj = None
+    
+    # Note: interaction_profile and adaptive_strategies are set above if adaptive system is enabled
 
     # 🔑 STICKY: prefer payload id, else the server-sticky id
     incoming_session_id = request.data.get("session_id")
@@ -1459,6 +1537,64 @@ def send_chat(request):
         )
         if not any(m.get("role") == "system" and str(m.get("content", "")).startswith("ResponseMode:") for m in chat_history):
             chat_history.insert(1, {"role": "system", "content": header})
+    
+    # --- Extract signals and update profile (Adaptive System) - after chat_history is built
+    if settings.ENABLE_ADAPTIVE_RESPONSE and interaction_profile:
+        try:
+            from .preference_inference import SignalExtractor, PreferenceInference, ResponseStrategyResolver
+            
+            # Extract signals from current interaction
+            signals = SignalExtractor.extract_all_signals(
+                user_message=user_message,
+                has_files=has_files,
+                conversation_history=chat_history
+            )
+            
+            # Detect topic change (simple heuristic: compare current message with last message)
+            topic_changed = False
+            if chat_history:
+                last_user_msg = next((m.get('content', '') for m in reversed(chat_history) if m.get('role') == 'user'), '')
+                # Simple topic change detection: significant vocabulary shift
+                if last_user_msg and user_message:
+                    last_words = set(last_user_msg.lower().split())
+                    current_words = set(user_message.lower().split())
+                    if last_words and current_words:
+                        overlap = len(last_words & current_words) / max(len(last_words), len(current_words), 1)
+                        topic_changed = overlap < 0.3  # Less than 30% word overlap suggests topic change
+            
+            # Update profile with new signals
+            interaction_profile = PreferenceInference.update_profile(
+                interaction_profile, 
+                signals, 
+                topic_changed=topic_changed
+            )
+            
+            # Resolve response strategies
+            adaptive_strategies = ResponseStrategyResolver.resolve_strategies(interaction_profile, tone)
+            
+            # Build adaptive system prompt (overrides the standard one)
+            adaptive_system_prompt = build_adaptive_system_prompt(
+                tone=tone,
+                care_setting=care_setting,
+                faith_setting=faith_setting,
+                lang=lang,
+                profile=interaction_profile,
+                strategies=adaptive_strategies
+            )
+            
+            # Update system prompt in chat_history if it was already inserted
+            for m in chat_history:
+                if m.get("role") == "system" and base_prompt in m.get("content", ""):
+                    m["content"] = adaptive_system_prompt
+                    break
+            # Also update the system_prompt variable for consistency
+            system_prompt = adaptive_system_prompt
+        except Exception as e:
+            # Graceful degradation - if adaptive system fails, use standard prompt
+            import logging
+            log = logging.getLogger(__name__)
+            log.warning(f"Adaptive response system error during processing: {e}")
+            # system_prompt already set above, continue with standard prompt
 
     # --- Process files → combined_context
     # Separate images from other files

@@ -723,8 +723,27 @@ body {
 .chat-ai .md-prose h4 { font-size: 1rem; font-weight: 600; margin: 0.45em 0 0.3em; }
 
 .chat-ai .md-prose p { margin: 0.5em 0; }
-.chat-ai .md-prose ul, .chat-ai .md-prose ol { margin: 0.5em 0 0.5em 1.5em; }
-.chat-ai .md-prose li { margin: 0.25em 0; }
+.chat-ai .md-prose ul, .chat-ai .md-prose ol { 
+  margin: 0.5em 0 0.5em 0;
+  padding-left: 1.5em;
+  list-style-position: outside;
+}
+.chat-ai .md-prose ul {
+  list-style-type: disc;
+}
+.chat-ai .md-prose ol {
+  list-style-type: decimal;
+}
+.chat-ai .md-prose li { 
+  margin: 0.4em 0;
+  padding-left: 0.5em;
+  line-height: 1.6;
+}
+.chat-ai .md-prose ul ul, .chat-ai .md-prose ol ol,
+.chat-ai .md-prose ul ol, .chat-ai .md-prose ol ul {
+  margin-top: 0.3em;
+  margin-bottom: 0.3em;
+}
 
 .chat-ai .md-prose table {
   width: 100%;

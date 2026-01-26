@@ -294,19 +294,51 @@ body{
   <!-- Main Content -->
   <main class="max-w-7xl mx-auto px-4 md:px-6 pt-12 md:pt-20 pb-16">
     <!-- Hero Section -->
-    <div class="text-center mb-12">
-      <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 mb-6 max-w-4xl mx-auto leading-tight">
-        Medical results,<br>
-        finally explained<br>
-        in plain language.
+    <div class="text-center mb-12 relative">
+      <!-- Decorative accent elements -->
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-8 w-32 h-1 bg-gradient-to-r from-transparent via-[#236092] to-transparent opacity-30"></div>
+      
+      <div class="relative inline-block mb-8">
+        <!-- Trust badge/icon accent -->
+        <div class="absolute -top-4 -right-4 w-16 h-16 bg-gradient-to-br from-[#236092]/10 to-amber-200/20 rounded-full blur-xl"></div>
+        <div class="relative bg-white/60 backdrop-blur-sm border border-slate-200/50 rounded-2xl px-6 py-3 shadow-lg inline-flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#236092] to-[#1B5A8E] flex items-center justify-center shadow-md">
+            <i class="fa-solid fa-shield-halved text-white text-sm"></i>
+          </div>
+          <div class="text-left">
+            <p class="text-xs font-semibold text-slate-900">HIPAA-Compliant</p>
+            <p class="text-xs text-slate-600">Medical-grade security</p>
+          </div>
+        </div>
+      </div>
+      
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 mb-6 max-w-4xl mx-auto leading-tight relative">
+        <span class="relative inline-block">
+          Medical results,<br>
+          <span class="bg-gradient-to-r from-[#236092] via-[#1B5A8E] to-[#236092] bg-clip-text text-transparent">explained with care.</span>
+          <div class="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#236092]/20 to-transparent"></div>
+        </span>
       </h1>
-      <p class="text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto mb-8">
-        Upload any medical document. We'll summarize it clearly. You get next steps explained in plain English.
-      </p>
+      
+      <div class="max-w-3xl mx-auto space-y-4 mb-8">
+        <p class="text-xl md:text-2xl text-slate-700 max-w-3xl mx-auto leading-relaxed">
+          Meet <span class="font-semibold text-[#236092]">Aira</span> — a compassionate medical AI designed to help you understand your health without confusion or overwhelm.
+        </p>
+        <p class="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+          Upload a medical document and talk it through with Aira in plain language. You'll get clear explanations, thoughtful next steps, and a calm space to ask questions — at your own pace.
+        </p>
+      </div>
+      
+      <!-- Visual separator with accent -->
+      <div class="flex items-center justify-center gap-4 mb-8 max-w-2xl mx-auto">
+        <div class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
+        <div class="w-2 h-2 rounded-full bg-[#236092] opacity-60"></div>
+        <div class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
+      </div>
       
       <!-- Mode Selector -->
       <div class="flex items-center justify-center gap-3 mb-8">
-        <span class="text-sm text-slate-600">Tone:</span>
+        <span class="text-sm text-slate-600">How Aira responds:</span>
         <div id="modeSelectWrap" class="flex items-center gap-2 flex-wrap justify-center">
           <button data-mode="PlainClinical" class="mode-selector" aria-pressed="true">
             <i class="fa-regular fa-message text-[#236092]"></i>
@@ -411,235 +443,248 @@ body{
   </main>
 
   <!-- Product Intro Section -->
-  <section class="py-20 bg-gradient-to-b from-white via-slate-50 to-white">
-    <div class="max-w-7xl mx-auto px-4 md:px-6">
-      <div class="text-center mb-12">
-        <h2 class="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-6">
-          Understand medical information at the speed of thought.
-        </h2>
-        <p class="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto mb-8">
-          Upload any medical document and instantly get a clean, easy-to-understand summary—highlighting what matters, what it means, and what to do next.
-        </p>
-        <a href="/signup" class="inline-flex items-center px-8 py-4 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition shadow-lg text-lg">
-          Start building clarity with NeuroMed Aira
-        </a>
+ <!-- Two Panel Section: Product Demo -->
+<section class="py-28 bg-white">
+  <div class="max-w-7xl mx-auto px-6">
+
+    <!-- Header -->
+    <div class="text-center mb-20">
+      <h2 class="text-4xl md:text-5xl font-bold text-slate-900 mb-5">
+        Medical information, finally explained clearly
+      </h2>
+      <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+        Aira helps you understand medical results without pressure, jargon, or overwhelm.
+      </p>
     </div>
-    </div>
-  </section>
 
-  <!-- Two Panel Section: Product Demo -->
-  <section class="py-20 bg-white">
-    <div class="max-w-7xl mx-auto px-4 md:px-6">
-      <div class="text-center mb-12">
-        <div class="inline-flex items-center gap-2 mb-4">
-          <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm">
-            <img src="https://res.cloudinary.com/dk52yeq9x/image/upload/v1768919639/NeuroMed_AI_Logo-13-12_vgfarp.png" 
-                 alt="NeuroMed Aira Icon" 
-                 class="w-6 h-6 object-contain"/>
-          </div>
-          <h2 class="text-3xl font-bold text-slate-900">NeuroMed Aira</h2>
-        </div>
-        <p class="text-lg text-slate-600 mb-8">Your AI Medical Summary Assistant</p>
-      </div>
-      <div class="grid lg:grid-cols-2 gap-12 items-center">
-        <!-- Left Panel: Text -->
-        <div>
-          <div class="bg-slate-50 rounded-2xl p-6 mb-6 border border-slate-200">
-            <p class="text-lg text-slate-700 italic mb-4">
-              "Explain this lab result in simple terms for my elderly mother."
-            </p>
-            <p class="text-base text-slate-600">
-              Aira translates complex medical language into explanations anyone can understand—patients, caregivers, and families alike.
-            </p>
-          </div>
-          <div class="space-y-4">
-            <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-lg bg-[#236092] flex items-center justify-center flex-shrink-0">
-                <i class="fa-solid fa-plus text-white text-sm"></i>
-              </div>
-              <div>
-                <h3 class="font-semibold text-slate-900 mb-1">Add context</h3>
-                <p class="text-sm text-slate-600">Ask your question naturally—just like you'd ask a doctor.</p>
-              </div>
-            </div>
-            <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-lg bg-[#236092] flex items-center justify-center flex-shrink-0">
-                <i class="fa-solid fa-sparkles text-white text-sm"></i>
-              </div>
-              <div>
-                <h3 class="font-semibold text-slate-900 mb-1">Improve your prompt</h3>
-                <p class="text-sm text-slate-600">Aira refines your request to get the most accurate, helpful explanation.</p>
-              </div>
-            </div>
-          </div>
-  </div>
+    <div class="grid lg:grid-cols-2 gap-20 items-center">
 
-        <!-- Right Panel: Demo UI -->
-        <div class="relative">
-          <div class="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-[#236092]/10 via-transparent to-amber-200/20 blur-2xl"></div>
-          <div class="relative bg-white/90 backdrop-blur-sm border border-slate-200 shadow-2xl rounded-3xl p-6 overflow-hidden">
-            <!-- App Header -->
-            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200">
-              <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm">
-                <img src="https://res.cloudinary.com/dk52yeq9x/image/upload/v1768919639/NeuroMed_AI_Logo-13-12_vgfarp.png" 
-                     alt="NeuroMed Aira Icon" 
-                     class="w-6 h-6 object-contain"/>
-        </div>
-              <div>
-                <p class="font-semibold text-slate-900">NeuroMed Aira</p>
-                <p class="text-xs text-slate-500">Medical Summary Assistant</p>
-        </div>
-      </div>
+      <!-- LEFT: Narrative Panel -->
+      <div class="space-y-12">
 
-            <!-- Prompt Box -->
-            <div class="bg-white border-2 border-slate-200 rounded-2xl p-4 mb-4 shadow-lg">
-              <p class="text-sm text-slate-700 mb-3">
-                "Explain this lab result in simple terms for my elderly mother"
-              </p>
-              <div class="flex items-center gap-2">
-                <button class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center">
-                  <i class="fa-solid fa-plus text-xs text-slate-600"></i>
-    </button>
-                <button class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-medium text-slate-700 flex items-center gap-1">
-                  <i class="fa-solid fa-pencil text-xs"></i>
-                  <span>Add context</span>
-                </button>
-                <button class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-medium text-slate-700 flex items-center gap-1">
-                  <i class="fa-solid fa-sparkles text-xs"></i>
-                  <span>Improve prompt</span>
-                </button>
-                <button class="ml-auto w-10 h-10 rounded-xl bg-[#F59E0B] hover:bg-[#d97706] flex items-center justify-center shadow-md">
-                  <i class="fa-solid fa-arrow-up text-white text-sm"></i>
-                </button>
-        </div>
-        </div>
-
-            <!-- Summary Preview -->
-            <div class="space-y-3">
-              <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                <p class="text-xs font-semibold text-slate-900 mb-1">In simple terms</p>
-                <p class="text-xs text-slate-600">
-                  Your lab results fall within normal ranges. No immediate concerns—just continue routine check-ups.
-                </p>
-      </div>
-              <div class="grid grid-cols-2 gap-2">
-                <div class="bg-white rounded-lg p-2 border border-slate-100">
-                  <p class="text-xs font-semibold text-slate-900 mb-1">What this means</p>
-                  <p class="text-xs text-slate-600">Everything looks stable and healthy.</p>
-        </div>
-                <div class="bg-white rounded-lg p-2 border border-slate-100">
-                  <p class="text-xs font-semibold text-slate-900 mb-1">Next steps</p>
-                  <p class="text-xs text-slate-600">Schedule your next follow-up as planned.</p>
-        </div>
-      </div>
-        </div>
-        </div>
-      </div>
-        </div>
-        </div>
-  </section>
-
-  <!-- Backend Built-in Section -->
-  <section class="py-20 bg-gradient-to-b from-slate-50 to-white">
-    <div class="max-w-7xl mx-auto px-4 md:px-6">
-      <div class="grid lg:grid-cols-2 gap-12 items-center">
-        <!-- Left: Visual -->
-        <div class="relative order-2 lg:order-1">
-          <div class="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-blue-200/20 via-transparent to-purple-200/20 blur-2xl"></div>
-          <div class="relative bg-white/90 backdrop-blur-sm border border-slate-200 shadow-2xl rounded-3xl p-6">
-            <!-- Task List -->
-            <div class="space-y-3 mb-6">
-              <div class="flex items-center gap-3">
-                <div class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
-                  <i class="fa-solid fa-check text-white text-xs"></i>
-      </div>
-                <p class="text-sm text-slate-700">Encrypting your documents</p>
-        </div>
-              <div class="flex items-center gap-3">
-                <div class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
-                  <i class="fa-solid fa-check text-white text-xs"></i>
-        </div>
-                <p class="text-sm text-slate-700">Securing your data</p>
-      </div>
-              <div class="flex items-center gap-3">
-                <div class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
-                  <i class="fa-solid fa-check text-white text-xs"></i>
-                </div>
-                <p class="text-sm text-slate-700">Protecting your privacy</p>
-              </div>
-              <div class="flex items-center gap-3">
-                <div class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
-                  <i class="fa-solid fa-check text-white text-xs"></i>
-                </div>
-                <p class="text-sm text-slate-700">Generating secure summaries</p>
-              </div>
-              <div class="flex items-center gap-3">
-                <div class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
-                  <i class="fa-solid fa-check text-white text-xs"></i>
-                </div>
-                <p class="text-sm text-slate-700">Ensuring HIPAA compliance</p>
-  </div>
-</div>
-
-            <!-- Prompt Box -->
-            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
-              <p class="text-xs font-medium text-slate-700 mb-2">What would you change?</p>
-              <div class="flex items-center gap-2">
-                <input type="text" placeholder="Add your request..." class="flex-1 text-xs px-3 py-2 rounded-lg border border-slate-200 bg-white">
-                <button class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-medium text-slate-700 flex items-center gap-1">
-                  <i class="fa-solid fa-pencil text-xs"></i>
-                  <span>Add styling</span>
-  </button>
-                <button class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-medium text-slate-700 flex items-center gap-1">
-                  <i class="fa-solid fa-sparkles text-xs"></i>
-                  <span>Improve prompt</span>
-                </button>
-                <button class="w-8 h-8 rounded-xl bg-[#F59E0B] hover:bg-[#d97706] flex items-center justify-center">
-                  <i class="fa-solid fa-arrow-up text-white text-xs"></i>
-                </button>
-      </div>
-          </div>
-          </div>
-          </div>
-
-        <!-- Right: Text -->
-        <div class="order-1 lg:order-2">
-          <h2 class="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-6">
-            Your privacy isn't an add-on. It's built in.
-          </h2>
-          <div class="space-y-4 mb-6">
-            <div class="flex items-start gap-3">
-              <i class="fa-solid fa-shield-halved text-[#236092] mt-1"></i>
-              <div>
-                <p class="font-semibold text-slate-900">End-to-end encryption</p>
-          </div>
-            </div>
-            <div class="flex items-start gap-3">
-              <i class="fa-solid fa-shield-halved text-[#236092] mt-1"></i>
-              <div>
-                <p class="font-semibold text-slate-900">HIPAA-compliant processing</p>
-              </div>
-            </div>
-            <div class="flex items-start gap-3">
-              <i class="fa-solid fa-shield-halved text-[#236092] mt-1"></i>
-              <div>
-                <p class="font-semibold text-slate-900">Secure document handling</p>
-              </div>
-            </div>
-            <div class="flex items-start gap-3">
-              <i class="fa-solid fa-shield-halved text-[#236092] mt-1"></i>
-              <div>
-                <p class="font-semibold text-slate-900">Private, protected summaries—always</p>
-              </div>
-            </div>
-          </div>
-          <p class="text-lg text-slate-600 mb-8 leading-relaxed">
-            Everything happens automatically behind the scenes, so you can focus on understanding—not worrying. Your data stays yours. Period.
+        <!-- Quote / Use Case -->
+        <div class="relative bg-slate-50 rounded-3xl p-10">
+          <span class="absolute -top-4 left-8 text-xs font-semibold tracking-wide text-slate-400 bg-white px-3 py-1 rounded-full border">
+            Real question
+          </span>
+          <p class="text-xl text-slate-800 italic leading-relaxed mb-4">
+            “Explain this lab result in simple terms for my elderly mother.”
+          </p>
+          <p class="text-sm text-slate-600 max-w-md">
+            Speak naturally. Aira understands context, intent, and emotional weight — without you explaining how.
           </p>
         </div>
+
+        <!-- Feature Card -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-10 space-y-6 shadow-sm">
+          <div class="flex gap-4">
+            <div class="w-10 h-10 rounded-xl bg-[#236092]/10 text-[#236092] flex items-center justify-center">
+              <i class="fa-solid fa-brain"></i>
+            </div>
+            <div>
+              <h3 class="font-semibold text-slate-900 mb-1">
+                Understand instantly
+              </h3>
+              <p class="text-sm text-slate-600">
+                Aira translates complex medical language into calm, human explanations.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex gap-4">
+            <div class="w-10 h-10 rounded-xl bg-[#236092]/10 text-[#236092] flex items-center justify-center">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+            <div>
+              <h3 class="font-semibold text-slate-900 mb-1">
+                Adapts automatically
+              </h3>
+              <p class="text-sm text-slate-600">
+                No modes to choose. Aira quietly adjusts how it explains based on you.
+              </p>
+            </div>
           </div>
         </div>
+      </div>
+
+      <!-- RIGHT: Demo UI -->
+      <div class="relative">
+
+        <!-- Soft background glow -->
+        <div class="absolute -inset-8 rounded-3xl bg-gradient-to-tr from-[#236092]/10 via-transparent to-amber-200/30 blur-3xl"></div>
+
+        <div class="relative bg-white rounded-3xl shadow-2xl border border-slate-200 p-8">
+
+          <!-- App Header -->
+          <div class="flex items-center gap-3 mb-8">
+            <div class="w-10 h-10 rounded-xl border border-slate-200 flex items-center justify-center">
+              <img
+                src="https://res.cloudinary.com/dk52yeq9x/image/upload/v1768919639/NeuroMed_AI_Logo-13-12_vgfarp.png"
+                class="w-6 h-6"
+              />
+            </div>
+            <div>
+              <p class="font-semibold text-slate-900">NeuroMed Aira</p>
+              <p class="text-xs text-slate-500">Medical Summary Assistant</p>
+            </div>
+          </div>
+
+          <!-- Input -->
+          <div class="bg-slate-50 rounded-2xl p-6 mb-6">
+            <p class="text-sm text-slate-700 mb-4">
+              Explain this lab result in simple terms for my elderly mother
+            </p>
+
+            <div class="flex justify-end">
+              <button class="w-11 h-11 rounded-xl bg-[#F59E0B] hover:bg-[#d97706] flex items-center justify-center shadow-md transition">
+                <i class="fa-solid fa-arrow-up text-white"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Output -->
+          <div class="space-y-4">
+            <div class="bg-white rounded-xl p-4 border border-slate-100">
+              <p class="text-xs font-semibold text-slate-900 mb-1">In simple terms</p>
+              <p class="text-sm text-slate-600">
+                Your results are normal. No immediate concerns.
+              </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div class="bg-slate-50 rounded-xl p-3">
+                <p class="text-xs font-semibold text-slate-900 mb-1">What this means</p>
+                <p class="text-xs text-slate-600">Everything looks stable.</p>
+              </div>
+              <div class="bg-slate-50 rounded-xl p-3">
+                <p class="text-xs font-semibold text-slate-900 mb-1">Next steps</p>
+                <p class="text-xs text-slate-600">Continue routine care.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- Two Panel Section: Product Demo -->
+
+
+
+  <!-- Backend Built-in Section -->
+  <section class="py-28 bg-gradient-to-b from-slate-50 to-white">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid lg:grid-cols-2 gap-20 items-center">
+  
+        <!-- LEFT: Secure System Visual -->
+        <div class="relative order-2 lg:order-1">
+  
+          <!-- Soft glow -->
+          <div class="absolute -inset-8 rounded-3xl bg-gradient-to-tr from-blue-200/20 via-transparent to-emerald-200/20 blur-3xl"></div>
+  
+          <div class="relative bg-white rounded-3xl shadow-2xl border border-slate-200 p-8 space-y-8">
+  
+            <!-- Status Header -->
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                <i class="fa-solid fa-lock"></i>
+              </div>
+              <div>
+                <p class="font-semibold text-slate-900">Secure processing active</p>
+                <p class="text-xs text-slate-500">All systems running safely</p>
+              </div>
+            </div>
+  
+            <!-- Automated Security List -->
+            <div class="space-y-3 text-sm text-slate-600">
+              <p class="flex items-center gap-2">
+                <i class="fa-solid fa-check text-emerald-500 text-xs"></i>
+                Documents encrypted on upload
+              </p>
+              <p class="flex items-center gap-2">
+                <i class="fa-solid fa-check text-emerald-500 text-xs"></i>
+                HIPAA-compliant handling
+              </p>
+              <p class="flex items-center gap-2">
+                <i class="fa-solid fa-check text-emerald-500 text-xs"></i>
+                Private, isolated processing
+              </p>
+              <p class="flex items-center gap-2">
+                <i class="fa-solid fa-check text-emerald-500 text-xs"></i>
+                Secure summaries generated
+              </p>
+            </div>
+  
+            <!-- Subtle Prompt (Secondary) -->
+            <div class="bg-slate-50 rounded-2xl p-5">
+              <p class="text-xs font-medium text-slate-700 mb-3">
+                Want something explained differently?
+              </p>
+              <div class="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="Add a follow-up request…"
+                  class="flex-1 text-xs px-3 py-2 rounded-lg border border-slate-200 bg-white"
+                />
+                <button class="w-10 h-10 rounded-xl bg-[#F59E0B] hover:bg-[#d97706] flex items-center justify-center transition">
+                  <i class="fa-solid fa-arrow-up text-white text-xs"></i>
+                </button>
+              </div>
+            </div>
+  
+          </div>
+        </div>
+  
+        <!-- RIGHT: Trust Narrative -->
+        <div class="order-1 lg:order-2 max-w-xl">
+          <h2 class="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-6">
+            Privacy isn’t optional.  
+            It’s foundational.
+          </h2>
+  
+          <p class="text-lg text-slate-600 leading-relaxed mb-8">
+            Aira is built for medical information from the ground up — with security,
+            compliance, and privacy woven into every step.
+          </p>
+  
+          <div class="space-y-5">
+            <div class="flex items-start gap-4">
+              <div class="w-9 h-9 rounded-xl bg-[#236092]/10 text-[#236092] flex items-center justify-center">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <p class="text-slate-700 font-medium">
+                End-to-end encrypted document handling
+              </p>
+            </div>
+  
+            <div class="flex items-start gap-4">
+              <div class="w-9 h-9 rounded-xl bg-[#236092]/10 text-[#236092] flex items-center justify-center">
+                <i class="fa-solid fa-file-shield"></i>
+              </div>
+              <p class="text-slate-700 font-medium">
+                HIPAA-compliant processing by default
+              </p>
+            </div>
+  
+            <div class="flex items-start gap-4">
+              <div class="w-9 h-9 rounded-xl bg-[#236092]/10 text-[#236092] flex items-center justify-center">
+                <i class="fa-solid fa-user-shield"></i>
+              </div>
+              <p class="text-slate-700 font-medium">
+                Your data stays yours — always
+              </p>
+            </div>
+          </div>
+        </div>
+  
+      </div>
+    </div>
   </section>
+  
 
   <!-- Testimonials Section -->
   <section class="py-20 bg-white">
@@ -1111,15 +1156,22 @@ Your expertise leads; I make the information faster, sharper, and more usable.
   }
 };
 
-function selectMode(btn){
+function selectMode(btn, skipRefresh = false){
   $$('#modeSelectWrap button').forEach(b => { 
     b.setAttribute('aria-pressed','false');
   });
   btn.setAttribute('aria-pressed','true');
   const mode = btn.dataset.mode;
+  const currentMode = loadMode();
   saveMode(mode);
   applyModeUI(mode);
   track('mode_chosen', { mode });
+  // Only refresh if mode actually changed and user clicked (not on page load)
+  if (!skipRefresh && mode !== currentMode) {
+    setTimeout(() => {
+      window.location.reload();
+    }, 300); // Small delay to show the toast notification
+  }
 }
 
     function applyModeUI(mode){
@@ -1334,6 +1386,9 @@ chatWindow.scrollTop = chatWindow.scrollHeight;
   if (msg) fd.append('message', msg);
   fd.append('tone', mode);
   fd.append('lang', lang);
+  // Include session_id if available (for adaptive system profile tracking)
+  const existingSessionId = localStorage.getItem('nm_session_id');
+  if (existingSessionId) fd.append('session_id', existingSessionId);
   if (filesToSend.length) {
     for (const f of filesToSend) fd.append('files[]', f);
   }
@@ -1352,6 +1407,8 @@ chatWindow.scrollTop = chatWindow.scrollHeight;
       signal: abortController.signal
     });
     const data = await res.json();
+    // Store session_id if returned (for adaptive system profile tracking)
+    if (data.session_id) localStorage.setItem('nm_session_id', data.session_id);
    typing.classList.remove('text-slate-600'); 
 typing.classList.add('text-slate-800');
     typing.innerHTML = '';
@@ -1427,8 +1484,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const savedMode = loadMode();
   $$('#modeSelectWrap button').forEach(btn => {
     const mode = btn.dataset.mode;
-    if(mode === savedMode){ selectMode(btn); }
-    btn.addEventListener('click', () => selectMode(btn));
+    if(mode === savedMode){ selectMode(btn, true); } // skipRefresh=true on page load
+    btn.addEventListener('click', () => selectMode(btn, false)); // Allow refresh on user click
   });
 
   // Suggestions

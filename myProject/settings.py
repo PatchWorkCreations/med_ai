@@ -41,6 +41,9 @@ load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
+# Feature Flags
+ENABLE_ADAPTIVE_RESPONSE = os.getenv('ENABLE_ADAPTIVE_RESPONSE', 'False').lower() == 'true'
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',

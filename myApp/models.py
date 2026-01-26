@@ -188,6 +188,44 @@ class ChatSession(models.Model):
     class Meta:
         ordering = ['-updated_at']
 
+
+class InteractionProfile(models.Model):
+    """
+    Tracks user communication preferences (inferred, not configured).
+    Profiles are context-sensitive, not identity-defining.
+    """
+    user = models.OneToOneField(
+        User, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True,
+        related_name='interaction_profile'
+    )
+    session_id = models.CharField(max_length=255, null=True, blank=True, db_index=True)
+    
+    # Preference dimensions (0.0 to 1.0 scale)
+    verbosity_level = models.FloatField(default=0.5)  # 0=low, 1=high
+    emotional_support = models.FloatField(default=0.5)  # 0=low, 1=high
+    structure_preference = models.FloatField(default=0.5)  # 0=freeform, 1=stepwise
+    technical_depth = models.FloatField(default=0.5)  # 0=low, 1=high
+    response_pacing = models.FloatField(default=0.5)  # 0=fast, 1=normal
+    
+    # Metadata
+    last_updated_at = models.DateTimeField(auto_now=True)
+    interaction_count = models.IntegerField(default=0)
+    
+    class Meta:
+        db_table = 'interaction_profiles'
+        indexes = [
+            models.Index(fields=['user'], name='interaction_user_idx'),
+            models.Index(fields=['session_id'], name='interaction_session_idx'),
+        ]
+    
+    def __str__(self):
+        if self.user:
+            return f"InteractionProfile for {self.user.username}"
+        return f"InteractionProfile for session {self.session_id}"
+
 import uuid
 from django.db import models
 
