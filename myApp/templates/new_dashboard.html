@@ -652,6 +652,7 @@ body {
 
 /* Premium chat bubbles */
 .chat-bubble {
+  position: relative;
   border-radius: var(--nm-radius-lg);
   padding: 14px 18px;
   font-size: 15px;
@@ -660,7 +661,6 @@ body {
   word-break: break-word;
   box-shadow: var(--nm-shadow);
   animation: fadeInUp 0.3s ease-out;
-  position: relative;
   transition: box-shadow 0.2s ease;
 }
 
@@ -683,6 +683,7 @@ body {
   margin-left: 0;
   border-bottom-left-radius: 4px;
   border-left: 3px solid var(--nm-accent);
+  padding-bottom: 50px;
 }
 
 /* AI badge on assistant bubbles */
@@ -803,21 +804,33 @@ body {
 /* Inline actions in assistant bubbles */
 .chat-ai .bubble-actions {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  opacity: 0;
+  bottom: 10px;
+  right: 12px;
+  opacity: 1;
   transition: opacity 0.2s ease;
   display: flex;
-  gap: 4px;
+  gap: 6px;
+  z-index: 10;
+  align-items: center;
 }
 
-.chat-ai:hover .bubble-actions {
+/* Keep copy button (first) always visible, hide others on non-hover */
+.chat-ai .bubble-actions button:not(:first-child):not(.read-aloud-btn) {
+  opacity: 0;
+}
+
+.chat-ai:hover .bubble-actions button:not(:first-child):not(.read-aloud-btn) {
   opacity: 1;
 }
 
+/* Volume button always visible */
+.chat-ai .bubble-actions button.read-aloud-btn {
+  opacity: 1 !important;
+}
+
 .bubble-actions button {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 6px;
   border: none;
   background: var(--nm-ui-bubble-action-bg);
@@ -828,12 +841,54 @@ body {
   justify-content: center;
   font-size: 12px;
   transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.bubble-actions button.read-aloud-btn {
+  background: rgba(40, 146, 109, 0.1);
+  color: var(--nm-accent);
+  opacity: 1 !important;
+  border: 1px solid rgba(40, 146, 109, 0.2);
+  box-shadow: none;
+  backdrop-filter: blur(4px);
+}
+
+.bubble-actions button.read-aloud-btn:hover {
+  background: rgba(40, 146, 109, 0.15);
+  border-color: rgba(40, 146, 109, 0.3);
+  transform: scale(1.08);
+  box-shadow: 0 2px 4px rgba(40, 146, 109, 0.15);
+}
+
+.bubble-actions button.read-aloud-btn:active {
+  transform: scale(0.95);
 }
 
 .bubble-actions button:hover {
   background: var(--nm-paper);
   color: var(--nm-primary);
-  transform: scale(1.1);
+  transform: scale(1.05);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.bubble-actions button.playing {
+  background: rgba(40, 146, 109, 0.2);
+  color: var(--nm-accent);
+  border-color: var(--nm-accent);
+  animation: pulse-audio 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-audio {
+  0%, 100% { 
+    opacity: 1;
+    transform: scale(1);
+    background: rgba(40, 146, 109, 0.2);
+  }
+  50% { 
+    opacity: 0.8;
+    transform: scale(1.05);
+    background: rgba(40, 146, 109, 0.25);
+  }
 }
 
 /* Typing indicator - premium status row */
@@ -3601,12 +3656,15 @@ function appendChatBubble(role, content, isHistory = false) {
       const rendered = renderMarkdown(content);
       bubble.innerHTML = rendered;
       
-      // Add bubble actions (copy, view full)
+      // Add bubble actions (copy, read aloud, view full)
       const actions = document.createElement('div');
       actions.className = 'bubble-actions';
       actions.innerHTML = `
         <button onclick="copyBubbleText(this)" title="Copy">
           <i class="fa-solid fa-copy"></i>
+        </button>
+        <button onclick="readBubbleText(this)" title="Read aloud" class="read-aloud-btn">
+          <i class="fa-solid fa-volume-high"></i>
         </button>
         ${content.length > 500 ? `<button onclick="viewFullSummary('${escapeHtml(content)}')" title="View full">
           <i class="fa-solid fa-expand"></i>
@@ -3657,6 +3715,100 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+// Text-to-speech state management
+let currentSpeech = null;
+let currentSpeechButton = null;
+
+function readBubbleText(btn) {
+  const bubble = btn.closest('.chat-bubble');
+  const text = bubble.textContent || bubble.innerText;
+  
+  // If already playing this bubble, stop it
+  if (currentSpeechButton === btn && currentSpeech && speechSynthesis.speaking) {
+    speechSynthesis.cancel();
+    btn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+    btn.classList.remove('playing');
+    currentSpeech = null;
+    currentSpeechButton = null;
+    return;
+  }
+  
+  // Stop any currently playing speech
+  if (currentSpeech && speechSynthesis.speaking) {
+    speechSynthesis.cancel();
+    if (currentSpeechButton) {
+      currentSpeechButton.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+      currentSpeechButton.classList.remove('playing');
+    }
+  }
+  
+  // Check if browser supports speech synthesis
+  if (!('speechSynthesis' in window)) {
+    showToast('Text-to-speech is not supported in your browser', 'error');
+    return;
+  }
+  
+  // Create speech utterance
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 1.0; // Normal speed
+  utterance.pitch = 1.0; // Normal pitch
+  utterance.volume = 1.0; // Full volume
+  
+  // Try to use a natural-sounding voice
+  const voices = speechSynthesis.getVoices();
+  const preferredVoices = voices.filter(v => 
+    v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Premium') || v.name.includes('Enhanced'))
+  );
+  if (preferredVoices.length > 0) {
+    utterance.voice = preferredVoices[0];
+  } else if (voices.length > 0) {
+    const englishVoices = voices.filter(v => v.lang.startsWith('en'));
+    if (englishVoices.length > 0) {
+      utterance.voice = englishVoices[0];
+    }
+  }
+  
+  // Update button state
+  btn.innerHTML = '<i class="fa-solid fa-stop"></i>';
+  btn.classList.add('playing');
+  currentSpeech = utterance;
+  currentSpeechButton = btn;
+  
+  // Handle speech end
+  utterance.onend = () => {
+    btn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+    btn.classList.remove('playing');
+    currentSpeech = null;
+    currentSpeechButton = null;
+  };
+  
+  // Handle speech error
+  utterance.onerror = (event) => {
+    console.error('Speech synthesis error:', event);
+    btn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+    btn.classList.remove('playing');
+    showToast('Error reading text', 'error');
+    currentSpeech = null;
+    currentSpeechButton = null;
+  };
+  
+  // Start speaking
+  speechSynthesis.speak(utterance);
+  
+  // Load voices if not already loaded (some browsers need this)
+  if (voices.length === 0) {
+    speechSynthesis.onvoiceschanged = () => {
+      const updatedVoices = speechSynthesis.getVoices();
+      const preferredUpdated = updatedVoices.filter(v => 
+        v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Premium') || v.name.includes('Enhanced'))
+      );
+      if (preferredUpdated.length > 0 && utterance.voice === null) {
+        utterance.voice = preferredUpdated[0];
+      }
+    };
+  }
 }
 
 function copyBubbleText(btn) {
