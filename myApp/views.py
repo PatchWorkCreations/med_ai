@@ -4449,3 +4449,96 @@ def google_oauth_callback(request):
     except Exception as e:
         log.exception("Unexpected error in Google OAuth")
         return HttpResponseBadRequest(f"An error occurred: {str(e)}")
+
+
+@api_view(["POST"])
+@csrf_exempt
+def text_to_speech(request):
+    """
+    Generate text-to-speech audio using ElevenLabs API.
+    Filters out emojis and returns base64-encoded audio.
+    """
+    import re
+    import base64
+    
+    try:
+        # Use request.data for DRF, request.body for regular Django views
+        if hasattr(request, 'data'):
+            text = request.data.get('text', '').strip()
+        else:
+            data = json.loads(request.body)
+            text = data.get('text', '').strip()
+        
+        if not text:
+            return JsonResponse({'error': 'No text provided'}, status=400)
+        
+        # Filter out emojis and other unicode symbols
+        # Remove emoji ranges and other symbols
+        emoji_pattern = re.compile(
+            "["
+            "\U0001F600-\U0001F64F"  # emoticons
+            "\U0001F300-\U0001F5FF"  # symbols & pictographs
+            "\U0001F680-\U0001F6FF"  # transport & map symbols
+            "\U0001F1E0-\U0001F1FF"  # flags (iOS)
+            "\U00002702-\U000027B0"  # dingbats
+            "\U000024C2-\U0001F251"  # enclosed characters
+            "\U0001F900-\U0001F9FF"  # supplemental symbols
+            "\U0001FA00-\U0001FA6F"  # chess symbols
+            "\U0001FA70-\U0001FAFF"  # symbols and pictographs extended-A
+            "\U00002600-\U000026FF"  # miscellaneous symbols
+            "\U00002700-\U000027BF"  # dingbats
+            "]+", 
+            flags=re.UNICODE
+        )
+        cleaned_text = emoji_pattern.sub('', text).strip()
+        
+        # Also remove common emoji-like patterns
+        cleaned_text = re.sub(r'[^\w\s\.,!?;:\-\(\)\[\]\{\}\'"]+', '', cleaned_text)
+        
+        if not cleaned_text:
+            return JsonResponse({'error': 'Text contains only emojis or symbols'}, status=400)
+        
+        # Get ElevenLabs credentials from settings
+        api_key = getattr(settings, 'ELEVENLABS_API_KEY', '')
+        voice_id = getattr(settings, 'VOICE_ID_ENGLISH', '')
+        
+        if not api_key or not voice_id:
+            return JsonResponse({'error': 'ElevenLabs API not configured'}, status=500)
+        
+        # Call ElevenLabs API
+        tts_response = requests.post(
+            f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
+            headers={
+                "xi-api-key": api_key,
+                "Content-Type": "application/json"
+            },
+            json={
+                "text": cleaned_text,
+                "voice_settings": {
+                    "stability": 0.4,
+                    "similarity_boost": 0.7
+                }
+            },
+            timeout=30
+        )
+        
+        if tts_response.status_code != 200:
+            log.error(f"ElevenLabs TTS failed: {tts_response.status_code} - {tts_response.text}")
+            return JsonResponse({
+                'error': 'Text-to-speech generation failed',
+                'details': tts_response.text
+            }, status=tts_response.status_code)
+        
+        # Return base64-encoded audio
+        audio_base64 = base64.b64encode(tts_response.content).decode('utf-8')
+        
+        return JsonResponse({
+            'audio': audio_base64,
+            'format': 'mp3'  # ElevenLabs returns MP3 by default
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        log.exception("Error in text-to-speech endpoint")
+        return JsonResponse({'error': str(e)}, status=500)

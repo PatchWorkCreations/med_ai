@@ -180,6 +180,7 @@ urlpatterns = [
     path("api/billing/history/", billing_views.billing_history, name="billing_history"),
     path("api/billing/cancel/", billing_views.cancel_subscription, name="billing_cancel"),
     path("api/billing/contact-clinical/", billing_views.contact_clinical, name="billing_contact_clinical"),
+    path("api/text-to-speech/", views.text_to_speech, name="text_to_speech"),
 
 ]
 
