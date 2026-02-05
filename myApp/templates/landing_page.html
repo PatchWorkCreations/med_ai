@@ -189,12 +189,12 @@ body{
 .mode-selector {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
+  gap: 6px;
+  padding: 7px 14px;
   background: white;
   border: 1px solid rgba(0,0,0,.08);
-  border-radius: 12px;
-  font-size: 0.9rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -231,7 +231,7 @@ body{
     <div class="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between">
       <!-- Logo -->
       <a href="/" class="flex items-center gap-3">
-  <img src="https://res.cloudinary.com/dk52yeq9x/image/upload/v1770243950/neuromed_ai_1_a8imgm.png" 
+  <img src="https://res.cloudinary.com/dk52yeq9x/image/upload/v1770301408/Neuromed_Aira_Logo-09_qpgvss.png" 
        alt="NeuroMed Aira Logo" 
        class="h-16 object-contain"/>
 </a>
@@ -338,7 +338,7 @@ body{
       
       <!-- Mode Selector -->
       <div class="flex items-center justify-center gap-3 mb-8">
-        <span class="text-sm text-slate-600">How Aira responds:</span>
+        <span class="text-base md:text-lg font-semibold text-slate-700">How Aira responds:</span>
         <div id="modeSelectWrap" class="flex items-center gap-2 flex-wrap justify-center">
           <button data-mode="PlainClinical" class="mode-selector" aria-pressed="true">
             <i class="fa-regular fa-message text-[#236092]"></i>
@@ -373,7 +373,7 @@ body{
       <div class="w-full flex">
         <div id="intro" class="chat-bubble chat-ai shimmer mr-auto">
           <p class="text-slate-800 leading-relaxed">
-            Hi there! You're in Balanced Mode. I can help you with clear explanations and add clinician notes when useful.
+            Hi there — I'm Aira. Share a lab result, report, or question, and I'll translate it into plain language, highlight what matters, and suggest thoughtful next questions to ask your clinician.
           </p>
         </div>
       </div>
@@ -1114,17 +1114,17 @@ function loadMode(){ return localStorage.getItem('nm_mode') || 'PlainClinical'; 
   'PlainClinical': { 
     icon: 'fa-regular fa-message', 
     color: 'text-[#236092]', 
-    intro: "Hi there! You're in Balanced Mode. I can help you with clear explanations and add clinician notes when useful." 
+    intro: "Hi, I'm Aira. I’ll walk through your results in clear, everyday language, point out what’s most important, and quietly add clinical context when it helps." 
   },
   'Caregiver': { 
     icon: 'fa-solid fa-hands-holding-child', 
     color: 'text-amber-700', 
-    intro: "Hi there! You're in Caregiver Mode. I can guide you with gentle, practical steps to make caregiving easier." 
+    intro: "Hi, I'm Aira. Tell me about the person you’re caring for, and I’ll help you turn medical information into gentle, practical steps you can actually use." 
   },
   'Faith': { 
     icon: 'fa-solid fa-hands-praying', 
     color: 'text-indigo-700', 
-    intro: "Hi there! You're in Faith Mode. I can support you with guidance and encouragement, rooted in faith and hope." 
+    intro: "Hi, I'm Aira. If you’d like, we can look at your results through a lens of faith and hope while still keeping the medical facts clear and grounded." 
   },
   'Clinical': { 
   icon: 'fa-solid fa-stethoscope', 
@@ -1147,12 +1147,12 @@ Your expertise leads; I make the information faster, sharper, and more usable.
   'Geriatric': { 
     icon: 'fa-solid fa-person-cane', 
     color: 'text-[#28926D]', 
-    intro: "Hi there! You're in Geriatric Mode. I can explain things in simpler steps with clarity, tailored for older adults." 
+    intro: "Hi, I'm Aira. I can slow things down, break results into simple steps, and keep language friendly for older adults and the people supporting them." 
   },
   'EmotionalSupport': { 
     icon: 'fa-solid fa-heart', 
     color: 'text-rose-700', 
-    intro: "Hi there! You're in Emotional Support Mode. I can be here with calm, validating support and gentle guidance whenever you need it." 
+    intro: "Hi, I’m Aira. If you’re feeling anxious or overwhelmed, you can tell me what’s on your mind and I’ll respond calmly, validate what you’re feeling, and help you think about next steps." 
   }
 };
 
