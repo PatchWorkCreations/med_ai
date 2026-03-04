@@ -168,10 +168,9 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
-# Optional if you're collecting from multiple apps:
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
+# Optional if you're collecting from multiple apps (only add if dir exists, avoids Railway warning):
+_static_dir = os.path.join(BASE_DIR, "static")
+STATICFILES_DIRS = [_static_dir] if os.path.exists(_static_dir) else []
 
 
 

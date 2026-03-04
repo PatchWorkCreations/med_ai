@@ -7756,16 +7756,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
     
-    // New chat button
-    const newChatBtn = document.getElementById('newChatBtn');
-    if (newChatBtn) {
-      newChatBtn.addEventListener('click', () => {
-        console.log('New chat button clicked');
-        newChat();
-      });
-    } else {
-      console.error('New chat button not found!');
-    }
+    // New chat handled by sidebarNewChat below
     
     // Initialize mobile sidebar (with error handling)
     try {
