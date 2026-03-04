@@ -18,6 +18,7 @@ ALLOWED_HOSTS = [
     "medai-production-21ae.up.railway.app",
     "localhost", "127.0.0.1",
     "192.168.100.53",  # Mac IP for iOS physical device testing
+    "192.168.100.89",  # Mac IP (DHCP may change - update when testing from iPhone)
     ".localtest.me",          # ← allow any *.localtest.me subdomain
     ".lvh.me",                # ← optional alt to localtest.me
 ]
@@ -29,6 +30,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
     "http://192.168.100.53:8000",  # Mac IP for iOS physical device testing
+    "http://192.168.100.89:8000",  # Mac IP (update when DHCP changes)
     "http://*.localtest.me:8000",  # ← add
     "http://*.lvh.me:8000",        # ← optional
 ]
@@ -36,6 +38,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 import os
 from dotenv import load_dotenv
+import sys
 
 load_dotenv()
 
@@ -47,6 +50,11 @@ VOICE_ID_ENGLISH = os.getenv("VOICE_ID_ENGLISH", "")
 
 # Feature Flags
 ENABLE_ADAPTIVE_RESPONSE = os.getenv('ENABLE_ADAPTIVE_RESPONSE', 'False').lower() == 'true'
+
+# File upload limits - allow larger images for mobile/medical uploads
+# Django defaults: 2.5 MB - too small for phone camera images
+FILE_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024   # 25 MB per file
+DATA_UPLOAD_MAX_MEMORY_SIZE = 30 * 1024 * 1024   # 30 MB total request
 
 
 INSTALLED_APPS = [
@@ -112,11 +120,14 @@ WSGI_APPLICATION = 'myProject.wsgi.application'
 
 import dj_database_url
 
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+# Always use DATABASE_URL (Postgres) so local and deployed share the same data.
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv("DATABASE_URL"),
+    "default": dj_database_url.config(
+        default=DATABASE_URL,
         conn_max_age=600,
-        ssl_require=True  # Railway requires SSL for Postgres
+        ssl_require=True,  # Railway requires SSL for Postgres
     )
 }
 
@@ -194,6 +205,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
     "http://192.168.100.53:8000",  # Mac IP for iOS physical device testing
+    "http://192.168.100.89:8000",  # Mac IP (update when DHCP changes)
     "https://neuromedai.org",
     "https://www.neuromedai.org",
 ]

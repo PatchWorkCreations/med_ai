@@ -6,311 +6,620 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>About – NeuroMed Aira</title>
   <meta name="description" content="Learn how NeuroMed Aira simplifies medical records into gentle, faith-based, or clinical summaries. Built for caregivers, patients, and families." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+
   <style>
-    .hc *{ color:#000 !important; border-color:#0003 !important }
-    .hc body{ background:#fff !important; }
+    /* ===== Design Tokens ===== */
+    :root {
+      --navy: #0F4C81;
+      --navy-deep: #08305A;
+      --sky: #4FA8D8;
+      --sky-light: #E8F4FD;
+      --teal: #1E8A7A;
+      --teal-light: #E6F6F4;
+      --amber: #F0A500;
+      --amber-light: #FEF3C7;
+      --cream: #FAFAF8;
+      --slate-soft: #F4F6F9;
+      --text-primary: #0D1B2A;
+      --text-secondary: #4A5568;
+      --text-muted: #8896A5;
+      --border: rgba(15, 76, 129, 0.10);
+      --shadow-soft: 0 2px 12px rgba(15, 76, 129, 0.07);
+      --shadow-card: 0 4px 24px rgba(15, 76, 129, 0.10);
+      --shadow-lift: 0 8px 40px rgba(15, 76, 129, 0.13);
+      --radius: 16px;
+      --radius-lg: 24px;
+      --radius-xl: 32px;
+      --font-serif: 'Instrument Serif', Georgia, serif;
+      --font-sans: 'DM Sans', system-ui, sans-serif;
+    }
+
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--cream);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 5% 0%, rgba(79,168,216,.09) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 95% 15%, rgba(30,138,122,.06) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 30% at 60% 100%, rgba(240,165,0,.05) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    * { position: relative; z-index: 1; }
+
+    /* High Contrast */
+    .hc * { color: #000 !important; border-color: #000 !important; }
+    .hc body { background: #fff !important; }
+
+    /* ===== Typography ===== */
+    .serif { font-family: var(--font-serif); }
+
+    /* ===== Gradient text ===== */
+    .gradient-text {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--sky) 55%, var(--teal) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ===== Entrance animations ===== */
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .anim-1 { animation: fade-up .55s ease both; }
+    .anim-2 { animation: fade-up .55s ease .1s both; }
+    .anim-3 { animation: fade-up .55s ease .2s both; }
+    .anim-4 { animation: fade-up .55s ease .3s both; }
+    .anim-card { animation: fade-up .6s ease both; }
+
+    /* ===== Cards ===== */
+    .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      transition: transform .22s ease, box-shadow .22s ease;
+    }
+    .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); }
+
+    /* ===== Buttons ===== */
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 28px;
+      background: var(--navy);
+      color: white;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: .93rem;
+      text-decoration: none;
+      transition: background .2s, transform .15s, box-shadow .2s;
+      box-shadow: 0 2px 10px rgba(15,76,129,.22);
+      border: none; cursor: pointer;
+    }
+    .btn-primary:hover { background: var(--navy-deep); transform: translateY(-1px); box-shadow: 0 5px 18px rgba(15,76,129,.28); }
+
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 26px;
+      background: transparent;
+      color: white;
+      border-radius: 999px;
+      font-weight: 500;
+      font-size: .93rem;
+      text-decoration: none;
+      border: 1.5px solid rgba(255,255,255,.55);
+      transition: background .2s, border-color .2s;
+    }
+    .btn-outline:hover { background: rgba(255,255,255,.12); border-color: white; }
+
+    /* ===== Section label ===== */
+    .label-tag {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-size: .72rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--navy);
+      padding: 5px 14px;
+      background: var(--sky-light);
+      border-radius: 999px;
+      border: 1px solid rgba(79,168,216,.25);
+      margin-bottom: 16px;
+    }
+
+    /* ===== Badge chips ===== */
+    .chip {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 7px 14px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: .82rem; font-weight: 500;
+      color: var(--text-secondary);
+      box-shadow: var(--shadow-soft);
+    }
+
+    /* ===== Stat items ===== */
+    .stat-number {
+      font-family: var(--font-serif);
+      font-size: 2.4rem;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+
+    /* ===== Feature icon ===== */
+    .feat-icon {
+      width: 52px; height: 52px;
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      margin-bottom: 18px;
+      flex-shrink: 0;
+    }
+
+    /* ===== Divider ===== */
+    .section-divider {
+      width: 48px; height: 3px;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--navy), var(--sky));
+      margin-bottom: 20px;
+    }
+
+    /* ===== Use-case pills ===== */
+    .use-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px;
+      background: var(--slate-soft);
+      border-radius: 999px;
+      font-size: .8rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* ===== Quote card ===== */
+    .quote-card {
+      border-left: 3px solid var(--sky);
+      padding-left: 20px;
+    }
+
+    /* ===== Highlight pill (hero) ===== */
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 7px 16px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: .8rem; font-weight: 600;
+      color: var(--navy);
+      box-shadow: var(--shadow-soft);
+      margin-bottom: 24px;
+    }
+
+    /* ===== Scroll-aware card reveal ===== */
+    .reveal {
+      opacity: 0; transform: translateY(20px);
+      transition: opacity .5s ease, transform .5s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ===== CTA Section ===== */
+    .cta-section {
+      background: linear-gradient(150deg, var(--navy-deep) 0%, var(--navy) 50%, #0d5a7c 100%);
+      position: relative; overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 80% at 0% 50%, rgba(79,168,216,.12) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 60% at 100% 50%, rgba(30,138,122,.1) 0%, transparent 60%);
+      pointer-events: none; z-index: 0;
+    }
+    .cta-section > * { position: relative; z-index: 1; }
+
+    /* ===== Footer ===== */
+    .site-footer {
+      border-top: 1px solid var(--border);
+      background: white;
+    }
+
+    @media (max-width: 767px) {
+      .stat-number { font-size: 2rem; }
+    }
   </style>
 </head>
 
-<body class="bg-slate-50/80 text-slate-900 font-sans antialiased">
+<body>
 
-  <!-- Header -->
+  <!-- ===== HEADER ===== -->
   {% include "partials/header.html" %}
 
-  <!-- Hero -->
-  <section class="relative overflow-hidden bg-gradient-to-b from-[#f5f8fc] via-white to-[#f2fafc]">
-    <!-- soft background accents -->
-    <div class="pointer-events-none absolute -left-32 -top-32 h-64 w-64 rounded-full bg-[#236092]/10 blur-3xl"></div>
-    <div class="pointer-events-none absolute -right-24 top-40 h-72 w-72 rounded-full bg-teal-300/10 blur-3xl"></div>
+  <!-- ===== HERO ===== -->
+  <section style="padding: 64px 0 80px;">
+    <div style="max-width: 1100px; margin: 0 auto; padding: 0 24px;">
+      <div style="display: grid; gap: 56px; align-items: center;" class="lg:grid-cols-2 grid">
 
-    <div class="relative max-w-6xl mx-auto px-6 lg:px-8 py-16 lg:py-24">
-      <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
-        <!-- Copy column -->
-        <div>
-          <div class="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-[#236092] shadow-sm ring-1 ring-[#236092]/10 mb-6">
-            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+        <!-- Left copy -->
+        <div class="anim-1">
+          <div class="hero-badge">
+            <span style="width:7px;height:7px;border-radius:50%;background:#22c55e;display:inline-block;flex-shrink:0;"></span>
             About NeuroMed Aira
           </div>
 
-          <h1 class="text-4xl sm:text-5xl font-semibold tracking-tight text-slate-900 mb-4">
-            Medicine is complex.<br class="hidden sm:block" />
-            <span class="text-[#236092]">Understanding it shouldn’t be.</span>
+          <h1 class="serif" style="font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1.12; color: var(--text-primary); margin-bottom: 20px;">
+            Medicine is complex.<br>
+            <span class="gradient-text">Understanding it<br>shouldn't be.</span>
           </h1>
 
-          <p class="text-base sm:text-lg text-slate-600 max-w-xl mb-6">
-            NeuroMed Aira turns dense medical papers into calm, human explanations.
-            Whether you’re a caregiver, patient, or clinician, we translate the science
-            into steps you can actually act on — in your tone, in your language.
+          <p style="font-size: 1.08rem; color: var(--text-secondary); line-height: 1.7; max-width: 520px; margin-bottom: 28px;">
+            NeuroMed Aira turns dense medical documents into calm, human explanations. Whether you're a caregiver, patient, or clinician — we translate the science into steps you can actually act on, in your tone, in your language.
           </p>
 
-          <!-- audience chips -->
-          <div class="flex flex-wrap gap-2 mb-8">
-            <span class="inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-slate-700 ring-1 ring-slate-200">
-              <i class="fa-solid fa-hand-holding-heart text-rose-500"></i>
+          <!-- Audience chips -->
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 36px;">
+            <span class="chip">
+              <i class="fa-solid fa-hand-holding-heart" style="color: #be123c;"></i>
               For caregivers & families
             </span>
-            <span class="inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-slate-700 ring-1 ring-slate-200">
-              <i class="fa-solid fa-stethoscope text-emerald-600"></i>
+            <span class="chip">
+              <i class="fa-solid fa-stethoscope" style="color: var(--teal);"></i>
               For clinicians & teams
             </span>
-            <span class="inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-slate-700 ring-1 ring-slate-200">
-              <i class="fa-solid fa-globe text-indigo-500"></i>
+            <span class="chip">
+              <i class="fa-solid fa-globe" style="color: var(--navy);"></i>
               Multilingual summaries
             </span>
           </div>
 
-          <!-- stats -->
-          <div class="flex flex-wrap gap-8 text-sm text-slate-600">
+          <!-- Stats row -->
+          <div style="display: flex; flex-wrap: wrap; gap: 32px; padding-top: 24px; border-top: 1px solid var(--border);">
             <div>
-              <p class="text-2xl font-semibold text-slate-900">3</p>
-              <p class="mt-1">Modes: Caregiver, Clinical, Faith</p>
+              <div class="stat-number">6</div>
+              <p style="font-size: .84rem; color: var(--text-muted); margin-top: 4px; max-width: 120px; line-height: 1.4;">Response modes to fit every need</p>
             </div>
             <div>
-              <p class="text-2xl font-semibold text-slate-900">95%</p>
-              <p class="mt-1">of users say they feel calmer after reading</p>
+              <div class="stat-number">95%</div>
+              <p style="font-size: .84rem; color: var(--text-muted); margin-top: 4px; max-width: 130px; line-height: 1.4;">Of users feel calmer after reading</p>
             </div>
             <div>
-              <p class="text-2xl font-semibold text-slate-900">Minutes</p>
-              <p class="mt-1">to clarity, not hours of Googling</p>
+              <div class="stat-number serif" style="font-style: italic; font-size: 1.8rem; padding-top: 8px;">Minutes</div>
+              <p style="font-size: .84rem; color: var(--text-muted); margin-top: 4px; max-width: 120px; line-height: 1.4;">To clarity — not hours of Googling</p>
             </div>
           </div>
         </div>
 
-        <!-- Product card / visual -->
-        <div class="relative">
-          <div class="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-[#236092]/10 via-transparent to-emerald-200/40 blur-2xl"></div>
+        <!-- Right: sample card -->
+        <div class="anim-2" style="position: relative;">
+          <!-- Glow -->
+          <div style="position:absolute;inset:-32px;border-radius:48px;background:linear-gradient(135deg,rgba(79,168,216,.1),rgba(30,138,122,.08));filter:blur(36px);"></div>
 
-          <div class="relative bg-white/90 backdrop-blur-sm border border-slate-100 shadow-xl rounded-3xl p-6 sm:p-7 lg:p-8">
-            <div class="flex items-center justify-between mb-4">
-              <div class="flex items-center gap-2">
-                <div class="h-9 w-9 rounded-2xl bg-[#236092]/10 flex items-center justify-center">
-                  <i class="fa-solid fa-file-medical text-[#236092]"></i>
+          <div class="card" style="padding: 28px; position: relative;">
+            <!-- Card header -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:40px;height:40px;border-radius:12px;background:var(--sky-light);display:flex;align-items:center;justify-content:center;">
+                  <i class="fa-solid fa-file-medical" style="color:var(--navy);"></i>
                 </div>
                 <div>
-                  <p class="text-xs uppercase tracking-wide text-slate-400">Sample Summary</p>
-                  <p class="text-sm font-medium text-slate-900">MRI Brain Scan – Explained</p>
+                  <p style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin:0;">Sample Summary</p>
+                  <p style="font-size:.92rem;font-weight:600;color:var(--text-primary);margin:0;">MRI Brain Scan – Explained</p>
                 </div>
               </div>
-              <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
-                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+              <span style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;background:var(--teal-light);border-radius:999px;font-size:.72rem;font-weight:600;color:var(--teal);">
+                <span style="width:6px;height:6px;border-radius:50%;background:var(--teal);display:inline-block;"></span>
                 Caregiver Mode
               </span>
             </div>
 
-            <div class="space-y-3 text-xs sm:text-sm">
-              <div class="rounded-2xl bg-slate-50 p-3">
-                <p class="font-semibold text-slate-900 mb-1">In simple terms</p>
-                <p class="text-slate-600">
-                  There is no sign of active bleeding or stroke. Your doctor is monitoring
-                  some mild changes that are common with age and high blood pressure.
+            <!-- Summary blocks -->
+            <div style="display:grid;gap:12px;">
+              <div style="background:var(--slate-soft);border-radius:var(--radius);padding:16px;">
+                <p style="font-size:.78rem;font-weight:700;color:var(--text-primary);margin:0 0 6px 0;display:flex;align-items:center;gap:6px;">
+                  <span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;"></span>
+                  In simple terms
+                </p>
+                <p style="font-size:.88rem;color:var(--text-secondary);margin:0;line-height:1.6;">
+                  There is no sign of active bleeding or stroke. Your doctor is monitoring some mild changes that are common with age and high blood pressure.
                 </p>
               </div>
 
-              <div class="grid gap-3 sm:grid-cols-2">
-                <div class="rounded-2xl border border-slate-100 p-3">
-                  <p class="text-xs font-semibold text-slate-900 mb-1">What this means</p>
-                  <p class="text-slate-600">
-                    This result is not an emergency. Keep taking prescribed medicine and attend your next check-up.
-                  </p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:14px;">
+                  <p style="font-size:.72rem;font-weight:700;color:var(--text-primary);margin:0 0 5px 0;">What this means</p>
+                  <p style="font-size:.82rem;color:var(--text-secondary);margin:0;line-height:1.5;">Not an emergency. Continue prescribed medicine and attend your next check-up.</p>
                 </div>
-                <div class="rounded-2xl border border-slate-100 p-3">
-                  <p class="text-xs font-semibold text-slate-900 mb-1">Next gentle step</p>
-                  <p class="text-slate-600">
-                    Write down any new symptoms and bring them to your next appointment so your doctor has a clear picture.
-                  </p>
+                <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:14px;">
+                  <p style="font-size:.72rem;font-weight:700;color:var(--text-primary);margin:0 0 5px 0;">Next gentle step</p>
+                  <p style="font-size:.82rem;color:var(--text-secondary);margin:0;line-height:1.5;">Note any new symptoms before your next appointment to give your doctor a clear picture.</p>
                 </div>
               </div>
 
-              <div class="flex items-center justify-between pt-1">
-                <div class="flex items-center gap-2 text-xs text-slate-500">
-                  <i class="fa-solid fa-shield-heart"></i>
-                  <span>Private, encrypted, yours only</span>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding-top:4px;">
+                <div style="display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--text-muted);">
+                  <i class="fa-solid fa-shield-heart" style="color:var(--teal);"></i>
+                  Private, encrypted, yours only
                 </div>
-                <button class="inline-flex items-center gap-2 rounded-full bg-[#236092] px-4 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-[#1d5077] transition">
-                  <i class="fa-solid fa-upload text-[0.7rem]"></i>
-                  <span>Upload a file</span>
-                </button>
+                <a href="/signup" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--navy);color:white;border-radius:999px;font-size:.78rem;font-weight:600;text-decoration:none;box-shadow:0 2px 8px rgba(15,76,129,.2);transition:background .2s;">
+                  <i class="fa-solid fa-upload" style="font-size:.7rem;"></i>
+                  Upload a file
+                </a>
               </div>
             </div>
-
           </div>
         </div>
+
       </div>
     </div>
   </section>
 
-  <!-- What We Offer -->
-  <section class="py-20 bg-[#236092]/5">
-    <div class="max-w-6xl mx-auto px-6 lg:px-8">
-      <div class="text-center max-w-3xl mx-auto mb-12">
-        <h2 class="text-3xl font-semibold tracking-tight text-slate-900 mb-3">
-          What NeuroMed Aira offers
+  <!-- ===== WHAT WE OFFER ===== -->
+  <section style="padding: 80px 0; background: var(--slate-soft);">
+    <div style="max-width: 1100px; margin: 0 auto; padding: 0 24px;">
+
+      <div class="text-center" style="max-width: 560px; margin: 0 auto 56px;">
+        <div class="label-tag" style="display:inline-flex;">
+          <i class="fa-solid fa-wand-magic-sparkles" style="font-size:.75rem;"></i>
+          What we offer
+        </div>
+        <h2 class="serif" style="font-size: clamp(1.9rem, 4vw, 2.6rem); line-height: 1.18; color: var(--text-primary); margin-bottom: 14px;">
+          Tools built for real people,<br>not just doctors.
         </h2>
-        <p class="text-slate-600">
-          Thoughtful tools designed for real people — not just doctors. We help you move
-          from “What does this even mean?” to “Okay, I know my next step.”
+        <p style="color: var(--text-secondary); font-size: 1rem; line-height: 1.65;">
+          We help you move from <em>"What does this even mean?"</em> to <em>"Okay, I know my next step."</em>
         </p>
       </div>
 
-      <div class="grid gap-8 md:grid-cols-3">
+      <div style="display: grid; gap: 20px;" class="md:grid-cols-3 grid">
+
         <!-- Card 1 -->
-        <article class="group relative rounded-3xl bg-white/90 backdrop-blur border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition overflow-hidden">
-          <div class="absolute inset-x-0 -top-24 h-32 bg-gradient-to-b from-[#236092]/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition"></div>
-          <div class="relative p-6 sm:p-7 h-full flex flex-col">
-            <div class="text-3xl text-[#236092] mb-4">
-              <i class="fa-solid fa-file-medical"></i>
-            </div>
-            <h3 class="text-lg font-semibold text-slate-900 mb-2">
-              Clear AI summaries
-            </h3>
-            <p class="text-sm text-slate-600 mb-4">
-              Upload PDFs, DOCX, or notes — NeuroMed Aira breaks them down into plain language
-              you can understand, with key findings and next-step guidance.
-            </p>
-            <p class="mt-auto text-xs font-medium text-[#236092]">
-              Built for scared, overwhelmed 2 a.m. Googlers — not just medical pros.
-            </p>
+        <div class="card reveal" style="padding: 32px; display: flex; flex-direction: column;">
+          <div class="feat-icon" style="background: var(--sky-light);">
+            <i class="fa-solid fa-file-medical" style="color: var(--navy);"></i>
           </div>
-        </article>
+          <div class="section-divider"></div>
+          <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin: 0 0 12px 0;">Clear AI summaries</h3>
+          <p style="font-size: .9rem; color: var(--text-secondary); line-height: 1.65; flex: 1; margin: 0 0 20px 0;">
+            Upload PDFs, DOCX, or notes — Aira breaks them into plain language with key findings and actionable next steps.
+          </p>
+          <p style="font-size: .8rem; font-weight: 600; color: var(--navy); font-style: italic; margin: 0;">
+            "Built for scared, overwhelmed 2 a.m. Googlers."
+          </p>
+        </div>
 
         <!-- Card 2 -->
-        <article class="group relative rounded-3xl bg-white/90 backdrop-blur border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition overflow-hidden">
-          <div class="absolute inset-x-0 -top-24 h-32 bg-gradient-to-b from-teal-400/15 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition"></div>
-          <div class="relative p-6 sm:p-7 h-full flex flex-col">
-            <div class="text-3xl text-teal-600 mb-4">
-              <i class="fa-solid fa-comment-dots"></i>
-            </div>
-            <h3 class="text-lg font-semibold text-slate-900 mb-2">
-              Gentle chat assistant
-            </h3>
-            <p class="text-sm text-slate-600 mb-4">
-              Ask follow-up questions and get calm, thoughtful answers — especially
-              when you’re tired, scared, or explaining results to someone you love.
-            </p>
-            <p class="mt-auto text-xs font-medium text-teal-700">
-              Always patient, never rushed. You can ask the same thing three times.
-            </p>
+        <div class="card reveal" style="padding: 32px; display: flex; flex-direction: column; animation-delay: .08s;">
+          <div class="feat-icon" style="background: var(--teal-light);">
+            <i class="fa-solid fa-comment-dots" style="color: var(--teal);"></i>
           </div>
-        </article>
+          <div class="section-divider" style="background: linear-gradient(90deg, var(--teal), var(--sky));"></div>
+          <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin: 0 0 12px 0;">Gentle chat assistant</h3>
+          <p style="font-size: .9rem; color: var(--text-secondary); line-height: 1.65; flex: 1; margin: 0 0 20px 0;">
+            Ask follow-up questions and get calm, thoughtful answers — especially when you're tired, scared, or explaining results to someone you love.
+          </p>
+          <p style="font-size: .8rem; font-weight: 600; color: var(--teal); font-style: italic; margin: 0;">
+            "Always patient. You can ask the same thing three times."
+          </p>
+        </div>
 
         <!-- Card 3 -->
-        <article class="group relative rounded-3xl bg-white/90 backdrop-blur border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition overflow-hidden">
-          <div class="absolute inset-x-0 -top-24 h-32 bg-gradient-to-b from-rose-400/15 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition"></div>
-          <div class="relative p-6 sm:p-7 h-full flex flex-col">
-            <div class="text-3xl text-rose-500 mb-4">
-              <i class="fa-solid fa-hand-holding-heart"></i>
+        <div class="card reveal" style="padding: 32px; display: flex; flex-direction: column; animation-delay: .16s;">
+          <div class="feat-icon" style="background: #fff1f2;">
+            <i class="fa-solid fa-hand-holding-heart" style="color: #be123c;"></i>
+          </div>
+          <div class="section-divider" style="background: linear-gradient(90deg, #be123c, #f87171);"></div>
+          <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin: 0 0 12px 0;">Faith & family focused</h3>
+          <p style="font-size: .9rem; color: var(--text-secondary); line-height: 1.65; flex: 1; margin: 0 0 20px 0;">
+            Choose your tone: clinical, caregiving, or faith-centered. We'll meet you where you are — in English, Taglish, or with a quiet blessing woven into the words.
+          </p>
+          <p style="font-size: .8rem; font-weight: 600; color: #be123c; font-style: italic; margin: 0;">
+            "Data matters — and so do comfort, culture, and belief."
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== HOW IT HELPS ===== -->
+  <section style="padding: 80px 0; background: white;">
+    <div style="max-width: 1100px; margin: 0 auto; padding: 0 24px;">
+
+      <!-- Section header -->
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 48px;">
+        <div style="max-width: 520px;">
+          <div class="label-tag" style="display:inline-flex;">
+            <i class="fa-solid fa-heart-pulse" style="font-size:.75rem;"></i>
+            Real moments
+          </div>
+          <h2 class="serif" style="font-size: clamp(1.8rem, 4vw, 2.5rem); line-height: 1.18; color: var(--text-primary); margin: 0;">
+            Built for real moments<br>in healthcare.
+          </h2>
+          <p style="font-size: .95rem; color: var(--text-secondary); line-height: 1.65; margin-top: 12px;">
+            Right after you get results, before you spiral on search engines, and before your next appointment.
+          </p>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <span class="use-pill"><i class="fa-solid fa-clock-rotate-left" style="color:var(--text-muted);"></i> Late-night results</span>
+          <span class="use-pill"><i class="fa-solid fa-people-group" style="color:var(--text-muted);"></i> Family decisions</span>
+          <span class="use-pill"><i class="fa-solid fa-hospital-user" style="color:var(--text-muted);"></i> Clinic follow-ups</span>
+        </div>
+      </div>
+
+      <!-- Use case cards -->
+      <div style="display: grid; gap: 16px;" class="md:grid-cols-3 grid">
+
+        <!-- Caregivers -->
+        <div class="reveal" style="border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; background: white; transition: transform .22s, box-shadow .22s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lift)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+          <div style="height: 5px; background: linear-gradient(90deg, var(--navy), var(--sky));"></div>
+          <div style="padding: 24px;">
+            <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:var(--sky-light);border-radius:999px;font-size:.72rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px;">
+              <i class="fa-solid fa-hands-holding-child" style="font-size:.75rem;"></i>
+              Caregivers
             </div>
-            <h3 class="text-lg font-semibold text-slate-900 mb-2">
-              Faith & family focused
-            </h3>
-            <p class="text-sm text-slate-600 mb-4">
-              Choose a tone: clinical, caregiving, or faith-centered. We’ll meet you where
-              you are — in English, Taglish, or with a quiet blessing woven into the words.
-            </p>
-            <p class="mt-auto text-xs font-medium text-rose-600">
-              Because data matters — and so do comfort, culture, and belief.
+            <div class="quote-card" style="margin-bottom: 14px;">
+              <p style="font-family: var(--font-serif); font-size: 1.05rem; font-style: italic; color: var(--text-primary); margin: 0; line-height: 1.4;">"I'm reading this for my parents."</p>
+            </div>
+            <p style="font-size: .88rem; color: var(--text-secondary); line-height: 1.65; margin: 0;">
+              Get summaries that avoid scary language, highlight what truly matters, and give you simple sentences you can share with your family.
             </p>
           </div>
-        </article>
+        </div>
+
+        <!-- Patients -->
+        <div class="reveal" style="border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; background: white; transition: transform .22s, box-shadow .22s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lift)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+          <div style="height: 5px; background: linear-gradient(90deg, var(--teal), var(--sky));"></div>
+          <div style="padding: 24px;">
+            <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:var(--teal-light);border-radius:999px;font-size:.72rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px;">
+              <i class="fa-solid fa-user-injured" style="font-size:.75rem;"></i>
+              Patients
+            </div>
+            <div class="quote-card" style="margin-bottom: 14px; border-left-color: var(--teal);">
+              <p style="font-family: var(--font-serif); font-size: 1.05rem; font-style: italic; color: var(--text-primary); margin: 0; line-height: 1.4;">"I don't speak doctor."</p>
+            </div>
+            <p style="font-size: .88rem; color: var(--text-secondary); line-height: 1.65; margin: 0;">
+              Break down labs and imaging into plain language, with gentle suggestions for questions to ask at your next appointment.
+            </p>
+          </div>
+        </div>
+
+        <!-- Clinicians -->
+        <div class="reveal" style="border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; background: white; transition: transform .22s, box-shadow .22s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lift)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+          <div style="height: 5px; background: linear-gradient(90deg, #4f46e5, var(--sky));"></div>
+          <div style="padding: 24px;">
+            <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:#ede9fe;border-radius:999px;font-size:.72rem;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px;">
+              <i class="fa-solid fa-stethoscope" style="font-size:.75rem;"></i>
+              Clinicians
+            </div>
+            <div class="quote-card" style="margin-bottom: 14px; border-left-color: #4f46e5;">
+              <p style="font-family: var(--font-serif); font-size: 1.05rem; font-style: italic; color: var(--text-primary); margin: 0; line-height: 1.4;">"I need my patients to really get it."</p>
+            </div>
+            <p style="font-size: .88rem; color: var(--text-secondary); line-height: 1.65; margin: 0;">
+              Generate patient-friendly explanations that respect clinical accuracy while saving you time in busy clinics or telehealth sessions.
+            </p>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
 
-  <!-- How it Helps / Use cases -->
-  <section class="py-16 bg-white">
-    <div class="max-w-6xl mx-auto px-6 lg:px-8">
-      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 mb-10">
-        <div class="max-w-xl">
-          <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900 mb-3">
-            Built for real moments in healthcare.
-          </h2>
-          <p class="text-sm sm:text-base text-slate-600">
-            NeuroMed Aira sits in the middle of your care journey — right after you get the
-            results, before you spiral on search engines, and before your next appointment.
-          </p>
-        </div>
-        <div class="flex flex-wrap gap-3 text-xs">
-          <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-slate-700">
-            <i class="fa-solid fa-clock-rotate-left text-slate-500"></i>
-            Late-night results
-          </span>
-          <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-slate-700">
-            <i class="fa-solid fa-people-group text-slate-500"></i>
-            Family decisions
-          </span>
-          <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-slate-700">
-            <i class="fa-solid fa-hospital-user text-slate-500"></i>
-            Clinic follow-ups
-          </span>
-        </div>
-      </div>
+  <!-- ===== VALUES STRIP ===== -->
+  <section style="padding: 64px 0; background: var(--slate-soft);">
+    <div style="max-width: 1100px; margin: 0 auto; padding: 0 24px;">
+      <div style="display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
 
-      <div class="grid gap-6 md:grid-cols-3">
-        <div class="rounded-2xl border border-slate-100 bg-slate-50/80 p-5">
-          <p class="text-xs font-semibold text-[#236092] mb-1">Caregivers</p>
-          <p class="text-sm font-medium text-slate-900 mb-2">
-            “I’m reading this for my parents.”
-          </p>
-          <p class="text-sm text-slate-600">
-            Get summaries that avoid scary language, highlight what truly matters, and
-            give you simple sentences you can repeat to your family.
-          </p>
+        <div style="display:flex;align-items:flex-start;gap:14px;" class="reveal">
+          <div style="width:44px;height:44px;border-radius:14px;background:var(--sky-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fa-solid fa-lock" style="color:var(--navy);"></i>
+          </div>
+          <div>
+            <p style="font-weight:700;font-size:.95rem;margin:0 0 4px 0;color:var(--text-primary);">HIPAA-compliant</p>
+            <p style="font-size:.83rem;color:var(--text-secondary);margin:0;line-height:1.5;">Built for healthcare data from day one.</p>
+          </div>
         </div>
-        <div class="rounded-2xl border border-slate-100 bg-slate-50/80 p-5">
-          <p class="text-xs font-semibold text-[#236092] mb-1">Patients</p>
-          <p class="text-sm font-medium text-slate-900 mb-2">
-            “I don’t speak doctor.”
-          </p>
-          <p class="text-sm text-slate-600">
-            Break down labs and imaging into plain language, with gentle suggestions for
-            questions to ask at your next appointment.
-          </p>
+
+        <div style="display:flex;align-items:flex-start;gap:14px;" class="reveal">
+          <div style="width:44px;height:44px;border-radius:14px;background:var(--teal-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fa-solid fa-shield-halved" style="color:var(--teal);"></i>
+          </div>
+          <div>
+            <p style="font-weight:700;font-size:.95rem;margin:0 0 4px 0;color:var(--text-primary);">End-to-end encrypted</p>
+            <p style="font-size:.83rem;color:var(--text-secondary);margin:0;line-height:1.5;">Your files are secured in transit and at rest.</p>
+          </div>
         </div>
-        <div class="rounded-2xl border border-slate-100 bg-slate-50/80 p-5">
-          <p class="text-xs font-semibold text-[#236092] mb-1">Clinicians</p>
-          <p class="text-sm font-medium text-slate-900 mb-2">
-            “I need my patients to really get it.”
-          </p>
-          <p class="text-sm text-slate-600">
-            Generate patient-friendly explanations that respect your clinical accuracy
-            while saving you time in busy clinics or telehealth sessions.
-          </p>
+
+        <div style="display:flex;align-items:flex-start;gap:14px;" class="reveal">
+          <div style="width:44px;height:44px;border-radius:14px;background:var(--amber-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fa-solid fa-globe" style="color:var(--amber);"></i>
+          </div>
+          <div>
+            <p style="font-weight:700;font-size:.95rem;margin:0 0 4px 0;color:var(--text-primary);">60+ languages</p>
+            <p style="font-size:.83rem;color:var(--text-secondary);margin:0;line-height:1.5;">Summaries in your native language.</p>
+          </div>
         </div>
+
+        <div style="display:flex;align-items:flex-start;gap:14px;" class="reveal">
+          <div style="width:44px;height:44px;border-radius:14px;background:#fff1f2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fa-solid fa-heart" style="color:#be123c;"></i>
+          </div>
+          <div>
+            <p style="font-weight:700;font-size:.95rem;margin:0 0 4px 0;color:var(--text-primary);">Human-first design</p>
+            <p style="font-size:.83rem;color:var(--text-secondary);margin:0;line-height:1.5;">Compassion built into every response.</p>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
 
-  <!-- CTA -->
-  <section class="bg-gradient-to-r from-[#0f766e] via-[#236092] to-[#172554] text-white py-16">
-    <div class="max-w-4xl mx-auto px-6 text-center space-y-5">
-      <h2 class="text-3xl sm:text-4xl font-semibold tracking-tight">
-        Ready to make sense of your medical records?
+  <!-- ===== CTA ===== -->
+  <section class="cta-section" style="padding: 80px 0;">
+    <div style="max-width: 720px; margin: 0 auto; padding: 0 24px; text-align: center;">
+      
+      <div style="display:inline-flex;align-items:center;gap:7px;padding:6px 16px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:999px;font-size:.78rem;font-weight:600;color:rgba(255,255,255,.85);margin-bottom:24px;">
+        <i class="fa-solid fa-bolt" style="color:var(--amber);"></i>
+        Free to start
+      </div>
+
+      <h2 class="serif" style="font-size: clamp(2rem, 5vw, 3rem); color: white; line-height: 1.15; margin-bottom: 18px;">
+        Ready to make sense of<br>your medical records?
       </h2>
-      <p class="text-sm sm:text-base text-white/80 max-w-2xl mx-auto">
-        Create a free account and start turning confusing reports into clear, calm summaries.
-        No jargon, no drama — just the information you need to move forward.
+
+      <p style="font-size: 1rem; color: rgba(255,255,255,.75); max-width: 480px; margin: 0 auto 36px; line-height: 1.7;">
+        Create a free account and turn confusing reports into clear, calm summaries. No jargon, no drama — just the information you need to move forward.
       </p>
-      <div class="flex flex-wrap justify-center gap-4 pt-2">
-        <a href="/signup/" class="inline-flex items-center justify-center rounded-full bg-white text-[#236092] font-semibold px-7 py-2.5 text-sm shadow-sm hover:bg-slate-100 transition">
-          Create account
+
+      <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 14px;">
+        <a href="/signup/" class="btn-primary" style="background: white; color: var(--navy);">
+          <i class="fa-solid fa-user-plus" style="font-size:.85rem;"></i>
+          Create free account
         </a>
-        <a href="/login/" class="inline-flex items-center justify-center rounded-full border border-white/70 text-white font-medium px-7 py-2.5 text-sm hover:bg-white/10 transition">
+        <a href="/login/" class="btn-outline">
           Sign in
         </a>
       </div>
-      <p class="text-[11px] text-white/70">
-        Your documents are encrypted and private. You’re always in control of what you upload and delete.
+
+      <p style="font-size: .75rem; color: rgba(255,255,255,.5); margin-top: 24px;">
+        Your documents are encrypted and private. You're always in control.
       </p>
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer class="text-center py-6 text-xs sm:text-sm text-slate-500 bg-white">
-    <p>© 2025 NeuroMed Aira. Healing with intelligence + heart.</p>
-    <p class="italic mt-1 text-slate-400">“Grace meets knowledge here.”</p>
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer" style="padding: 28px 24px; text-align: center;">
+    <p style="font-size: .88rem; color: var(--text-muted); margin: 0;">© 2025 NeuroMed Aira. Healing with intelligence + heart.</p>
+    <p style="font-size: .78rem; color: var(--text-muted); font-style: italic; margin: 6px 0 0 0; font-family: var(--font-serif);">"Grace meets knowledge here."</p>
   </footer>
+
+  <!-- ===== Scroll reveal ===== -->
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
 
 </body>
 </html>

@@ -417,7 +417,15 @@ def send_chat(request):
                     session_id = None
             care_setting = request.data.get('care_setting')
             faith_setting = request.data.get('faith_setting')
-            files = request.FILES.getlist('files[]') if hasattr(request, 'FILES') else []
+            # Image upload: try files[] first (iOS), then file (single)
+            files = []
+            if hasattr(request, 'FILES') and request.FILES:
+                files = list(request.FILES.getlist('files[]') or request.FILES.getlist('file') or [])
+                if not files and 'file' in request.FILES:
+                    files = [request.FILES['file']]
+            # Image-only upload: use placeholder message if empty (AI needs context)
+            if files and not message:
+                message = "Please analyze this image."
         else:
             # Try to parse as JSON if content type is missing
             try:
@@ -446,9 +454,26 @@ def send_chat(request):
                 "detail": "Message or files required"
             }, status=400)
         
-        # Debug: log what we received
-        print(f"DEBUG: Parsed message: '{message}' (length: {len(message)}, empty: {not message})")
-        print(f"DEBUG: Files count: {len(files) if files else 0}")
+        # Debug: log what we received (for image upload diagnosis)
+        print("=" * 50)
+        print("MOBILE_API send_chat: REQUEST RECEIVED")
+        print(f"  CONTENT_TYPE: {request.META.get('CONTENT_TYPE', '')}")
+        print(f"  Message: '{message[:80]}...' (len={len(message)})" if len(message) > 80 else f"  Message: '{message}' (len={len(message)})")
+        print(f"  Files count: {len(files)}")
+        if files:
+            for i, f in enumerate(files):
+                name = getattr(f, 'name', '?')
+                size = getattr(f, 'size', 0)
+                ctype = getattr(f, 'content_type', '?')
+                print(f"    File {i+1}: name={name!r}, size={size} bytes, type={ctype}")
+        else:
+            # Log why we might have no files (for diagnosis)
+            has_files = hasattr(request, 'FILES') and request.FILES
+            print(f"  request.FILES exists: {has_files}")
+            if has_files:
+                print(f"  request.FILES keys: {list(request.FILES.keys())}")
+                print(f"  getlist('files[]'): {list(request.FILES.getlist('files[]') or [])}")
+        print("=" * 50)
         
         # Normalize tone format
         tone_map = {
@@ -532,18 +557,24 @@ def send_chat(request):
         
         # Handle FILES - only if we have files
         if files:
-            # Create a mock FILES object
+            # Create a mock FILES object that myApp.send_chat expects
             class MockFiles:
                 def __init__(self, file_list):
                     self._files = file_list
                 
                 def getlist(self, key):
-                    return self._files if key == 'files[]' else []
+                    if key in ('files[]', 'file'):
+                        return self._files
+                    return []
                 
                 def __contains__(self, key):
-                    return key == 'files[]' or key == 'file'
+                    return key in ('files[]', 'file') and bool(self._files)
+                
+                def get(self, key, default=None):
+                    return self._files[0] if self._files and key in ('files[]', 'file') else default
             
             new_request.FILES = MockFiles(files)
+            print(f"MOBILE_API: Passing {len(files)} file(s) to real_send_chat")
         else:
             # Empty dict for FILES when no files
             new_request.FILES = {}
