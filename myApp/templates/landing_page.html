@@ -72,35 +72,37 @@ body::before {
 * { position: relative; z-index: 1; }
 
 /* ===== Markdown Styles ===== */
-.chat-ai.chat-bubble { white-space: normal; line-height: 1.55; padding: 14px 16px; }
-.chat-ai .md-prose { font-size: .96rem; line-height: 1.55; }
+.chat-ai.chat-bubble { white-space: normal; line-height: 1.6; padding: 14px 16px; font-weight: 500; }
+.chat-ai .md-prose { font-size: 1rem; line-height: 1.65; font-weight: 500; -webkit-font-smoothing: antialiased; }
 .chat-ai .md-prose > :first-child { margin-top: 0 !important; }
 .chat-ai .md-prose > :last-child { margin-bottom: 0 !important; }
 .chat-ai .md-prose h1, .chat-ai .md-prose h2, .chat-ai .md-prose h3, .chat-ai .md-prose h4 {
-  margin: .3em 0 .18em !important; line-height: 1.2;
-  font-family: var(--font-serif);
+  margin: .3em 0 .18em !important; line-height: 1.25;
+  font-family: var(--font-sans);
+  font-weight: 600;
 }
 .chat-ai .md-prose h1 { font-size: 1.2rem; }
 .chat-ai .md-prose h2 { font-size: 1.08rem; }
 .chat-ai .md-prose h3 { font-size: 1rem; }
-.chat-ai .md-prose p { margin: .16em 0 !important; }
+.chat-ai .md-prose p { margin: .16em 0 !important; font-weight: 500; }
 .chat-ai .md-prose p + p { margin-top: .12em !important; }
 .chat-ai .md-prose p:empty { display: none; }
 .chat-ai .md-prose :is(h1,h2,h3,h4) + :is(p,ul,ol,table,blockquote) { margin-top: .2em !important; }
 .chat-ai .md-prose :is(p,ul,ol,table,blockquote) + :is(h1,h2,h3,h4) { margin-top: .3em !important; }
 .chat-ai .md-prose ul, .chat-ai .md-prose ol { margin: .18em 0 .24em 1.2em !important; }
-.chat-ai .md-prose li { margin: .08em 0 !important; }
+.chat-ai .md-prose li { margin: .08em 0 !important; font-weight: 500; }
 .chat-ai .md-prose blockquote {
-  border-left: 3px solid var(--sky);
+  border-left: 3px solid var(--teal);
   padding-left: .6rem;
   margin: .2em 0 !important;
   color: var(--text-secondary);
   font-style: italic;
+  font-weight: 500;
 }
 .chat-ai .md-prose code { background: var(--sky-light); padding: .06rem .22rem; border-radius: 6px; font-size: .88em; }
 .chat-ai .md-prose pre { background: var(--slate-soft); padding: .8rem; border-radius: var(--radius); margin: .28rem 0 !important; }
-.chat-ai .md-prose table { width:100%; border-collapse: collapse; margin: .28rem 0 !important; font-size: .92rem; }
-.chat-ai .md-prose th, .chat-ai .md-prose td { border: 1px solid var(--border); padding: .32rem .5rem; }
+.chat-ai .md-prose table { width:100%; border-collapse: collapse; margin: .28rem 0 !important; font-size: .92rem; font-weight: 500; }
+.chat-ai .md-prose th, .chat-ai .md-prose td { border: 1px solid var(--border); padding: .32rem .5rem; font-weight: 500; }
 .chat-ai .md-prose thead th { background: var(--sky-light); font-weight: 600; }
 
 /* ===== Navbar ===== */
@@ -169,7 +171,9 @@ body::before {
 .chat-ai {
   background: #fff;
   color: var(--text-primary);
+  font-weight: 500;
   border: 1px solid var(--border);
+  border-left: 3px solid var(--teal);
   border-bottom-left-radius: 4px !important;
   margin-right: auto;
   box-shadow: var(--shadow-soft);
@@ -180,7 +184,7 @@ body::before {
 .typing-dots span {
   width: 7px; height: 7px;
   border-radius: 50%;
-  background: var(--sky);
+  background: var(--teal);
   animation: bounce-dot 1.2s ease infinite;
 }
 .typing-dots span:nth-child(2) { animation-delay: .2s; }
@@ -202,15 +206,15 @@ body::before {
   white-space: nowrap;
 }
 .mode-pill:hover:not([aria-pressed="true"]) {
-  border-color: var(--sky);
-  background: var(--sky-light);
+  border-color: var(--teal);
+  background: var(--teal-light);
   transform: translateY(-1px);
 }
 .mode-pill[aria-pressed="true"] {
-  background: var(--navy);
+  background: var(--teal);
   color: white;
-  border-color: var(--navy);
-  box-shadow: 0 3px 12px rgba(15,76,129,.25);
+  border-color: var(--teal);
+  box-shadow: 0 3px 12px rgba(30,138,122,.35);
 }
 .mode-pill[aria-pressed="true"] i { color: white !important; opacity: .9; }
 
@@ -224,8 +228,8 @@ body::before {
   overflow: hidden;
 }
 .input-shell:focus-within {
-  border-color: var(--sky);
-  box-shadow: 0 4px 28px rgba(79, 168, 216, .18);
+  border-color: var(--teal);
+  box-shadow: 0 4px 28px rgba(30, 138, 122, .2);
 }
 
 #chatInput {
@@ -259,21 +263,21 @@ body::before {
   transition: background .18s, color .18s;
   font-size: .9rem;
 }
-.input-icon-btn:hover { background: var(--sky-light); color: var(--navy); }
+.input-icon-btn:hover { background: var(--teal-light); color: var(--teal); }
 
 .send-btn {
   width: 44px; height: 44px;
   border-radius: 12px;
-  background: var(--amber);
+  background: var(--teal);
   border: none; cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center;
   color: white;
   font-size: 1rem;
   transition: background .18s, transform .15s, box-shadow .18s;
-  box-shadow: 0 2px 10px rgba(240,165,0,.3);
+  box-shadow: 0 2px 10px rgba(30,138,122,.35);
   flex-shrink: 0;
 }
-.send-btn:hover:not(:disabled) { background: #d4920a; transform: scale(1.04); box-shadow: 0 4px 16px rgba(240,165,0,.35); }
+.send-btn:hover:not(:disabled) { background: #16796b; transform: scale(1.04); box-shadow: 0 4px 16px rgba(30,138,122,.4); }
 .send-btn:active:not(:disabled) { transform: scale(0.97); }
 .send-btn:disabled { opacity: .38; cursor: not-allowed; transform: none; }
 
@@ -292,12 +296,12 @@ body::before {
   box-shadow: 0 1px 4px rgba(0,0,0,.04);
   white-space: nowrap;
 }
-.suggestion-chip i { color: var(--navy); font-size: .85rem; }
+.suggestion-chip i { color: var(--teal); font-size: .85rem; }
 .suggestion-chip:hover {
-  border-color: var(--navy);
-  background: var(--sky-light);
+  border-color: var(--teal);
+  background: var(--teal-light);
   transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(15,76,129,.12);
+  box-shadow: 0 4px 14px rgba(30,138,122,.15);
 }
 
 /* ===== Feature Cards ===== */
@@ -396,7 +400,7 @@ body::before {
 
 /* ===== Hero gradient text ===== */
 .gradient-text {
-  background: linear-gradient(135deg, var(--navy) 0%, var(--sky) 60%, var(--teal) 100%);
+  background: linear-gradient(135deg, var(--navy) 0%, var(--teal) 45%, #059669 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -497,8 +501,8 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
 
   <!-- Trust Badge -->
   <div class="flex justify-center mb-8">
-    <div class="inline-flex items-center gap-2.5 px-4 py-2 bg-white border border-teal-200 rounded-full shadow-sm text-sm font-medium text-teal-700">
-      <span class="w-5 h-5 rounded-full bg-teal-500 flex items-center justify-center flex-shrink-0">
+    <div class="inline-flex items-center gap-2.5 px-4 py-2.5 bg-emerald-50 border-2 border-emerald-200 rounded-full shadow-sm shadow-emerald-500/10 text-sm font-semibold text-emerald-800">
+      <span class="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
         <i class="fa-solid fa-shield-halved text-white" style="font-size:.6rem;"></i>
       </span>
       HIPAA-Compliant · Medical-grade security
@@ -511,13 +515,13 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
       Medical results,<br><span class="gradient-text">explained with care.</span>
     </h1>
     <p style="font-size: clamp(1.05rem, 2.5vw, 1.25rem); color: var(--text-secondary); max-width: 580px; margin: 0 auto; line-height: 1.65;">
-      Meet <strong style="color: var(--navy);">Aira</strong> — a compassionate AI that turns lab reports, discharge papers, and medical documents into clear, calm language you can actually use.
+      Meet <strong style="color: var(--teal);">Aira</strong> — a compassionate AI that turns lab reports, discharge papers, and medical documents into clear, calm language you can actually use.
     </p>
   </div>
 
   <!-- Mode Selector -->
   <div class="flex flex-col items-center gap-3 mb-8">
-    <p style="font-size:.85rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: .06em;">How should Aira respond?</p>
+    <p style="font-size:.85rem; color: var(--teal); font-weight: 600; text-transform: uppercase; letter-spacing: .06em;">How should Aira respond?</p>
     <div id="modeSelectWrap" class="flex flex-wrap justify-center gap-2">
       <button data-mode="PlainClinical" class="mode-pill" aria-pressed="true">
         <i class="fa-regular fa-message" style="color: var(--navy);"></i> Balanced
@@ -543,11 +547,11 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
   <!-- Intro Bubble -->
   <div class="max-w-3xl mx-auto mb-6">
     <div class="flex items-start gap-3">
-      <div style="width:36px;height:36px;border-radius:50%;background:var(--sky-light);border:2px solid rgba(79,168,216,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--teal-light);border:2px solid rgba(30,138,122,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
         <img src="https://res.cloudinary.com/dk52yeq9x/image/upload/v1768919639/NeuroMed_AI_Logo-13-12_vgfarp.png" style="width:20px;height:20px;object-fit:contain;" alt="Aira"/>
       </div>
       <div id="intro" class="chat-bubble chat-ai shimmer">
-        <p style="margin:0;color:var(--text-primary);line-height:1.65;">
+        <p style="margin:0;color:var(--text-primary);line-height:1.65;font-weight:500;">
           Hi there — I'm <strong>Aira</strong>. Share a lab result, report, or question, and I'll translate it into plain language, highlight what matters, and suggest thoughtful next questions to ask your clinician.
         </p>
       </div>
@@ -588,7 +592,7 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
 
   <!-- Suggestions -->
   <div class="text-center mb-12">
-    <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:12px;font-weight:500;">Not sure where to start? Try one of these</p>
+    <p style="font-size:.82rem;color:var(--teal);margin-bottom:12px;font-weight:600;">Not sure where to start? Try one of these</p>
     <div id="suggestionsList" class="flex flex-wrap items-center justify-center gap-2">
       <button class="suggestion-chip"><i class="fa-regular fa-hospital"></i><span>Simplify this ER discharge for my family</span></button>
       <button class="suggestion-chip"><i class="fa-solid fa-vial-circle-check"></i><span>Explain these labs in plain English</span></button>
@@ -1369,7 +1373,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   // Drag & drop
   const dz=$('#chatInput').closest('.input-shell');
-  ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,(e)=>{ e.preventDefault(); dz.style.borderColor='var(--sky)'; }));
+  ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,(e)=>{ e.preventDefault(); dz.style.borderColor='var(--teal)'; }));
   ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,(e)=>{
     e.preventDefault(); dz.style.borderColor='';
     if(ev==='drop'&&e.dataTransfer?.files?.length) for(const f of e.dataTransfer.files) addFile(f);

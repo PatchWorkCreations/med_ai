@@ -333,6 +333,16 @@ def create_chat_session(request):
     tone = request.data.get("tone", "PlainClinical")
     lang = request.data.get("lang", "en-US")
     
+    # Free account chat limit (5 chats)
+    from myApp.billing_utils import can_free_user_create_chat
+    allowed, _, msg = can_free_user_create_chat(request.user, existing_session_id=None)
+    if not allowed:
+        return Response({
+            "error": "FREE_CHAT_LIMIT_EXCEEDED",
+            "detail": msg,
+            "requires_subscription": True,
+        }, status=403)
+    
     # Normalize tone format (iOS might send "PlainClinical", backend uses "plain_clinical")
     tone_map = {
         "PlainClinical": "plain_clinical",

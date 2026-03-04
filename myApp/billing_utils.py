@@ -64,6 +64,47 @@ def has_feature_access(user, feature):
     return capabilities.get(feature, False)
 
 
+def get_free_chat_limit(user):
+    """
+    Get the chat session limit for free users. Returns None for paid users (unlimited).
+    """
+    if not user or not user.is_authenticated:
+        return 5  # Unauthenticated/guest treated as free with limit
+    if is_subscription_active(user):
+        return None  # Unlimited for paid
+    plan = get_user_plan(user)
+    capabilities = settings.PLAN_CAPABILITIES.get(plan, settings.PLAN_CAPABILITIES.get("free", {}))
+    return capabilities.get("free_chat_limit")
+
+
+def can_free_user_create_chat(user, existing_session_id=None):
+    """
+    Check if a free user can create or use a new chat session.
+    Returns (allowed: bool, remaining: int|None, message: str).
+    """
+    limit = get_free_chat_limit(user)
+    if limit is None:
+        return True, None, ""  # Paid user, unlimited
+
+    from myApp.models import ChatSession
+    count = ChatSession.objects.filter(user=user, archived=False).count()
+
+    # Reusing existing session - always allow if under limit; if at limit, allow only if session exists
+    if existing_session_id:
+        exists = ChatSession.objects.filter(
+            id=existing_session_id, user=user, archived=False
+        ).exists()
+        if exists:
+            return True, limit - count, ""  # Reusing, allow
+        # Session doesn't exist, will create new - fall through to create check
+
+    if count >= limit:
+        return False, 0, (
+            f"You've used your {limit} free chats. Upgrade to continue the conversation."
+        )
+    return True, limit - count, ""
+
+
 def get_history_days(user):
     """Get number of days of history user can access."""
     plan = get_user_plan(user)
