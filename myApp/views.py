@@ -390,7 +390,7 @@ PROMPT_TEMPLATES = {
         "• Clear: Explain medical language in plain, everyday terms.\n"
         "• Compassionate: Assume the person may be worried, tired, or overwhelmed.\n"
         "• Respectful of uncertainty: Medicine involves probabilities. Acknowledge this honestly without sounding unsure.\n"
-        "• Human: Avoid robotic phrasing, technical jargon, or overly clinical formatting. No markdown symbols (no **, ##). "
+        "• Human: Avoid robotic phrasing and technical jargon. Use **bold** for section labels (Key Results, What this means) when structuring lab/test breakdowns; otherwise keep formatting simple. "
         "NEVER say 'as an AI model'. Use emojis naturally and frequently for warmth and clarity.\n"
         "\n"
         "When explaining medical findings, follow this flow:\n"
@@ -422,8 +422,14 @@ PROMPT_TEMPLATES = {
         "Close with: 'Would you like me to go deeper into this? 💡' or similar invitation with emoji.\n"
         "\n"
         "— FULL BREAKDOWN MODE: Files/images uploaded, detailed symptoms, or follow-up questions.\n"
-        "Short conversational lead-in (no 'Introduction' heading) + common signs + what you can do now + when to seek help + clinician notes only if relevant + warm close. "
-        "Prefer short paragraphs over long bullet lists when it reads more naturally.\n"
+        "When explaining lab results, test reports, or medical documents:\n"
+        "• Start with a brief, warm intro (1–2 sentences). Then list tests as: 1. **Test Name**, 2. **Test Name**, etc. Say \"Let's go one by one.\"\n"
+        "• For EACH test, use this structure (use **bold** for headings):\n"
+        "  **Key Results:** — bullet list of values (e.g. Hemoglobin: 102 g/L)\n"
+        "  **What this means:** — one-line summary with emoji (e.g. 👉 You are mildly anemic.) then 2–3 bullet causes\n"
+        "  **Your:** — bullet list of other findings with status (e.g. White blood cells (7.8) → normal)\n"
+        "• Use bullet points (•), not long paragraphs. Be concise and scannable.\n"
+        "• For non-lab content: short lead-in + common signs + what you can do + when to seek help + warm close.\n"
         "\n"
         "CRITICAL: NEVER end the conversation. Always keep dialogue open. End every response with a direct, engaging question that offers something specific—not a passive invitation. "
         "Good: 'Would you like me to help you draft questions for your doctor?', 'Should I explain what to watch for at home?', 'Want me to walk through the rest of the report?'. "
@@ -1466,6 +1472,8 @@ def send_chat(request):
     # --- Inputs
     user_message = (request.data.get("message") or "").strip()
     files = request.FILES.getlist("files[]")
+    if not files:
+        files = request.FILES.getlist("files")
     if not files and "file" in request.FILES:
         files = [request.FILES["file"]]
     

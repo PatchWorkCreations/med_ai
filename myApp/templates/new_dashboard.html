@@ -712,20 +712,29 @@ body {
   margin-top: 2px;
 }
 
-/* Rich markdown in bubbles */
+/* Rich markdown in bubbles - user-friendly, easy on the eyes */
 .chat-ai .md-prose {
   font-size: 15px;
-  line-height: 1.5;
+  line-height: 1.65;
+  font-weight: 500;
+  color: var(--nm-text-primary);
 }
 
-.chat-ai .md-prose h1 { font-size: 1.25rem; font-weight: 700; margin: 0.75em 0 0.5em; }
-.chat-ai .md-prose h2 { font-size: 1.15rem; font-weight: 600; margin: 0.65em 0 0.4em; }
-.chat-ai .md-prose h3 { font-size: 1.05rem; font-weight: 600; margin: 0.55em 0 0.35em; }
-.chat-ai .md-prose h4 { font-size: 1rem; font-weight: 600; margin: 0.45em 0 0.3em; }
+/* Clear hierarchy for headings */
+.chat-ai .md-prose h1 { font-size: 1.25rem; font-weight: 700; margin: 1em 0 0.5em; letter-spacing: -0.02em; }
+.chat-ai .md-prose h2 { font-size: 1.15rem; font-weight: 600; margin: 0.9em 0 0.45em; letter-spacing: -0.01em; }
+.chat-ai .md-prose h3 { font-size: 1.05rem; font-weight: 600; margin: 0.8em 0 0.4em; }
+.chat-ai .md-prose h4 { font-size: 1rem; font-weight: 600; margin: 0.7em 0 0.35em; }
 
-.chat-ai .md-prose p { margin: 0.5em 0; }
+/* Paragraphs - more breathing room, softer density */
+.chat-ai .md-prose p { 
+  margin: 0.65em 0; 
+  line-height: 1.7;
+  max-width: 65ch; /* Optimal line length for readability */
+}
+
 .chat-ai .md-prose ul, .chat-ai .md-prose ol { 
-  margin: 0.5em 0 0.5em 0;
+  margin: 0.65em 0 0.65em 0;
   padding-left: 1.5em;
   list-style-position: outside;
 }
@@ -736,14 +745,14 @@ body {
   list-style-type: decimal;
 }
 .chat-ai .md-prose li { 
-  margin: 0.4em 0;
+  margin: 0.5em 0;
   padding-left: 0.5em;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 .chat-ai .md-prose ul ul, .chat-ai .md-prose ol ol,
 .chat-ai .md-prose ul ol, .chat-ai .md-prose ol ul {
-  margin-top: 0.3em;
-  margin-bottom: 0.3em;
+  margin-top: 0.35em;
+  margin-bottom: 0.35em;
 }
 
 .chat-ai .md-prose table {
@@ -769,13 +778,14 @@ body {
 }
 
 .chat-ai .md-prose blockquote {
-  border-left: 3px solid var(--nm-accent);
-  padding-left: 16px;
-  margin: 0.75em 0;
+  border-left: 4px solid var(--nm-accent);
+  padding: 14px 18px;
+  margin: 1em 0;
   color: var(--nm-text-secondary);
   background: var(--nm-bg-blockquote);
-  border-radius: 0 8px 8px 0;
-  padding: 12px 16px;
+  border-radius: 0 var(--nm-radius) var(--nm-radius) 0;
+  font-style: normal;
+  line-height: 1.65;
 }
 
 .chat-ai .md-prose code {
@@ -799,6 +809,40 @@ body {
   background: transparent;
   color: inherit;
   padding: 0;
+}
+
+/* Horizontal rules as soft section dividers */
+.chat-ai .md-prose hr {
+  border: none;
+  height: 1px;
+  background: var(--nm-border-color);
+  margin: 1.25em 0;
+}
+
+/* Last paragraph (often CTA) - softer, inviting */
+.chat-ai .md-prose p:last-of-type {
+  margin-bottom: 0;
+  padding-top: 0.5em;
+}
+
+/* Reduce density: add space between sibling paragraphs */
+.chat-ai .md-prose p + p {
+  margin-top: 0.75em;
+}
+
+/* Lab/test format: bold section labels (Key Results, What this means) */
+.chat-ai .md-prose strong {
+  color: var(--nm-primary);
+  font-weight: 600;
+}
+
+/* Numbered lists - clean spacing for 1. 2. 3. format */
+.chat-ai .md-prose ol {
+  margin: 0.75em 0;
+  padding-left: 1.75em;
+}
+.chat-ai .md-prose ol li {
+  margin: 0.4em 0;
 }
 
 /* Inline actions in assistant bubbles */
@@ -2397,7 +2441,7 @@ body.geriatric-zoom button {
             <button id="firstAttachBtn" class="shrink-0 w-8 h-8 rounded-full first-message-btn flex items-center justify-center transition">
               <i class="fa-solid fa-plus first-message-icon text-sm"></i>
             </button>
-            <input type="file" id="firstFileInput" class="hidden" multiple accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic" />
+            <input type="file" id="firstFileInput" class="hidden" multiple accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic,image/*" />
             <input type="text" 
                    id="firstChatInput" 
                    placeholder="Ask anything" 
@@ -2446,7 +2490,7 @@ body.geriatric-zoom button {
           <button id="attachBtn" class="shrink-0 w-8 h-8 flex items-center justify-center transition hover:bg-gray-100 rounded-full" title="Attach files (Up to 15 files • PDF/DOCX/TXT/Images)">
             <i class="fa-solid fa-plus text-gray-700 text-lg"></i>
           </button>
-          <input type="file" id="fileInput" class="hidden" multiple accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic" />
+          <input type="file" id="fileInput" class="hidden" multiple accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic,image/*" />
           
           <!-- Text Input - No border, seamless integration -->
           <input type="text" 
@@ -3702,10 +3746,8 @@ function appendChatBubble(role, content, isHistory = false) {
 
 function renderMarkdown(text) {
   if (typeof marked === 'undefined') {
-    // Fallback if marked.js not loaded
     return `<div class="md-prose">${escapeHtml(text).replace(/\n/g, '<br>')}</div>`;
   }
-  
   const html = marked.parse(text);
   const clean = DOMPurify ? DOMPurify.sanitize(html) : html;
   return `<div class="md-prose">${clean}</div>`;
