@@ -105,6 +105,17 @@ body::before {
 .chat-ai .md-prose th, .chat-ai .md-prose td { border: 1px solid var(--border); padding: .32rem .5rem; font-weight: 500; }
 .chat-ai .md-prose thead th { background: var(--sky-light); font-weight: 600; }
 
+/* ===== Hero background ===== */
+.hero-section {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--cream);
+  background-image: url('https://media.istockphoto.com/id/1222067521/vector/abstract-teal-lines.jpg?s=612x612&w=0&k=20&c=k0dZL8mwLyEQshRqE9pIBBeEyQjMSDg14ZZHSHDxWbQ=');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 /* ===== Navbar ===== */
 .navbar {
   position: sticky;
@@ -497,7 +508,8 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
 </header>
 
 <!-- ===== HERO ===== -->
-<main class="max-w-5xl mx-auto px-4 md:px-6 pt-10 md:pt-16 pb-16">
+<section class="hero-section w-full">
+<main class="max-w-5xl mx-auto px-4 md:px-6 pt-10 md:pt-16 pb-16" style="position:relative;z-index:1;">
 
   <!-- Trust Badge -->
   <div class="flex justify-center mb-8">
@@ -602,6 +614,7 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
     </div>
   </div>
 </main>
+</section>
 
 <!-- ===== HOW IT WORKS ===== -->
 <section style="padding: 80px 0; background: white;">
