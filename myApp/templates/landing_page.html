@@ -715,6 +715,8 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
   color: var(--text-secondary);
 }
 .guest-limit-timer-row strong { color: var(--navy); font-family: monospace; }
+#cooldownBanner.cooldown-banner { display: flex; }
+#cooldownBanner.cooldown-banner.hidden { display: none !important; }
 </style>
 </head>
 <body class="text-slate-800">
@@ -831,7 +833,7 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
 
   <!-- Input -->
   <div class="max-w-3xl mx-auto mb-6">
-    <div id="cooldownBanner" class="hidden" style="margin-bottom:12px;padding:14px 18px;background:linear-gradient(135deg,var(--teal-light),var(--sky-light));border:1px solid rgba(30,138,122,.25);border-radius:var(--radius);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;">
+    <div id="cooldownBanner" class="cooldown-banner hidden" style="margin-bottom:12px;padding:14px 18px;background:linear-gradient(135deg,var(--teal-light),var(--sky-light));border:1px solid rgba(30,138,122,.25);border-radius:var(--radius);flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;">
       <div style="display:flex;align-items:center;gap:10px;">
         <i class="fa-solid fa-clock" style="color:var(--teal);font-size:1.1rem;"></i>
         <div>
@@ -1448,27 +1450,47 @@ let firstSendAttempted=false;
 let files=[];
 let abortController=null;
 let showGateAfterResponse=false;
-let guestTurnsUsed=parseInt(localStorage.getItem('nm_guest_turns')||'0',10);
+function loadGuestState(){
+  let turns=parseInt(localStorage.getItem('nm_guest_turns')||'0',10);
+  let until=parseInt(localStorage.getItem('nm_guest_cooldown_until')||'0',10);
+  if(isNaN(turns)||turns<0||turns>50){ turns=0; localStorage.setItem('nm_guest_turns','0'); }
+  if(isNaN(until)||until<0){ until=0; localStorage.removeItem('nm_guest_cooldown_until'); }
+  const now=Date.now();
+  if(until>0&&until<now){ until=0; localStorage.removeItem('nm_guest_cooldown_until'); localStorage.removeItem('nm_guest_cooldown_count'); localStorage.setItem('nm_guest_turns','0'); }
+  if(until>0&&until-now>45*60*1000){ until=0; localStorage.removeItem('nm_guest_cooldown_until'); localStorage.removeItem('nm_guest_cooldown_count'); }
+  return {turns,until};
+}
+let _gs=loadGuestState();
+let guestTurnsUsed=_gs.turns;
 let guestLimitReached=false;
-let guestCooldownUntil=parseInt(localStorage.getItem('nm_guest_cooldown_until')||'0',10);
+let guestCooldownUntil=_gs.until;
 let guestCooldownCount=parseInt(localStorage.getItem('nm_guest_cooldown_count')||'0',10);
 let isSending=false;
 let cooldownInterval=null;
 
 function checkCooldownExpiry(){
   const now=Date.now();
-  if(guestCooldownUntil>0&&now>=guestCooldownUntil){
+  if(guestCooldownUntil<=0) return false;
+  if(now>=guestCooldownUntil){
     guestCooldownUntil=0;
     guestTurnsUsed=0;
     guestLimitReached=false;
     localStorage.removeItem('nm_guest_cooldown_until');
+    localStorage.removeItem('nm_guest_cooldown_count');
     localStorage.setItem('nm_guest_turns','0');
     hideGuestLimitModal();
     applyGuestLimitState(false);
     if(cooldownInterval){ clearInterval(cooldownInterval); cooldownInterval=null; }
     return false;
   }
-  return guestCooldownUntil>0;
+  const maxCooldownMs=45*60*1000;
+  if(guestCooldownUntil-now>maxCooldownMs){
+    localStorage.removeItem('nm_guest_cooldown_until');
+    localStorage.removeItem('nm_guest_cooldown_count');
+    guestCooldownUntil=0;
+    return false;
+  }
+  return true;
 }
 
 function startCooldown(){
@@ -1719,22 +1741,20 @@ async function sendChat(){
     const node=renderAssistantMarkdown(data.reply||'⚠️ No reply received.');
     typing.appendChild(node);
     track('result_rendered',{lang,hasFiles:filesToSend.length>0});
+    const authed=await isAuthenticated();
+    if(!authed){
+      guestTurnsUsed+=1;
+      localStorage.setItem('nm_guest_turns',String(guestTurnsUsed));
+      if(guestTurnsUsed===1) $('#postResultInvite').classList.remove('hidden');
+      if(guestTurnsUsed>=GUEST_CHAT_LIMIT){ startCooldown(); applyGuestLimitState(true); showGuestLimitModal(); }
+    }
   }catch(e){
     typing.style.background='#fef2f2'; typing.style.borderColor='#fecaca'; typing.style.color='#b91c1c';
     typing.innerText="I couldn't finish that — want me to try a lighter summary or split the file?";
   }finally{
     isSending=false;
     files=[]; $('#fileChips').innerHTML=''; $('#fileChips').style.display='none'; toggleSend();
-    if(showGateAfterResponse){
-      const authed=await isAuthenticated();
-      if(!authed){
-        guestTurnsUsed+=1;
-        localStorage.setItem('nm_guest_turns',String(guestTurnsUsed));
-        if(guestTurnsUsed===1) $('#postResultInvite').classList.remove('hidden');
-        if(guestTurnsUsed>=GUEST_CHAT_LIMIT){ startCooldown(); applyGuestLimitState(true); showGuestLimitModal(); }
-      }
-      showGateAfterResponse=false;
-    }
+    if(showGateAfterResponse) showGateAfterResponse=false;
   }
 }
 
@@ -1749,6 +1769,13 @@ function startDictation(){
 document.addEventListener('DOMContentLoaded',()=>{
   isAuthenticated().then(authed=>{
     if(authed) return;
+    if(guestTurnsUsed<GUEST_CHAT_LIMIT&&guestCooldownUntil<=0) return;
+    if(guestTurnsUsed<GUEST_CHAT_LIMIT&&guestCooldownUntil>0){
+      guestCooldownUntil=0;
+      localStorage.removeItem('nm_guest_cooldown_until');
+      localStorage.removeItem('nm_guest_cooldown_count');
+      return;
+    }
     if(checkCooldownExpiry()){ applyGuestLimitState(true); return; }
     if(guestTurnsUsed>=GUEST_CHAT_LIMIT&&guestCooldownUntil<=0){ startCooldown(); applyGuestLimitState(true); }
   });
