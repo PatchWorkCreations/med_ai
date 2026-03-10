@@ -10,7 +10,7 @@
   <meta name="theme-color" content="#0F4C81">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
@@ -39,8 +39,8 @@
   --radius: 16px;
   --radius-lg: 24px;
   --radius-xl: 32px;
-  --font-serif: 'Instrument Serif', Georgia, serif;
-  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-serif: 'Roboto', system-ui, sans-serif;
+  --font-sans: 'Roboto', system-ui, sans-serif;
 }
 
 /* ===== Base ===== */
@@ -110,7 +110,7 @@ body::before {
   position: relative;
   overflow: hidden;
   background-color: var(--cream);
-  background-image: url('https://media.istockphoto.com/id/1222067521/vector/abstract-teal-lines.jpg?s=612x612&w=0&k=20&c=k0dZL8mwLyEQshRqE9pIBBeEyQjMSDg14ZZHSHDxWbQ=');
+  background-image: url('https://res.cloudinary.com/dw5tnpylt/image/upload/v1772982182/neuromedAI_background_vuoyex.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -201,33 +201,6 @@ body::before {
 .typing-dots span:nth-child(2) { animation-delay: .2s; }
 .typing-dots span:nth-child(3) { animation-delay: .4s; }
 @keyframes bounce-dot { 0%,80%,100% { transform: scale(.7); opacity:.4; } 40% { transform: scale(1); opacity: 1; } }
-
-/* ===== Mode Selector ===== */
-.mode-pill {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 9px 16px;
-  border-radius: 999px;
-  font-size: .82rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all .2s ease;
-  border: 1.5px solid var(--border);
-  background: white;
-  color: var(--text-primary);
-  white-space: nowrap;
-}
-.mode-pill:hover:not([aria-pressed="true"]) {
-  border-color: var(--teal);
-  background: var(--teal-light);
-  transform: translateY(-1px);
-}
-.mode-pill[aria-pressed="true"] {
-  background: var(--teal);
-  color: white;
-  border-color: var(--teal);
-  box-shadow: 0 3px 12px rgba(30,138,122,.35);
-}
-.mode-pill[aria-pressed="true"] i { color: white !important; opacity: .9; }
 
 /* ===== Input Area ===== */
 .input-shell {
@@ -428,13 +401,320 @@ body::before {
 
 /* ===== Mobile ===== */
 @media (max-width: 767px) {
-  .mode-pill { padding: 8px 13px; font-size: .78rem; }
   #chatInput { padding: 14px 16px 0 16px; font-size: .95rem; }
   .chat-bubble { max-width: 88%; }
 }
 
 /* ===== Easy Read ===== */
 body.easy-read { font-size: 18px; line-height: 1.7; }
+
+/* ===== Language Invite Popup ===== */
+#langInviteOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 65;
+  background: rgba(13, 27, 42, 0.25);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s;
+  cursor: pointer;
+}
+#langInviteOverlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+#langInvite {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  transform: translateY(20px);
+  opacity: 0;
+  visibility: hidden;
+  z-index: 70;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease, visibility 0.35s;
+}
+#langInvite.show {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+}
+#langInvite .lang-invite-card {
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 48px rgba(15, 76, 129, 0.15), 0 0 0 1px rgba(79, 168, 216, 0.08);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  max-width: 420px;
+  position: relative;
+  overflow: hidden;
+}
+#langInvite .lang-invite-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--teal), var(--sky));
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+.lang-invite-close {
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 32px; height: 32px;
+  border: none;
+  background: var(--slate-soft);
+  border-radius: 10px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s, color .2s;
+}
+.lang-invite-close:hover {
+  background: var(--sky-light);
+  color: var(--navy);
+}
+.lang-invite-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.lang-invite-icon {
+  width: 44px; height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--teal-light), var(--sky-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.lang-invite-icon i {
+  font-size: 1.25rem;
+  color: var(--teal);
+}
+.lang-invite-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+}
+.lang-invite-sub {
+  font-size: .85rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.45;
+}
+.lang-invite-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.lang-invite-quick-btn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: white;
+  font-size: .82rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all .2s ease;
+  font-family: inherit;
+}
+.lang-invite-quick-btn:hover {
+  border-color: var(--teal);
+  background: var(--teal-light);
+  color: var(--navy);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(30, 138, 122, 0.15);
+}
+.lang-invite-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.lang-invite-all {
+  font-size: .84rem;
+  color: var(--teal);
+  font-weight: 600;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: color .2s;
+}
+.lang-invite-all:hover { color: var(--navy); }
+.lang-invite-dismiss {
+  font-size: .8rem;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  font-family: inherit;
+  transition: color .2s;
+}
+.lang-invite-dismiss:hover { color: var(--text-secondary); }
+.lang-invite-full-list {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+.lang-invite-full-list.expanded {
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.lang-invite-full-list button {
+  width: 100%;
+  text-align: left;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: .85rem;
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text-primary);
+  border-radius: 8px;
+  transition: background .15s;
+}
+.lang-invite-full-list button:hover { background: var(--sky-light); }
+.lang-invite-full-list button span:last-child { font-size: .72rem; color: var(--text-muted); }
+.lang-invite-full-list::-webkit-scrollbar { width: 5px; }
+.lang-invite-full-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+@media (max-width: 480px) {
+  #langInvite { bottom: 16px; left: 16px; right: 16px; transform: translateY(20px); }
+  #langInvite.show { transform: translateY(0); }
+  #langInvite .lang-invite-card { max-width: none; }
+}
+
+/* ===== Guest Limit Modal ===== */
+#guestLimitOverlay { opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s; }
+#guestLimitOverlay.show { opacity: 1; visibility: visible; }
+.guest-limit-modal { transform: scale(0.95); opacity: 0; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s; }
+#guestLimitOverlay.show .guest-limit-modal { transform: scale(1); opacity: 1; }
+.guest-limit-card {
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid var(--border);
+  box-shadow: 0 24px 64px rgba(15, 76, 129, 0.2);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  max-width: 420px;
+  position: relative;
+  overflow: hidden;
+}
+.guest-limit-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--teal), var(--sky));
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+.guest-limit-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, var(--teal-light), var(--sky-light));
+  border-radius: 999px;
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--teal);
+  margin-bottom: 20px;
+}
+.guest-limit-title {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 10px 0;
+  line-height: 1.25;
+}
+.guest-limit-sub {
+  font-size: .95rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0 0 20px 0;
+}
+.guest-limit-benefits {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.guest-limit-benefit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: .9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.guest-limit-benefit i { color: var(--teal); font-size: 1rem; flex-shrink: 0; }
+.guest-limit-actions { display: flex; flex-direction: column; gap: 12px; }
+.guest-limit-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 24px;
+  background: var(--teal);
+  color: white;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: background .2s, transform .15s, box-shadow .2s;
+  box-shadow: 0 4px 16px rgba(30, 138, 122, 0.35);
+}
+.guest-limit-primary:hover { background: #16796b; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(30, 138, 122, 0.4); color: white; }
+.guest-limit-secondary {
+  text-align: center;
+  padding: 12px;
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--navy);
+  text-decoration: none;
+  transition: color .2s;
+}
+.guest-limit-secondary:hover { color: var(--teal); }
+.guest-limit-footer {
+  font-size: .8rem;
+  color: var(--text-muted);
+  margin: 16px 0 0 0;
+  text-align: center;
+}
+.guest-limit-timer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--slate-soft);
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-size: .9rem;
+  color: var(--text-secondary);
+}
+.guest-limit-timer-row strong { color: var(--navy); font-family: monospace; }
 </style>
 </head>
 <body class="text-slate-800">
@@ -531,31 +811,6 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
     </p>
   </div>
 
-  <!-- Mode Selector -->
-  <div class="flex flex-col items-center gap-3 mb-8">
-    <p style="font-size:.85rem; color: var(--teal); font-weight: 600; text-transform: uppercase; letter-spacing: .06em;">How should Aira respond?</p>
-    <div id="modeSelectWrap" class="flex flex-wrap justify-center gap-2">
-      <button data-mode="PlainClinical" class="mode-pill" aria-pressed="true">
-        <i class="fa-regular fa-message" style="color: var(--navy);"></i> Balanced
-      </button>
-      <button data-mode="Caregiver" class="mode-pill" aria-pressed="false">
-        <i class="fa-solid fa-hands-holding-child" style="color: #92400e;"></i> Caregiver
-      </button>
-      <button data-mode="Clinical" class="mode-pill" aria-pressed="false">
-        <i class="fa-solid fa-stethoscope" style="color: #1e293b;"></i> Clinical
-      </button>
-      <button data-mode="Faith" class="mode-pill" aria-pressed="false">
-        <i class="fa-solid fa-hands-praying" style="color: #4f46e5;"></i> Faith
-      </button>
-      <button data-mode="Geriatric" class="mode-pill" aria-pressed="false">
-        <i class="fa-solid fa-person-cane" style="color: var(--teal);"></i> Geriatric
-      </button>
-      <button data-mode="EmotionalSupport" class="mode-pill" aria-pressed="false">
-        <i class="fa-solid fa-heart" style="color: #be123c;"></i> Emotional Support
-      </button>
-    </div>
-  </div>
-
   <!-- Intro Bubble -->
   <div class="max-w-3xl mx-auto mb-6">
     <div class="flex items-start gap-3">
@@ -564,7 +819,8 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
       </div>
       <div id="intro" class="chat-bubble chat-ai shimmer">
         <p style="margin:0;color:var(--text-primary);line-height:1.65;font-weight:500;">
-          Hi there — I'm <strong>Aira</strong>. Share a lab result, report, or question, and I'll translate it into plain language, highlight what matters, and suggest thoughtful next questions to ask your clinician.
+          Hi, I'm <strong>Aira</strong> 💙<br>
+          If you're caring for someone, I'll help you think through next steps gently and clearly. What's going on?
         </p>
       </div>
     </div>
@@ -575,6 +831,19 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
 
   <!-- Input -->
   <div class="max-w-3xl mx-auto mb-6">
+    <div id="cooldownBanner" class="hidden" style="margin-bottom:12px;padding:14px 18px;background:linear-gradient(135deg,var(--teal-light),var(--sky-light));border:1px solid rgba(30,138,122,.25);border-radius:var(--radius);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <i class="fa-solid fa-clock" style="color:var(--teal);font-size:1.1rem;"></i>
+        <div>
+          <p style="margin:0;font-weight:600;font-size:.9rem;color:var(--text-primary);">You can't send messages right now.</p>
+          <p style="margin:2px 0 0 0;font-size:.82rem;color:var(--text-secondary);">Chat again in <strong id="cooldownBannerTimer">25:00</strong> — or <a href="/login?next=/" style="color:var(--teal);font-weight:600;text-decoration:underline;">sign in</a> / <a href="/signup?next=/" style="color:var(--teal);font-weight:600;text-decoration:underline;">sign up</a> to chat anytime.</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <a href="/login?next=/" class="btn-ghost" style="padding:8px 16px;font-size:.85rem;">Sign in</a>
+        <a href="/signup?next=/" class="btn-primary" style="padding:8px 16px;font-size:.85rem;">Sign up free</a>
+      </div>
+    </div>
     <input type="file" id="fileInput" class="hidden" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.heic,.webp" multiple />
     <div class="input-shell">
       <textarea
@@ -1023,6 +1292,42 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
   </div>
 </div>
 
+<!-- ===== LANGUAGE INVITE POPUP ===== -->
+<div id="langInviteOverlay" aria-hidden="true"></div>
+<div id="langInvite" role="dialog" aria-label="Choose your language" aria-describedby="langInviteDesc">
+  <div class="lang-invite-card">
+    <button type="button" class="lang-invite-close" onclick="dismissLangInvite()" aria-label="Close">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <div class="lang-invite-header">
+      <div class="lang-invite-icon">
+        <i class="fa-solid fa-globe"></i>
+      </div>
+      <div>
+        <p class="lang-invite-title" id="langInviteDesc">Aira speaks your language</p>
+        <p class="lang-invite-sub">Choose your preferred language for clearer medical explanations.</p>
+      </div>
+    </div>
+    <div class="lang-invite-quick">
+      <button type="button" class="lang-invite-quick-btn" data-lang="en-US">English</button>
+      <button type="button" class="lang-invite-quick-btn" data-lang="es-ES">Español</button>
+      <button type="button" class="lang-invite-quick-btn" data-lang="zh-CN">中文</button>
+      <button type="button" class="lang-invite-quick-btn" data-lang="pt-BR">Português</button>
+      <button type="button" class="lang-invite-quick-btn" data-lang="fr-FR">Français</button>
+      <button type="button" class="lang-invite-quick-btn" data-lang="vi-VN">Tiếng Việt</button>
+      <button type="button" class="lang-invite-quick-btn" data-lang="ko-KR">한국어</button>
+      <button type="button" class="lang-invite-quick-btn" data-lang="ar-SA">العربية</button>
+    </div>
+    <div class="lang-invite-full-list" id="langInviteFullList"></div>
+    <div class="lang-invite-footer">
+      <button type="button" class="lang-invite-all" id="langInviteShowAll">
+        <i class="fa-solid fa-chevron-down" id="langInviteShowAllIcon"></i> See all languages
+      </button>
+      <button type="button" class="lang-invite-dismiss" onclick="dismissLangInvite()">Not now</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== POST RESULT INVITE ===== -->
 <div id="postResultInvite" class="fixed bottom-5 right-5 z-[60] hidden">
   <div style="background:white;border:1px solid var(--border);box-shadow:var(--shadow-lift);border-radius:var(--radius-lg);padding:20px;max-width:300px;">
@@ -1031,6 +1336,34 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
     <div style="display:flex;gap:8px;">
       <a href="/signup" class="btn-primary" style="padding:9px 16px;font-size:.85rem;flex:1;justify-content:center;">Create free account</a>
       <button onclick="document.getElementById('postResultInvite').classList.add('hidden')" class="btn-ghost" style="padding:9px 14px;font-size:.85rem;">Later</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== GUEST LIMIT MODAL (5 chats + cooldown) ===== -->
+<div id="guestLimitOverlay" class="fixed inset-0 z-[70] hidden flex items-center justify-center p-4" style="background:rgba(13,27,42,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);">
+  <div id="guestLimitModal" class="guest-limit-modal" role="dialog" aria-labelledby="guestLimitTitle" aria-modal="true">
+    <div class="guest-limit-card">
+      <div class="guest-limit-badge"><i class="fa-solid fa-clock"></i> <span id="guestLimitBadgeText">You've used your 5 free messages</span></div>
+      <h2 id="guestLimitTitle" class="guest-limit-title">Chat again in <span id="guestLimitCountdown">25:00</span></h2>
+      <p class="guest-limit-sub" id="guestLimitSub">Or sign up now to chat anytime — no waiting, no limits.</p>
+      <div class="guest-limit-timer-row">
+        <i class="fa-solid fa-hourglass-half" style="color:var(--teal);"></i>
+        <span>Next batch of 5 messages in: <strong id="guestLimitTimer">25:00</strong></span>
+      </div>
+      <div class="guest-limit-benefits">
+        <div class="guest-limit-benefit"><i class="fa-solid fa-check-circle"></i><span>Unlimited medical summaries</span></div>
+        <div class="guest-limit-benefit"><i class="fa-solid fa-check-circle"></i><span>No waiting — chat anytime</span></div>
+        <div class="guest-limit-benefit"><i class="fa-solid fa-check-circle"></i><span>Save your chat history</span></div>
+      </div>
+      <div class="guest-limit-actions">
+        <a href="/signup?next=/" class="guest-limit-primary">
+          <i class="fa-solid fa-arrow-right"></i>
+          Sign up to chat anytime — it's free
+        </a>
+        <a href="/login?next=/" class="guest-limit-secondary">I already have an account</a>
+      </div>
+      <p class="guest-limit-footer">Free to start — no credit card required</p>
     </div>
   </div>
 </div>
@@ -1103,19 +1436,105 @@ const $$=sel=>Array.from(document.querySelectorAll(sel));
 function track(ev,data={}){ try{ navigator.sendBeacon('/api/track',new Blob([JSON.stringify({ev,...data})],{type:'application/json'})); }catch{} }
 function getCSRFToken(){ const m=document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)'); return m?m.pop():''; }
 function setSendDisabled(disabled){ $('#sendBtn').disabled=disabled; }
-function loadMode(){ return localStorage.getItem('nm_mode')||'PlainClinical'; }
-function saveMode(m){ localStorage.setItem('nm_mode',m); }
-
 async function isAuthenticated(){
   try{ const r=await fetch('/api/auth/status/',{credentials:'include'}); if(!r.ok) return false; const j=await r.json(); return !!j.authenticated; }
   catch{ return false; }
 }
 
+const GUEST_CHAT_LIMIT=5;
+const GUEST_COOLDOWN_FIRST=25;
+const GUEST_COOLDOWN_NEXT=40;
 let firstSendAttempted=false;
 let files=[];
 let abortController=null;
 let showGateAfterResponse=false;
 let guestTurnsUsed=parseInt(localStorage.getItem('nm_guest_turns')||'0',10);
+let guestLimitReached=false;
+let guestCooldownUntil=parseInt(localStorage.getItem('nm_guest_cooldown_until')||'0',10);
+let guestCooldownCount=parseInt(localStorage.getItem('nm_guest_cooldown_count')||'0',10);
+let isSending=false;
+let cooldownInterval=null;
+
+function checkCooldownExpiry(){
+  const now=Date.now();
+  if(guestCooldownUntil>0&&now>=guestCooldownUntil){
+    guestCooldownUntil=0;
+    guestTurnsUsed=0;
+    guestLimitReached=false;
+    localStorage.removeItem('nm_guest_cooldown_until');
+    localStorage.setItem('nm_guest_turns','0');
+    hideGuestLimitModal();
+    applyGuestLimitState(false);
+    if(cooldownInterval){ clearInterval(cooldownInterval); cooldownInterval=null; }
+    return false;
+  }
+  return guestCooldownUntil>0;
+}
+
+function startCooldown(){
+  guestCooldownCount=parseInt(localStorage.getItem('nm_guest_cooldown_count')||'0',10);
+  const mins=guestCooldownCount===0?GUEST_COOLDOWN_FIRST:GUEST_COOLDOWN_NEXT;
+  guestCooldownUntil=Date.now()+mins*60*1000;
+  guestCooldownCount+=1;
+  localStorage.setItem('nm_guest_cooldown_until',String(guestCooldownUntil));
+  localStorage.setItem('nm_guest_cooldown_count',String(guestCooldownCount));
+}
+
+function formatCooldown(ms){
+  const totalSec=Math.max(0,Math.ceil(ms/1000));
+  const m=Math.floor(totalSec/60);
+  const s=totalSec%60;
+  return m+':'+(s<10?'0':'')+s;
+}
+
+function updateCooldownUI(){
+  const now=Date.now();
+  const remaining=guestCooldownUntil-now;
+  if(remaining<=0){ checkCooldownExpiry(); return; }
+  const str=formatCooldown(remaining);
+  const t1=$('#guestLimitCountdown'); const t2=$('#guestLimitTimer'); const t3=$('#cooldownBannerTimer');
+  if(t1) t1.textContent=str;
+  if(t2) t2.textContent=str;
+  if(t3) t3.textContent=str;
+}
+
+function showGuestLimitModal(){
+  updateCooldownUI();
+  const ov=$('#guestLimitOverlay');
+  if(ov){ ov.classList.remove('hidden'); void ov.offsetWidth; ov.classList.add('show'); }
+  if(!cooldownInterval) cooldownInterval=setInterval(updateCooldownUI,1000);
+  track('guest_limit_modal_shown');
+}
+function hideGuestLimitModal(){
+  const ov=$('#guestLimitOverlay');
+  if(ov){ ov.classList.remove('show'); setTimeout(()=>ov.classList.add('hidden'),300); }
+}
+
+function applyGuestLimitState(atLimit){
+  guestLimitReached=atLimit;
+  const shell=$('#chatInput')?.closest('.input-shell');
+  const input=$('#chatInput');
+  const upload=$('#uploadBtn');
+  const send=$('#sendBtn');
+  const suggestions=$('#suggestionsList');
+  const banner=$('#cooldownBanner');
+  if(atLimit){
+    if(shell) shell.classList.add('is-disabled');
+    if(input){ input.placeholder="You can't send messages right now. Sign up to chat anytime."; input.readOnly=true; }
+    if(upload) upload.disabled=true;
+    if(send) send.disabled=true;
+    if(suggestions){ suggestions.style.opacity='0.5'; suggestions.style.pointerEvents='none'; }
+    if(banner){ banner.classList.remove('hidden'); updateCooldownUI(); if(!cooldownInterval) cooldownInterval=setInterval(updateCooldownUI,1000); }
+  }else{
+    if(shell) shell.classList.remove('is-disabled');
+    if(input){ input.placeholder='Ask about a test result, upload a document, or just describe what you received…'; input.readOnly=false; }
+    if(upload) upload.disabled=false;
+    if(send) toggleSend();
+    if(suggestions){ suggestions.style.opacity=''; suggestions.style.pointerEvents=''; }
+    if(banner) banner.classList.add('hidden');
+    if(cooldownInterval){ clearInterval(cooldownInterval); cooldownInterval=null; }
+  }
+}
 
 // Readability Controls
 (function(){
@@ -1140,42 +1559,6 @@ window.addEventListener('scroll',()=>{
   if(nav) nav.classList.toggle('scrolled',window.scrollY>10);
 },{passive:true});
 
-// Mode
-const MODE_META = {
-  'PlainClinical':{ icon:'fa-regular fa-message', color:'color:var(--navy)', intro:"Hi there — I'm **Aira**. Share a lab result, report, or question, and I'll translate it into plain language, highlight what matters, and suggest thoughtful next questions to ask your clinician." },
-  'Caregiver':{ icon:'fa-solid fa-hands-holding-child', color:'color:#92400e', intro:"Hi, I'm **Aira**. Tell me about the person you're caring for, and I'll help you turn medical information into gentle, practical steps you can actually use." },
-  'Faith':{ icon:'fa-solid fa-hands-praying', color:'color:#4f46e5', intro:"Hi, I'm **Aira**. If you'd like, we can look at your results through a lens of faith and hope while still keeping the medical facts clear and grounded." },
-  'Clinical':{ icon:'fa-solid fa-stethoscope', color:'color:#1e293b', intro:`# 🩺 NeuroMed Aira — Clinical Mode\n\nWelcome to **Clinical Mode**. I'll process notes, labs, and reports with a structured, medical-first lens.\n\n**Think:** SOAP format, focused differentials, and evidence-based clarity—minus the clutter.\n\n### What I'll do\n- 📝 Organize findings into **Subjective, Objective, Assessment, Plan**.\n- 🔬 **Flag key abnormalities** or patterns worth noting.\n- 📊 Provide **concise interpretations** to speed rounds and documentation.\n\nYour expertise leads; I make the information faster, sharper, and more usable.\n\n**Upload your first report to begin.**` },
-  'Geriatric':{ icon:'fa-solid fa-person-cane', color:'color:var(--teal)', intro:"Hi, I'm **Aira**. I can slow things down, break results into simple steps, and keep language friendly for older adults and the people supporting them." },
-  'EmotionalSupport':{ icon:'fa-solid fa-heart', color:'color:#be123c', intro:"Hi, I'm **Aira**. If you're feeling anxious or overwhelmed, you can tell me what's on your mind and I'll respond calmly, validate what you're feeling, and help you think about next steps." }
-};
-
-function selectMode(btn,skipRefresh=false){
-  $$('#modeSelectWrap button').forEach(b=>b.setAttribute('aria-pressed','false'));
-  btn.setAttribute('aria-pressed','true');
-  const mode=btn.dataset.mode;
-  const currentMode=loadMode();
-  saveMode(mode);
-  applyModeUI(mode);
-  track('mode_chosen',{mode});
-  if(!skipRefresh && mode!==currentMode){ setTimeout(()=>window.location.reload(),300); }
-}
-
-function applyModeUI(mode){
-  const meta=MODE_META[mode]||MODE_META['PlainClinical'];
-  const intro=$('#intro');
-  intro.classList.add('shimmer');
-  setTimeout(()=>{
-    intro.innerHTML='';
-    const node=renderAssistantMarkdown(meta.intro||'');
-    intro.appendChild(node);
-    intro.classList.remove('shimmer');
-  },220);
-  const label=mode==='PlainClinical'?'Balanced':mode==='EmotionalSupport'?'Emotional Support':mode;
-  showToast(`${label} mode`, meta.icon, meta.color);
-  if(mode==='Geriatric') document.body.classList.add('easy-read');
-}
-
 function showToast(text,icon,colorStyle){
   const t=$('#toast'); const ti=$('#toastIcon'); const tt=$('#toastText');
   ti.className=icon; ti.setAttribute('style',colorStyle);
@@ -1196,6 +1579,7 @@ function iconFor(name){
 const MAX_FILES=15;
 function addFile(file){
   if(!file) return;
+  if(guestLimitReached) return;
   if(files.length>=MAX_FILES){ showToast(`Max ${MAX_FILES} files`,'fa-solid fa-triangle-exclamation','color:#b45309'); return; }
   const isDuplicate=files.some(f=>f.name===file.name&&f.size===file.size);
   if(isDuplicate){ showToast('File already added','fa-solid fa-info-circle','color:var(--sky)'); return; }
@@ -1222,6 +1606,7 @@ function autosize(){
 }
 
 function toggleSend(){
+  if(guestLimitReached){ setSendDisabled(true); return; }
   const hasText=($('#chatInput').value||'').trim().length>0;
   const hasFile=files.length>0;
   setSendDisabled(!(hasText||hasFile));
@@ -1282,10 +1667,19 @@ function renderAssistantMarkdown(mdText){
 }
 
 async function sendChat(){
+  if(isSending) return;
   const msg=($('#chatInput').value||'').trim();
-  const mode=loadMode();
   const lang=typeof __nmLang==='function'?__nmLang():(navigator.language||'en-US');
   if(!msg&&files.length===0) return;
+
+  const authed=await isAuthenticated();
+  if(!authed){
+    if(checkCooldownExpiry()){ showGuestLimitModal(); return; }
+    if(guestTurnsUsed>=GUEST_CHAT_LIMIT){ showGuestLimitModal(); return; }
+  }
+
+  isSending=true;
+  setSendDisabled(true);
 
   if(!firstSendAttempted){ firstSendAttempted=true; const authed=await isAuthenticated(); if(!authed) showGateAfterResponse=true; }
   if(window.innerWidth<768) document.getElementById('intro')?.classList.add('hidden');
@@ -1307,7 +1701,7 @@ async function sendChat(){
 
   const fd=new FormData();
   if(msg) fd.append('message',msg);
-  fd.append('tone',mode); fd.append('lang',lang);
+  fd.append('lang',lang);
   const existingSessionId=localStorage.getItem('nm_session_id');
   if(existingSessionId) fd.append('session_id',existingSessionId);
   if(filesToSend.length) for(const f of filesToSend) fd.append('files[]',f);
@@ -1324,15 +1718,21 @@ async function sendChat(){
     typing.innerHTML='';
     const node=renderAssistantMarkdown(data.reply||'⚠️ No reply received.');
     typing.appendChild(node);
-    track('result_rendered',{mode,lang,hasFiles:filesToSend.length>0});
+    track('result_rendered',{lang,hasFiles:filesToSend.length>0});
   }catch(e){
     typing.style.background='#fef2f2'; typing.style.borderColor='#fecaca'; typing.style.color='#b91c1c';
     typing.innerText="I couldn't finish that — want me to try a lighter summary or split the file?";
   }finally{
+    isSending=false;
     files=[]; $('#fileChips').innerHTML=''; $('#fileChips').style.display='none'; toggleSend();
     if(showGateAfterResponse){
       const authed=await isAuthenticated();
-      if(!authed){ guestTurnsUsed+=1; localStorage.setItem('nm_guest_turns',String(guestTurnsUsed)); if(guestTurnsUsed===1) $('#postResultInvite').classList.remove('hidden'); }
+      if(!authed){
+        guestTurnsUsed+=1;
+        localStorage.setItem('nm_guest_turns',String(guestTurnsUsed));
+        if(guestTurnsUsed===1) $('#postResultInvite').classList.remove('hidden');
+        if(guestTurnsUsed>=GUEST_CHAT_LIMIT){ startCooldown(); applyGuestLimitState(true); showGuestLimitModal(); }
+      }
       showGateAfterResponse=false;
     }
   }
@@ -1347,6 +1747,12 @@ function startDictation(){
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
+  isAuthenticated().then(authed=>{
+    if(authed) return;
+    if(checkCooldownExpiry()){ applyGuestLimitState(true); return; }
+    if(guestTurnsUsed>=GUEST_CHAT_LIMIT&&guestCooldownUntil<=0){ startCooldown(); applyGuestLimitState(true); }
+  });
+
   // Language
   const desktopBtn=$('#langBtn'), desktopMenu=$('#langMenu');
   const mobileBtn=$('#mLangBtn'), mobileMenu=$('#mLangMenu');
@@ -1359,15 +1765,17 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(desktopMenu&&!desktopMenu.contains(e.target)&&e.target!==desktopBtn) toggleMenu(desktopMenu,false);
     if(mobileMenu&&!mobileMenu.contains(e.target)&&e.target!==mobileBtn) toggleMenu(mobileMenu,false);
   });
-  document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ toggleMenu(desktopMenu,false); toggleMenu(mobileMenu,false); } });
+  function dismissLangInvite(){
+    $('#langInviteOverlay')?.classList.remove('show');
+    $('#langInviteOverlay')?.setAttribute('aria-hidden','true');
+    $('#langInvite')?.classList.remove('show');
+    $('#langInviteFullList')?.classList.remove('expanded');
+    const sb=$('#langInviteShowAll'); if(sb) sb.innerHTML='<i class="fa-solid fa-chevron-down"></i> See all languages';
+    try{ localStorage.setItem('nm_lang_invite_dismissed','1'); }catch{}
+  }
+  window.dismissLangInvite=dismissLangInvite;
+  document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ if($('#guestLimitOverlay')?.classList.contains('show')) hideGuestLimitModal(); else if($('#langInvite')?.classList.contains('show')) dismissLangInvite(); else{ toggleMenu(desktopMenu,false); toggleMenu(mobileMenu,false); } } });
   window.__nmLang=()=>loadLang();
-
-  // Modes
-  const savedMode=loadMode();
-  $$('#modeSelectWrap button').forEach(btn=>{
-    if(btn.dataset.mode===savedMode) selectMode(btn,true);
-    btn.addEventListener('click',()=>selectMode(btn,false));
-  });
 
   // Suggestions
   $$('.suggestion-chip').forEach(btn=>btn.addEventListener('click',()=>{
@@ -1401,6 +1809,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   autosize(); toggleSend();
   setTimeout(()=>$('#chatInput').focus(),200);
 
+  $('#guestLimitOverlay')?.addEventListener('click',e=>{ if(e.target===e.currentTarget) hideGuestLimitModal(); });
+
   // Mobile menu
   const btn=$('#nmMenuBtn'), menu=$('#nmMobileMenu');
   const icoOpen=$('#nmIconOpen'), icoClose=$('#nmIconClose');
@@ -1408,6 +1818,42 @@ document.addEventListener('DOMContentLoaded',()=>{
   btn?.addEventListener('click',()=>setOpen(menu.classList.contains('hidden')));
   document.addEventListener('click',(e)=>{ if(!menu||menu.classList.contains('hidden')) return; if(!menu.contains(e.target)&&!btn.contains(e.target)) setOpen(false); });
   document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') setOpen(false); });
+
+  // Language invite popup - show after 5s if not dismissed
+  const langInviteEl=$('#langInvite'), langInviteOverlay=$('#langInviteOverlay'), langInviteFullList=$('#langInviteFullList');
+  function showLangInvite(){
+    if(langInviteOverlay){ langInviteOverlay.classList.add('show'); langInviteOverlay.setAttribute('aria-hidden','false'); }
+    if(langInviteEl) langInviteEl.classList.add('show');
+  }
+  langInviteOverlay?.addEventListener('click',dismissLangInvite);
+  if(langInviteFullList){
+    LANGUAGE_CHOICES.forEach(([code,label])=>{
+      const bt=document.createElement('button'); bt.type='button'; bt.dataset.lang=code;
+      bt.innerHTML=`<span>${label}</span><span>${code}</span>`;
+      bt.addEventListener('click',()=>{ pickLang(code); dismissLangInvite(); showToast('Language set to '+label,'fa-solid fa-globe','color:var(--teal)'); });
+      langInviteFullList.appendChild(bt);
+    });
+  }
+  $$('.lang-invite-quick-btn').forEach(bt=>{
+    bt.addEventListener('click',()=>{
+      const code=bt.dataset.lang;
+      if(code){ pickLang(code); dismissLangInvite(); showToast('Language set to '+labelForLang(code),'fa-solid fa-globe','color:var(--teal)'); }
+    });
+  });
+  $('#langInviteShowAll')?.addEventListener('click',()=>{
+    const full=langInviteFullList;
+    const btn=$('#langInviteShowAll');
+    if(full?.classList.contains('expanded')){
+      full.classList.remove('expanded');
+      if(btn) btn.innerHTML='<i class="fa-solid fa-chevron-down" id="langInviteShowAllIcon"></i> See all languages';
+    } else {
+      full?.classList.add('expanded');
+      if(btn) btn.innerHTML='<i class="fa-solid fa-chevron-up" id="langInviteShowAllIcon"></i> Show less';
+    }
+  });
+  if(!localStorage.getItem('nm_lang_invite_dismissed')){
+    setTimeout(()=>{ showLangInvite(); },5000);
+  }
 });
 </script>
 

@@ -1803,11 +1803,6 @@ body.geriatric-zoom button {
     margin-left: auto;
   }
   
-  /* Hide desktop-only elements on mobile */
-  #activeChips {
-    display: none !important;
-  }
-  
   /* Hide NEW badge on mobile */
   #imagesNewBadge {
     display: none !important;
@@ -2187,6 +2182,201 @@ body.geriatric-zoom button {
   transform: scale(1.05);
 }
 
+/* Language Invite Popup - dashboard */
+.lang-invite-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1099;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s;
+  cursor: pointer;
+}
+.lang-invite-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+.lang-invite-dialog {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  transform: translateY(20px);
+  opacity: 0;
+  visibility: hidden;
+  z-index: 1100;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease, visibility 0.35s;
+}
+.lang-invite-dialog.show {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+}
+.lang-invite-card {
+  background: var(--nm-paper);
+  border: 1px solid var(--nm-border-color);
+  box-shadow: var(--nm-shadow-xl);
+  border-radius: var(--nm-radius-xl);
+  padding: 24px;
+  max-width: 420px;
+  position: relative;
+  overflow: hidden;
+}
+.lang-invite-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--nm-accent);
+  border-radius: var(--nm-radius-xl) var(--nm-radius-xl) 0 0;
+}
+.lang-invite-close {
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 32px; height: 32px;
+  border: none;
+  background: var(--nm-bg-skeleton);
+  border-radius: 10px;
+  cursor: pointer;
+  color: var(--nm-text-muted);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+.lang-invite-close:hover {
+  background: var(--nm-bg-skeleton-shine);
+  color: var(--nm-text-primary);
+}
+.lang-invite-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.lang-invite-icon {
+  width: 44px; height: 44px;
+  border-radius: 14px;
+  background: rgba(40, 146, 109, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.lang-invite-icon i {
+  font-size: 1.25rem;
+  color: var(--nm-accent);
+}
+.lang-invite-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--nm-text-primary);
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+}
+.lang-invite-sub {
+  font-size: 0.85rem;
+  color: var(--nm-text-secondary);
+  margin: 0;
+  line-height: 1.45;
+}
+.lang-invite-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.lang-invite-quick-btn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--nm-border-color);
+  background: var(--nm-paper);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--nm-text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+.lang-invite-quick-btn:hover {
+  border-color: var(--nm-accent);
+  background: rgba(40, 146, 109, 0.1);
+  color: var(--nm-accent);
+  transform: translateY(-1px);
+  box-shadow: var(--nm-shadow-sm);
+}
+.lang-invite-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.lang-invite-all {
+  font-size: 0.84rem;
+  color: var(--nm-accent);
+  font-weight: 600;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s;
+}
+.lang-invite-all:hover { color: var(--nm-primary); }
+.lang-invite-dismiss {
+  font-size: 0.8rem;
+  color: var(--nm-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  font-family: inherit;
+  transition: color 0.2s;
+}
+.lang-invite-dismiss:hover { color: var(--nm-text-secondary); }
+.lang-invite-full-list {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+.lang-invite-full-list.expanded {
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--nm-border-color) transparent;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--nm-border-color);
+}
+.lang-invite-full-list button {
+  width: 100%;
+  text-align: left;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--nm-text-primary);
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.lang-invite-full-list button:hover { background: var(--nm-bg-skeleton); }
+@media (max-width: 480px) {
+  .lang-invite-dialog { bottom: 16px; left: 16px; right: 16px; transform: translateY(20px); }
+  .lang-invite-dialog.show { transform: translateY(0); }
+  .lang-invite-card { max-width: none; }
+}
+
 #micBtn.listening i {
   animation: micIconBounce 0.6s ease-in-out infinite;
 }
@@ -2385,10 +2575,7 @@ body.geriatric-zoom button {
                  alt="NeuroMed Aira" 
                  class="md:hidden h-14 w-auto" />
             
-            <!-- Active chips (tone, care, faith, language) -->
-            <div id="activeChips" class="hidden md:flex items-center gap-2">
-              <!-- Populated by JS -->
-            </div>
+            <!-- Active chips removed - backend infers tone/response format -->
           </div>
           
           <div class="flex items-center gap-2">
@@ -2500,12 +2687,6 @@ body.geriatric-zoom button {
           
           <!-- Tools Row - Integrated seamlessly -->
           <div class="flex items-center gap-1 shrink-0">
-            <!-- Tone Selector - Minimal style -->
-            <button id="toneBtn" class="px-3 py-1.5 rounded-full hover:bg-gray-100 transition flex items-center gap-1.5 text-sm text-gray-700" title="Tone">
-              <i class="fa-solid fa-sliders text-xs"></i>
-              <span class="hidden sm:inline">Tone</span>
-            </button>
-            
             <!-- Mic Button -->
             <button id="micBtn" class="w-8 h-8 flex items-center justify-center transition hover:bg-gray-100 rounded-full" title="Dictate">
               <i class="fa-solid fa-microphone text-gray-700"></i>
@@ -3583,6 +3764,42 @@ body.geriatric-zoom button {
   <!-- Toast Container -->
   <div id="toastContainer"></div>
   
+  <!-- Language Invite Popup (dashboard) - show after 5 min if not dismissed -->
+  <div id="langInviteOverlay" class="lang-invite-overlay" aria-hidden="true"></div>
+  <div id="langInvite" class="lang-invite-dialog" role="dialog" aria-label="Choose your language" aria-describedby="langInviteDesc">
+    <div class="lang-invite-card">
+      <button type="button" class="lang-invite-close" onclick="dismissLangInvite()" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div class="lang-invite-header">
+        <div class="lang-invite-icon">
+          <i class="fa-solid fa-globe"></i>
+        </div>
+        <div>
+          <p class="lang-invite-title" id="langInviteDesc">Aira speaks your language</p>
+          <p class="lang-invite-sub">Choose your preferred language for clearer medical explanations.</p>
+        </div>
+      </div>
+      <div class="lang-invite-quick">
+        <button type="button" class="lang-invite-quick-btn" data-lang="en-US">English</button>
+        <button type="button" class="lang-invite-quick-btn" data-lang="es-ES">Español</button>
+        <button type="button" class="lang-invite-quick-btn" data-lang="zh-CN">中文</button>
+        <button type="button" class="lang-invite-quick-btn" data-lang="pt-BR">Português</button>
+        <button type="button" class="lang-invite-quick-btn" data-lang="fr-FR">Français</button>
+        <button type="button" class="lang-invite-quick-btn" data-lang="vi-VN">Tiếng Việt</button>
+        <button type="button" class="lang-invite-quick-btn" data-lang="ko-KR">한국어</button>
+        <button type="button" class="lang-invite-quick-btn" data-lang="ar-SA">العربية</button>
+      </div>
+      <div class="lang-invite-full-list" id="langInviteFullList"></div>
+      <div class="lang-invite-footer">
+        <button type="button" class="lang-invite-all" id="langInviteShowAll">
+          <i class="fa-solid fa-chevron-down" id="langInviteShowAllIcon"></i> See all languages
+        </button>
+        <button type="button" class="lang-invite-dismiss" onclick="dismissLangInvite()">Not now</button>
+      </div>
+    </div>
+  </div>
+  
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.3/dist/purify.min.js"></script>
@@ -3793,7 +4010,7 @@ function readBubbleText(btn) {
   btn.classList.add('playing');
   currentSpeechButton = btn;
   
-  // Call ElevenLabs API via backend
+  // Call OpenAI TTS via backend
   fetch('/api/text-to-speech/', {
     method: 'POST',
     headers: {
@@ -5853,302 +6070,9 @@ function initFaithSelector() {
 }
 
 function updateActiveChips() {
-  const chipsContainer = document.getElementById('activeChips');
-  if (!chipsContainer) return;
-  
-  chipsContainer.innerHTML = '';
-  
-  // Tone chip
-  const toneLabels = {
-    'PlainClinical': 'Balanced',
-    'Caregiver': 'Caregiver',
-    'Faith': 'Faith',
-    'Clinical': 'Clinical',
-    'Geriatric': 'Geriatric',
-    'EmotionalSupport': 'Emotional Support'
-  };
-  const toneChip = createChip('Tone', toneLabels[currentTone] || currentTone, (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('Tone chip clicked');
-    const toneBtn = document.getElementById('toneBtn');
-    const tonePopover = document.getElementById('tonePopover');
-    if (toneBtn && tonePopover) {
-      // Trigger the same logic as tone button click
-      const rect = toneChip.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      const viewportWidth = window.innerWidth;
-      
-      let top = rect.bottom + 8;
-      let left = rect.left;
-      
-      const popoverHeight = 400;
-      if (top + popoverHeight > viewportHeight - 20) {
-        top = rect.top - popoverHeight - 8;
-      }
-      
-      const popoverWidth = 320;
-      if (left + popoverWidth > viewportWidth - 20) {
-        left = viewportWidth - popoverWidth - 20;
-      }
-      
-      if (left < 20) left = 20;
-      if (top < 20) top = 20;
-      
-      tonePopover.style.display = 'block';
-      tonePopover.style.position = 'fixed';
-      tonePopover.style.top = `${top}px`;
-      tonePopover.style.left = `${left}px`;
-      tonePopover.style.zIndex = '1000';
-      tonePopover.classList.remove('hidden');
-      
-      // Mark current selection
-      tonePopover.querySelectorAll('.tone-option').forEach(opt => {
-        opt.classList.remove('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
-        opt.classList.add('bg-white');
-        const checkIcon = opt.querySelector('.tone-check');
-        
-        if (opt.dataset.tone === currentTone) {
-          opt.classList.add('bg-token-accent', 'text-white', 'ring-2', 'ring-accent', 'active-tone');
-          if (checkIcon) {
-            checkIcon.classList.remove('opacity-0');
-            checkIcon.classList.add('opacity-100');
-          }
-        } else {
-          if (checkIcon) {
-            checkIcon.classList.add('opacity-0');
-            checkIcon.classList.remove('opacity-100');
-          }
-        }
-      });
-    } else {
-      // Fallback: try clicking the button
-      toneBtn?.click();
-    }
-  });
-  toneChip.setAttribute('title', 'Click to change tone');
-  chipsContainer.appendChild(toneChip);
-  
-  // Care chip (conditional)
-  if (currentTone === 'Caregiver' || currentTone === 'Clinical') {
-    const careLabels = {
-      'hospital': 'Hospital',
-      'ambulatory': 'Ambulatory',
-      'urgent': 'Urgent'
-    };
-    const careLabel = careLabels[currentCare] || currentCare;
-    const careChip = createChip('Care', careLabel, () => {
-      // Open care popover
-      const carePopover = document.getElementById('carePopover');
-      if (carePopover) {
-        const rect = careChip.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const viewportWidth = window.innerWidth;
-        
-        let top = rect.bottom + 8;
-        let left = rect.left;
-        
-        const popoverHeight = 250;
-        if (top + popoverHeight > viewportHeight - 20) {
-          top = rect.top - popoverHeight - 8;
-        }
-        
-        const popoverWidth = 280;
-        if (left + popoverWidth > viewportWidth - 20) {
-          left = viewportWidth - popoverWidth - 20;
-        }
-        
-        if (left < 20) left = 20;
-        if (top < 20) top = 20;
-        
-        carePopover.style.display = 'block';
-        carePopover.style.position = 'fixed';
-        carePopover.style.top = `${top}px`;
-        carePopover.style.left = `${left}px`;
-        carePopover.style.zIndex = '1000';
-        carePopover.classList.remove('hidden');
-        
-        // Mark current selection
-        carePopover.querySelectorAll('.care-option').forEach(o => {
-          o.classList.remove('bg-token-accent', 'text-white', 'ring-2', 'ring-accent', 'active-tone');
-          o.classList.add('bg-white');
-          if (o.dataset.care === currentCare) {
-            o.classList.add('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
-          }
-        });
-      }
-    });
-    careChip.setAttribute('data-chip', 'care');
-    careChip.setAttribute('title', 'Click to change care setting');
-    chipsContainer.appendChild(careChip);
-  }
-  
-  // Faith chip (conditional)
-  if (currentTone === 'Faith') {
-    const faithLabels = {
-      'general': 'General',
-      'christian': 'Christian',
-      'jewish': 'Jewish',
-      'muslim': 'Muslim',
-      'buddhist': 'Buddhist',
-      'hindu': 'Hindu'
-    };
-    const faithLabel = faithLabels[currentFaith] || currentFaith;
-    const faithChip = createChip('Faith', faithLabel, () => {
-      // Open faith popover
-      const faithPopover = document.getElementById('faithPopover');
-      if (faithPopover) {
-        const rect = faithChip.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const viewportWidth = window.innerWidth;
-        
-        let top = rect.bottom + 8;
-        let left = rect.left;
-        
-        const popoverHeight = 400;
-        if (top + popoverHeight > viewportHeight - 20) {
-          top = rect.top - popoverHeight - 8;
-        }
-        
-        const popoverWidth = 320;
-        if (left + popoverWidth > viewportWidth - 20) {
-          left = viewportWidth - popoverWidth - 20;
-        }
-        
-        if (left < 20) left = 20;
-        if (top < 20) top = 20;
-        
-        faithPopover.style.display = 'block';
-        faithPopover.style.position = 'fixed';
-        faithPopover.style.top = `${top}px`;
-        faithPopover.style.left = `${left}px`;
-        faithPopover.style.zIndex = '1000';
-        faithPopover.classList.remove('hidden');
-        
-        // Mark current selection
-        faithPopover.querySelectorAll('.faith-option').forEach(o => {
-          o.classList.remove('bg-token-accent', 'text-white', 'ring-2', 'ring-accent', 'active-tone');
-          o.classList.add('bg-white');
-          if (o.dataset.faith === currentFaith) {
-            o.classList.add('bg-[#28926D]', 'text-white', 'ring-2', 'ring-[#28926D]', 'active-tone');
-          }
-        });
-      }
-    });
-    faithChip.setAttribute('data-chip', 'faith');
-    faithChip.setAttribute('title', 'Click to change faith setting');
-    chipsContainer.appendChild(faithChip);
-  }
-  
-  // Language chip
-  const lang = localStorage.getItem('nm_lang') || 'en-US';
-  const langLabel = LANGUAGE_CHOICES.find(([code]) => code === lang)?.[1] || lang;
-  const langChip = createChip('Language', langLabel, (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('Language chip clicked');
-    const langMenu = document.getElementById('langMenu');
-    
-    if (langMenu) {
-      // Render languages before opening - use the renderLanguages function
-      const langList = langMenu.querySelector('.space-y-1');
-      const langSearchInput = langMenu.querySelector('input');
-      
-      // Clear search and render all languages
-      if (langSearchInput) {
-        langSearchInput.value = '';
-      }
-      
-      // Use the renderLanguages function that's already defined
-      if (langList) {
-        langList.innerHTML = '';
-        const currentLang = localStorage.getItem('nm_lang') || 'en-US';
-        
-        LANGUAGE_CHOICES.forEach(([code, name]) => {
-          const btn = document.createElement('button');
-          btn.className = 'w-full text-left px-3 py-2 hover:bg-gray-100 rounded flex items-center justify-between transition cursor-pointer';
-          btn.type = 'button';
-          btn.innerHTML = `
-            <span class="flex-1">${name}</span>
-            ${currentLang === code ? '<i class="fa-solid fa-check text-token-accent ml-2"></i>' : '<span class="ml-2 w-4"></span>'}
-          `;
-          btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            selectLanguage(code);
-          });
-          langList.appendChild(btn);
-        });
-        
-        console.log(`Rendered ${LANGUAGE_CHOICES.length} languages in menu`);
-      }
-      
-      // Open language menu directly
-      const rect = langChip.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      const viewportWidth = window.innerWidth;
-      
-      let top = rect.bottom + 8;
-      let left = rect.left;
-      
-      // If popover would go off bottom, show above chip
-      const popoverHeight = 400;
-      if (top + popoverHeight > viewportHeight - 20) {
-        top = rect.top - popoverHeight - 8;
-      }
-      
-      // Ensure popover doesn't go off right edge
-      const popoverWidth = 280;
-      if (left + popoverWidth > viewportWidth - 20) {
-        left = viewportWidth - popoverWidth - 20;
-      }
-      
-      // Ensure popover doesn't go off left edge
-      if (left < 20) {
-        left = 20;
-      }
-      
-      // Ensure popover doesn't go off top
-      if (top < 20) {
-        top = 20;
-      }
-      
-      langMenu.style.display = 'block';
-      langMenu.style.position = 'fixed';
-      langMenu.style.top = `${top}px`;
-      langMenu.style.left = `${left}px`;
-      langMenu.style.zIndex = '1000';
-      // Close language menu if tutorial is open
-      const tutorialOverlay = document.getElementById('tutorialOverlay');
-      if (tutorialOverlay && !tutorialOverlay.classList.contains('hidden')) {
-        langMenu.classList.add('hidden');
-        return;
-      }
-      langMenu.classList.remove('hidden');
-      
-      // Focus search input if it exists
-      const langSearchInput2 = langMenu.querySelector('input');
-      if (langSearchInput2) {
-        setTimeout(() => langSearchInput2.focus(), 100);
-      }
-    } else {
-      console.error('Language menu not found - initializing...');
-      // Initialize language picker if not done yet
-      initLanguagePicker();
-      // Try again after a brief delay
-      setTimeout(() => {
-        const langBtn = document.getElementById('langBtn');
-        if (langBtn) langBtn.click();
-      }, 100);
-    }
-  });
-  langChip.setAttribute('title', 'Click to change language');
-  chipsContainer.appendChild(langChip);
-  
-  // Always show chips container (remove hidden class)
-  chipsContainer.classList.remove('hidden');
-  chipsContainer.style.display = 'flex';
+  // Chips removed - backend infers tone and response format
 }
+
 
 function createChip(label, value, onClick) {
   const chip = document.createElement('button');
@@ -6314,6 +6238,89 @@ function selectLanguage(code) {
   updateActiveChips();
   showToast(`Language set to ${LANGUAGE_CHOICES.find(([c]) => c === code)?.[1] || code}`, 'success');
 }
+
+// ============================================
+// LANGUAGE INVITE POPUP (dashboard - 5 min delay)
+// ============================================
+
+const LANG_INVITE_DASHBOARD_DELAY = 5 * 60 * 1000; // 5 minutes
+const LANG_INVITE_DASHBOARD_KEY = 'nm_lang_invite_dismissed_dashboard';
+
+function dismissLangInvite() {
+  const overlay = document.getElementById('langInviteOverlay');
+  const dialog = document.getElementById('langInvite');
+  const fullList = document.getElementById('langInviteFullList');
+  const showAllBtn = document.getElementById('langInviteShowAll');
+  if (overlay) { overlay.classList.remove('show'); overlay.setAttribute('aria-hidden', 'true'); }
+  if (dialog) dialog.classList.remove('show');
+  if (fullList) fullList.classList.remove('expanded');
+  if (showAllBtn) showAllBtn.innerHTML = '<i class="fa-solid fa-chevron-down" id="langInviteShowAllIcon"></i> See all languages';
+  try { localStorage.setItem(LANG_INVITE_DASHBOARD_KEY, '1'); } catch (e) {}
+}
+
+function showLangInvite() {
+  const overlay = document.getElementById('langInviteOverlay');
+  const dialog = document.getElementById('langInvite');
+  if (overlay) { overlay.classList.add('show'); overlay.setAttribute('aria-hidden', 'false'); }
+  if (dialog) dialog.classList.add('show');
+}
+
+function initDashboardLangInvite() {
+  if (localStorage.getItem(LANG_INVITE_DASHBOARD_KEY)) return;
+  const overlay = document.getElementById('langInviteOverlay');
+  const dialog = document.getElementById('langInvite');
+  const fullList = document.getElementById('langInviteFullList');
+  const showAllBtn = document.getElementById('langInviteShowAll');
+
+  overlay?.addEventListener('click', dismissLangInvite);
+
+  if (fullList) {
+    LANGUAGE_CHOICES.forEach(([code, label]) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.lang = code;
+      btn.innerHTML = `<span>${label}</span><span class="text-xs text-gray-500">${code}</span>`;
+      btn.className = 'flex items-center justify-between w-full';
+      btn.addEventListener('click', () => {
+        selectLanguage(code);
+        dismissLangInvite();
+        showToast(`Language set to ${label}`, 'success');
+      });
+      fullList.appendChild(btn);
+    });
+  }
+
+  document.querySelectorAll('.lang-invite-quick-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const code = btn.dataset.lang;
+      if (code) {
+        const label = LANGUAGE_CHOICES.find(([c]) => c === code)?.[1] || code;
+        selectLanguage(code);
+        dismissLangInvite();
+        showToast(`Language set to ${label}`, 'success');
+      }
+    });
+  });
+
+  showAllBtn?.addEventListener('click', () => {
+    if (fullList?.classList.contains('expanded')) {
+      fullList.classList.remove('expanded');
+      if (showAllBtn) showAllBtn.innerHTML = '<i class="fa-solid fa-chevron-down" id="langInviteShowAllIcon"></i> See all languages';
+    } else {
+      fullList?.classList.add('expanded');
+      if (showAllBtn) showAllBtn.innerHTML = '<i class="fa-solid fa-chevron-up" id="langInviteShowAllIcon"></i> Show less';
+    }
+  });
+
+  setTimeout(() => {
+    if (localStorage.getItem(LANG_INVITE_DASHBOARD_KEY)) return;
+    if (localStorage.getItem('nm_lang')) return; // User already selected language
+    showLangInvite();
+  }, LANG_INVITE_DASHBOARD_DELAY);
+}
+
+// Expose dismissLangInvite for onclick
+window.dismissLangInvite = dismissLangInvite;
 
 // ============================================
 // VOICE DICTATION
@@ -7611,15 +7618,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   
   try {
-    // Initialize all components
-    initToneSelector();
-    initCareSelector();
-    initFaithSelector();
+    // Initialize all components (tone/care/faith removed - backend infers)
     initLanguagePicker();
+    initDashboardLangInvite(); // Language invite popup after 5 min
     initVoiceDictation();
     initJumpToLatest();
     updateActiveChips();
-    updateConditionalSettings();
     updateComposerPadding();
     
     // File input
@@ -7943,13 +7947,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.addEventListener('keydown', (e) => {
       // ESC closes modals
       if (e.key === 'Escape') {
-        closeSettingsModal();
-        closeSummaryModal();
-        closeDeleteModal();
-        document.querySelectorAll('.popover').forEach(p => {
-          p.classList.add('hidden');
-          p.style.display = 'none';
-        });
+        const langInvite = document.getElementById('langInvite');
+        if (langInvite?.classList.contains('show')) {
+          dismissLangInvite();
+        } else {
+          closeSettingsModal();
+          closeSummaryModal();
+          closeDeleteModal();
+          document.querySelectorAll('.popover').forEach(p => {
+            p.classList.add('hidden');
+            p.style.display = 'none';
+          });
+        }
       }
       
       // Cmd/Ctrl + K for new chat

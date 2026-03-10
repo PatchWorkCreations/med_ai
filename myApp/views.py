@@ -286,6 +286,66 @@ def _is_detailed(msg: str) -> bool:
     separators = [",", ";", " because ", " since ", " for weeks", " for days", " after ", " with "]
     return any(x in msg_l for x in separators)
 
+# Valid use-case tones for inference (maps to PROMPT_TEMPLATES)
+VALID_USE_CASES = frozenset({"PlainClinical", "Caregiver", "Clinical", "Faith", "Geriatric", "EmotionalSupport"})
+
+
+def _infer_use_case(user_message: str, has_files: bool, session: dict) -> str:
+    """
+    Infer use-case tone from message content (and optionally prior context).
+    Defaults to PlainClinical when no strong signals. Runs per message for dynamic update.
+    """
+    text = (user_message or "").lower()
+    if not text and not has_files:
+        return "PlainClinical"
+
+    # Clinical: provider/medical-professional context
+    clinical_signals = [
+        "soap", "differential", "clinical note", "rounds", "documentation",
+        "physician", "provider", "medical professional", "chart", "assessment and plan",
+        "differential diagnosis", "clinical mode",
+    ]
+    if any(s in text for s in clinical_signals):
+        return "Clinical"
+
+    # EmotionalSupport: distress, anxiety, overwhelm
+    emotional_signals = [
+        "anxious", "overwhelmed", "scared", "worried", "nervous", "stressed",
+        "panic", "afraid", "can't sleep", "cant sleep", "so stressed", "freaking out",
+        "really worried", "terrified", "emotional support",
+    ]
+    if any(s in text for s in emotional_signals):
+        return "EmotionalSupport"
+
+    # Faith: spiritual / faith context
+    faith_signals = [
+        "prayer", "pray", "faith", "god", "spiritual", "hope", "blessing",
+        "belief", "believing", "scripture", "bible",
+    ]
+    if any(s in text for s in faith_signals):
+        return "Faith"
+
+    # Geriatric: elderly, senior, memory, aging
+    geriatric_signals = [
+        "elderly", "older adult", "senior", "grandmother", "grandfather", "grandma", "grandpa",
+        "memory", "confusion", "fall risk", "medication management", "age 70", "age 80",
+        "dementia", "alzheimer", "aging",
+    ]
+    if any(s in text for s in geriatric_signals):
+        return "Geriatric"
+
+    # Caregiver: family member being cared for
+    caregiver_signals = [
+        "my mom", "my dad", "my mother", "my father", "caring for", "caregiver",
+        "my child", "my son", "my daughter", "my parent", "my grandmother", "my grandfather",
+        "take care of", "helping my", "caring for my", "for my",
+    ]
+    if any(s in text for s in caregiver_signals):
+        return "Caregiver"
+
+    return "PlainClinical"
+
+
 def _classify_mode(user_message: str, has_files: bool, session: dict) -> tuple[str, str]:
     """
     Decide QUICK / EXPLAIN / FULL and a topic hint (soft memory).
@@ -314,7 +374,7 @@ def _classify_mode(user_message: str, has_files: bool, session: dict) -> tuple[s
 def build_system_prompt(tone: str, care_setting: Optional[str], faith_setting: Optional[str], lang: str) -> str:
     base = get_system_prompt(tone)
 
-    if tone in ("Clinical", "Caregiver") and care_setting:
+    if tone == "Clinical" and care_setting:
         full = get_setting_prompt(base, care_setting)
     elif tone == "Faith" and faith_setting:
         full = get_faith_prompt(base, faith_setting)
@@ -344,7 +404,7 @@ def build_adaptive_system_prompt(
     # Add care/faith settings (existing logic)
     if tone == "Faith" and faith_setting:
         system_prompt = get_faith_prompt(base_prompt, faith_setting)
-    elif tone in ("Clinical", "Caregiver"):
+    elif tone == "Clinical":
         system_prompt = get_setting_prompt(base_prompt, care_setting)
     else:
         system_prompt = base_prompt
@@ -439,6 +499,10 @@ PROMPT_TEMPLATES = {
     "Caregiver": (
         "You are NeuroMed Aira, a calm and compassionate medical guide supporting caregivers. "
         "You combine clarity, warmth, and practical wisdom to help people feel informed and supported.\n"
+        "\n"
+        "FORMAT: Never use clinical handoff structures. Do NOT use banners like [Inpatient / Discharge Handoff], [Clinic Follow-Up], or [Urgent Care Triage]. "
+        "Do NOT use section headers like Handoff Highlights, Discharge Plan, Safety & Red Flags, or Clinician Notes. "
+        "Respond in a warm, conversational flow with short paragraphs—like a thoughtful clinician explaining to a family member over a cup of tea, not a medical chart.\n"
         "\n"
         "Voice: Gentle and validating. Clear and actionable. Calm, never alarming. Assume the caregiver may be worried or overwhelmed. "
         "Use emojis naturally for warmth. Use short paragraphs when possible; avoid sounding like a medical chart.\n"
@@ -1014,7 +1078,7 @@ def summarize_medical_record(request):
 
     file_name = (uploaded_file.name or "").lower()
     base = get_system_prompt(tone)
-    system_prompt = get_setting_prompt(base, care_setting)
+    system_prompt = get_setting_prompt(base, care_setting) if tone == "Clinical" else base
 
 
     try:
@@ -1395,10 +1459,26 @@ def get_faith_prompt(base_prompt: str, faith_setting: str) -> str:
 @permission_classes([AllowAny])
 @parser_classes([MultiPartParser, FormParser])
 def send_chat(request):
-    raw_tone = request.data.get("tone") or request.session.get("tone") or "PlainClinical"
-    tone = normalize_tone(raw_tone)
-    care_setting = norm_setting(request.data.get("care_setting") or request.session.get("care_setting"))
+    # --- Inputs (needed early for tone inference)
+    user_message = (request.data.get("message") or "").strip()
+    files = request.FILES.getlist("files[]")
+    if not files:
+        files = request.FILES.getlist("files")
+    if not files and "file" in request.FILES:
+        files = [request.FILES["file"]]
+    has_files = bool(files)
+
+    # --- Tone: use explicit from request when provided; otherwise infer per message (dynamic update)
+    raw_tone = request.data.get("tone")
+    if raw_tone:
+        tone = normalize_tone(raw_tone)
+        request.session.pop("nm_inferred_tone", None)
+    else:
+        tone = normalize_tone(_infer_use_case(user_message, has_files, request.session))
+        request.session["nm_inferred_tone"] = tone
     request.session["tone"] = tone
+
+    care_setting = norm_setting(request.data.get("care_setting") or request.session.get("care_setting"))
     faith_setting = None
     care_setting = None
     if tone in ("Clinical", "Caregiver"):
@@ -1459,7 +1539,7 @@ def send_chat(request):
 
     if tone == "Faith" and faith_setting:
         system_prompt = get_faith_prompt(base_prompt, faith_setting)
-    elif tone in ("Clinical", "Caregiver"):
+    elif tone == "Clinical":
         system_prompt = get_setting_prompt(base_prompt, care_setting)
     else:
         system_prompt = base_prompt
@@ -1467,17 +1547,7 @@ def send_chat(request):
     # --- Add language instruction to system prompt
     system_prompt = _add_language_instruction(system_prompt, lang)
 
-
-
-    # --- Inputs
-    user_message = (request.data.get("message") or "").strip()
-    files = request.FILES.getlist("files[]")
-    if not files:
-        files = request.FILES.getlist("files")
-    if not files and "file" in request.FILES:
-        files = [request.FILES["file"]]
-    
-    # Validate file count
+    # --- Validate file count
     if len(files) > MAX_FILES_PER_UPLOAD:
         return JsonResponse({
             "reply": f"Too many files. Maximum {MAX_FILES_PER_UPLOAD} files allowed per upload.",
@@ -4462,12 +4532,13 @@ def google_oauth_callback(request):
 @csrf_exempt
 def text_to_speech(request):
     """
-    Generate text-to-speech audio using ElevenLabs API.
+    Generate text-to-speech audio using OpenAI TTS API.
     Filters out emojis and returns base64-encoded audio.
+    Uses tts-1 model for cost efficiency.
     """
     import re
     import base64
-    
+
     try:
         # Use request.data for DRF, request.body for regular Django views
         if hasattr(request, 'data'):
@@ -4475,12 +4546,11 @@ def text_to_speech(request):
         else:
             data = json.loads(request.body)
             text = data.get('text', '').strip()
-        
+
         if not text:
             return JsonResponse({'error': 'No text provided'}, status=400)
-        
+
         # Filter out emojis and other unicode symbols
-        # Remove emoji ranges and other symbols
         emoji_pattern = re.compile(
             "["
             "\U0001F600-\U0001F64F"  # emoticons
@@ -4494,56 +4564,41 @@ def text_to_speech(request):
             "\U0001FA70-\U0001FAFF"  # symbols and pictographs extended-A
             "\U00002600-\U000026FF"  # miscellaneous symbols
             "\U00002700-\U000027BF"  # dingbats
-            "]+", 
+            "]+",
             flags=re.UNICODE
         )
         cleaned_text = emoji_pattern.sub('', text).strip()
-        
+
         # Also remove common emoji-like patterns
         cleaned_text = re.sub(r'[^\w\s\.,!?;:\-\(\)\[\]\{\}\'"]+', '', cleaned_text)
-        
+
         if not cleaned_text:
             return JsonResponse({'error': 'Text contains only emojis or symbols'}, status=400)
-        
-        # Get ElevenLabs credentials from settings
-        api_key = getattr(settings, 'ELEVENLABS_API_KEY', '')
-        voice_id = getattr(settings, 'VOICE_ID_ENGLISH', '')
-        
-        if not api_key or not voice_id:
-            return JsonResponse({'error': 'ElevenLabs API not configured'}, status=500)
-        
-        # Call ElevenLabs API
-        tts_response = requests.post(
-            f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
-            headers={
-                "xi-api-key": api_key,
-                "Content-Type": "application/json"
-            },
-            json={
-                "text": cleaned_text,
-                "voice_settings": {
-                    "stability": 0.4,
-                    "similarity_boost": 0.7
-                }
-            },
-            timeout=30
+
+        # OpenAI TTS has a 4096 character limit
+        if len(cleaned_text) > 4096:
+            cleaned_text = cleaned_text[:4093] + "..."
+
+        api_key = getattr(settings, 'OPENAI_API_KEY', None)
+        if not api_key:
+            return JsonResponse({'error': 'OpenAI API not configured'}, status=500)
+
+        # Call OpenAI TTS API (tts-1 is cheaper than tts-1-hd)
+        response = client.audio.speech.create(
+            model="tts-1",
+            voice="nova",
+            input=cleaned_text,
+            response_format="mp3",
         )
-        
-        if tts_response.status_code != 200:
-            log.error(f"ElevenLabs TTS failed: {tts_response.status_code} - {tts_response.text}")
-            return JsonResponse({
-                'error': 'Text-to-speech generation failed',
-                'details': tts_response.text
-            }, status=tts_response.status_code)
-        
-        # Return base64-encoded audio
-        audio_base64 = base64.b64encode(tts_response.content).decode('utf-8')
-        
+
+        audio_bytes = response.content
+        audio_base64 = base64.b64encode(audio_bytes).decode('utf-8')
+
         return JsonResponse({
             'audio': audio_base64,
-            'format': 'mp3'  # ElevenLabs returns MP3 by default
+            'format': 'mp3'
         })
-        
+
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
     except Exception as e:
