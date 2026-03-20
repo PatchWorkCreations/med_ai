@@ -7,12 +7,12 @@ from django.views.generic import RedirectView
 from .views import LegalView, terms_redirect, privacy_redirect
 from .views import WarmLoginView 
 from django.urls import path, re_path
-from django.contrib.sitemaps import Sitemap
+from django.contrib.sitemaps import StaticViewSitemap
 from django.contrib.sitemaps.views import sitemap
 
 from . import api_chat
 
-class StaticSitemap(Sitemap):
+class StaticSitemap(StaticViewSitemap):
     priority = 0.8
     changefreq = "weekly"
 
