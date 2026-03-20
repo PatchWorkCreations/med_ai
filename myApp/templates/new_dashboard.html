@@ -1,4 +1,4 @@
-﻿{% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -2457,7 +2457,7 @@ body.geriatric-zoom button {
         <div class="relative">
           <input type="text" 
                  id="sessionSearch" 
-                 placeholder="Search sessions, keywords, summariesâ€¦" 
+                 placeholder="Search sessions, keywords, summaries..." 
                  class="w-full px-4 py-2 pl-10 pr-3 text-sm border border-token-gray-200 rounded-lg focus-ring-accent bg-token-paper sidebar-search-input" />
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
         </div>
@@ -2689,7 +2689,7 @@ body.geriatric-zoom button {
         <!-- Composer Input Area - ChatGPT-style unified floating bar -->
         <div id="dropzone" class="dropzone flex items-center gap-2 px-4 py-3 rounded-full bg-token-paper shadow-lg">
           <!-- Attach Button -->
-          <button id="attachBtn" class="shrink-0 w-8 h-8 flex items-center justify-center transition hover:bg-gray-100 rounded-full" title="Attach files (Up to 15 files â€¢ PDF/DOCX/TXT/Images)">
+          <button id="attachBtn" class="shrink-0 w-8 h-8 flex items-center justify-center transition hover:bg-gray-100 rounded-full" title="Attach files (Up to 15 files • PDF/DOCX/TXT/Images)">
             <i class="fa-solid fa-plus text-gray-700 text-lg"></i>
           </button>
           <input type="file" id="fileInput" class="hidden" multiple accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.heic,image/*" />
@@ -2849,15 +2849,15 @@ body.geriatric-zoom button {
       <!-- Mobile Dropdown (shown only on mobile) -->
       <div class="md:hidden p-4 border-b border-gray-200 flex items-center gap-3">
         <select id="settingsMobileDropdown" class="flex-1 px-4 py-3 text-sm border border-gray-300 rounded-lg focus-ring-accent bg-white">
-          <option value="general">âš™ï¸ General</option>
-          <option value="notifications">ðŸ”” Notifications</option>
-          <option value="personalization">ðŸŽ¨ Personalization</option>
-          <option value="apps">ðŸ“± Apps</option>
-          <option value="data">ðŸ’¾ Data controls</option>
-          <option value="security">ðŸ” Security</option>
-          <option value="parental">ðŸ‘¨â€ðŸ‘©â€ðŸ‘§ Parental controls</option>
-          <option value="billing">ðŸ’³ Billing & Subscription</option>
-          <option value="account">ðŸ‘¤ Account</option>
+          <option value="general">General</option>
+          <option value="notifications">Notifications</option>
+          <option value="personalization">Personalization</option>
+          <option value="apps">Apps</option>
+          <option value="data">Data controls</option>
+          <option value="security">Security</option>
+          <option value="parental">Parental controls</option>
+          <option value="billing">Billing & Subscription</option>
+          <option value="account">Account</option>
         </select>
         <!-- Close button - positioned beside dropdown -->
         <button onclick="closeSettingsModal()" class="flex items-center justify-center w-10 h-10 flex-shrink-0" aria-label="Close">
@@ -3411,7 +3411,7 @@ body.geriatric-zoom button {
                     <i class="fa-solid fa-desktop text-gray-400"></i>
                     <div>
                       <div class="font-medium text-gray-900">Current Session</div>
-                      <div class="text-xs text-gray-500">This device â€¢ Just now</div>
+                      <div class="text-xs text-gray-500">This device • Just now</div>
                     </div>
                   </div>
                   <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Active</span>
@@ -3797,10 +3797,10 @@ body.geriatric-zoom button {
       </div>
       <div class="lang-invite-quick">
         <button type="button" class="lang-invite-quick-btn" data-lang="en-US">English</button>
-        <button type="button" class="lang-invite-quick-btn" data-lang="es-ES">EspaÃ±ol</button>
+        <button type="button" class="lang-invite-quick-btn" data-lang="es-ES">Español</button>
         <button type="button" class="lang-invite-quick-btn" data-lang="zh-CN">ä¸­æ–‡</button>
-        <button type="button" class="lang-invite-quick-btn" data-lang="pt-BR">PortuguÃªs</button>
-        <button type="button" class="lang-invite-quick-btn" data-lang="fr-FR">FranÃ§ais</button>
+        <button type="button" class="lang-invite-quick-btn" data-lang="pt-BR">Português</button>
+        <button type="button" class="lang-invite-quick-btn" data-lang="fr-FR">Français</button>
         <button type="button" class="lang-invite-quick-btn" data-lang="vi-VN">Tiáº¿ng Viá»‡t</button>
         <button type="button" class="lang-invite-quick-btn" data-lang="ko-KR">í•œêµ­ì–´</button>
         <button type="button" class="lang-invite-quick-btn" data-lang="ar-SA">Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©</button>
@@ -4984,11 +4984,11 @@ async function greetUser(showBubble = false) {
     const name = data.display_name || 'there';
     
     const greetings = [
-      `Hi ${name}!‘‹ I'm your medical assistant. I'm here to help you understand your health information, analyze medical documents, and answer your questions. What would you like to explore today?`,
-      `Welcome, ${name}!ŒŸ I'm ready to assist you with medical information, document analysis, and health questions. Feel free to share documents, images, or ask me anything.`,
-      `Hello ${name}!’™ I can help you understand medical documents, analyze health images, and provide clear explanations. What can I help you with today?`,
-      `Hi there, ${name}!¥ I'm your medical guide. I'm here to translate medical jargon, review documents, and help you make sense of your health information. How can I assist you?`,
-      `Welcome back, ${name}! âœ¨ Whether you have questions about symptoms, need help understanding test results, or want to review medical documents, I'm here to help. What's on your mind?`,
+      `Hi ${name}! I'm your medical assistant. I'm here to help you understand your health information, analyze medical documents, and answer your questions. What would you like to explore today?`,
+      `Welcome, ${name}! I'm ready to assist you with medical information, document analysis, and health questions. Feel free to share documents, images, or ask me anything.`,
+      `Hello ${name}! I can help you understand medical documents, analyze health images, and provide clear explanations. What can I help you with today?`,
+      `Hi there, ${name}! I'm your medical guide. I'm here to translate medical jargon, review documents, and help you make sense of your health information. How can I assist you?`,
+      `Welcome back, ${name}! Whether you have questions about symptoms, need help understanding test results, or want to review medical documents, I'm here to help. What's on your mind?`,
     ];
     
     const greeting = greetings[Math.floor(Math.random() * greetings.length)];
@@ -5024,7 +5024,7 @@ async function greetUser(showBubble = false) {
       if (chatWindow && chatWindow.children.length === 0 && 
           (!firstMessageView || firstMessageView.classList.contains('hidden'))) {
         if (emptyState) emptyState.classList.add('hidden');
-        appendChatBubble('assistant', 'Hi there!‘‹ I\'m your medical assistant. How can I help you today?', false);
+        appendChatBubble('assistant', 'Hi there! I\'m your medical assistant. How can I help you today?', false);
       }
     }
   }
@@ -5682,6 +5682,13 @@ async function sendChat() {
     }
     
     if (!res.ok) {
+      if (data?.requires_subscription || data?.error === 'FREE_CHAT_LIMIT_EXCEEDED') {
+        hideTypingIndicator();
+        const upgradeMessage = data.reply || "You've used your 10 free chats. Upgrade to Pro to continue.";
+        appendChatBubble('assistant', upgradeMessage);
+        showToast('Free chat limit reached. Upgrade to Pro to continue.', 'error');
+        return;
+      }
       throw new Error(data.detail || data.message || 'Request failed');
     }
     
@@ -5712,7 +5719,7 @@ async function sendChat() {
       text: 'Retry',
       onclick: 'sendChat()'
     });
-    appendChatBubble('assistant', 'âš ï¸ Sorry, something went wrong. Please try again.');
+    appendChatBubble('assistant', 'Sorry, something went wrong. Please try again.');
   } finally {
     chatLocked = false;
     if (sendBtn) {
@@ -5947,7 +5954,7 @@ function initToneSelector() {
         
         // Update UI
         updateActiveChips();
-        showToast(`âœ“ Tone set to ${label}`, 'success');
+        showToast(`Tone set to ${label}`, 'success');
         
         // Show/hide care/faith based on tone
         updateConditionalSettings();
@@ -6441,7 +6448,7 @@ function initVoiceDictation() {
         micBtn.classList.add('bg-[#236092]', 'text-white', 'listening');
         micBtn.innerHTML = '<i class="fa-solid fa-stop"></i>';
         micBtn.title = 'Listening... Click to stop';
-        showToast('ðŸŽ¤ Listening... Speak now', 'info');
+        showToast('Listening... Speak now', 'info');
         
         // Auto-stop after max time
         setTimeout(() => {
@@ -8384,7 +8391,7 @@ async function loadChatHistoryStats() {
       const data = await response.json();
       statsDiv.innerHTML = `
         <i class="fa-solid fa-chart-bar mr-2"></i>
-        <strong>${data.total_sessions}</strong> sessions â€¢ 
+        <strong>${data.total_sessions}</strong> sessions • 
         <strong>${data.total_messages}</strong> messages
       `;
     } else {
@@ -9003,7 +9010,7 @@ window.initMobileSidebar = initMobileSidebar;
               </div>
               <h4 class="text-lg font-semibold text-gray-900">Send Button</h4>
             </div>
-            <p class="text-sm text-gray-600 mb-4 leading-relaxed">After typing your message, click the <strong>black circle button</strong> with an arrow (â†’) to send it.</p>
+            <p class="text-sm text-gray-600 mb-4 leading-relaxed">After typing your message, click the <strong>black circle button</strong> with an arrow to send it.</p>
             <div class="bg-gray-50 rounded-lg p-3 space-y-2.5">
               <div class="flex items-start gap-3">
                 <i class="fa-solid fa-check text-gray-500 mt-0.5 text-sm"></i>

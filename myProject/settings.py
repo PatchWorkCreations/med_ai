@@ -367,7 +367,7 @@ PLAN_CAPABILITIES = {
         "medical_summaries": False,
         "voice": False,
         "history_days": 0,
-        "free_chat_limit": 5,  # Free users get 5 chat sessions
+        "free_chat_limit": 10,  # Free users get 10 chat sessions
     },
     "monthly": {
         "medical_summaries": True,

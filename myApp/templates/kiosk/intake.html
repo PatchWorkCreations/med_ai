@@ -1,10 +1,10 @@
-﻿{% load static %}
+{% load static %}
 <!doctype html>
 <html lang="en" class="h-full">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Smart Triage â€” Chat</title>
+  <title>Smart Triage — Chat</title>
   <meta name="theme-color" content="#0b3b36" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -60,7 +60,7 @@
             <div class="h-9 w-9 rounded-lg ring-2 ring-white/50" style="background:var(--brand)"></div>
           {% endif %}
           <div class="text-sm/5 opacity-90">
-            {% if request.org %}{{ request.org.name }}{% else %}NeuroMed{% endif %} â€¢ Secure triage
+            {% if request.org %}{{ request.org.name }}{% else %}NeuroMed{% endif %} • Secure triage
           </div>
         </div>
 
@@ -76,11 +76,11 @@
       </div>
 
       <h1 class="mt-6 text-3xl md:text-4xl font-extrabold tracking-tight">
-        Tell us whatâ€™s going on
+        Tell us what’s going on
       </h1>
       <p class="mt-2 max-w-2xl text-white/85">
         Chat with our assistant. It will gather details so your care team is prepared.
-        <span class="opacity-80">For this demo, please donâ€™t include personal identifiers.</span>
+        <span class="opacity-80">For this demo, please don’t include personal identifiers.</span>
       </p>
     </div>
   </header>
@@ -98,7 +98,7 @@
               <i class="fa-solid fa-robot text-xs" aria-hidden="true"></i>
             </div>
             <div class="bubble bg-slate-100 text-slate-800">
-              Hi! Iâ€™m your intake assistant. What brings you in today?
+              Hi! I’m your intake assistant. What brings you in today?
             </div>
           </div>
         </div>
@@ -109,7 +109,7 @@
             <textarea id="input"
               rows="2"
               class="flex-1 min-w-[240px] rounded-xl border border-slate-300 px-3 py-2 focus:ring-emerald-500 focus:border-emerald-500"
-              placeholder="Type your messageâ€¦ (e.g., Right knee pain for 3 months, worse on stairs)"></textarea>
+              placeholder="Type your message… (e.g., Right knee pain for 3 months, worse on stairs)"></textarea>
             <button id="send" class="brand-btn rounded-xl px-4 py-2.5 inline-flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
               <i class="fa-solid fa-paper-plane" aria-hidden="true"></i><span>Send</span>
             </button>
@@ -129,10 +129,10 @@
           <div class="mt-3 flex items-center justify-between text-xs text-slate-500">
             <div class="flex items-center gap-3">
               <span id="typing" class="hidden items-center gap-2">
-                <i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i> Assistant is typingâ€¦
+                <i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i> Assistant is typing…
               </span>
               <span id="offline" class="hidden items-center gap-2 text-amber-700">
-                <i class="fa-solid fa-plug-circle-exclamation" aria-hidden="true"></i> Youâ€™re offline
+                <i class="fa-solid fa-plug-circle-exclamation" aria-hidden="true"></i> You’re offline
               </span>
             </div>
             <button id="finish" class="rounded-lg px-3 py-1.5 border border-emerald-600 text-emerald-700 hover:bg-emerald-50 disabled:opacity-60 disabled:cursor-not-allowed">
@@ -142,38 +142,38 @@
         </div>
       </section>
 
-      <!-- â€œWeâ€™re collectingâ€ panel -->
+      <!-- "We're collecting" panel -->
       <aside class="rounded-2xl bg-white border border-slate-200/80 shadow-xl p-5">
         <div class="flex items-center justify-between">
-          <h2 class="font-semibold">Weâ€™re collecting</h2>
-          <span id="collectStatus" class="text-xs px-2 py-1 rounded bg-emerald-50 text-emerald-700">buildingâ€¦</span>
+          <h2 class="font-semibold">We’re collecting</h2>
+          <span id="collectStatus" class="text-xs px-2 py-1 rounded bg-emerald-50 text-emerald-700">building…</span>
         </div>
         <dl class="mt-4 space-y-3 text-sm">
           <div>
             <dt class="text-slate-500">Chief complaint</dt>
-            <dd id="f_complaint" class="font-medium">â€”</dd>
+            <dd id="f_complaint" class="font-medium">—</dd>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div>
               <dt class="text-slate-500">Duration</dt>
-              <dd id="f_duration" class="font-medium">â€”</dd>
+              <dd id="f_duration" class="font-medium">—</dd>
             </div>
             <div>
               <dt class="text-slate-500">Severity</dt>
-              <dd id="f_severity" class="font-medium">â€”</dd>
+              <dd id="f_severity" class="font-medium">—</dd>
             </div>
           </div>
           <div>
             <dt class="text-slate-500">Location</dt>
-            <dd id="f_location" class="font-medium">â€”</dd>
+            <dd id="f_location" class="font-medium">—</dd>
           </div>
           <div>
             <dt class="text-slate-500">Red flags</dt>
-            <dd id="f_redflags" class="font-medium">â€”</dd>
+            <dd id="f_redflags" class="font-medium">—</dd>
           </div>
           <div>
             <dt class="text-slate-500">Next questions</dt>
-            <dd id="f_questions" class="font-medium">â€”</dd>
+            <dd id="f_questions" class="font-medium">—</dd>
           </div>
         </dl>
 
@@ -181,12 +181,12 @@
           <div class="font-medium mb-1">Saved to clinic</div>
           <div>Encounter <span id="encId" class="font-semibold"></span> created.</div>
           <a id="goDash" href="/portal/dashboard/?section=frontdesk" class="mt-2 inline-block text-emerald-700 hover:underline">
-            View in Front Desk â†’
+            View in Front Desk ->
           </a>
         </div>
 
         <div class="mt-6 text-[11px] text-slate-500">
-          This assistant does not replace medical care. If youâ€™re experiencing an emergency, call your local emergency number.
+          This assistant does not replace medical care. If you’re experiencing an emergency, call your local emergency number.
         </div>
       </aside>
     </div>
@@ -210,7 +210,7 @@
         <i class="fa-solid fa-xmark"></i>
       </button>
     </div>
-    <p class="mt-1 text-xs text-slate-500">Weâ€™ll share this with the clinic to contact you.</p>
+    <p class="mt-1 text-xs text-slate-500">We’ll share this with the clinic to contact you.</p>
 
     <form id="ptForm" class="mt-4 grid grid-cols-2 gap-3">
       <div class="col-span-2">
@@ -303,14 +303,14 @@
 
   const fields = { complaint:null, duration:null, severity:null, location:null, red_flags:[], next_questions:[] };
   const updateFieldsUI = () => {
-    f('f_complaint').textContent = fields.complaint || 'â€”';
-    f('f_duration').textContent  = fields.duration  || 'â€”';
-    f('f_severity').textContent  = fields.severity  || 'â€”';
-    f('f_location').textContent  = fields.location  || 'â€”';
-    f('f_redflags').textContent  = (fields.red_flags && fields.red_flags.length) ? fields.red_flags.join(', ') : 'â€”';
-    f('f_questions').textContent = (fields.next_questions && fields.next_questions.length) ? fields.next_questions.join(' â€¢ ') : 'â€”';
+    f('f_complaint').textContent = fields.complaint || '—';
+    f('f_duration').textContent  = fields.duration  || '—';
+    f('f_severity').textContent  = fields.severity  || '—';
+    f('f_location').textContent  = fields.location  || '—';
+    f('f_redflags').textContent  = (fields.red_flags && fields.red_flags.length) ? fields.red_flags.join(', ') : '—';
+    f('f_questions').textContent = (fields.next_questions && fields.next_questions.length) ? fields.next_questions.join(' • ') : '—';
     const building = !(fields.complaint || fields.severity || (fields.red_flags||[]).length);
-    setStatusBadge(building ? 'buildingâ€¦' : 'in progress', building ? 'build' : 'progress');
+    setStatusBadge(building ? 'building…' : 'in progress', building ? 'build' : 'progress');
   };
 
   const transcript = []; // {role:'user'|'assistant', content:'...'}
@@ -385,7 +385,7 @@
               <h3 class="font-semibold">Your details</h3>
               <button type="button" id="ptClose" class="text-slate-500 hover:text-slate-700"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <p class="mt-1 text-xs text-slate-500">Weâ€™ll share this with the clinic to contact you.</p>
+            <p class="mt-1 text-xs text-slate-500">We’ll share this with the clinic to contact you.</p>
             <form id="ptForm" class="mt-4 grid grid-cols-2 gap-3">
               <div class="col-span-2">
                 <label class="text-xs text-slate-600">Full name</label>
@@ -440,7 +440,7 @@
     document.getElementById('ptClose')?.addEventListener('click', hideModal);
     document.getElementById('ptCancel')?.addEventListener('click', hideModal);
 
-    // Submit handler (AJAX â†’ /api/v1/triage/submit)
+    // Submit handler (AJAX -> /api/v1/triage/submit)
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const fd = new FormData(form);
@@ -498,7 +498,7 @@
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Bad response');
 
-      const text = data.assistant || "Thanksâ€”tell me more.";
+      const text = data.assistant || "Thanks—tell me more.";
 
       if (data.fields){
         Object.assign(fields, data.fields);
@@ -531,7 +531,7 @@
       transcript.push({role:'assistant', content:text});
       appendBubble('assistant', text);
     }catch(e){
-      const fallback = "Thanksâ€”could you share when this started and how severe the pain is (mild/moderate/severe)?";
+      const fallback = "Thanks—could you share when this started and how severe the pain is (mild/moderate/severe)?";
       transcript.push({role:'assistant', content:fallback});
       appendBubble('assistant', fallback);
       toast(e.message);
@@ -578,7 +578,7 @@
         <i class="fa-solid fa-robot text-xs" aria-hidden="true"></i>
       </div>
       <div class="bubble bg-slate-100 text-slate-800">
-        Hi! Iâ€™m your intake assistant. What brings you in today?
+        Hi! I’m your intake assistant. What brings you in today?
       </div>`;
     chat.appendChild(row);
     chat.scrollTop = chat.scrollHeight;
@@ -594,9 +594,9 @@
   // Submit to clinic with optional patient block
   const submitToClinic = async (patient = null) => {
     const btn = $('#ptSubmit');
-    if (btn) { btn.disabled = true; btn.textContent = 'Sendingâ€¦'; }
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
     finishBtn.disabled = true;
-    finishBtn.textContent = 'Savingâ€¦';
+    finishBtn.textContent = 'Saving…';
 
     try{
       const res = await fetch("/api/v1/triage/submit", {
@@ -622,7 +622,7 @@
         document.getElementById('encId').textContent = `#${data.encounter_id}`;
         document.getElementById('finishCard').classList.remove('hidden');
         try { sessionStorage.removeItem('triage_transcript'); } catch(e){}
-        appendBubble('assistant', "Thanks â€” Iâ€™ve shared this with the care team. Theyâ€™ll review and reach out soon. Anything else before we close?");
+        appendBubble('assistant', "Thanks — I’ve shared this with the care team. They’ll review and reach out soon. Anything else before we close?");
       } else {
         toast('Saved, but no encounter id returned.');
       }

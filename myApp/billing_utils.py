@@ -6,6 +6,7 @@ from django.utils import timezone
 from datetime import timedelta
 import requests
 import logging
+from django.utils.dateparse import parse_datetime
 
 log = logging.getLogger(__name__)
 
@@ -69,7 +70,7 @@ def get_free_chat_limit(user):
     Get the chat session limit for free users. Returns None for paid users (unlimited).
     """
     if not user or not user.is_authenticated:
-        return 5  # Unauthenticated/guest treated as free with limit
+        return 10  # Unauthenticated/guest treated as free with limit
     if is_subscription_active(user):
         return None  # Unlimited for paid
     plan = get_user_plan(user)
@@ -79,7 +80,7 @@ def get_free_chat_limit(user):
 
 def can_free_user_create_chat(user, existing_session_id=None):
     """
-    Check if a free user can create or use a new chat session.
+    Check if a free user can send another chat turn.
     Returns (allowed: bool, remaining: int|None, message: str).
     """
     limit = get_free_chat_limit(user)
@@ -87,22 +88,35 @@ def can_free_user_create_chat(user, existing_session_id=None):
         return True, None, ""  # Paid user, unlimited
 
     from myApp.models import ChatSession
-    count = ChatSession.objects.filter(user=user, archived=False).count()
+    # Count user turns in the last 30 days (avoids blocking users due to very old history).
+    cutoff = timezone.now() - timedelta(days=30)
+    sessions = ChatSession.objects.filter(user=user)
 
-    # Reusing existing session - always allow if under limit; if at limit, allow only if session exists
-    if existing_session_id:
-        exists = ChatSession.objects.filter(
-            id=existing_session_id, user=user, archived=False
-        ).exists()
-        if exists:
-            return True, limit - count, ""  # Reusing, allow
-        # Session doesn't exist, will create new - fall through to create check
+    used_turns = 0
+    for s in sessions:
+        for m in (s.messages or []):
+            if m.get("role") != "user":
+                continue
 
-    if count >= limit:
+            ts = m.get("ts")
+            if ts:
+                dt = parse_datetime(ts)
+                if dt is not None:
+                    if timezone.is_naive(dt):
+                        dt = timezone.make_aware(dt, timezone.get_current_timezone())
+                    if dt >= cutoff:
+                        used_turns += 1
+                    continue
+
+            # Fallback when message has no timestamp: use session updated_at heuristic.
+            if s.updated_at and s.updated_at >= cutoff:
+                used_turns += 1
+
+    if used_turns >= limit:
         return False, 0, (
             f"You've used your {limit} free chats. Upgrade to continue the conversation."
         )
-    return True, limit - count, ""
+    return True, max(limit - used_turns, 0), ""
 
 
 def get_history_days(user):

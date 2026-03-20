@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -95,8 +95,8 @@
     <div class="subtext">Live Voice Assistant</div>
     <div id="responseText" style="font-size: 0.9rem; color: #ccc; margin-top: 1rem;"></div>
     <div class="controls">
-      <button class="button" onclick="toggleMute()">ðŸ”‡</button>
-      <button class="button end" onclick="endCall()">âŒ</button>
+      <button class="button" onclick="toggleMute()">Mute</button>
+      <button class="button end" onclick="endCall()">End</button>
     </div>
     <audio id="audioPlayer" autoplay style="display: none;"></audio>
   </div>
@@ -132,7 +132,7 @@ function processAudioQueue() {
   const base64Audio = audioQueue.shift();
   const audioBlob = base64ToBlob(base64Audio, "audio/mpeg");
   const audioUrl = URL.createObjectURL(audioBlob);
-  const audio = new Audio(audioUrl);  // â¬…ï¸ NEW audio tag for every chunk
+  const audio = new Audio(audioUrl);  // New audio tag for every chunk
 
   isPlaying = true;
 
@@ -145,13 +145,13 @@ function processAudioQueue() {
   };
 
   audio.onerror = (e) => {
-    console.warn("ðŸ”‡ Audio playback error", e);
+    console.warn("Audio playback error", e);
     isPlaying = false;
     processAudioQueue();
   };
 
   audio.play().catch(err => {
-    console.warn("â›” Could not auto-play audio:", err);
+    console.warn("⛔ Could not auto-play audio:", err);
     isPlaying = false;
     processAudioQueue();
   });
@@ -234,7 +234,7 @@ function processAudioQueue() {
         } else {
           silenceCounter++;
           if (silenceCounter >= silenceThreshold && isSpeaking) {
-            console.log("ðŸ›‘ Pause detected â€” sending chunk early");
+            console.log("Pause detected - sending chunk early");
             if (mediaRecorder && mediaRecorder.state === "recording") {
               mediaRecorder.stop(); // This triggers audio send
             }

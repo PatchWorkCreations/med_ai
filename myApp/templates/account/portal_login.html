@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>{% if request.org %}{{ request.org.name }}{% else %}NeuroMed Aira{% endif %} â€” Sign in</title>
+  <title>{% if request.org %}{{ request.org.name }}{% else %}NeuroMed Aira{% endif %} — Sign in</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google tag (gtag.js) -->
@@ -47,7 +47,7 @@
       </div>
 
       <div class="text-xs text-slate-500">
-        Â© {{ now|date:"Y" }} NeuroMed Aira. All rights reserved.
+        © {{ now|date:"Y" }} NeuroMed Aira. All rights reserved.
       </div>
     </div>
 
@@ -87,7 +87,7 @@
 
             <div>
               <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ form.password.id_for_label }}">Password</label>
-              {% render_field form.password class+="w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-emerald-100 focus:border-emerald-400" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" %}
+              {% render_field form.password class+="w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-emerald-100 focus:border-emerald-400" placeholder="••••••••" %}
               {% if form.password.errors %}
                 <p class="mt-1 text-sm text-rose-700">{{ form.password.errors|join:", " }}</p>
               {% endif %}
@@ -106,7 +106,7 @@
         </div>
 
         <p class="mt-4 text-center text-xs text-slate-500">
-          Youâ€™re signing into the portal for
+          You’re signing into the portal for
           <strong>{% if request.org %}{{ request.org.name }}{% else %}NeuroMed Aira{% endif %}</strong>.
         </p>
       </div>

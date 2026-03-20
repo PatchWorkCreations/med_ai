@@ -1571,10 +1571,11 @@ def send_chat(request):
     sticky_session_id = request.session.get("active_chat_session_id")
     chosen_session_id = incoming_session_id or sticky_session_id
 
-    # --- Free account chat limit (5 chats)
+    # --- Free account chat limit
     if use_db and request.user.is_authenticated:
-        from .billing_utils import is_subscription_active, can_free_user_create_chat
+        from .billing_utils import is_subscription_active, can_free_user_create_chat, get_free_chat_limit
         if not is_subscription_active(request.user):
+            free_chat_limit = get_free_chat_limit(request.user) or 10
             allowed, remaining, msg = can_free_user_create_chat(
                 request.user, existing_session_id=chosen_session_id
             )
@@ -1583,7 +1584,8 @@ def send_chat(request):
                     "reply": msg,
                     "error": "FREE_CHAT_LIMIT_EXCEEDED",
                     "requires_subscription": True,
-                    "free_chats_used": 5,
+                    "free_chats_used": free_chat_limit,
+                    "free_chat_limit": free_chat_limit,
                 }, status=403)
 
     # --- Build initial chat_history (DB vs guest)

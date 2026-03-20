@@ -108,8 +108,8 @@
             <tr>
                 <td><strong>{{ user.username }}</strong></td>
                 <td>{{ user.email }}</td>
-                <td>{{ user.profile.display_name|default:"â€”" }}</td>
-                <td>{{ user.profile.profession|default:"â€”" }}</td>
+                <td>{{ user.profile.display_name|default:"—" }}</td>
+                <td>{{ user.profile.profession|default:"—" }}</td>
                 <td>{{ user.profile.language|default:"en-US" }}</td>
                 <td>{{ user.date_joined|date:"M d, Y" }}</td>
                 <td>{% if user.last_login %}{{ user.last_login|date:"M d, Y" }}{% else %}Never{% endif %}</td>
