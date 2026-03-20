@@ -141,7 +141,7 @@ function processAudioQueue() {
   audio.onended = () => {
     isPlaying = false;
     document.getElementById("avatar").style.animationPlayState = 'paused';
-    processAudioQueue(); // ðŸŽ¯ Play next chunk
+    processAudioQueue(); //Ž¯ Play next chunk
   };
 
   audio.onerror = (e) => {

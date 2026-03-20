@@ -4984,10 +4984,10 @@ async function greetUser(showBubble = false) {
     const name = data.display_name || 'there';
     
     const greetings = [
-      `Hi ${name}! ðŸ‘‹ I'm your medical assistant. I'm here to help you understand your health information, analyze medical documents, and answer your questions. What would you like to explore today?`,
-      `Welcome, ${name}! ðŸŒŸ I'm ready to assist you with medical information, document analysis, and health questions. Feel free to share documents, images, or ask me anything.`,
-      `Hello ${name}! ðŸ’™ I can help you understand medical documents, analyze health images, and provide clear explanations. What can I help you with today?`,
-      `Hi there, ${name}! ðŸ¥ I'm your medical guide. I'm here to translate medical jargon, review documents, and help you make sense of your health information. How can I assist you?`,
+      `Hi ${name}!‘‹ I'm your medical assistant. I'm here to help you understand your health information, analyze medical documents, and answer your questions. What would you like to explore today?`,
+      `Welcome, ${name}!ŒŸ I'm ready to assist you with medical information, document analysis, and health questions. Feel free to share documents, images, or ask me anything.`,
+      `Hello ${name}!’™ I can help you understand medical documents, analyze health images, and provide clear explanations. What can I help you with today?`,
+      `Hi there, ${name}!¥ I'm your medical guide. I'm here to translate medical jargon, review documents, and help you make sense of your health information. How can I assist you?`,
       `Welcome back, ${name}! âœ¨ Whether you have questions about symptoms, need help understanding test results, or want to review medical documents, I'm here to help. What's on your mind?`,
     ];
     
@@ -5024,7 +5024,7 @@ async function greetUser(showBubble = false) {
       if (chatWindow && chatWindow.children.length === 0 && 
           (!firstMessageView || firstMessageView.classList.contains('hidden'))) {
         if (emptyState) emptyState.classList.add('hidden');
-        appendChatBubble('assistant', 'Hi there! ðŸ‘‹ I\'m your medical assistant. How can I help you today?', false);
+        appendChatBubble('assistant', 'Hi there!‘‹ I\'m your medical assistant. How can I help you today?', false);
       }
     }
   }

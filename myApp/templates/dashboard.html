@@ -739,7 +739,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
 
   <!-- Toast -->
   <div id="fbToast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
-    <div class="bg-[#28926D] text-white px-4 py-2 rounded shadow">Thanks! Feedback received. ðŸ’œ</div>
+    <div class="bg-[#28926D] text-white px-4 py-2 rounded shadow">Thanks! Feedback received.’œ</div>
   </div>
 
   <!-- Success Modal -->
@@ -753,7 +753,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
           <i class="fa-solid fa-check"></i>
         </div>
         <div>
-          <h3 class="text-xl font-semibold text-gray-800">Thanks for the feedback! ðŸ’œ</h3>
+          <h3 class="text-xl font-semibold text-gray-800">Thanks for the feedback!’œ</h3>
           <p id="fbSuccessMsg" class="text-sm text-gray-600 mt-1">
             Weâ€™ve received your submission. Your input helps make NeuroMed Aira kinder and sharper.
           </p>
@@ -928,7 +928,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
   document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeFeedback(); });
 
   // ---------- Tiny toast ----------
-  function showToast(msg='Thanks! Feedback received. ðŸ’œ'){
+  function showToast(msg='Thanks! Feedback received.’œ'){
     if (!toast) return;
     const box = toast.querySelector('div') || toast;
     box.textContent = msg;
@@ -2109,7 +2109,7 @@ async function sendChat() {
 
     files.forEach(p => formData.append('files[]', p.file, p.file.name));
 
-    // ðŸ”‘ include CSRF
+    //”‘ include CSRF
     const csrftoken = getCookie('csrftoken');
 
     const res  = await fetch('/webapp/api/send-chat/', { 
