@@ -7,42 +7,12 @@ from django.views.generic import RedirectView
 from .views import LegalView, terms_redirect, privacy_redirect
 from .views import WarmLoginView 
 from django.urls import path, re_path
-from django.contrib.sitemaps import StaticViewSitemap
-from django.contrib.sitemaps.views import sitemap
 
 from . import api_chat
-
-class StaticSitemap(StaticViewSitemap):
-    priority = 0.8
-    changefreq = "weekly"
-
-    def items(self):
-        return [
-            "home",
-            "about",
-            "signup",
-            "login",
-            "landing",
-            "book_demo",
-            "legal",
-            "terms",
-            "privacy",
-            "speaking-page",
-            "beta_feedback",
-            "beta_thanks",
-        ]
-
-sitemaps = {"static": StaticSitemap}
 
 urlpatterns = [
     # Public Pages
     path('', views.landing_page, name='home'),
-    path(
-        "sitemap.xml",
-        sitemap,
-        {"sitemaps": sitemaps},
-        name="django.contrib.sitemaps.views.sitemap",
-    ),
     path('signup/', views.signup_view, name='signup'),
 
     path("api/chat/sessions/", api_chat.list_chat_sessions, name="chat_sessions_list"),
