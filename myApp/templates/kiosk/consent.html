@@ -1,7 +1,22 @@
-<!doctype html><html><head>
+﻿<!doctype html><html><head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Consent</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-WY3SL8DJL9"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-WY3SL8DJL9');
+  </script>  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "vys1vrllqq");
+  </script>
 </head>
 <body class="min-h-screen bg-slate-50">
   <div class="max-w-3xl mx-auto px-4 py-8">
@@ -9,8 +24,8 @@
       <h1 class="text-xl font-semibold">Consent</h1>
       <p class="text-sm text-slate-600 mt-1">Please review and accept to continue.</p>
       <div class="mt-4 text-sm text-slate-700 space-y-2">
-        <p>• I consent to digital intake and secure processing of my information.</p>
-        <p>• I understand this system assists clinicians and doesn’t replace medical care.</p>
+        <p>â€¢ I consent to digital intake and secure processing of my information.</p>
+        <p>â€¢ I understand this system assists clinicians and doesnâ€™t replace medical care.</p>
       </div>
       <label class="mt-4 flex items-center gap-2 text-sm text-slate-700">
         <input id="ok" type="checkbox" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
@@ -25,3 +40,4 @@ ok.onchange=()=>{ next.disabled=!ok.checked; };
 next.onclick=()=>{ location.href="/kiosk/intake"; };
 </script>
 </body></html>
+

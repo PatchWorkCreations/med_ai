@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -72,6 +72,21 @@
       background: #e63946;
     }
   </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-WY3SL8DJL9"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-WY3SL8DJL9');
+  </script>  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "vys1vrllqq");
+  </script>
 </head>
 <body>
   <div class="call-container">
@@ -80,8 +95,8 @@
     <div class="subtext">Live Voice Assistant</div>
     <div id="responseText" style="font-size: 0.9rem; color: #ccc; margin-top: 1rem;"></div>
     <div class="controls">
-      <button class="button" onclick="toggleMute()">🔇</button>
-      <button class="button end" onclick="endCall()">❌</button>
+      <button class="button" onclick="toggleMute()">ðŸ”‡</button>
+      <button class="button end" onclick="endCall()">âŒ</button>
     </div>
     <audio id="audioPlayer" autoplay style="display: none;"></audio>
   </div>
@@ -117,7 +132,7 @@ function processAudioQueue() {
   const base64Audio = audioQueue.shift();
   const audioBlob = base64ToBlob(base64Audio, "audio/mpeg");
   const audioUrl = URL.createObjectURL(audioBlob);
-  const audio = new Audio(audioUrl);  // ⬅️ NEW audio tag for every chunk
+  const audio = new Audio(audioUrl);  // â¬…ï¸ NEW audio tag for every chunk
 
   isPlaying = true;
 
@@ -126,17 +141,17 @@ function processAudioQueue() {
   audio.onended = () => {
     isPlaying = false;
     document.getElementById("avatar").style.animationPlayState = 'paused';
-    processAudioQueue(); // 🎯 Play next chunk
+    processAudioQueue(); // ðŸŽ¯ Play next chunk
   };
 
   audio.onerror = (e) => {
-    console.warn("🔇 Audio playback error", e);
+    console.warn("ðŸ”‡ Audio playback error", e);
     isPlaying = false;
     processAudioQueue();
   };
 
   audio.play().catch(err => {
-    console.warn("⛔ Could not auto-play audio:", err);
+    console.warn("â›” Could not auto-play audio:", err);
     isPlaying = false;
     processAudioQueue();
   });
@@ -219,7 +234,7 @@ function processAudioQueue() {
         } else {
           silenceCounter++;
           if (silenceCounter >= silenceThreshold && isSpeaking) {
-            console.log("🛑 Pause detected — sending chunk early");
+            console.log("ðŸ›‘ Pause detected â€” sending chunk early");
             if (mediaRecorder && mediaRecorder.state === "recording") {
               mediaRecorder.stop(); // This triggers audio send
             }
@@ -238,3 +253,4 @@ function processAudioQueue() {
   
 </body>
 </html>
+

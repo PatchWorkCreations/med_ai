@@ -1,10 +1,25 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>How to Share — NeuroMed Aira</title>
+  <title>How to Share â€” NeuroMed Aira</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-WY3SL8DJL9"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-WY3SL8DJL9');
+  </script>  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "vys1vrllqq");
+  </script>
 </head>
 <body class="bg-slate-50 text-slate-800">
   <header class="w-full border-b bg-white/80 backdrop-blur">
@@ -28,7 +43,7 @@
         <ol class="mt-2 list-decimal pl-5 space-y-1 text-slate-700">
           <li>Go back to the chat.</li>
           <li>Generate a summary (or upload a file).</li>
-          <li>Click “Download PDF.”</li>
+          <li>Click â€œDownload PDF.â€</li>
         </ol>
         <a href="/api/export/pdf/latest" class="mt-4 inline-block px-4 py-2 rounded-lg bg-teal-600 text-white hover:bg-[#1B5A8E]">
           Download current summary
@@ -40,7 +55,7 @@
         <h2 class="font-semibold text-lg">Option B: Share as a link</h2>
         <ol class="mt-2 list-decimal pl-5 space-y-1 text-slate-700">
           <li>Make a summary in the chat.</li>
-          <li>Click “Create shareable link.”</li>
+          <li>Click â€œCreate shareable link.â€</li>
           <li>Send the link to your caregiver or clinician.</li>
         </ol>
         <button id="shareBtn" class="mt-4 px-4 py-2 rounded-lg border hover:bg-slate-50">Create shareable link</button>
@@ -60,9 +75,9 @@
     <section class="mt-8 bg-white border rounded-2xl p-5">
       <h2 class="font-semibold">Privacy & safety</h2>
       <ul class="mt-2 list-disc pl-5 text-slate-700 space-y-1">
-        <li>We don’t post anything publicly; shared links are unlisted and expire automatically.</li>
-        <li>Remove personal identifiers from uploads if you’re concerned (name, MRN, address).</li>
-        <li>This is for education; it’s not a medical diagnosis.</li>
+        <li>We donâ€™t post anything publicly; shared links are unlisted and expire automatically.</li>
+        <li>Remove personal identifiers from uploads if youâ€™re concerned (name, MRN, address).</li>
+        <li>This is for education; itâ€™s not a medical diagnosis.</li>
       </ul>
     </section>
   </main>
@@ -78,7 +93,7 @@
 
     shareBtn?.addEventListener('click', async () => {
       shareError.classList.add('hidden'); shareError.textContent = '';
-      shareBtn.disabled = true; shareBtn.textContent = 'Creating…';
+      shareBtn.disabled = true; shareBtn.textContent = 'Creatingâ€¦';
       try{
         const res = await fetch('/api/share/latest', { method:'POST', headers:{'X-Requested-With':'XMLHttpRequest'} });
         const data = await res.json();
@@ -104,3 +119,4 @@
   </script>
 </body>
 </html>
+

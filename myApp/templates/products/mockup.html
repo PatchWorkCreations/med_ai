@@ -1,9 +1,9 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>NeuroMed Aira — Demo Command Center</title>
+  <title>NeuroMed Aira â€” Demo Command Center</title>
 
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -51,6 +51,21 @@
     .route.is-active { display: block; }
     .tab-btn[aria-selected="true"] { background: rgba(16,185,129,.1); color:#065f46; border-color: rgba(16,185,129,.25); }
   </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-WY3SL8DJL9"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-WY3SL8DJL9');
+  </script>  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "vys1vrllqq");
+  </script>
 </head>
 <body class="bg-slate-50 text-ink">
 
@@ -83,7 +98,7 @@
           <select id="scenario" class="w-full rounded-xl border-slate-300 text-sm">
             <option>Chest pain (ED)</option>
             <option selected>Knee MRI (Outpatient)</option>
-            <option>Diabetes follow‑up (Primary Care)</option>
+            <option>Diabetes followâ€‘up (Primary Care)</option>
             <option>GI procedure (Endoscopy)</option>
             <option>Spanish consult (Pediatrics)</option>
           </select>
@@ -147,12 +162,12 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-soft">
             <div class="text-xs text-slate-500">Time saved</div>
-            <div class="mt-1 text-2xl font-extrabold">–70%</div>
+            <div class="mt-1 text-2xl font-extrabold">â€“70%</div>
             <div class="text-xs text-slate-500">vs baseline</div>
           </div>
           <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-soft">
             <div class="text-xs text-slate-500">Denials reduced</div>
-            <div class="mt-1 text-2xl font-extrabold">↓45%</div>
+            <div class="mt-1 text-2xl font-extrabold">â†“45%</div>
             <div class="text-xs text-slate-500">last 30 days</div>
           </div>
           <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-soft">
@@ -162,7 +177,7 @@
           </div>
           <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-soft">
             <div class="text-xs text-slate-500">Throughput</div>
-            <div class="mt-1 text-2xl font-extrabold">↑32%</div>
+            <div class="mt-1 text-2xl font-extrabold">â†‘32%</div>
             <div class="text-xs text-slate-500">triage + intake</div>
           </div>
         </div>
@@ -242,9 +257,9 @@
           <div class="lg:col-span-2 rounded-2xl bg-white border border-slate-200 p-5 shadow-soft">
             <div class="font-semibold">Recent Activity</div>
             <ol class="mt-3 space-y-3 text-sm">
-              <li class="flex gap-3"><span class="h-6 w-6 grid place-content-center rounded-full bg-emerald-50 text-emerald-700"><i class="fa-solid fa-file-pen text-[12px]"></i></span><span><strong>SOAP note</strong> drafted for Patient #KM‑102 (Knee MRI)</span></li>
+              <li class="flex gap-3"><span class="h-6 w-6 grid place-content-center rounded-full bg-emerald-50 text-emerald-700"><i class="fa-solid fa-file-pen text-[12px]"></i></span><span><strong>SOAP note</strong> drafted for Patient #KMâ€‘102 (Knee MRI)</span></li>
               <li class="flex gap-3"><span class="h-6 w-6 grid place-content-center rounded-full bg-[#236092]/5 text-sky-700"><i class="fa-solid fa-code text-[12px]"></i></span><span>Codes <strong>ICD-10</strong> + <strong>CPT</strong> suggested with 98% confidence</span></li>
-              <li class="flex gap-3"><span class="h-6 w-6 grid place-content-center rounded-full bg-violet-50 text-violet-700"><i class="fa-solid fa-triangle-exclamation text-[12px]"></i></span><span>Denial risk: bundling conflict detected → fix applied</span></li>
+              <li class="flex gap-3"><span class="h-6 w-6 grid place-content-center rounded-full bg-violet-50 text-violet-700"><i class="fa-solid fa-triangle-exclamation text-[12px]"></i></span><span>Denial risk: bundling conflict detected â†’ fix applied</span></li>
               <li class="flex gap-3"><span class="h-6 w-6 grid place-content-center rounded-full bg-emerald-50 text-emerald-700"><i class="fa-solid fa-language text-[12px]"></i></span><span>Caregiver summary generated in <strong>Spanish</strong></span></li>
             </ol>
           </div>
@@ -269,7 +284,7 @@
             <div class="mt-3 text-sm text-slate-600 space-y-2">
               <div><span class="text-slate-500">Patient:</span> Jane Doe (34F)</div>
               <div><span class="text-slate-500">Reason:</span> Knee pain / MRI review</div>
-              <div><span class="text-slate-500">Vitals:</span> 120/78 • 72 bpm • 98.4°F</div>
+              <div><span class="text-slate-500">Vitals:</span> 120/78 â€¢ 72 bpm â€¢ 98.4Â°F</div>
             </div>
             <div class="mt-4">
               <div class="text-xs text-slate-500">Uploads</div>
@@ -283,7 +298,7 @@
           <!-- Center: Scribe -->
           <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-soft">
             <div class="flex items-center justify-between">
-              <div class="font-semibold">AI Scribe — Draft Note</div>
+              <div class="font-semibold">AI Scribe â€” Draft Note</div>
               <div class="text-xs text-slate-500">Scenario: Knee MRI</div>
             </div>
             <div class="mt-3 text-sm space-y-3">
@@ -301,7 +316,7 @@
               </div>
               <div>
                 <div class="text-slate-500 text-xs">Plan</div>
-                <p>RICE, PT referral, NSAIDs PRN, activity modification; follow-up 6–8 weeks; consider ortho consult if no improvement.</p>
+                <p>RICE, PT referral, NSAIDs PRN, activity modification; follow-up 6â€“8 weeks; consider ortho consult if no improvement.</p>
               </div>
             </div>
             <div class="mt-4 flex flex-wrap gap-2">
@@ -315,7 +330,7 @@
           <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-soft">
             <div class="font-semibold">Diagnostic Assistant</div>
             <ul class="mt-3 text-sm space-y-2">
-              <li class="flex items-start gap-2"><span class="mt-1 h-5 w-5 grid place-content-center rounded-full bg-violet-50 text-violet-700"><i class="fa-solid fa-highlighter text-[11px]"></i></span><span>MRI: Small medial meniscus tear (posterior horn) — likely source of pain.</span></li>
+              <li class="flex items-start gap-2"><span class="mt-1 h-5 w-5 grid place-content-center rounded-full bg-violet-50 text-violet-700"><i class="fa-solid fa-highlighter text-[11px]"></i></span><span>MRI: Small medial meniscus tear (posterior horn) â€” likely source of pain.</span></li>
               <li class="flex items-start gap-2"><span class="mt-1 h-5 w-5 grid place-content-center rounded-full bg-violet-50 text-violet-700"><i class="fa-solid fa-book-medical text-[11px]"></i></span><span>Guidelines: Begin conservative management before surgical consideration.</span></li>
               <li class="flex items-start gap-2"><span class="mt-1 h-5 w-5 grid place-content-center rounded-full bg-violet-50 text-violet-700"><i class="fa-solid fa-language text-[11px]"></i></span><span>Offer Spanish family summary if preferred.</span></li>
             </ul>
@@ -335,7 +350,7 @@
             <div class="mt-3 space-y-3">
               <div class="rounded-xl border border-slate-200 p-3">
                 <div class="flex items-center justify-between text-sm"><span>Maria R.</span><span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">Medium</span></div>
-                <div class="mt-1 text-xs text-slate-500">Knee pain • Insurance: Aetna</div>
+                <div class="mt-1 text-xs text-slate-500">Knee pain â€¢ Insurance: Aetna</div>
               </div>
             </div>
           </div>
@@ -344,7 +359,7 @@
             <div class="mt-3 space-y-3">
               <div class="rounded-xl border border-slate-200 p-3">
                 <div class="flex items-center justify-between text-sm"><span>Jason T.</span><span class="px-2 py-0.5 rounded-full bg-red-50 text-red-700">High</span></div>
-                <div class="mt-1 text-xs text-slate-500">Chest pain • Eligibility check suggested</div>
+                <div class="mt-1 text-xs text-slate-500">Chest pain â€¢ Eligibility check suggested</div>
               </div>
             </div>
           </div>
@@ -353,7 +368,7 @@
             <div class="mt-3 space-y-3">
               <div class="rounded-xl border border-slate-200 p-3">
                 <div class="flex items-center justify-between text-sm"><span>Luisa M.</span><span class="px-2 py-0.5 rounded-full bg-green-50 text-green-700">Low</span></div>
-                <div class="mt-1 text-xs text-slate-500">Diabetes f/u • Forms complete</div>
+                <div class="mt-1 text-xs text-slate-500">Diabetes f/u â€¢ Forms complete</div>
               </div>
             </div>
           </div>
@@ -362,7 +377,7 @@
             <div class="mt-3 space-y-3">
               <div class="rounded-xl border border-slate-200 p-3">
                 <div class="flex items-center justify-between text-sm"><span>Ken C.</span><span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">Booked</span></div>
-                <div class="mt-1 text-xs text-slate-500">GI procedure • 10:30 AM, Thu</div>
+                <div class="mt-1 text-xs text-slate-500">GI procedure â€¢ 10:30 AM, Thu</div>
               </div>
             </div>
           </div>
@@ -375,7 +390,7 @@
           <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-soft">
             <div class="font-semibold">AI Coding Assistant</div>
             <ul class="mt-3 text-sm space-y-3">
-              <li class="flex items-start gap-2"><span class="mt-1 h-5 w-5 grid place-content-center rounded-full bg-[#236092]/5 text-sky-700"><i class="fa-solid fa-code text-[11px]"></i></span><span>ICD‑10: M23.206 (Derangement of medial meniscus), M25.561 (Pain in right knee)</span></li>
+              <li class="flex items-start gap-2"><span class="mt-1 h-5 w-5 grid place-content-center rounded-full bg-[#236092]/5 text-sky-700"><i class="fa-solid fa-code text-[11px]"></i></span><span>ICDâ€‘10: M23.206 (Derangement of medial meniscus), M25.561 (Pain in right knee)</span></li>
               <li class="flex items-start gap-2"><span class="mt-1 h-5 w-5 grid place-content-center rounded-full bg-[#236092]/5 text-sky-700"><i class="fa-solid fa-code text-[11px]"></i></span><span>CPT: 99213 (Established patient visit, low complexity)</span></li>
               <li class="flex items-start gap-2"><span class="mt-1 h-5 w-5 grid place-content-center rounded-full bg-[#236092]/5 text-sky-700"><i class="fa-solid fa-shield-heart text-[11px]"></i></span><span>Rationale: Linked to documented exam, imaging report, and plan</span></li>
             </ul>
@@ -389,14 +404,14 @@
           <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-soft">
             <div class="font-semibold">Denial Risk Review</div>
             <ul class="mt-3 text-sm space-y-3">
-              <li class="flex items-start gap-2"><span class="mt-1 h-5 w-5 grid place-content-center rounded-full bg-violet-50 text-violet-700"><i class="fa-solid fa-triangle-exclamation text-[11px]"></i></span><span>Bundling rule: CPT 99213 with 73721 requires medical necessity documentation — present ✓</span></li>
+              <li class="flex items-start gap-2"><span class="mt-1 h-5 w-5 grid place-content-center rounded-full bg-violet-50 text-violet-700"><i class="fa-solid fa-triangle-exclamation text-[11px]"></i></span><span>Bundling rule: CPT 99213 with 73721 requires medical necessity documentation â€” present âœ“</span></li>
               <li class="flex items-start gap-2"><span class="mt-1 h-5 w-5 grid place-content-center rounded-full bg-violet-50 text-violet-700"><i class="fa-solid fa-clipboard-check text-[11px]"></i></span><span>Missing element: pain duration added to Subjective (now included)</span></li>
             </ul>
             <div class="mt-4 flex flex-wrap gap-2">
               <button class="rounded-full bg-ink text-white px-4 py-2 text-sm font-semibold">Apply Fixes</button>
               <button class="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold">Export Audit</button>
             </div>
-            <div class="mt-5 text-xs text-slate-500">Batch: 10 encounters processed today • Approval rate 96%</div>
+            <div class="mt-5 text-xs text-slate-500">Batch: 10 encounters processed today â€¢ Approval rate 96%</div>
           </div>
         </div>
       </section>
@@ -425,9 +440,9 @@
           <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-soft">
             <div class="font-semibold">Security & Compliance</div>
             <ul class="mt-3 text-sm space-y-2">
-              <li>HIPAA-aware design ✓</li>
-              <li>BAA available ✓</li>
-              <li>SOC 2 Type I — in progress</li>
+              <li>HIPAA-aware design âœ“</li>
+              <li>BAA available âœ“</li>
+              <li>SOC 2 Type I â€” in progress</li>
               <li>Audit logs & access controls</li>
             </ul>
           </div>

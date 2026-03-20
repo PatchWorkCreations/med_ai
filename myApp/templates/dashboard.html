@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -309,6 +309,21 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
 
 
 
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-WY3SL8DJL9"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-WY3SL8DJL9');
+  </script>  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "vys1vrllqq");
+  </script>
 </head>
 
 <body class="bg-white font-sans text-gray-800">
@@ -504,7 +519,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
           <!-- Text input -->
           <input type="text" id="chatInput"
                 class="flex-1 min-w-0 px-4 py-2 text-base border rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-[#28926D]/40"
-                placeholder="Type your question… (attachments will send with this)" />
+                placeholder="Type your questionâ€¦ (attachments will send with this)" />
 
           <!-- Mic -->
           <button id="micBtn" class="shrink-0 w-10 h-10 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center hover:bg-gray-300" title="Dictate">
@@ -517,7 +532,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
           </button>
         </div>
 
-        <p class="mt-1 text-xs text-gray-500 pl-12">Tip: Drag & drop files here to stage them. They won’t send until you hit <b>Send</b>.</p>
+        <p class="mt-1 text-xs text-gray-500 pl-12">Tip: Drag & drop files here to stage them. They wonâ€™t send until you hit <b>Send</b>.</p>
       </div>
     </section>
   </div>
@@ -530,7 +545,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
         <h2 class="text-2xl font-bold text-[#236092] flex items-center gap-2">
           <i class="fa-solid fa-brain text-[#236092] text-2xl"></i> Full Summary
         </h2>
-        <p class="text-base text-gray-500">Here’s the complete AI-generated explanation.</p>
+        <p class="text-base text-gray-500">Hereâ€™s the complete AI-generated explanation.</p>
       </div>
       <div id="modalContent" class="text-gray-800 text-base leading-relaxed max-h-[60vh] overflow-y-auto space-y-4 prose prose-sm"></div>
     </div>
@@ -539,8 +554,8 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
   <!-- Loading Overlay -->
   <div id="loadingOverlay" class="fixed inset-0 bg-white bg-opacity-90 z-50 flex flex-col items-center justify-center text-center hidden">
     <div class="animate-spin mb-4 text-[#236092] text-4xl"><i class="fa-solid fa-brain"></i></div>
-    <p class="text-2xl font-semibold text-gray-700">NeuroMed is thinking…</p>
-    <p class="text-base text-gray-500 mt-2 italic"><i class="fa-solid fa-brain text-[#236092] text-2xl"></i> Please hold the coffee ☕</p>
+    <p class="text-2xl font-semibold text-gray-700">NeuroMed is thinkingâ€¦</p>
+    <p class="text-base text-gray-500 mt-2 italic"><i class="fa-solid fa-brain text-[#236092] text-2xl"></i> Please hold the coffee â˜•</p>
   </div>
 
   <!-- Settings Modal -->
@@ -591,7 +606,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
       <div class="px-5 py-4 border-b flex items-center justify-between">
         <div class="flex items-center gap-3">
           <i class="fa-solid fa-heart text-[#236092] text-xl"></i>
-          <h3 class="text-lg font-semibold">NeuroMed Aira — Quick Feedback</h3>
+          <h3 class="text-lg font-semibold">NeuroMed Aira â€” Quick Feedback</h3>
         </div>
         <button id="feedbackClose" class="text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
       </div>
@@ -599,7 +614,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
       <!-- Body -->
       <form id="feedbackForm" class="px-5 py-4 overflow-y-auto space-y-4" enctype="multipart/form-data">
         <p class="text-sm text-gray-600 -mt-1">
-          Thanks for trying NeuroMed Aira! Please use <b>synthetic or public sample data</b> only — no Personal Health Information (PHI).
+          Thanks for trying NeuroMed Aira! Please use <b>synthetic or public sample data</b> only â€” no Personal Health Information (PHI).
         </p>
 
         <!-- Consent -->
@@ -612,7 +627,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
         <div>
           <label class="text-sm font-medium">What did you try today? (choose all that apply)</label>
           <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-            <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="upload_summarize"> Upload → Summary</label>
+            <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="upload_summarize"> Upload â†’ Summary</label>
             <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="multi_attachments"> Multiple attachments tray</label>
             <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="tone_selector"> Tone selector</label>
             <label class="flex items-start gap-2 bg-gray-50 border rounded p-2"><input type="checkbox" name="use_case_multi" value="chat_qna"> Chat Q&amp;A</label>
@@ -628,7 +643,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
           <div>
             <label class="text-sm">Your role</label>
             <select name="role" class="mt-1 w-full border rounded p-2" required>
-              <option value="">Select…</option>
+              <option value="">Selectâ€¦</option>
               <option value="caregiver">Caregiver</option>
               <option value="patient">Patient</option>
               <option value="clinician">Clinician</option>
@@ -643,7 +658,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
           <div>
             <label class="text-sm">What kind of input did you use?</label>
             <select name="input_type" class="mt-1 w-full border rounded p-2" required>
-              <option value="">Select…</option>
+              <option value="">Selectâ€¦</option>
               <option value="dummy">Text I wrote (dummy)</option>
               <option value="synthetic">Synthetic sample from the app</option>
               <option value="public">Public document (no PHI)</option>
@@ -663,31 +678,31 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
         <!-- Ratings -->
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-sm">Ease of use (1–5)</label>
+            <label class="text-sm">Ease of use (1â€“5)</label>
             <input name="ease" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2">
           </div>
           <div>
-            <label class="text-sm">Speed (1–5)</label>
+            <label class="text-sm">Speed (1â€“5)</label>
             <input name="speed" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2">
           </div>
           <div>
-            <label class="text-sm">Accuracy (1–5)</label>
+            <label class="text-sm">Accuracy (1â€“5)</label>
             <input name="accuracy" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2">
           </div>
           <div>
-            <label class="text-sm">Clarity (1–5)</label>
+            <label class="text-sm">Clarity (1â€“5)</label>
             <input name="clarity" type="number" min="1" max="5" value="3" class="mt-1 w-full border rounded p-2">
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-sm" for="nps">How likely are you to recommend NeuroMed Aira? (0–10)</label>
+            <label class="text-sm" for="nps">How likely are you to recommend NeuroMed Aira? (0â€“10)</label>
             <input id="nps" name="nps" type="number" min="0" max="10" class="mt-1 w-full border rounded p-2" required>
-            <div class="text-xs text-gray-500 mt-1">0 = Not at all likely • 10 = Extremely likely</div>
+            <div class="text-xs text-gray-500 mt-1">0 = Not at all likely â€¢ 10 = Extremely likely</div>
           </div>
           <label class="flex items-center gap-2 text-sm">
-            <input type="checkbox" name="allow_contact"> It’s okay to contact me about this feedback
+            <input type="checkbox" name="allow_contact"> Itâ€™s okay to contact me about this feedback
           </label>
           <label class="flex items-center gap-2 text-sm">
             <input type="checkbox" name="allow_anon" checked> Store my feedback anonymously
@@ -704,8 +719,8 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
           <textarea name="cons" rows="2" class="w-full border rounded p-2" placeholder="Any rough edges or missing pieces?"></textarea>
         </div>
         <div>
-          <label class="text-sm">Bugs or errors — steps to reproduce</label>
-          <textarea name="bugs" rows="2" class="w-full border rounded p-2" placeholder="1) Go to… 2) Click… 3) What happened…"></textarea>
+          <label class="text-sm">Bugs or errors â€” steps to reproduce</label>
+          <textarea name="bugs" rows="2" class="w-full border rounded p-2" placeholder="1) Go toâ€¦ 2) Clickâ€¦ 3) What happenedâ€¦"></textarea>
         </div>
         <div>
           <label class="text-sm">Screenshot (optional)</label>
@@ -724,7 +739,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
 
   <!-- Toast -->
   <div id="fbToast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
-    <div class="bg-[#28926D] text-white px-4 py-2 rounded shadow">Thanks! Feedback received. 💜</div>
+    <div class="bg-[#28926D] text-white px-4 py-2 rounded shadow">Thanks! Feedback received. ðŸ’œ</div>
   </div>
 
   <!-- Success Modal -->
@@ -738,9 +753,9 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
           <i class="fa-solid fa-check"></i>
         </div>
         <div>
-          <h3 class="text-xl font-semibold text-gray-800">Thanks for the feedback! 💜</h3>
+          <h3 class="text-xl font-semibold text-gray-800">Thanks for the feedback! ðŸ’œ</h3>
           <p id="fbSuccessMsg" class="text-sm text-gray-600 mt-1">
-            We’ve received your submission. Your input helps make NeuroMed Aira kinder and sharper.
+            Weâ€™ve received your submission. Your input helps make NeuroMed Aira kinder and sharper.
           </p>
         </div>
       </div>
@@ -784,7 +799,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
           <input id="mLangSearch" type="text"
                 class="w-full pl-9 pr-3 py-2 border rounded-lg"
-                placeholder="Search…">
+                placeholder="Searchâ€¦">
         </div>
       </div>
 
@@ -913,7 +928,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
   document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeFeedback(); });
 
   // ---------- Tiny toast ----------
-  function showToast(msg='Thanks! Feedback received. 💜'){
+  function showToast(msg='Thanks! Feedback received. ðŸ’œ'){
     if (!toast) return;
     const box = toast.querySelector('div') || toast;
     box.textContent = msg;
@@ -959,7 +974,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
   function openFbSuccess(data){
     if (!okModal){ showToast(); return; }
     okMeta?.classList.add('hidden');
-    if (okMsg) okMsg.textContent = 'We’ve received your submission. Your input helps make NeuroMed Aira kinder and sharper.';
+    if (okMsg) okMsg.textContent = 'Weâ€™ve received your submission. Your input helps make NeuroMed Aira kinder and sharper.';
     okModal.classList.remove('hidden');
     okModal.classList.add('flex');
   }
@@ -979,7 +994,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
 
     // Build FormData (multipart)
     const fd = new FormData(form);
-    fd.append('use_case', collectUseCase()); // consolidate checkboxes → single field
+    fd.append('use_case', collectUseCase()); // consolidate checkboxes â†’ single field
 
     // Minimal validation to avoid server 400
     const consent = fd.get('consent');
@@ -998,7 +1013,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
       if (!submitBtn) return;
       if (on) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Sending your feedback… hang tight';
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Sending your feedbackâ€¦ hang tight';
       } else {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalHTML;
@@ -1046,7 +1061,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
       openFbSuccess(data);
 
     } catch (err) {
-      showError('Hi! It seems the connection is busy at the moment — give it another try in a few minutes. We appreciate your patience.');
+      showError('Hi! It seems the connection is busy at the moment â€” give it another try in a few minutes. We appreciate your patience.');
       setLoading(false);
     }
   });
@@ -1057,7 +1072,7 @@ body.geriatric-zoom { --nm-zoom: 1.25; font-size: 112%; }
    (safe drop-in replacement)
    ========================= */
 
-/* ——— Reusable helpers ——— */
+/* â€”â€”â€” Reusable helpers â€”â€”â€” */
 async function apiPost(url, data) {
   const opts = {
     method: 'POST',
@@ -1084,7 +1099,7 @@ function getCSRFToken(){
   return m ? m.pop() : '';
 }
 
-/* ——— Session id helpers ——— */
+/* â€”â€”â€” Session id helpers â€”â€”â€” */
 const SESSION_KEY = 'nm_session_id';
 function getSessionId(){ return localStorage.getItem(SESSION_KEY); }
 function setSessionId(id){ localStorage.setItem(SESSION_KEY, String(id)); }
@@ -1363,7 +1378,7 @@ document.addEventListener('DOMContentLoaded', () => {
     rec.onstart = () => {
       listening = true;
       micBtn.classList.add('bg-[#236092]','text-white');
-      micBtn.title = 'Listening… click to stop';
+      micBtn.title = 'Listeningâ€¦ click to stop';
     };
     rec.onend = () => {
       listening = false;
@@ -1548,7 +1563,7 @@ window.__nmLang = () => loadLang();
   document.head.appendChild(s);
 })();
 
-/* 2) Parse → sanitize → return a <div.md-prose> */
+/* 2) Parse â†’ sanitize â†’ return a <div.md-prose> */
 function renderAssistantMarkdown(mdText){
   const normalized = (mdText ?? '')
     .trim()
@@ -1879,18 +1894,18 @@ async function greetUser() {
     const data = await res.json();
     const name = data.display_name || "there";
     const options = [
-  `Hi ${name} — how are you feeling today?`,
+  `Hi ${name} â€” how are you feeling today?`,
   `Welcome, ${name}. What do you need help with: symptoms, results, or next steps?`,
-  `${name}, I’m here to help. Share a document and I’ll summarize it in plain language.`,
+  `${name}, Iâ€™m here to help. Share a document and Iâ€™ll summarize it in plain language.`,
   `Hey ${name}, got labs or notes? I can translate the medical jargon for you.`,
-  `Hello ${name}! Tell me what’s going on and we’ll make a plan together.`,
+  `Hello ${name}! Tell me whatâ€™s going on and weâ€™ll make a plan together.`,
   `${name}, your health matters. Want me to draft questions for your next appointment?`,
-  `Hi ${name}. On a scale of 1–10, how are you feeling today?`,
+  `Hi ${name}. On a scale of 1â€“10, how are you feeling today?`,
   `Welcome back, ${name}. How can I support you right now?`
 ];
     appendBubble(options[Math.floor(Math.random()*options.length)], false);
   } catch {
-    appendBubble("Welcome back. Let’s take care of what matters most today.", false);
+    appendBubble("Welcome back. Letâ€™s take care of what matters most today.", false);
   }
 }
 
@@ -1908,7 +1923,7 @@ async function newChat() {
     localStorage.setItem('nm_session_id', String(data.session_id));
     if (window.openSession) { try { await openSession(Number(data.session_id)); } catch {} }
   }
-  appendBubble('I’m here to help. How are you feeling today, and what would you like to do—summarize records, explain results, or ask a health question?', false);
+  appendBubble('Iâ€™m here to help. How are you feeling today, and what would you like to doâ€”summarize records, explain results, or ask a health question?', false);
 }
 
 /* =========================
@@ -2048,7 +2063,7 @@ async function sendChat() {
     appendChatBubble('user', userMessageContent);
   }
 
-  // show typing bubble (assistant is "thinking…")
+  // show typing bubble (assistant is "thinkingâ€¦")
   const chatWindow = document.getElementById("chatWindow");
   let typingWrap;
   if (chatWindow) {
@@ -2062,7 +2077,7 @@ async function sendChat() {
   <div class="typing-dots text-gray-600 dark:text-gray-300">
     <span></span><span></span><span></span>
   </div>
-  <span class="ml-2 text-xs text-gray-500">NeuroMed is typing…</span>
+  <span class="ml-2 text-xs text-gray-500">NeuroMed is typingâ€¦</span>
 `;
 
 
@@ -2094,7 +2109,7 @@ async function sendChat() {
 
     files.forEach(p => formData.append('files[]', p.file, p.file.name));
 
-    // 🔑 include CSRF
+    // ðŸ”‘ include CSRF
     const csrftoken = getCookie('csrftoken');
 
     const res  = await fetch('/webapp/api/send-chat/', { 
@@ -2133,7 +2148,7 @@ async function sendChat() {
     // remove typing bubble if error
     document.getElementById("typingBubble")?.remove();
 
-    appendChatBubble('assistant', '⚠️ Sorry, something went wrong. Please try again.');
+    appendChatBubble('assistant', 'âš ï¸ Sorry, something went wrong. Please try again.');
   } finally {
     chatLocked = false;
   }
@@ -2258,7 +2273,7 @@ document.addEventListener('DOMContentLoaded', bindCareSettingUI);
 
 // Optional: expose to other scripts if needed
 window.__nmCareSetting = () => loadCareSetting();
-// ——— Tone gating for Care Setting ———
+// â€”â€”â€” Tone gating for Care Setting â€”â€”â€”
 function toneAllowsCare(toneValRaw) {
   const tone = (toneValRaw === 'PlainClinical') ? 'Balanced' : toneValRaw;
   // Only show care context for these tones
@@ -2375,7 +2390,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 /* =========================
    Page init bits you had (tour/install/etc.)
-   — keep as-is if you already include them elsewhere
+   â€” keep as-is if you already include them elsewhere
    ========================= */
 
 // New Chat
@@ -2428,7 +2443,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         credentials: 'include'
       }).catch(()=>{});
 
-      appendBubble('I’m here to help. How are you feeling today, and what would you like to do—summarize records, explain results, or ask a health question?', false);
+      appendBubble('Iâ€™m here to help. How are you feeling today, and what would you like to doâ€”summarize records, explain results, or ask a health question?', false);
     } else {
       const sid = getSessionId();
       if (sid) {
@@ -2463,3 +2478,4 @@ document.addEventListener('DOMContentLoaded', async () => {
   
 </body>
 </html>
+

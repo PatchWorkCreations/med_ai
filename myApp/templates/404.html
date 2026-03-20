@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" class="h-full">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>404 — Took a tiny nap | NeuroMed Aira</title>
+  <title>404 â€” Took a tiny nap | NeuroMed Aira</title>
   <meta name="theme-color" content="#236092" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -38,6 +38,21 @@
       .floaty,.glow,.eye,.tail,.plug,.cable path { animation: none !important; }
     }
   </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-WY3SL8DJL9"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-WY3SL8DJL9');
+  </script>  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "vys1vrllqq");
+  </script>
 </head>
 <body class="h-full bg-gradient-to-br from-teal-50 via-white to-emerald-50 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
   <!-- soft blobs -->
@@ -125,10 +140,10 @@
 
       <!-- copy -->
       <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-800 dark:text-white">
-        404 — This page is unplugged
+        404 â€” This page is unplugged
       </h1>
       <p class="mt-2 text-slate-600 dark:text-slate-300">
-        It looks like this link isn’t connected. Let’s plug you back into the right place. 💚
+        It looks like this link isnâ€™t connected. Letâ€™s plug you back into the right place. ðŸ’š
       </p>
 
       <!-- actions -->
@@ -151,7 +166,7 @@
       <form action="/search" method="get" class="mt-5">
         <label for="q" class="sr-only">Search</label>
         <div class="flex gap-2">
-          <input id="q" name="q" placeholder="Find what you’re looking for…" class="flex-1 rounded-xl border border-slate-200/80 dark:border-white/10 bg-white/80 dark:bg-white/5 px-4 py-2.5 outline-none focus:ring-2 focus:ring-[#28926D]/50" />
+          <input id="q" name="q" placeholder="Find what youâ€™re looking forâ€¦" class="flex-1 rounded-xl border border-slate-200/80 dark:border-white/10 bg-white/80 dark:bg-white/5 px-4 py-2.5 outline-none focus:ring-2 focus:ring-[#28926D]/50" />
           <button class="rounded-xl px-4 py-2.5 bg-black text-white hover:bg-slate-900 dark:bg-white dark:text-slate-900 transition">Search</button>
         </div>
       </form>
@@ -178,7 +193,7 @@
       copyBtn.addEventListener('click', async () => {
         try{
           await navigator.clipboard.writeText(url);
-          copyBtn.textContent = 'Link copied ✓';
+          copyBtn.textContent = 'Link copied âœ“';
           setTimeout(()=> copyBtn.textContent = 'Copy link', 1400);
         }catch{
           alert('Copy not available. You can copy from the address bar.');
@@ -188,3 +203,4 @@
   </script>
 </body>
 </html>
+
