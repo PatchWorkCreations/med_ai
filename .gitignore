@@ -1,2 +1,13 @@
 
 .env
+
+# Local virtual environments
+.venv/
+.venv311/
+venv/
+myvenv/
+myenv/
+
+# Python cache/bytecode
+__pycache__/
+*.pyc
