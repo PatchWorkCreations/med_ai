@@ -814,17 +814,17 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
       <span class="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
         <i class="fa-solid fa-shield-halved text-white" style="font-size:.6rem;"></i>
       </span>
-      HIPAA-Compliant · Medical-grade security
+      Secure, privacy-first infrastructure on AWS
     </div>
   </div>
 
   <!-- Hero Headline -->
   <div class="text-center mb-8">
     <h1 style="font-family: var(--font-serif); font-size: clamp(2.4rem, 6vw, 4rem); line-height: 1.15; color: var(--text-primary); margin-bottom: 16px;">
-      Medical results,<br><span class="gradient-text">explained with care.</span>
+      Understand medical results with<br><span class="gradient-text">clarity, privacy, and care.</span>
     </h1>
     <p style="font-size: clamp(1.05rem, 2.5vw, 1.25rem); color: var(--text-secondary); max-width: 580px; margin: 0 auto; line-height: 1.65;">
-      Meet <strong style="color: var(--teal);">Aira</strong> — a compassionate AI that turns lab reports, discharge papers, and medical documents into clear, calm language you can actually use.
+      Upload lab reports, discharge papers, and medical documents — and <strong style="color: var(--teal);">Aira</strong> helps you understand them in clear, calm language you can actually use.
     </p>
   </div>
 
@@ -836,8 +836,8 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
       </div>
       <div id="intro" class="chat-bubble chat-ai shimmer">
         <p style="margin:0;color:var(--text-primary);line-height:1.65;font-weight:500;">
-          Hi, I'm <strong>Aira</strong>’™<br>
-          If you're caring for someone, I'll help you think through next steps gently and clearly. What's going on?
+          Hi, I'm <strong>Aira</strong>.<br>
+          Upload a report, ask a question, or tell me what you received — and I'll help you make sense of it clearly and gently.
         </p>
       </div>
     </div>
@@ -866,7 +866,7 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
       <textarea
         id="chatInput"
         rows="1"
-        placeholder="Ask about a test result, upload a document, or just describe what you received…"
+        placeholder="Upload a report, ask about a result, or describe what you received…"
         aria-label="Message"
         style="min-height:56px;"
       ></textarea>
@@ -892,11 +892,11 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
   <div class="text-center mb-12">
     <p style="font-size:.82rem;color:var(--teal);margin-bottom:12px;font-weight:600;">Not sure where to start? Try one of these</p>
     <div id="suggestionsList" class="flex flex-wrap items-center justify-center gap-2">
-      <button class="suggestion-chip"><i class="fa-regular fa-hospital"></i><span>Simplify this ER discharge for my family</span></button>
-      <button class="suggestion-chip"><i class="fa-solid fa-vial-circle-check"></i><span>Explain these labs in plain English</span></button>
-      <button class="suggestion-chip"><i class="fa-solid fa-pills"></i><span>Make a daily medication schedule</span></button>
-      <button class="suggestion-chip"><i class="fa-regular fa-clipboard"></i><span>Questions to ask my doctor</span></button>
-      <button class="suggestion-chip"><i class="fa-solid fa-language"></i><span>Translate this for my lola (Taglish)</span></button>
+      <button class="suggestion-chip"><i class="fa-regular fa-hospital"></i><span>I have a discharge summary — simplify it for my family</span></button>
+      <button class="suggestion-chip"><i class="fa-solid fa-vial-circle-check"></i><span>I need my lab results explained in plain English</span></button>
+      <button class="suggestion-chip"><i class="fa-solid fa-pills"></i><span>Help me create a medication schedule from my prescriptions</span></button>
+      <button class="suggestion-chip"><i class="fa-regular fa-clipboard"></i><span>What questions should I ask my doctor at my next visit?</span></button>
+      <button class="suggestion-chip"><i class="fa-solid fa-language"></i><span>Translate medical info to Taglish for my lola</span></button>
     </div>
   </div>
 </main>
@@ -1013,194 +1013,6 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
   </div>
 </section>
 
-<!-- ===== PRIVACY ===== -->
-<section style="padding:80px 0;background:var(--slate-soft);">
-  <div class="max-w-6xl mx-auto px-6">
-    <div class="grid lg:grid-cols-2 gap-16 items-center">
-      <!-- Left: Security visual -->
-      <div style="position:relative;">
-        <div style="position:absolute;inset:-20px;border-radius:48px;background:linear-gradient(135deg,rgba(30,138,122,.08),rgba(15,76,129,.06));filter:blur(28px);"></div>
-        <div style="position:relative;background:white;border-radius:var(--radius-xl);box-shadow:var(--shadow-lift);border:1px solid var(--border);padding:28px;">
-          <!-- Status -->
-          <div style="display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--teal-light);border-radius:var(--radius);border:1px solid rgba(30,138,122,.2);margin-bottom:20px;">
-            <i class="fa-solid fa-lock" style="color:var(--teal);"></i>
-            <div>
-              <p style="font-weight:600;font-size:.92rem;margin:0;color:var(--text-primary);">Secure processing active</p>
-              <p style="font-size:.78rem;color:var(--teal);margin:0;">All systems operational</p>
-            </div>
-          </div>
-          <!-- Checklist -->
-          <div style="display:grid;gap:12px;margin-bottom:20px;">
-            <div style="display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--text-secondary);">
-              <span style="width:22px;height:22px;border-radius:6px;background:var(--teal-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-check" style="color:var(--teal);font-size:.7rem;"></i></span>
-              Documents encrypted on upload
-            </div>
-            <div style="display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--text-secondary);">
-              <span style="width:22px;height:22px;border-radius:6px;background:var(--teal-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-check" style="color:var(--teal);font-size:.7rem;"></i></span>
-              HIPAA-compliant handling
-            </div>
-            <div style="display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--text-secondary);">
-              <span style="width:22px;height:22px;border-radius:6px;background:var(--teal-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-check" style="color:var(--teal);font-size:.7rem;"></i></span>
-              Private, isolated processing
-            </div>
-            <div style="display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--text-secondary);">
-              <span style="width:22px;height:22px;border-radius:6px;background:var(--teal-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-check" style="color:var(--teal);font-size:.7rem;"></i></span>
-              Your data is never sold or shared
-            </div>
-          </div>
-          <!-- Mini prompt -->
-          <div style="background:var(--slate-soft);border-radius:var(--radius);padding:16px;">
-            <p style="font-size:.8rem;font-weight:600;color:var(--text-primary);margin:0 0 10px 0;">Want something explained differently?</p>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <input type="text" placeholder="Add a follow-up…" style="flex:1;font-size:.83rem;padding:9px 12px;border-radius:10px;border:1px solid var(--border);outline:none;font-family:var(--font-sans);background:white;" />
-              <button style="width:38px;height:38px;border-radius:10px;background:var(--amber);border:none;cursor:pointer;color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <i class="fa-solid fa-arrow-up" style="font-size:.82rem;"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- Right: Text -->
-      <div>
-        <div class="section-label">Security</div>
-        <h2 style="font-family:var(--font-serif);font-size:clamp(1.9rem,4vw,2.8rem);color:var(--text-primary);line-height:1.18;margin-bottom:18px;">
-          Privacy isn't optional.<br><span class="gradient-text">It's foundational.</span>
-        </h2>
-        <p style="font-size:1.05rem;color:var(--text-secondary);line-height:1.7;margin-bottom:28px;">
-          Aira is built for medical information from the ground up — with security, compliance, and privacy woven into every step.
-        </p>
-        <div style="display:grid;gap:16px;">
-          <div style="display:flex;align-items:flex-start;gap:14px;">
-            <div style="width:40px;height:40px;border-radius:12px;background:var(--sky-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <i class="fa-solid fa-shield-halved" style="color:var(--navy);"></i>
-            </div>
-            <div>
-              <p style="font-weight:600;font-size:.95rem;margin:0 0 3px 0;color:var(--text-primary);">End-to-end encrypted document handling</p>
-              <p style="font-size:.87rem;color:var(--text-secondary);margin:0;line-height:1.5;">Files are encrypted in transit and at rest.</p>
-            </div>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:14px;">
-            <div style="width:40px;height:40px;border-radius:12px;background:var(--sky-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <i class="fa-solid fa-file-shield" style="color:var(--navy);"></i>
-            </div>
-            <div>
-              <p style="font-weight:600;font-size:.95rem;margin:0 0 3px 0;color:var(--text-primary);">HIPAA-compliant processing by default</p>
-              <p style="font-size:.87rem;color:var(--text-secondary);margin:0;line-height:1.5;">Built from day one for healthcare data standards.</p>
-            </div>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:14px;">
-            <div style="width:40px;height:40px;border-radius:12px;background:var(--sky-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <i class="fa-solid fa-user-shield" style="color:var(--navy);"></i>
-            </div>
-            <div>
-              <p style="font-weight:600;font-size:.95rem;margin:0 0 3px 0;color:var(--text-primary);">Your data stays yours — always</p>
-              <p style="font-size:.87rem;color:var(--text-secondary);margin:0;line-height:1.5;">We never sell, share, or use your data to train models.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== TESTIMONIALS ===== -->
-<section style="padding:80px 0;background:white;">
-  <div class="max-w-6xl mx-auto px-6">
-    <div class="text-center mb-12">
-      <div class="section-label" style="justify-content:center;">Testimonials</div>
-      <h2 style="font-family:var(--font-serif);font-size:clamp(1.8rem,4vw,2.8rem);color:var(--text-primary);margin-bottom:10px;line-height:1.2;">
-        Real people. Real clarity.<br>Real relief.
-      </h2>
-    </div>
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-      <div class="testimonial-card">
-        <div style="display:flex;gap:3px;margin-bottom:12px;">
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-        </div>
-        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.65;margin-bottom:16px;">"NeuroMed Aira is perfect for caregivers who want to understand medical results without feeling overwhelmed."</p>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:38px;height:38px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;flex-shrink:0;">M</div>
-          <div><p style="font-weight:600;font-size:.88rem;margin:0;color:var(--text-primary);">Maria Santos</p><p style="font-size:.78rem;color:var(--text-muted);margin:0;">@marias_care</p></div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div style="display:flex;gap:3px;margin-bottom:12px;">
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-        </div>
-        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.65;margin-bottom:16px;">"You can finally understand complex medical reports without a medical degree. This tool just makes sense."</p>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:38px;height:38px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;flex-shrink:0;">J</div>
-          <div><p style="font-weight:600;font-size:.88rem;margin:0;color:var(--text-primary);">John Chen</p><p style="font-size:.78rem;color:var(--text-muted);margin:0;">@johnhealth</p></div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div style="display:flex;gap:3px;margin-bottom:12px;">
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-        </div>
-        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.65;margin-bottom:16px;">"No jargon. No confusion. Just clear explanations when you need them most."</p>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:38px;height:38px;border-radius:50%;background:#e11d48;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;flex-shrink:0;">S</div>
-          <div><p style="font-weight:600;font-size:.88rem;margin:0;color:var(--text-primary);">Sarah Johnson</p><p style="font-size:.78rem;color:var(--text-muted);margin:0;">@sarahcaregiver</p></div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div style="display:flex;gap:3px;margin-bottom:12px;">
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-        </div>
-        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.65;margin-bottom:16px;">"Thoughtfully designed with patients in mind. Secure, accurate, and genuinely useful."</p>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:38px;height:38px;border-radius:50%;background:#4f46e5;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;flex-shrink:0;">D</div>
-          <div><p style="font-weight:600;font-size:.88rem;margin:0;color:var(--text-primary);">Dr. David Park</p><p style="font-size:.78rem;color:var(--text-muted);margin:0;">@drpark</p></div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div style="display:flex;gap:3px;margin-bottom:12px;">
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-        </div>
-        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.65;margin-bottom:16px;">"Exactly what I needed to manage my parents' medical records with confidence."</p>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:38px;height:38px;border-radius:50%;background:var(--amber);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;flex-shrink:0;">L</div>
-          <div><p style="font-weight:600;font-size:.88rem;margin:0;color:var(--text-primary);">Lisa Martinez</p><p style="font-size:.78rem;color:var(--text-muted);margin:0;">@lisafamily</p></div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div style="display:flex;gap:3px;margin-bottom:12px;">
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-          <i class="fa-solid fa-star" style="color:var(--amber);font-size:.85rem;"></i>
-        </div>
-        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.65;margin-bottom:16px;">"Fast answers, even late at night. This should exist everywhere."</p>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:38px;height:38px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;flex-shrink:0;">R</div>
-          <div><p style="font-weight:600;font-size:.88rem;margin:0;color:var(--text-primary);">Robert Kim</p><p style="font-size:.78rem;color:var(--text-muted);margin:0;">@robertkim</p></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- ===== PRICING ===== -->
 <section style="padding:80px 0;background:linear-gradient(160deg,var(--navy-deep) 0%,var(--navy) 50%,#0f4c81 100%);position:relative;overflow:hidden;">
   <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--teal),var(--sky),var(--amber));"></div>
@@ -1301,6 +1113,65 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
   </div>
 </section>
 
+<!-- ===== PRIVACY (after pricing) ===== -->
+<section style="padding:80px 0;background:var(--slate-soft);">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+      <div>
+        <div class="section-label">Security</div>
+        <h2 style="font-family:var(--font-serif);font-size:clamp(1.9rem,4vw,2.8rem);color:var(--text-primary);line-height:1.18;margin-bottom:18px;">
+          Privacy isn't optional.<br><span class="gradient-text">It's foundational.</span>
+        </h2>
+        <p style="font-size:1.05rem;color:var(--text-secondary);line-height:1.7;margin-bottom:28px;">
+          Aira is built for medical information from the ground up — with security and privacy woven into every step.
+        </p>
+        <div style="display:grid;gap:16px;">
+          <div style="display:flex;align-items:flex-start;gap:14px;">
+            <div style="width:40px;height:40px;border-radius:12px;background:var(--sky-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fa-solid fa-shield-halved" style="color:var(--navy);"></i>
+            </div>
+            <div>
+              <p style="font-weight:600;font-size:.95rem;margin:0 0 3px 0;color:var(--text-primary);">Encrypted document handling on secure AWS infrastructure</p>
+              <p style="font-size:.87rem;color:var(--text-secondary);margin:0;line-height:1.5;">Files are encrypted in transit and at rest. Built from day one with sensitive health data in mind.</p>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:14px;">
+            <div style="width:40px;height:40px;border-radius:12px;background:var(--sky-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fa-solid fa-user-shield" style="color:var(--navy);"></i>
+            </div>
+            <div>
+              <p style="font-weight:600;font-size:.95rem;margin:0 0 3px 0;color:var(--text-primary);">Your data stays yours — always</p>
+              <p style="font-size:.87rem;color:var(--text-secondary);margin:0;line-height:1.5;">We never sell, share, or use your data to train models.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="position:relative;">
+        <div style="position:absolute;inset:-20px;border-radius:48px;background:linear-gradient(135deg,rgba(30,138,122,.08),rgba(15,76,129,.06));filter:blur(28px);"></div>
+        <div style="position:relative;background:white;border-radius:var(--radius-xl);box-shadow:var(--shadow-lift);border:1px solid var(--border);padding:28px;">
+          <div style="display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--teal-light);border-radius:var(--radius);border:1px solid rgba(30,138,122,.2);margin-bottom:20px;">
+            <i class="fa-solid fa-lock" style="color:var(--teal);"></i>
+            <div>
+              <p style="font-weight:600;font-size:.92rem;margin:0;color:var(--text-primary);">Secure processing active</p>
+              <p style="font-size:.78rem;color:var(--teal);margin:0;">All systems operational</p>
+            </div>
+          </div>
+          <div style="display:grid;gap:12px;">
+            <div style="display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--text-secondary);">
+              <span style="width:22px;height:22px;border-radius:6px;background:var(--teal-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-check" style="color:var(--teal);font-size:.7rem;"></i></span>
+              Documents encrypted on upload
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--text-secondary);">
+              <span style="width:22px;height:22px;border-radius:6px;background:var(--teal-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-check" style="color:var(--teal);font-size:.7rem;"></i></span>
+              Your data is never sold or shared
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ===== TOAST ===== -->
 <div id="toast" class="toast fixed top-5 right-5 z-[60] hidden" role="status" aria-live="polite">
   <div style="background:white;border:1px solid var(--border);box-shadow:var(--shadow-card);border-radius:14px;padding:12px 16px;font-size:.88rem;display:flex;align-items:center;gap:10px;min-width:200px;">
@@ -1394,6 +1265,8 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
       <a href="{% url 'terms' %}" style="color:var(--navy);text-decoration:none;font-weight:500;">Terms of Use</a>
       <span style="color:var(--border);">•</span>
       <a href="/about" style="color:var(--text-secondary);text-decoration:none;">About</a>
+      <span style="color:var(--border);">•</span>
+      <a href="{% url 'contact' %}" style="color:var(--text-secondary);text-decoration:none;">Contact</a>
     </div>
     <p style="font-size:.78rem;color:var(--text-muted);margin:0;">© 2025 NeuroMed Aira. All rights reserved.</p>
   </div>
@@ -1564,7 +1437,7 @@ function applyGuestLimitState(atLimit){
     if(banner){ banner.classList.remove('hidden'); updateCooldownUI(); if(!cooldownInterval) cooldownInterval=setInterval(updateCooldownUI,1000); }
   }else{
     if(shell) shell.classList.remove('is-disabled');
-    if(input){ input.placeholder='Ask about a test result, upload a document, or just describe what you received...'; input.readOnly=false; }
+    if(input){ input.placeholder='Upload a report, ask about a result, or describe what you received…'; input.readOnly=false; }
     if(upload) upload.disabled=false;
     if(send) toggleSend();
     if(suggestions){ suggestions.style.opacity=''; suggestions.style.pointerEvents=''; }

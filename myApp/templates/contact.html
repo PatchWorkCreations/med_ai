@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — NeuroMed Aira™</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&family=Roboto+Serif:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --green: #2E8B6A;
+    --green-light: #3DAA83;
+    --green-pale: #E8F5F0;
+    --blue: #2D5FA8;
+    --blue-light: #4278C8;
+    --blue-pale: #EBF1FB;
+    --navy: #1A2A4A;
+    --ink: #1C2B3A;
+    --ink-mid: #3D4F63;
+    --ink-soft: #6B7D92;
+    --border: #E2E8EF;
+    --white: #FFFFFF;
+    --bg: #FAFCFF;
+    --bg-warm: #F7F9FC;
+    --gradient: linear-gradient(135deg, var(--green) 0%, var(--blue) 100%);
+    --gradient-soft: linear-gradient(135deg, #E8F5F0 0%, #EBF1FB 100%);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Roboto', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAVBAR (unchanged) ── */
+  #navbar { --navy: #0F4C81; --navy-deep: #08305A; --sky: #4FA8D8; --teal: #1E8A7A; --teal-light: #E6F6F4; --border: rgba(15,76,129,0.12); --slate-soft: #F4F6F9; --text-primary: #0D1B2A; --text-muted: #8896A5; }
+  .navbar { position: sticky; top: 0; z-index: 100; background: rgba(250,250,248,0.92); backdrop-filter: blur(20px) saturate(1.4); border-bottom: 1px solid var(--border); }
+  .navbar .navbar-inner { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 1280px; margin: 0 auto; padding: 12px 24px; }
+  .navbar .nav-logo { display: flex !important; align-items: center; text-decoration: none; flex-shrink: 0; color: inherit; }
+  .navbar .nav-logo-img { height: 48px; width: auto; object-fit: contain; display: block; }
+  .navbar .navbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .navbar nav.navbar-nav { display: none; }
+  @media (min-width: 768px) { .navbar nav.navbar-nav { display: flex; align-items: center; gap: 8px; } .navbar #nmMenuBtn { display: none !important; } }
+  .navbar #nmMenuBtn { display: flex; align-items: center; justify-content: center; }
+  .navbar .btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: var(--navy); color: white; border-radius: 12px; font-weight: 600; font-size: .9rem; border: none; text-decoration: none; }
+  .navbar .btn-primary:hover { background: var(--navy-deep); color: white; }
+  .navbar .btn-ghost { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: transparent; color: var(--text-primary); border-radius: 12px; font-weight: 500; font-size: .9rem; border: 1px solid var(--border); text-decoration: none; }
+  .navbar .btn-ghost:hover { background: var(--teal-light); border-color: var(--teal); color: var(--text-primary); }
+  .navbar .input-icon-btn { width: 36px; height: 36px; border-radius: 10px; background: var(--slate-soft); border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; color: var(--text-muted); }
+  body.hc { filter: contrast(1.5) brightness(0.95); }
+
+  /* ── HERO (full bleed navy) ── */
+  .hero {
+    background: var(--navy);
+    position: relative;
+    overflow: hidden;
+    padding: 100px 48px 0;
+  }
+
+  /* animated mesh */
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 55% 80% at 5% 50%, rgba(46,139,106,0.2) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 60% at 95% 20%, rgba(45,95,168,0.28) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 50% at 50% 100%, rgba(61,170,131,0.1) 0%, transparent 60%);
+    animation: heroBreathe 16s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+
+  @keyframes heroBreathe {
+    0%   { opacity: 0.7; transform: scale(1) translate(0, 0); }
+    100% { opacity: 1;   transform: scale(1.06) translate(2%, 3%); }
+  }
+
+  /* dot grid */
+  .hero::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px);
+    background-size: 30px 30px;
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    position: relative; z-index: 1;
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 60px;
+    padding-bottom: 72px;
+  }
+
+  .hero-text { max-width: 680px; }
+
+  .hero-eyebrow {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 11px; letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--green-light);
+    margin-bottom: 24px;
+    display: flex; align-items: center; gap: 12px;
+    opacity: 0; animation: fadeUp 0.6s ease 0.1s forwards;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    width: 20px; height: 1.5px;
+    background: var(--green-light);
+    border-radius: 2px; display: block;
+  }
+
+  .hero h1 {
+    font-family: 'Roboto Serif', serif;
+    font-size: clamp(40px, 5.5vw, 72px);
+    font-weight: 500;
+    line-height: 1.1;
+    color: white;
+    letter-spacing: -2px;
+    margin-bottom: 24px;
+    opacity: 0; animation: fadeUp 0.65s ease 0.2s forwards;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    background: linear-gradient(120deg, var(--green-light) 0%, #9AE8D2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: 17px; font-weight: 300;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.8;
+    max-width: 520px;
+    opacity: 0; animation: fadeUp 0.65s ease 0.3s forwards;
+  }
+
+  /* response time badge */
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 100px;
+    padding: 8px 18px;
+    font-size: 13px; font-weight: 400;
+    color: rgba(255,255,255,0.55);
+    opacity: 0; animation: fadeUp 0.65s ease 0.42s forwards;
+    align-self: flex-end;
+    white-space: nowrap;
+  }
+
+  .badge-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green-light);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  /* ── FORM SECTION ── */
+  .form-section {
+    max-width: 1280px;
+    margin: 80px auto 0;
+    padding: 0 48px 100px;
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  /* sidebar */
+  .form-sidebar {
+    position: sticky; top: 100px;
+  }
+
+  .sidebar-eyebrow {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 10.5px; letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .sidebar-eyebrow::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  .form-sidebar h2 {
+    font-family: 'Roboto Serif', serif;
+    font-size: 28px; font-weight: 500;
+    color: var(--navy);
+    letter-spacing: -0.5px;
+    line-height: 1.25;
+    margin-bottom: 16px;
+  }
+
+  .form-sidebar p {
+    font-size: 14.5px; font-weight: 300;
+    color: var(--ink-soft);
+    line-height: 1.8;
+    margin-bottom: 32px;
+  }
+
+  /* topic pills in sidebar */
+  .topic-list {
+    display: flex; flex-direction: column; gap: 6px;
+    margin-bottom: 36px;
+  }
+
+  .topic-pill {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: white;
+    font-size: 13px; font-weight: 400;
+    color: var(--ink-mid);
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+    transition: all 0.18s;
+    text-align: left;
+  }
+
+  .topic-pill:hover {
+    border-color: var(--green);
+    color: var(--green);
+    background: var(--green-pale);
+  }
+
+  .topic-pill.active {
+    border-color: var(--green);
+    background: var(--green-pale);
+    color: var(--green);
+    font-weight: 500;
+  }
+
+  .topic-pill-icon { font-size: 14px; width: 20px; text-align: center; display: flex; align-items: center; justify-content: center; }
+
+  .topic-pill-check {
+    margin-left: auto;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--green);
+    display: none;
+    align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .topic-pill-check svg { width: 10px; height: 10px; }
+
+  .topic-pill.active .topic-pill-check { display: flex; }
+
+  /* sidebar trust items */
+  .sidebar-trust { display: flex; flex-direction: column; gap: 10px; }
+
+  .trust-item {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12.5px; color: var(--ink-soft); font-weight: 300;
+  }
+
+  .trust-icon {
+    width: 28px; height: 28px; flex-shrink: 0;
+    border-radius: 7px;
+    background: var(--green-pale);
+    border: 1px solid rgba(46,139,106,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    color: var(--green);
+  }
+
+  /* ── FORM CARD ── */
+  .form-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(26,42,74,0.04), 0 16px 48px rgba(26,42,74,0.06);
+  }
+
+  .form-card-header {
+    padding: 36px 40px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg-warm);
+    position: relative; overflow: hidden;
+  }
+
+  /* logo watermark in card header */
+  .form-card-header::after {
+    content: '';
+    position: absolute;
+    right: -20px; top: -30px;
+    width: 200px; height: 200px;
+    background-image: url('https://res.cloudinary.com/dk52yeq9x/image/upload/v1770301408/Neuromed_Aira_Logo-09_qpgvss.png');
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    opacity: 0.06;
+    pointer-events: none;
+  }
+
+  .form-card-header h3 {
+    font-family: 'Roboto Serif', serif;
+    font-size: 20px; font-weight: 500;
+    color: var(--navy); letter-spacing: -0.3px;
+  }
+
+  .form-card-header p {
+    font-size: 13px; color: var(--ink-soft); margin-top: 4px; font-weight: 300;
+  }
+
+  .secure-badge {
+    display: flex; align-items: center; gap: 7px;
+    padding: 7px 14px;
+    background: var(--green-pale);
+    border: 1px solid rgba(46,139,106,0.2);
+    border-radius: 100px;
+    font-size: 11.5px; font-weight: 400;
+    color: var(--green);
+    white-space: nowrap;
+    font-family: 'Roboto Mono', monospace;
+    letter-spacing: 0.3px;
+  }
+
+  .secure-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green);
+  }
+
+  /* form body */
+  .form-body {
+    padding: 40px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+
+  .form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+
+  .span-2 { grid-column: span 2; }
+
+  .form-group { display: flex; flex-direction: column; gap: 7px; }
+
+  .form-group label {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 10.5px; letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 400;
+  }
+
+  .req { color: var(--green); }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 100%;
+    padding: 13px 16px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14.5px; font-weight: 300;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg);
+    color: var(--ink);
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    outline: none; appearance: none;
+  }
+
+  .form-group input::placeholder,
+  .form-group textarea::placeholder { color: #B5C3CE; font-weight: 300; }
+
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    border-color: var(--green);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(46,139,106,0.1);
+  }
+
+  .form-group textarea {
+    min-height: 140px; resize: vertical; line-height: 1.7;
+  }
+
+  .form-group select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7D92' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 40px; cursor: pointer;
+  }
+
+  /* form error */
+  .form-error {
+    display: flex; align-items: center; gap: 10px;
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    color: #B91C1C;
+    padding: 13px 18px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    margin-bottom: 20px;
+  }
+
+  /* form footer */
+  .form-footer {
+    padding: 24px 40px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-warm);
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 20px;
+  }
+
+  .form-note {
+    font-size: 12px; color: var(--ink-soft);
+    font-weight: 300; line-height: 1.5;
+    display: flex; align-items: center; gap: 7px;
+  }
+
+  .form-note i { color: var(--green); }
+
+  .btn-submit {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--gradient);
+    color: white;
+    padding: 14px 36px;
+    border: none; border-radius: 100px;
+    font-size: 15px; font-weight: 500;
+    font-family: 'Roboto', sans-serif;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 20px rgba(45,95,168,0.28);
+    white-space: nowrap; letter-spacing: 0.2px;
+  }
+
+  .btn-submit:hover {
+    opacity: 0.91; transform: translateY(-1px);
+    box-shadow: 0 10px 32px rgba(45,95,168,0.35);
+  }
+
+  .btn-submit:active { transform: translateY(0); }
+  .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  /* ── FOOTER ── */
+  .site-footer {
+    background: var(--navy);
+    padding: 48px;
+    text-align: center;
+  }
+
+  .site-footer .footer-logo {
+    font-family: 'Roboto Serif', serif;
+    font-size: 18px; font-weight: 500;
+    color: white; margin-bottom: 16px;
+  }
+
+  .footer-links { display: flex; justify-content: center; gap: 28px; list-style: none; margin-bottom: 20px; flex-wrap: wrap; }
+  .footer-links a { font-size: 13.5px; color: rgba(255,255,255,0.38); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: white; }
+  .footer-copy { font-size: 12px; color: rgba(255,255,255,0.2); font-family: 'Roboto Mono', monospace; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1100px) {
+    .form-section { grid-template-columns: 280px 1fr; gap: 48px; }
+    .form-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 860px) {
+    .hero { padding: 72px 24px 0; }
+    .hero-inner { grid-template-columns: 1fr; gap: 24px; }
+    .hero-badge { align-self: auto; }
+    .form-section { grid-template-columns: 1fr; padding: 0 24px 80px; }
+    .form-sidebar { position: static; }
+    .form-grid, .form-grid-2 { grid-template-columns: 1fr; }
+    .span-2 { grid-column: span 1; }
+    .form-body { padding: 28px 24px; }
+    .form-card-header { padding: 24px; flex-direction: column; align-items: flex-start; gap: 12px; }
+    .form-footer { padding: 20px 24px; flex-direction: column; align-items: stretch; }
+    .btn-submit { justify-content: center; }
+    .site-footer { padding: 40px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== NAVBAR (unchanged) ===== -->
+<header id="navbar" class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="nav-logo">
+      <img src="https://res.cloudinary.com/dk52yeq9x/image/upload/v1770301408/Neuromed_Aira_Logo-09_qpgvss.png"
+           alt="NeuroMed Aira" class="nav-logo-img"/>
+    </a>
+    <div class="navbar-right">
+      <nav class="navbar-nav">
+        <button id="fontMinus" class="input-icon-btn" title="Decrease font size" aria-label="Smaller text"><span style="font-size:.8rem;font-weight:700;">A-</span></button>
+        <button id="fontPlus" class="input-icon-btn" title="Increase font size" aria-label="Larger text"><span style="font-size:.9rem;font-weight:700;">A+</span></button>
+        <button id="highContrast" class="input-icon-btn" aria-pressed="false" title="High contrast" aria-label="Toggle high contrast"><i class="fa-solid fa-circle-half-stroke"></i></button>
+        <div class="relative">
+          <button id="langBtn" class="btn-ghost text-sm" aria-haspopup="menu" aria-expanded="false">
+            <i class="fa-solid fa-globe opacity-70"></i>
+            <span id="langBtnLabel">English</span>
+            <i class="fa-solid fa-chevron-down opacity-50" style="font-size:.7rem;"></i>
+          </button>
+          <div id="langMenu" class="hidden absolute right-0 mt-2 w-56 max-h-72 overflow-auto bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-1"></div>
+        </div>
+        <a href="{% url 'about' %}" class="btn-ghost text-sm">About</a>
+        <a href="/signup" class="btn-ghost text-sm">Sign up</a>
+        <a href="/login" class="btn-primary text-sm" style="padding:10px 20px;">Log in</a>
+      </nav>
+      <button id="nmMenuBtn" class="input-icon-btn" aria-label="Open menu">
+        <svg id="nmIconOpen" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <svg id="nmIconClose" class="h-5 w-5" style="display:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="nmMobileMenu" class="hidden border-t border-slate-100 bg-white/95 backdrop-blur">
+    <div style="max-width:1280px;margin:0 auto;padding:16px 24px;display:grid;gap:12px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button id="mFontMinus" class="btn-ghost text-sm flex-1 justify-center">A-</button>
+        <button id="mFontPlus" class="btn-ghost text-sm flex-1 justify-center">A+</button>
+        <button id="mHighContrast" class="btn-ghost text-sm flex-1 justify-center" aria-pressed="false"><i class="fa-solid fa-circle-half-stroke"></i></button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <a href="{% url 'about' %}" class="btn-ghost text-sm">About</a>
+        <a href="/signup" class="btn-ghost text-sm">Sign up</a>
+        <a href="/login" class="btn-primary text-sm">Log in</a>
+      </div>
+      <div>
+        <button id="mLangBtn" class="btn-ghost text-sm w-full justify-between">
+          <span class="flex items-center gap-2"><i class="fa-solid fa-globe opacity-70"></i><span id="mLangBtnLabel">English</span></span>
+          <i class="fa-solid fa-chevron-down opacity-50" style="font-size:.7rem;"></i>
+        </button>
+        <div id="mLangMenu" class="hidden mt-2 border border-slate-200 rounded-2xl bg-white shadow-lg max-h-60 overflow-auto py-1"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-eyebrow">Contact NeuroMed Aira</div>
+      <h1>Let's talk about<br><em>what matters.</em></h1>
+      <p class="hero-sub">Whether you're a patient, caregiver, healthcare organization, or partner — every message reaches a real person on our team.</p>
+    </div>
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      We reply within one business day
+    </div>
+  </div>
+</section>
+
+<!-- ===== FORM SECTION ===== -->
+<div class="form-section">
+
+  <!-- SIDEBAR -->
+  <div class="form-sidebar">
+    <div class="sidebar-eyebrow">Send a message</div>
+    <h2>What can we help with?</h2>
+    <p>Pick a topic below and we'll route your message directly to the right person on our team.</p>
+
+    <div class="topic-list" id="topicList">
+      <button type="button" class="topic-pill active" data-topic="General question" onclick="selectTopic(this)">
+        <span class="topic-pill-icon"><i class="fa-solid fa-comments"></i></span> General question
+        <span class="topic-pill-check">
+          <svg viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </button>
+      <button type="button" class="topic-pill" data-topic="Clinic or enterprise" onclick="selectTopic(this)">
+        <span class="topic-pill-icon"><i class="fa-solid fa-building"></i></span> Clinic or enterprise
+        <span class="topic-pill-check">
+          <svg viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </button>
+      <button type="button" class="topic-pill" data-topic="Partnership" onclick="selectTopic(this)">
+        <span class="topic-pill-icon"><i class="fa-solid fa-handshake"></i></span> Partnership
+        <span class="topic-pill-check">
+          <svg viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </button>
+      <button type="button" class="topic-pill" data-topic="Bug or feedback" onclick="selectTopic(this)">
+        <span class="topic-pill-icon"><i class="fa-solid fa-bug"></i></span> Bug or feedback
+        <span class="topic-pill-check">
+          <svg viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </button>
+      <button type="button" class="topic-pill" data-topic="Privacy request" onclick="selectTopic(this)">
+        <span class="topic-pill-icon"><i class="fa-solid fa-shield-halved"></i></span> Privacy request
+        <span class="topic-pill-check">
+          <svg viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </button>
+      <button type="button" class="topic-pill" data-topic="Press & media" onclick="selectTopic(this)">
+        <span class="topic-pill-icon"><i class="fa-solid fa-newspaper"></i></span> Press &amp; media
+        <span class="topic-pill-check">
+          <svg viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </button>
+    </div>
+
+    <div class="sidebar-trust">
+      <div class="trust-item">
+        <div class="trust-icon"><i class="fa-solid fa-lock"></i></div>
+        Privacy-first on AWS infrastructure
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon"><i class="fa-solid fa-bolt"></i></div>
+        Reply within one business day
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon"><i class="fa-solid fa-user"></i></div>
+        Real humans — not bot responses
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon"><i class="fa-solid fa-ban"></i></div>
+        We never sell your data
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM CARD -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div>
+        <h3>Send us a message</h3>
+        <p>Fill in the details below and we'll be in touch.</p>
+      </div>
+      <div class="secure-badge">
+        <span class="secure-dot"></span> Secure &amp; encrypted
+      </div>
+    </div>
+
+    {% if error %}
+    <div class="form-body" style="padding-bottom:0;">
+      <div class="form-error">
+        <i class="fa-solid fa-circle-exclamation"></i> {{ error }}
+      </div>
+    </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'contact' %}" id="contactForm">
+      {% csrf_token %}
+
+      <!-- hidden subject field — driven by topic pills -->
+      <input type="hidden" name="subject" id="subjectField" value="General question">
+
+      <div class="form-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="fname">First name <span class="req">*</span></label>
+            <input type="text" id="fname" name="fname" required
+                   value="{{ form_data.fname|default:'' }}"
+                   placeholder="Jane" autocomplete="given-name">
+          </div>
+          <div class="form-group">
+            <label for="lname">Last name <span class="req">*</span></label>
+            <input type="text" id="lname" name="lname" required
+                   value="{{ form_data.lname|default:'' }}"
+                   placeholder="Smith" autocomplete="family-name">
+          </div>
+          <div class="form-group">
+            <label for="role">Your role</label>
+            <select id="role" name="role">
+              <option value="" disabled selected>Select…</option>
+              <option value="patient">Patient or caregiver</option>
+              <option value="clinician">Physician / clinician</option>
+              <option value="admin">Hospital administrator</option>
+              <option value="health_it">Healthcare IT</option>
+              <option value="researcher">Researcher / academic</option>
+              <option value="investor">Investor / partner</option>
+              <option value="press">Journalist / media</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="email">Email address <span class="req">*</span></label>
+            <input type="email" id="email" name="email" required
+                   value="{{ form_data.email|default:'' }}"
+                   placeholder="jane@example.com" autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label for="org">Organization <span style="color:var(--ink-soft);text-transform:none;font-family:'Roboto',sans-serif;font-size:11px;letter-spacing:0;">(optional)</span></label>
+            <input type="text" id="org" name="org"
+                   value="{{ form_data.org|default:'' }}"
+                   placeholder="Hospital, clinic, or company">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="message">Message <span class="req">*</span></label>
+          <textarea id="message" name="message" required
+                    placeholder="Tell us what's on your mind. The more context you share, the better we can help.">{{ form_data.message|default:'' }}</textarea>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <p class="form-note">
+          <i class="fa-solid fa-lock"></i>
+          Handled securely. Never sold or shared.
+        </p>
+        <button type="submit" class="btn-submit">
+          <i class="fa-solid fa-paper-plane" style="font-size:13px;"></i>
+          Send message
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer">
+  <div class="footer-logo">NeuroMed Aira™</div>
+  <ul class="footer-links">
+    <li><a href="/">Product</a></li>
+    <li><a href="/">Pricing</a></li>
+    <li><a href="{% url 'about' %}">About</a></li>
+    <li><a href="{% url 'contact' %}">Contact</a></li>
+    <li><a href="{% url 'privacy' %}">Privacy Policy</a></li>
+    <li><a href="{% url 'terms' %}">Terms of Use</a></li>
+  </ul>
+  <div class="footer-copy">Medical guidance, simplified. · Built with care.</div>
+</footer>
+
+<!-- ===== JS (original unchanged + topic logic) ===== -->
+<script>
+function selectTopic(btn) {
+  document.querySelectorAll('.topic-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('subjectField').value = btn.dataset.topic;
+}
+
+(function(){
+  const $=s=>document.querySelector(s);
+  const LANGUAGE_CHOICES=[['en-US','English'],['es-ES','Spanish'],['fr-FR','French'],['de-DE','German'],['zh-CN','Chinese'],['ja-JP','Japanese'],['pt-BR','Portuguese'],['ko-KR','Korean'],['ar-SA','Arabic'],['vi-VN','Vietnamese']];
+  function loadLang(){return localStorage.getItem('nm_lang')||((navigator.languages&&navigator.languages[0])||navigator.language||'en-US');}
+  function saveLang(c){localStorage.setItem('nm_lang',c);}
+  function labelFor(c){const f=LANGUAGE_CHOICES.find(([x])=>x===c);return f?f[1]:c;}
+  function buildMenu(el,onPick){
+    if(!el)return; el.innerHTML='';
+    LANGUAGE_CHOICES.forEach(([code,label])=>{
+      const b=document.createElement('button'); b.type='button';
+      b.style.cssText='width:100%;text-align:left;padding:8px 14px;font-size:.88rem;border:none;background:none;cursor:pointer;color:#0D1B2A;';
+      b.textContent=label; b.onclick=()=>{onPick(code);el.classList.add('hidden');};
+      el.appendChild(b);
+    });
+  }
+  function toggleMenu(el,open){if(el)el.classList.toggle('hidden',!open);}
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    const root=document.documentElement,body=document.body;
+    function adjustFont(d){const c=parseFloat(getComputedStyle(root).getPropertyValue('font-size'))||16;root.style.setProperty('font-size',Math.min(22,Math.max(14,c+d))+'px');}
+    function toggleHC(btn){body.classList.toggle('hc');btn.setAttribute('aria-pressed',body.classList.contains('hc'));}
+    $('#fontMinus')?.addEventListener('click',()=>adjustFont(-1));
+    $('#fontPlus')?.addEventListener('click',()=>adjustFont(1));
+    $('#highContrast')?.addEventListener('click',()=>toggleHC($('#highContrast')));
+    $('#mFontMinus')?.addEventListener('click',()=>adjustFont(-1));
+    $('#mFontPlus')?.addEventListener('click',()=>adjustFont(1));
+    $('#mHighContrast')?.addEventListener('click',()=>toggleHC($('#mHighContrast')));
+
+    const cur=loadLang();
+    const lb1=$('#langBtnLabel'),lb2=$('#mLangBtnLabel');
+    if(lb1)lb1.textContent=labelFor(cur); if(lb2)lb2.textContent=labelFor(cur);
+    const dm=$('#langMenu'),mm=$('#mLangMenu');
+    function pick(c){saveLang(c);if(lb1)lb1.textContent=labelFor(c);if(lb2)lb2.textContent=labelFor(c);}
+    buildMenu(dm,pick); buildMenu(mm,pick);
+    $('#langBtn')?.addEventListener('click',e=>{e.stopPropagation();toggleMenu(dm,dm.classList.contains('hidden'));});
+    $('#mLangBtn')?.addEventListener('click',e=>{e.stopPropagation();toggleMenu(mm,mm.classList.contains('hidden'));});
+    document.addEventListener('click',e=>{
+      if(dm&&!dm.contains(e.target)&&e.target.id!=='langBtn')toggleMenu(dm,false);
+      if(mm&&!mm.contains(e.target)&&e.target.id!=='mLangBtn')toggleMenu(mm,false);
+    });
+
+    const menu=$('#nmMobileMenu'),btn=$('#nmMenuBtn'),icoOpen=$('#nmIconOpen'),icoClose=$('#nmIconClose');
+    function setOpen(o){menu.classList.toggle('hidden',!o);btn?.setAttribute('aria-expanded',o);if(icoOpen)icoOpen.style.display=o?'none':'block';if(icoClose)icoClose.style.display=o?'block':'none';}
+    btn?.addEventListener('click',()=>setOpen(menu.classList.contains('hidden')));
+    document.addEventListener('click',e=>{if(menu&&!menu.classList.contains('hidden')&&!menu.contains(e.target)&&!btn?.contains(e.target))setOpen(false);});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')setOpen(false);});
+  });
+})();
+</script>
+
+</body>
+</html>

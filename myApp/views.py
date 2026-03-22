@@ -1608,6 +1608,11 @@ def send_chat(request):
             chat_history.insert(0, {"role": "system", "content": header})
         if not any(m.get("role") == "system" and base_prompt in m.get("content","") for m in chat_history):
             chat_history.insert(0, {"role": "system", "content": system_prompt})
+        # Always refresh main system prompt so language changes take effect immediately
+        for m in chat_history:
+            if m.get("role") == "system" and base_prompt in m.get("content", ""):
+                m["content"] = system_prompt
+                break
     else:
         summary_context = request.session.get("latest_summary", "")
         chat_history = request.session.get(
@@ -1616,6 +1621,11 @@ def send_chat(request):
         )
         if not any(m.get("role") == "system" and str(m.get("content", "")).startswith("ResponseMode:") for m in chat_history):
             chat_history.insert(1, {"role": "system", "content": header})
+        # Guest: always refresh main system prompt so language changes take effect
+        for m in chat_history:
+            if m.get("role") == "system" and base_prompt in m.get("content", ""):
+                m["content"] = system_prompt
+                break
     
     # --- Extract signals and update profile (Adaptive System) - after chat_history is built
     if settings.ENABLE_ADAPTIVE_RESPONSE and interaction_profile:
@@ -2152,6 +2162,65 @@ def landing_page(request):
 
 def about_page(request):
     return render(request, "about.html")
+
+
+def contact_page(request):
+    """Contact page (GET: show form, POST: submit via Resend)."""
+    if request.method == "POST":
+        name = (request.POST.get("name") or "").strip()
+        email = (request.POST.get("email") or "").strip()
+        subject = (request.POST.get("subject") or "").strip()
+        message = (request.POST.get("message") or "").strip()
+
+        if not name or not email or not message:
+            return render(
+                request,
+                "contact.html",
+                {
+                    "error": "Please fill in your name, email, and message.",
+                    "form_data": {"name": name, "email": email, "subject": subject, "message": message},
+                },
+            )
+
+        from .emailer import send_via_resend
+
+        contact_email = getattr(settings, "CONTACT_EMAIL", "hello@neuromedai.org")
+        email_subject = f"Contact form: {subject}" if subject else f"Contact from {name}"
+        email_body = f"""New contact form submission
+
+Name: {name}
+Email: {email}
+Subject: {subject or '(none)'}
+
+Message:
+{message}
+
+---
+Sent from NeuroMed Aira contact page
+"""
+
+        ok = send_via_resend(
+            to=contact_email,
+            subject=email_subject,
+            text=email_body,
+            reply_to=email,
+        )
+
+        if not ok:
+            return render(
+                request,
+                "contact.html",
+                {"error": "We couldn't send your message. Please try again or email us directly at hello@neuromedai.org.", "form_data": {"name": name, "email": email, "subject": subject, "message": message}},
+            )
+
+        return redirect("contact_thanks")
+
+    return render(request, "contact.html", {"form_data": {}})
+
+
+def contact_thanks(request):
+    """Thank-you page after contact form submission."""
+    return render(request, "contact_thanks.html")
 
 def speaking_view(request):
     return render(request, 'talking_ai/speaking.html')

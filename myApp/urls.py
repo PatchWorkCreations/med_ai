@@ -46,6 +46,8 @@ urlpatterns = [
 
 
      path('about/', views.about_page, name='about'),
+     path('contact/', views.contact_page, name='contact'),
+     path('contact/thanks/', views.contact_thanks, name='contact_thanks'),
 
      path('speak/', views.speaking_view, name='speaking-page'),
 
