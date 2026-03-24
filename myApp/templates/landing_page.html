@@ -43,7 +43,6 @@
   --font-sans: 'Roboto', system-ui, sans-serif;
 }
 
-/* ===== Base ===== */
 html { font-size: 16px; scroll-behavior: smooth; }
 body {
   font-family: var(--font-sans);
@@ -53,10 +52,8 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ===== High Contrast Mode ===== */
 body.hc { filter: contrast(1.5) brightness(0.95); }
 
-/* ===== Page Background ===== */
 body::before {
   content: '';
   position: fixed;
@@ -105,7 +102,7 @@ body::before {
 .chat-ai .md-prose th, .chat-ai .md-prose td { border: 1px solid var(--border); padding: .32rem .5rem; font-weight: 500; }
 .chat-ai .md-prose thead th { background: var(--sky-light); font-weight: 600; }
 
-/* ===== Hero background ===== */
+/* ===== Hero ===== */
 .hero-section {
   position: relative;
   overflow: hidden;
@@ -114,6 +111,195 @@ body::before {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+}
+
+/* ===== IMAGE: Hero split layout ===== */
+/* The hero now uses a two-column split: headline+chat on left, doctor image anchored right */
+.hero-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+}
+@media (max-width: 900px) {
+  .hero-split {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 40px 20px 48px;
+  }
+  .hero-split .hero-image-col {
+    order: -1; /* image above headline on mobile */
+  }
+}
+.hero-image-col img {
+  width: 100%;
+  height: 520px;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lift);
+  display: block;
+}
+@media (max-width: 900px) {
+  .hero-image-col img {
+    height: 260px;
+    object-position: center 20%;
+    border-radius: var(--radius-lg);
+  }
+}
+
+/* ===== Hero Luxury Chat Layer ===== */
+.lux-chat-card {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px) saturate(1.1);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    0 14px 40px rgba(15, 76, 129, 0.16),
+    0 3px 14px rgba(15, 76, 129, 0.08);
+}
+.hero-demo-thread {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+  animation: hero-thread-rise 700ms ease both;
+}
+.hero-demo-msg {
+  max-width: 88%;
+  padding: 11px 14px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 10px rgba(15, 76, 129, 0.07);
+}
+.hero-demo-msg.ai {
+  margin-right: auto;
+  background: linear-gradient(145deg, #f9fbff 0%, #f3f8ff 100%);
+  border-left: 3px solid var(--teal);
+  color: var(--text-primary);
+}
+.hero-demo-msg.user {
+  margin-left: auto;
+  background: linear-gradient(135deg, #0f4c81 0%, #145d9d 100%);
+  color: #fff;
+  border-color: rgba(15, 76, 129, 0.25);
+}
+.hero-demo-msg.d1 { animation: hero-msg-float 6s ease-in-out 0.1s infinite; }
+.hero-demo-msg.d2 { animation: hero-msg-float 6s ease-in-out 0.7s infinite; }
+.hero-demo-msg.d3 { animation: hero-msg-float 6s ease-in-out 1.2s infinite; }
+.hero-demo-msg.typing {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.hero-mini-dots {
+  display: inline-flex;
+  gap: 4px;
+}
+.hero-mini-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--teal);
+  opacity: 0.7;
+  animation: hero-mini-dot 1.1s ease-in-out infinite;
+}
+.hero-mini-dots span:nth-child(2) { animation-delay: 0.16s; }
+.hero-mini-dots span:nth-child(3) { animation-delay: 0.32s; }
+@keyframes hero-thread-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes hero-msg-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1.5px); }
+}
+@keyframes hero-mini-dot {
+  0%, 80%, 100% { transform: scale(0.8); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+.hero-proof-strip-content {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 18px clamp(18px, 4vw, 48px);
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+}
+.hero-proof-strip-content h2 {
+  margin: 0 0 8px;
+  font-size: clamp(1.4rem, 3.2vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+}
+.hero-proof-strip-content p {
+  margin: 0 auto 12px;
+  max-width: 760px;
+  font-size: clamp(.8rem, 1.25vw, .95rem);
+  opacity: .96;
+  line-height: 1.45;
+}
+.hero-proof-strip-ctas {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.hero-proof-strip-points {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: .92rem;
+  opacity: .95;
+}
+.hero-proof-strip-points li::before { content: "• "; opacity: .7; }
+@media (max-width: 640px) {
+  .hero-proof-strip-content {
+    justify-content: flex-end;
+    gap: 6px;
+    padding: 10px 10px 12px;
+  }
+  .hero-proof-strip-content h2 {
+    font-size: 1rem;
+    margin-bottom: 2px;
+    line-height: 1.15;
+  }
+  .hero-proof-strip-content p {
+    font-size: .76rem;
+    margin-bottom: 6px;
+    line-height: 1.25;
+  }
+  .hero-proof-strip-ctas {
+    width: 100%;
+    margin-bottom: 0;
+    gap: 6px;
+  }
+  .hero-proof-strip-ctas a {
+    flex: 1 1 0;
+    justify-content: center;
+    min-width: 0;
+    padding: 9px 10px !important;
+    font-size: .78rem !important;
+  }
+  .hero-proof-strip-points { display: none; }
 }
 
 /* ===== Navbar ===== */
@@ -308,6 +494,110 @@ body::before {
   flex-shrink: 0;
 }
 
+/* ===== IMAGE: Caregiver — full bleed inside How It Works card ===== */
+/* Replaces the awkward standalone image with an immersive image card */
+.caregiver-card {
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  position: relative;
+  height: 100%;
+  min-height: 380px;
+  box-shadow: var(--shadow-lift);
+  border: 1px solid var(--border);
+}
+.caregiver-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 15%;
+  display: block;
+}
+.caregiver-card .caregiver-caption {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 24px 20px 20px;
+  background: linear-gradient(to top, rgba(8,48,90,0.85) 0%, transparent 100%);
+  color: white;
+}
+.caregiver-card .caregiver-caption p {
+  font-size: 1.1rem;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.55;
+  margin: 0 0 6px 0;
+  opacity: 0.95;
+}
+.caregiver-card .caregiver-caption span {
+  font-size: .8rem;
+  opacity: 0.65;
+  font-weight: 500;
+  letter-spacing: .03em;
+}
+
+/* ===== IMAGE: CTA — wide banner with overlay text ===== */
+.cta-image-banner {
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  margin-bottom: 36px;
+  box-shadow: var(--shadow-lift);
+}
+.cta-image-banner img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  object-position: center 30%;
+  display: block;
+}
+.cta-image-banner .cta-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(8,48,90,0.55) 0%, rgba(30,138,122,0.35) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  text-align: center;
+}
+.cta-image-banner .cta-overlay h2 {
+  font-family: var(--font-serif);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  color: white;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 12px 0;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.25);
+}
+.cta-image-banner .cta-overlay p {
+  font-size: 1.05rem;
+  color: rgba(255,255,255,0.88);
+  margin: 0 0 24px 0;
+  line-height: 1.6;
+  max-width: 380px;
+}
+.cta-image-banner .cta-overlay a {
+  background: white;
+  color: var(--navy);
+  font-weight: 700;
+  padding: 13px 28px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: .95rem;
+  text-decoration: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  transition: transform .15s, box-shadow .2s;
+}
+.cta-image-banner .cta-overlay a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(0,0,0,0.25);
+}
+@media (max-width: 640px) {
+  .cta-image-banner img { height: 420px; }
+}
+
 /* ===== Testimonials ===== */
 .testimonial-card {
   background: white;
@@ -375,14 +665,12 @@ body::before {
   min-width: 20px; max-width: 40px;
 }
 
-/* ===== Intro bubble animation ===== */
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 #intro { animation: fade-up .5s ease .1s both; }
 
-/* ===== Hero gradient text ===== */
 .gradient-text {
   background: linear-gradient(135deg, var(--navy) 0%, var(--teal) 45%, #059669 100%);
   -webkit-background-clip: text;
@@ -390,212 +678,99 @@ body::before {
   background-clip: text;
 }
 
-/* ===== Accessibility ===== */
 .is-disabled { opacity: .45; pointer-events: none; }
 *:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; border-radius: 4px; }
 
-/* ===== Scrollbar ===== */
 #chatWindow { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
 #chatWindow::-webkit-scrollbar { width: 4px; }
 #chatWindow::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
-/* ===== Mobile ===== */
 @media (max-width: 767px) {
   #chatInput { padding: 14px 16px 0 16px; font-size: .95rem; }
   .chat-bubble { max-width: 88%; }
 }
 
-/* ===== Easy Read ===== */
 body.easy-read { font-size: 18px; line-height: 1.7; }
 
 /* ===== Language Invite Popup ===== */
 #langInviteOverlay {
-  position: fixed;
-  inset: 0;
-  z-index: 65;
+  position: fixed; inset: 0; z-index: 65;
   background: rgba(13, 27, 42, 0.25);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s;
-  cursor: pointer;
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s; cursor: pointer;
 }
-#langInviteOverlay.show {
-  opacity: 1;
-  visibility: visible;
-}
+#langInviteOverlay.show { opacity: 1; visibility: visible; }
 
 #langInvite {
-  position: fixed;
-  bottom: 24px;
-  left: 24px;
-  transform: translateY(20px);
-  opacity: 0;
-  visibility: hidden;
-  z-index: 70;
+  position: fixed; bottom: 24px; left: 24px;
+  transform: translateY(20px); opacity: 0; visibility: hidden; z-index: 70;
   transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease, visibility 0.35s;
 }
-#langInvite.show {
-  transform: translateY(0);
-  opacity: 1;
-  visibility: visible;
-}
+#langInvite.show { transform: translateY(0); opacity: 1; visibility: visible; }
 #langInvite .lang-invite-card {
   background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid var(--border);
   box-shadow: 0 12px 48px rgba(15, 76, 129, 0.15), 0 0 0 1px rgba(79, 168, 216, 0.08);
-  border-radius: var(--radius-xl);
-  padding: 24px;
-  max-width: 420px;
-  position: relative;
-  overflow: hidden;
+  border-radius: var(--radius-xl); padding: 24px; max-width: 420px;
+  position: relative; overflow: hidden;
 }
 #langInvite .lang-invite-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 4px;
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
   background: linear-gradient(90deg, var(--teal), var(--sky));
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
 }
 .lang-invite-close {
-  position: absolute;
-  top: 12px; right: 12px;
-  width: 32px; height: 32px;
-  border: none;
-  background: var(--slate-soft);
-  border-radius: 10px;
-  cursor: pointer;
-  color: var(--text-muted);
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: absolute; top: 12px; right: 12px;
+  width: 32px; height: 32px; border: none;
+  background: var(--slate-soft); border-radius: 10px; cursor: pointer;
+  color: var(--text-muted); font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
   transition: background .2s, color .2s;
 }
-.lang-invite-close:hover {
-  background: var(--sky-light);
-  color: var(--navy);
-}
-.lang-invite-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  margin-bottom: 16px;
-}
+.lang-invite-close:hover { background: var(--sky-light); color: var(--navy); }
+.lang-invite-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px; }
 .lang-invite-icon {
-  width: 44px; height: 44px;
-  border-radius: 14px;
+  width: 44px; height: 44px; border-radius: 14px;
   background: linear-gradient(135deg, var(--teal-light), var(--sky-light));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.lang-invite-icon i {
-  font-size: 1.25rem;
-  color: var(--teal);
-}
-.lang-invite-title {
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: var(--text-primary);
-  margin: 0 0 4px 0;
-  line-height: 1.3;
-}
-.lang-invite-sub {
-  font-size: .85rem;
-  color: var(--text-secondary);
-  margin: 0;
-  line-height: 1.45;
-}
-.lang-invite-quick {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 14px;
-}
+.lang-invite-icon i { font-size: 1.25rem; color: var(--teal); }
+.lang-invite-title { font-weight: 700; font-size: 1.05rem; color: var(--text-primary); margin: 0 0 4px 0; line-height: 1.3; }
+.lang-invite-sub { font-size: .85rem; color: var(--text-secondary); margin: 0; line-height: 1.45; }
+.lang-invite-quick { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
 .lang-invite-quick-btn {
-  padding: 8px 14px;
-  border-radius: 10px;
-  border: 1.5px solid var(--border);
-  background: white;
-  font-size: .82rem;
-  font-weight: 500;
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: all .2s ease;
-  font-family: inherit;
+  padding: 8px 14px; border-radius: 10px; border: 1.5px solid var(--border);
+  background: white; font-size: .82rem; font-weight: 500; color: var(--text-primary);
+  cursor: pointer; transition: all .2s ease; font-family: inherit;
 }
 .lang-invite-quick-btn:hover {
-  border-color: var(--teal);
-  background: var(--teal-light);
-  color: var(--navy);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(30, 138, 122, 0.15);
+  border-color: var(--teal); background: var(--teal-light); color: var(--navy);
+  transform: translateY(-1px); box-shadow: 0 2px 8px rgba(30, 138, 122, 0.15);
 }
-.lang-invite-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
+.lang-invite-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .lang-invite-all {
-  font-size: .84rem;
-  color: var(--teal);
-  font-weight: 600;
-  cursor: pointer;
-  background: none;
-  border: none;
-  padding: 0;
-  font-family: inherit;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: color .2s;
+  font-size: .84rem; color: var(--teal); font-weight: 600; cursor: pointer;
+  background: none; border: none; padding: 0; font-family: inherit;
+  display: inline-flex; align-items: center; gap: 6px; transition: color .2s;
 }
 .lang-invite-all:hover { color: var(--navy); }
 .lang-invite-dismiss {
-  font-size: .8rem;
-  color: var(--text-muted);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px 8px;
-  font-family: inherit;
-  transition: color .2s;
+  font-size: .8rem; color: var(--text-muted); background: none; border: none;
+  cursor: pointer; padding: 4px 8px; font-family: inherit; transition: color .2s;
 }
 .lang-invite-dismiss:hover { color: var(--text-secondary); }
-.lang-invite-full-list {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.35s ease;
-}
+.lang-invite-full-list { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
 .lang-invite-full-list.expanded {
-  max-height: 200px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
+  max-height: 200px; overflow-y: auto; scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent; margin-top: 12px;
+  padding-top: 12px; border-top: 1px solid var(--border);
 }
 .lang-invite-full-list button {
-  width: 100%;
-  text-align: left;
-  padding: 8px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: .85rem;
-  font-family: inherit;
-  border: none;
-  background: none;
-  cursor: pointer;
-  color: var(--text-primary);
-  border-radius: 8px;
-  transition: background .15s;
+  width: 100%; text-align: left; padding: 8px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: .85rem; font-family: inherit; border: none; background: none;
+  cursor: pointer; color: var(--text-primary); border-radius: 8px; transition: background .15s;
 }
 .lang-invite-full-list button:hover { background: var(--sky-light); }
 .lang-invite-full-list button span:last-child { font-size: .72rem; color: var(--text-muted); }
@@ -616,103 +791,43 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
   background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid var(--border);
   box-shadow: 0 24px 64px rgba(15, 76, 129, 0.2);
-  border-radius: var(--radius-xl);
-  padding: 32px;
-  max-width: 420px;
-  position: relative;
-  overflow: hidden;
+  border-radius: var(--radius-xl); padding: 32px; max-width: 420px;
+  position: relative; overflow: hidden;
 }
 .guest-limit-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 4px;
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
   background: linear-gradient(90deg, var(--teal), var(--sky));
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
 }
 .guest-limit-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px;
   background: linear-gradient(135deg, var(--teal-light), var(--sky-light));
-  border-radius: 999px;
-  font-size: .8rem;
-  font-weight: 600;
-  color: var(--teal);
-  margin-bottom: 20px;
+  border-radius: 999px; font-size: .8rem; font-weight: 600; color: var(--teal); margin-bottom: 20px;
 }
 .guest-limit-title {
-  font-family: var(--font-serif);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 10px 0;
-  line-height: 1.25;
+  font-family: var(--font-serif); font-size: 1.5rem; font-weight: 700;
+  color: var(--text-primary); margin: 0 0 10px 0; line-height: 1.25;
 }
-.guest-limit-sub {
-  font-size: .95rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin: 0 0 20px 0;
-}
-.guest-limit-benefits {
-  display: grid;
-  gap: 10px;
-  margin-bottom: 24px;
-}
-.guest-limit-benefit {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: .9rem;
-  font-weight: 500;
-  color: var(--text-primary);
-}
+.guest-limit-sub { font-size: .95rem; color: var(--text-secondary); line-height: 1.6; margin: 0 0 20px 0; }
+.guest-limit-benefits { display: grid; gap: 10px; margin-bottom: 24px; }
+.guest-limit-benefit { display: flex; align-items: center; gap: 10px; font-size: .9rem; font-weight: 500; color: var(--text-primary); }
 .guest-limit-benefit i { color: var(--teal); font-size: 1rem; flex-shrink: 0; }
 .guest-limit-actions { display: flex; flex-direction: column; gap: 12px; }
 .guest-limit-primary {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 14px 24px;
-  background: var(--teal);
-  color: white;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 1rem;
-  text-decoration: none;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 14px 24px; background: var(--teal); color: white; border-radius: 12px;
+  font-weight: 700; font-size: 1rem; text-decoration: none;
   transition: background .2s, transform .15s, box-shadow .2s;
   box-shadow: 0 4px 16px rgba(30, 138, 122, 0.35);
 }
 .guest-limit-primary:hover { background: #16796b; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(30, 138, 122, 0.4); color: white; }
-.guest-limit-secondary {
-  text-align: center;
-  padding: 12px;
-  font-size: .9rem;
-  font-weight: 600;
-  color: var(--navy);
-  text-decoration: none;
-  transition: color .2s;
-}
+.guest-limit-secondary { text-align: center; padding: 12px; font-size: .9rem; font-weight: 600; color: var(--navy); text-decoration: none; transition: color .2s; }
 .guest-limit-secondary:hover { color: var(--teal); }
-.guest-limit-footer {
-  font-size: .8rem;
-  color: var(--text-muted);
-  margin: 16px 0 0 0;
-  text-align: center;
-}
+.guest-limit-footer { font-size: .8rem; color: var(--text-muted); margin: 16px 0 0 0; text-align: center; }
 .guest-limit-timer-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 14px;
-  background: var(--slate-soft);
-  border-radius: 10px;
-  margin-bottom: 20px;
-  font-size: .9rem;
-  color: var(--text-secondary);
+  display: flex; align-items: center; gap: 8px; padding: 12px 14px;
+  background: var(--slate-soft); border-radius: 10px; margin-bottom: 20px;
+  font-size: .9rem; color: var(--text-secondary);
 }
 .guest-limit-timer-row strong { color: var(--navy); font-family: monospace; }
 #cooldownBanner.cooldown-banner { display: flex; }
@@ -724,9 +839,9 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-WY3SL8DJL9');
-  </script>  <script type="text/javascript">
+  </script>
+  <script type="text/javascript">
     (function(c,l,a,r,i,t,y){
       c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
       t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
@@ -752,7 +867,7 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
         <span style="font-size:.8rem;font-weight:700;">A-</span>
       </button>
       <button id="fontPlus" class="input-icon-btn" title="Increase font size" aria-label="Larger text">
-        <span style="font-size:.9rem;font-weight:700;">Aï¼‹</span>
+        <span style="font-size:.9rem;font-weight:700;">A+</span>
       </button>
       <button id="highContrast" class="input-icon-btn" aria-pressed="false" title="High contrast" aria-label="Toggle high contrast">
         <i class="fa-solid fa-circle-half-stroke"></i>
@@ -784,7 +899,7 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
     <div class="max-w-7xl mx-auto px-5 py-4 grid gap-3">
       <div class="flex items-center gap-2">
         <button id="mFontMinus" class="btn-ghost text-sm flex-1 justify-center">A-</button>
-        <button id="mFontPlus" class="btn-ghost text-sm flex-1 justify-center">Aï¼‹</button>
+        <button id="mFontPlus" class="btn-ghost text-sm flex-1 justify-center">A+</button>
         <button id="mHighContrast" class="btn-ghost text-sm flex-1 justify-center" aria-pressed="false">
           <i class="fa-solid fa-circle-half-stroke"></i>
         </button>
@@ -804,106 +919,139 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
   </div>
 </header>
 
-<!-- ===== HERO ===== -->
-<section class="hero-section w-full">
-<main class="max-w-5xl mx-auto px-4 md:px-6 pt-10 md:pt-16 pb-16" style="position:relative;z-index:1;">
+<!-- ===== HERO — two-column split layout ===== -->
+<!--
+  IMAGE RATIONALE (doctor_explaining):
+  Before: image was dropped as a standalone block between the headline and the chat UI,
+  creating a jarring visual interruption with no relationship to the content on either side.
 
-  <!-- Trust Badge -->
-  <div class="flex justify-center mb-8">
-    <div class="inline-flex items-center gap-2.5 px-4 py-2.5 bg-emerald-50 border-2 border-emerald-200 rounded-full shadow-sm shadow-emerald-500/10 text-sm font-semibold text-emerald-800">
-      <span class="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
-        <i class="fa-solid fa-shield-halved text-white" style="font-size:.6rem;"></i>
+  After: image anchors the right column of a split-panel hero. The headline, Aira intro
+  bubble, chat window and input live on the left — the doctor image sits opposite, at equal
+  height, giving the layout editorial balance and reinforcing the "explained simply" promise
+  with a real human visual instead of a disconnected decoration.
+-->
+<section class="hero-section w-full" style="padding-bottom:0;">
+  <div style="max-width:1160px;margin:0 auto;text-align:center;padding:clamp(36px,5vw,64px) clamp(20px,6vw,40px) clamp(24px,3vw,36px);">
+    <div style="display:inline-flex;align-items:center;gap:8px;padding:7px 16px;background:rgba(34,197,94,.10);border:1.5px solid rgba(34,197,94,.25);border-radius:999px;font-size:.78rem;font-weight:600;color:#166534;margin-bottom:20px;">
+      <span style="width:16px;height:16px;border-radius:50%;background:#22c55e;display:flex;align-items:center;justify-content:center;">
+        <i class="fa-solid fa-shield-halved" style="font-size:.5rem;color:white;"></i>
       </span>
       Secure, privacy-first infrastructure on AWS
     </div>
-  </div>
-
-  <!-- Hero Headline -->
-  <div class="text-center mb-8">
-    <h1 style="font-family: var(--font-serif); font-size: clamp(2.4rem, 6vw, 4rem); line-height: 1.15; color: var(--text-primary); margin-bottom: 16px;">
-      Understand medical results with<br><span class="gradient-text">clarity, privacy, and care.</span>
+    <h1 style="font-family:var(--font-serif);font-size:clamp(2rem,5vw,3.4rem);font-weight:600;line-height:1.12;color:var(--text-primary);margin-bottom:12px;">
+      Understand your medical results<br><span class="gradient-text">with clarity, privacy, and care.</span>
     </h1>
-    <p style="font-size: clamp(1.05rem, 2.5vw, 1.25rem); color: var(--text-secondary); max-width: 580px; margin: 0 auto; line-height: 1.65;">
-      Upload lab reports, discharge papers, and medical documents — and <strong style="color: var(--teal);">Aira</strong> helps you understand them in clear, calm language you can actually use.
+    <p style="font-size:clamp(.95rem,2vw,1.1rem);color:var(--text-secondary);line-height:1.6;max-width:680px;margin:0 auto;">
+      Upload lab reports, discharge papers, or any medical document — <strong style="color:var(--teal);">Aira</strong> explains them in calm, clear language you can actually use.
     </p>
   </div>
 
-  <!-- Intro Bubble -->
-  <div class="max-w-3xl mx-auto mb-6">
-    <div class="flex items-start gap-3">
-      <div style="width:36px;height:36px;border-radius:50%;background:var(--teal-light);border:2px solid rgba(30,138,122,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
-        <img src="https://res.cloudinary.com/dk52yeq9x/image/upload/v1768919639/NeuroMed_AI_Logo-13-12_vgfarp.png" style="width:20px;height:20px;object-fit:contain;" alt="Aira"/>
+  <div style="position:relative;z-index:2;padding:0 clamp(16px,4vw,32px) clamp(20px,3vw,32px);max-width:720px;margin:0 auto;">
+    <div class="input-shell lux-chat-card" style="border-radius:var(--radius-xl);box-shadow:var(--shadow-lift);overflow:hidden;">
+      <div style="height:3px;background:linear-gradient(90deg,var(--teal),var(--sky));"></div>
+      <div style="padding:20px 20px 0;">
+        <div class="flex items-start gap-3 mb-4">
+          <div style="width:38px;height:38px;border-radius:50%;background:var(--teal-light);border:2px solid rgba(30,138,122,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <img src="https://res.cloudinary.com/dk52yeq9x/image/upload/v1768919639/NeuroMed_AI_Logo-13-12_vgfarp.png" style="width:21px;height:21px;object-fit:contain;" alt="Aira"/>
+          </div>
+          <div id="intro" class="chat-bubble chat-ai shimmer" style="background:var(--slate-soft);">
+            <p style="margin:0;color:var(--text-primary);line-height:1.65;font-weight:500;">
+              Hi, I'm <strong>Aira</strong>. Upload a report, ask a question, or describe what you received — I'll help you make sense of it clearly and gently.
+            </p>
+          </div>
+        </div>
+        <div id="heroDemoThread" class="hero-demo-thread" aria-hidden="true">
+          <div class="hero-demo-msg ai d1">I can summarize your report in plain language and highlight what to ask your doctor next.</div>
+          <div class="hero-demo-msg user d2">My creatinine is a bit high. Should I be worried right now?</div>
+          <div class="hero-demo-msg ai typing d3">
+            <span>Let's review what that usually means and what to watch for next.</span>
+            <span class="hero-mini-dots"><span></span><span></span><span></span></span>
+          </div>
+        </div>
+        <div id="chatWindow" class="mb-3 space-y-4 min-h-[4px]"></div>
       </div>
-      <div id="intro" class="chat-bubble chat-ai shimmer">
-        <p style="margin:0;color:var(--text-primary);line-height:1.65;font-weight:500;">
-          Hi, I'm <strong>Aira</strong>.<br>
-          Upload a report, ask a question, or tell me what you received — and I'll help you make sense of it clearly and gently.
-        </p>
+
+      <div id="cooldownBanner" class="cooldown-banner hidden" style="margin:0;padding:14px 20px;background:linear-gradient(135deg,var(--teal-light),var(--sky-light));border-top:1px solid rgba(30,138,122,.2);flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <i class="fa-solid fa-clock" style="color:var(--teal);"></i>
+          <div>
+            <p style="margin:0;font-weight:600;color:var(--text-primary);font-size:.9rem;">You can't send messages right now.</p>
+            <p style="margin:2px 0 0;color:var(--text-secondary);font-size:.82rem;">Chat again in <strong id="cooldownBannerTimer">25:00</strong> — or <a href="/login?next=/" style="color:var(--teal);font-weight:600;text-decoration:underline;">sign in</a> / <a href="/signup?next=/" style="color:var(--teal);font-weight:600;text-decoration:underline;">sign up</a>.</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <a href="/login?next=/" class="btn-ghost" style="padding:7px 14px;font-size:.84rem;">Sign in</a>
+          <a href="/signup?next=/" class="btn-primary" style="padding:7px 14px;font-size:.84rem;">Sign up free</a>
+        </div>
+      </div>
+
+      <div style="height:1px;background:var(--border);"></div>
+
+      <div class="input-area" style="padding:14px 16px 16px;">
+        <input type="file" id="fileInput" class="hidden" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.heic,.webp" multiple />
+        <div id="fileChips" class="flex flex-wrap gap-2" style="display:none!important;padding:0 0 10px 0;"></div>
+        <textarea
+          id="chatInput"
+          rows="1"
+          placeholder="Ask about a result, upload a report, or describe what you received..."
+          aria-label="Message"
+          style="min-height:48px;padding:0;"
+        ></textarea>
+        <div class="input-actions" style="padding:0;margin-top:8px;">
+          <div class="flex items-center gap-2">
+            <button id="uploadBtn" class="input-icon-btn" title="Attach file" aria-label="Upload file">
+              <i class="fa-solid fa-paperclip"></i>
+            </button>
+            <button id="micBtn" class="input-icon-btn" title="Voice input" aria-label="Voice input">
+              <i class="fa-solid fa-microphone"></i>
+            </button>
+            <span style="font-size:.72rem;color:var(--text-muted);margin-left:4px;">PDF, image, Word</span>
+          </div>
+          <button id="sendBtn" class="send-btn" title="Send" aria-label="Send message" disabled>
+            <i class="fa-solid fa-arrow-up"></i>
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Chat Window -->
-  <div id="chatWindow" class="max-w-3xl mx-auto mb-5 space-y-4 min-h-[40px]"></div>
-
-  <!-- Input -->
-  <div class="max-w-3xl mx-auto mb-6">
-    <div id="cooldownBanner" class="cooldown-banner hidden" style="margin-bottom:12px;padding:14px 18px;background:linear-gradient(135deg,var(--teal-light),var(--sky-light));border:1px solid rgba(30,138,122,.25);border-radius:var(--radius);flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <i class="fa-solid fa-clock" style="color:var(--teal);font-size:1.1rem;"></i>
-        <div>
-          <p style="margin:0;font-weight:600;font-size:.9rem;color:var(--text-primary);">You can't send messages right now.</p>
-          <p style="margin:2px 0 0 0;font-size:.82rem;color:var(--text-secondary);">Chat again in <strong id="cooldownBannerTimer">25:00</strong> — or <a href="/login?next=/" style="color:var(--teal);font-weight:600;text-decoration:underline;">sign in</a> / <a href="/signup?next=/" style="color:var(--teal);font-weight:600;text-decoration:underline;">sign up</a> to chat anytime.</p>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;">
-        <a href="/login?next=/" class="btn-ghost" style="padding:8px 16px;font-size:.85rem;">Sign in</a>
-        <a href="/signup?next=/" class="btn-primary" style="padding:8px 16px;font-size:.85rem;">Sign up free</a>
-      </div>
-    </div>
-    <input type="file" id="fileInput" class="hidden" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.heic,.webp" multiple />
-    <div class="input-shell">
-      <textarea
-        id="chatInput"
-        rows="1"
-        placeholder="Upload a report, ask about a result, or describe what you received…"
-        aria-label="Message"
-        style="min-height:56px;"
-      ></textarea>
-      <div id="fileChips" class="flex flex-wrap gap-2 px-4 pb-0" style="display:none!important;padding-bottom:0;"></div>
-      <div class="input-actions">
-        <div class="flex items-center gap-2">
-          <button id="uploadBtn" class="input-icon-btn" title="Attach file" aria-label="Upload file">
-            <i class="fa-solid fa-paperclip"></i>
-          </button>
-          <button id="micBtn" class="input-icon-btn" title="Voice input" aria-label="Voice input">
-            <i class="fa-solid fa-microphone"></i>
-          </button>
-          <span style="font-size:.75rem;color:var(--text-muted);">PDF, images, Word docs</span>
-        </div>
-        <button id="sendBtn" class="send-btn" title="Send" aria-label="Send message" disabled>
-          <i class="fa-solid fa-arrow-up"></i>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Suggestions -->
-  <div class="text-center mb-12">
-    <p style="font-size:.82rem;color:var(--teal);margin-bottom:12px;font-weight:600;">Not sure where to start? Try one of these</p>
+  <div style="padding:clamp(14px,2vw,20px) clamp(16px,4vw,32px) 0;max-width:720px;margin:0 auto;">
+    <span style="font-size:.78rem;color:var(--teal);font-weight:600;margin-bottom:10px;display:block;text-align:center;">Not sure where to start? Try one of these</span>
     <div id="suggestionsList" class="flex flex-wrap items-center justify-center gap-2">
-      <button class="suggestion-chip"><i class="fa-regular fa-hospital"></i><span>I have a discharge summary — simplify it for my family</span></button>
-      <button class="suggestion-chip"><i class="fa-solid fa-vial-circle-check"></i><span>I need my lab results explained in plain English</span></button>
-      <button class="suggestion-chip"><i class="fa-solid fa-pills"></i><span>Help me create a medication schedule from my prescriptions</span></button>
-      <button class="suggestion-chip"><i class="fa-regular fa-clipboard"></i><span>What questions should I ask my doctor at my next visit?</span></button>
-      <button class="suggestion-chip"><i class="fa-solid fa-language"></i><span>Translate medical info to Taglish for my lola</span></button>
+      <button class="suggestion-chip"><i class="fa-regular fa-hospital"></i><span>Simplify my discharge summary</span></button>
+      <button class="suggestion-chip"><i class="fa-solid fa-vial-circle-check"></i><span>Explain my lab results</span></button>
+      <button class="suggestion-chip"><i class="fa-solid fa-pills"></i><span>Make a medication schedule</span></button>
+      <button class="suggestion-chip"><i class="fa-regular fa-clipboard"></i><span>What to ask my doctor</span></button>
+      <button class="suggestion-chip"><i class="fa-solid fa-language"></i><span>Translate for my lola</span></button>
     </div>
   </div>
-</main>
+
+  <div style="position:relative;z-index:2;margin-top:clamp(28px,4vw,44px);height:clamp(180px,22vw,240px);overflow:hidden;">
+    <img
+      src="https://res.cloudinary.com/dw5tnpylt/image/upload/v1774351643/doctor_explaining_rrqzbp.png"
+      alt="Doctor calmly explaining medical results to a patient"
+      loading="lazy"
+      style="width:100%;height:100%;object-fit:cover;object-position:center 25%;display:block;transform:scale(1.03);"
+    />
+    <div style="position:absolute;inset:0;z-index:1;background:linear-gradient(to bottom,rgba(8,48,90,.32) 0%,rgba(8,48,90,.42) 28%,rgba(8,48,90,.72) 66%,rgba(8,48,90,.92) 100%);"></div>
+    <section class="hero-proof-strip-content" aria-label="Medical report AI summary call to action">
+      <h2>Understand Medical Reports in Minutes</h2>
+      <p>AI-powered explanations for lab results, discharge summaries, and prescriptions.</p>
+      <div class="hero-proof-strip-ctas">
+        <a href="/signup" class="btn-primary" style="padding:11px 22px;font-size:.92rem;font-weight:700;">Start Free</a>
+        <a href="#how-it-works" class="btn-ghost" style="padding:11px 22px;font-size:.92rem;font-weight:700;background:rgba(255,255,255,.92);">See How It Works</a>
+      </div>
+      <ul class="hero-proof-strip-points">
+        <li>Privacy-first on AWS</li>
+        <li>No medical jargon</li>
+        <li>Supports English, Tagalog, Spanish, and more</li>
+      </ul>
+    </section>
+  </div>
 </section>
 
 <!-- ===== HOW IT WORKS ===== -->
-<section style="padding: 80px 0; background: white;">
+<section id="how-it-works" style="padding:80px 0;background:white;">
   <div class="max-w-6xl mx-auto px-6">
     <div class="text-center mb-14">
       <div class="section-label" style="justify-content:center;">How it works</div>
@@ -915,8 +1063,7 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
       </p>
     </div>
 
-    <div class="grid md:grid-cols-3 gap-6">
-      <!-- Step 1 -->
+    <div class="grid md:grid-cols-3 gap-6 mb-16">
       <div class="feature-card text-center">
         <div class="feature-icon mx-auto" style="background:var(--sky-light);">
           <i class="fa-solid fa-file-medical" style="color:var(--navy);"></i>
@@ -925,7 +1072,6 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
         <h3 style="font-weight:700;font-size:1.08rem;margin-bottom:10px;color:var(--text-primary);">Share your document</h3>
         <p style="color:var(--text-secondary);font-size:.92rem;line-height:1.6;">Upload a lab result, discharge paper, prescription, or just type your question in plain language.</p>
       </div>
-      <!-- Step 2 -->
       <div class="feature-card text-center">
         <div class="feature-icon mx-auto" style="background:var(--teal-light);">
           <i class="fa-solid fa-brain" style="color:var(--teal);"></i>
@@ -934,7 +1080,6 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
         <h3 style="font-weight:700;font-size:1.08rem;margin-bottom:10px;color:var(--text-primary);">Aira understands</h3>
         <p style="color:var(--text-secondary);font-size:.92rem;line-height:1.6;">Aira reads context, tone, and intent — adapting its response to you, your family, or your care situation.</p>
       </div>
-      <!-- Step 3 -->
       <div class="feature-card text-center">
         <div class="feature-icon mx-auto" style="background:var(--amber-light);">
           <i class="fa-solid fa-comment-medical" style="color:var(--amber);"></i>
@@ -945,31 +1090,35 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
       </div>
     </div>
 
-    <!-- Demo Panel -->
-    <div class="mt-16 grid lg:grid-cols-2 gap-12 items-center">
-      <!-- Left: Use case quote -->
-      <div>
-        <div style="background:var(--slate-soft);border-radius:var(--radius-lg);padding:32px;margin-bottom:24px;position:relative;border-left:4px solid var(--sky);">
-          <p style="font-family:var(--font-serif);font-size:1.25rem;color:var(--text-primary);line-height:1.65;font-style:italic;margin:0 0 12px 0;">
-            "Explain this lab result in simple terms for my elderly mother."
-          </p>
-          <p style="font-size:.88rem;color:var(--text-secondary);margin:0;">Just speak naturally. Aira understands who you're caring for and how to respond.</p>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div style="padding:18px;background:white;border-radius:var(--radius);border:1px solid var(--border);">
-            <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--navy);margin-bottom:10px;"></i>
-            <p style="font-weight:600;font-size:.9rem;margin:0 0 6px 0;">Adapts to you</p>
-            <p style="font-size:.83rem;color:var(--text-secondary);margin:0;line-height:1.5;">No settings needed. Aira adjusts based on context.</p>
-          </div>
-          <div style="padding:18px;background:white;border-radius:var(--radius);border:1px solid var(--border);">
-            <i class="fa-solid fa-bolt" style="color:var(--amber);margin-bottom:10px;"></i>
-            <p style="font-weight:600;font-size:.9rem;margin:0 0 6px 0;">Instant answers</p>
-            <p style="font-size:.83rem;color:var(--text-secondary);margin:0;line-height:1.5;">Get clear explanations in seconds, any time of day.</p>
-          </div>
+    <!--
+      IMAGE RATIONALE (caregiver):
+      Before: image was dropped as a freestanding block between a pull-quote and two tiny
+      stat cards — no visual connection to either, shrunk to 230px, and adding scroll weight
+      without earning it.
+
+      After: image fills the entire left column of the demo panel as a tall immersive card.
+      The quote is overlaid as a caption at the bottom (text-on-image), so the emotional
+      story — a person caring for a loved one — and the conversational prompt live together.
+      The right column holds the interactive demo card at the same height, creating genuine
+      visual balance between "human moment" and "product response."
+    -->
+    <div class="grid lg:grid-cols-2 gap-8 items-stretch">
+
+      <!-- Left: caregiver image as immersive card with caption -->
+      <div class="caregiver-card">
+        <img
+          src="https://res.cloudinary.com/dw5tnpylt/image/upload/v1774351647/Woman_taking_care_the_sick_loved_one_azbt2v.png"
+          alt="A woman caring for an elderly loved one at home"
+          loading="lazy"
+        />
+        <div class="caregiver-caption">
+          <p>"Explain this lab result in simple terms for my elderly mother."</p>
+          <span>Just speak naturally — Aira understands who you're caring for.</span>
         </div>
       </div>
-      <!-- Right: Demo Card -->
-      <div style="position:relative;">
+
+      <!-- Right: demo card -->
+      <div style="position:relative;display:flex;flex-direction:column;justify-content:center;">
         <div style="position:absolute;inset:-24px;border-radius:48px;background:linear-gradient(135deg,rgba(79,168,216,.1),rgba(240,165,0,.08));filter:blur(32px);"></div>
         <div style="position:relative;background:white;border-radius:var(--radius-xl);box-shadow:var(--shadow-lift);border:1px solid var(--border);padding:28px;">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);">
@@ -985,11 +1134,9 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
               <span style="font-size:.75rem;color:var(--teal);font-weight:500;">Active</span>
             </div>
           </div>
-          <!-- Demo message -->
           <div style="background:var(--navy);color:white;border-radius:12px 12px 4px 12px;padding:12px 16px;font-size:.9rem;margin-bottom:16px;margin-left:auto;max-width:85%;box-shadow:0 2px 10px rgba(15,76,129,.2);">
             Explain this lab result in simple terms for my elderly mother
           </div>
-          <!-- Demo reply -->
           <div style="background:var(--slate-soft);border:1px solid var(--border);border-radius:12px 12px 12px 4px;padding:16px;font-size:.88rem;line-height:1.6;color:var(--text-primary);">
             <div style="font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:7px;">
               <span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;"></span>
@@ -1007,8 +1154,22 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
               </div>
             </div>
           </div>
+          <!-- Adapts to you / Instant answers — moved here from orphaned position -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;">
+            <div style="padding:14px;background:var(--slate-soft);border-radius:var(--radius);border:1px solid var(--border);">
+              <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--navy);margin-bottom:8px;"></i>
+              <p style="font-weight:600;font-size:.85rem;margin:0 0 4px 0;">Adapts to you</p>
+              <p style="font-size:.78rem;color:var(--text-secondary);margin:0;line-height:1.5;">No settings needed. Aira adjusts based on context.</p>
+            </div>
+            <div style="padding:14px;background:var(--slate-soft);border-radius:var(--radius);border:1px solid var(--border);">
+              <i class="fa-solid fa-bolt" style="color:var(--amber);margin-bottom:8px;"></i>
+              <p style="font-weight:600;font-size:.85rem;margin:0 0 4px 0;">Instant answers</p>
+              <p style="font-size:.78rem;color:var(--text-secondary);margin:0;line-height:1.5;">Get clear explanations in seconds, any time of day.</p>
+            </div>
+          </div>
         </div>
       </div>
+
     </div>
   </div>
 </section>
@@ -1097,24 +1258,38 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
   </div>
 </section>
 
-<!-- ===== CTA ===== -->
-<section style="padding:80px 0;background:white;">
-  <div class="max-w-3xl mx-auto px-6 text-center">
-    <h2 style="font-family:var(--font-serif);font-size:clamp(2rem,5vw,3.2rem);color:var(--text-primary);margin-bottom:16px;line-height:1.2;">
-      Start understanding<br><span class="gradient-text">in minutes.</span>
-    </h2>
-    <p style="font-size:1.1rem;color:var(--text-secondary);margin-bottom:32px;line-height:1.6;max-width:420px;margin-left:auto;margin-right:auto;">
-      No jargon. No guessing. Just clarity — when it matters most.
-    </p>
-    <a href="/signup" class="btn-primary" style="font-size:1rem;padding:14px 32px;">
-      <i class="fa-solid fa-arrow-right"></i>
-      Start with NeuroMed Aira — it's free
-    </a>
+<!-- ===== CTA — image as immersive banner with overlaid copy ===== -->
+<!--
+  IMAGE RATIONALE (family_checkup):
+  Before: image sat as a passive standalone block between the heading and the button,
+  with no visual relationship to either — functionally just a gap-filler.
+
+  After: image becomes the entire section background. The headline, subtext, and CTA
+  button are overlaid using a dark gradient, so the family moment carries the emotional
+  weight of the call to action. The image now IS the CTA, not decoration around it.
+-->
+<section style="padding:80px 0;background:var(--slate-soft);">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="cta-image-banner">
+      <img
+        src="https://res.cloudinary.com/dw5tnpylt/image/upload/v1774351648/family_checkup_g8oaze.png"
+        alt="A family looking over medical results together, feeling relieved"
+        loading="lazy"
+      />
+      <div class="cta-overlay">
+        <h2>Start understanding<br><span style="color:rgba(79,210,195,0.95);">in minutes.</span></h2>
+        <p>No jargon. No guessing. Just clarity — when it matters most.</p>
+        <a href="/signup">
+          <i class="fa-solid fa-arrow-right"></i>
+          Start with NeuroMed Aira — it's free
+        </a>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ===== PRIVACY (after pricing) ===== -->
-<section style="padding:80px 0;background:var(--slate-soft);">
+<!-- ===== PRIVACY ===== -->
+<section style="padding:80px 0;background:white;">
   <div class="max-w-6xl mx-auto px-6">
     <div class="grid lg:grid-cols-2 gap-16 items-center">
       <div>
@@ -1188,9 +1363,7 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
       <i class="fa-solid fa-xmark"></i>
     </button>
     <div class="lang-invite-header">
-      <div class="lang-invite-icon">
-        <i class="fa-solid fa-globe"></i>
-      </div>
+      <div class="lang-invite-icon"><i class="fa-solid fa-globe"></i></div>
       <div>
         <p class="lang-invite-title" id="langInviteDesc">Aira speaks your language</p>
         <p class="lang-invite-sub">Choose your preferred language for clearer medical explanations.</p>
@@ -1199,12 +1372,12 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
     <div class="lang-invite-quick">
       <button type="button" class="lang-invite-quick-btn" data-lang="en-US">English</button>
       <button type="button" class="lang-invite-quick-btn" data-lang="es-ES">Español</button>
-      <button type="button" class="lang-invite-quick-btn" data-lang="zh-CN">ä¸­æ–‡</button>
+      <button type="button" class="lang-invite-quick-btn" data-lang="zh-CN">中文</button>
       <button type="button" class="lang-invite-quick-btn" data-lang="pt-BR">Português</button>
       <button type="button" class="lang-invite-quick-btn" data-lang="fr-FR">Français</button>
-      <button type="button" class="lang-invite-quick-btn" data-lang="vi-VN">Tiáº¿ng Viá»‡t</button>
-      <button type="button" class="lang-invite-quick-btn" data-lang="ko-KR">í•œêµ­ì–´</button>
-      <button type="button" class="lang-invite-quick-btn" data-lang="ar-SA">Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©</button>
+      <button type="button" class="lang-invite-quick-btn" data-lang="vi-VN">Tiếng Việt</button>
+      <button type="button" class="lang-invite-quick-btn" data-lang="ko-KR">한국어</button>
+      <button type="button" class="lang-invite-quick-btn" data-lang="ar-SA">العربية</button>
     </div>
     <div class="lang-invite-full-list" id="langInviteFullList"></div>
     <div class="lang-invite-footer">
@@ -1228,7 +1401,7 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
   </div>
 </div>
 
-<!-- ===== GUEST LIMIT MODAL (5 chats + cooldown) ===== -->
+<!-- ===== GUEST LIMIT MODAL ===== -->
 <div id="guestLimitOverlay" class="fixed inset-0 z-[70] hidden flex items-center justify-center p-4" style="background:rgba(13,27,42,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);">
   <div id="guestLimitModal" class="guest-limit-modal" role="dialog" aria-labelledby="guestLimitTitle" aria-modal="true">
     <div class="guest-limit-card">
@@ -1272,9 +1445,8 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
   </div>
 </footer>
 
-<!-- ===== SCRIPTS (all original logic preserved) ===== -->
+<!-- ===== SCRIPTS ===== -->
 <script>
-// Language Support
 const LANGUAGE_CHOICES = [
   ['en-US','English'], ['ja-JP','Japanese'], ['es-ES','Spanish'], ['fr-FR','French'],
   ['de-DE','German'], ['it-IT','Italian'], ['pt-PT','Portuguese (Portugal)'], ['pt-BR','Portuguese (Brazil)'],
@@ -1323,6 +1495,7 @@ function applyLangUI(code){
 
 const $=sel=>document.querySelector(sel);
 const $$=sel=>Array.from(document.querySelectorAll(sel));
+function hideHeroDemoThread(){ const el=$('#heroDemoThread'); if(el) el.classList.add('hidden'); }
 function track(ev,data={}){ try{ navigator.sendBeacon('/api/track',new Blob([JSON.stringify({ev,...data})],{type:'application/json'})); }catch{} }
 function getCSRFToken(){ const m=document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)'); return m?m.pop():''; }
 function setSendDisabled(disabled){ $('#sendBtn').disabled=disabled; }
@@ -1360,24 +1533,14 @@ function checkCooldownExpiry(){
   const now=Date.now();
   if(guestCooldownUntil<=0) return false;
   if(now>=guestCooldownUntil){
-    guestCooldownUntil=0;
-    guestTurnsUsed=0;
-    guestLimitReached=false;
-    localStorage.removeItem('nm_guest_cooldown_until');
-    localStorage.removeItem('nm_guest_cooldown_count');
-    localStorage.setItem('nm_guest_turns','0');
-    hideGuestLimitModal();
-    applyGuestLimitState(false);
+    guestCooldownUntil=0; guestTurnsUsed=0; guestLimitReached=false;
+    localStorage.removeItem('nm_guest_cooldown_until'); localStorage.removeItem('nm_guest_cooldown_count'); localStorage.setItem('nm_guest_turns','0');
+    hideGuestLimitModal(); applyGuestLimitState(false);
     if(cooldownInterval){ clearInterval(cooldownInterval); cooldownInterval=null; }
     return false;
   }
   const maxCooldownMs=45*60*1000;
-  if(guestCooldownUntil-now>maxCooldownMs){
-    localStorage.removeItem('nm_guest_cooldown_until');
-    localStorage.removeItem('nm_guest_cooldown_count');
-    guestCooldownUntil=0;
-    return false;
-  }
+  if(guestCooldownUntil-now>maxCooldownMs){ localStorage.removeItem('nm_guest_cooldown_until'); localStorage.removeItem('nm_guest_cooldown_count'); guestCooldownUntil=0; return false; }
   return true;
 }
 
@@ -1392,20 +1555,16 @@ function startCooldown(){
 
 function formatCooldown(ms){
   const totalSec=Math.max(0,Math.ceil(ms/1000));
-  const m=Math.floor(totalSec/60);
-  const s=totalSec%60;
+  const m=Math.floor(totalSec/60); const s=totalSec%60;
   return m+':'+(s<10?'0':'')+s;
 }
 
 function updateCooldownUI(){
-  const now=Date.now();
-  const remaining=guestCooldownUntil-now;
+  const now=Date.now(); const remaining=guestCooldownUntil-now;
   if(remaining<=0){ checkCooldownExpiry(); return; }
   const str=formatCooldown(remaining);
   const t1=$('#guestLimitCountdown'); const t2=$('#guestLimitTimer'); const t3=$('#cooldownBannerTimer');
-  if(t1) t1.textContent=str;
-  if(t2) t2.textContent=str;
-  if(t3) t3.textContent=str;
+  if(t1) t1.textContent=str; if(t2) t2.textContent=str; if(t3) t3.textContent=str;
 }
 
 function showGuestLimitModal(){
@@ -1423,37 +1582,27 @@ function hideGuestLimitModal(){
 function applyGuestLimitState(atLimit){
   guestLimitReached=atLimit;
   const shell=$('#chatInput')?.closest('.input-shell');
-  const input=$('#chatInput');
-  const upload=$('#uploadBtn');
-  const send=$('#sendBtn');
-  const suggestions=$('#suggestionsList');
-  const banner=$('#cooldownBanner');
+  const input=$('#chatInput'); const upload=$('#uploadBtn'); const send=$('#sendBtn');
+  const suggestions=$('#suggestionsList'); const banner=$('#cooldownBanner');
   if(atLimit){
     if(shell) shell.classList.add('is-disabled');
     if(input){ input.placeholder="You can't send messages right now. Sign up to chat anytime."; input.readOnly=true; }
-    if(upload) upload.disabled=true;
-    if(send) send.disabled=true;
+    if(upload) upload.disabled=true; if(send) send.disabled=true;
     if(suggestions){ suggestions.style.opacity='0.5'; suggestions.style.pointerEvents='none'; }
     if(banner){ banner.classList.remove('hidden'); updateCooldownUI(); if(!cooldownInterval) cooldownInterval=setInterval(updateCooldownUI,1000); }
   }else{
     if(shell) shell.classList.remove('is-disabled');
     if(input){ input.placeholder='Upload a report, ask about a result, or describe what you received…'; input.readOnly=false; }
-    if(upload) upload.disabled=false;
-    if(send) toggleSend();
+    if(upload) upload.disabled=false; if(send) toggleSend();
     if(suggestions){ suggestions.style.opacity=''; suggestions.style.pointerEvents=''; }
     if(banner) banner.classList.add('hidden');
     if(cooldownInterval){ clearInterval(cooldownInterval); cooldownInterval=null; }
   }
 }
 
-// Readability Controls
 (function(){
-  const root=document.documentElement;
-  const body=document.body;
-  function adjustFont(delta){
-    const curr=parseFloat(getComputedStyle(root).getPropertyValue('font-size'))||16;
-    root.style.setProperty('font-size',Math.min(22,Math.max(14,curr+delta))+'px');
-  }
+  const root=document.documentElement; const body=document.body;
+  function adjustFont(delta){ const curr=parseFloat(getComputedStyle(root).getPropertyValue('font-size'))||16; root.style.setProperty('font-size',Math.min(22,Math.max(14,curr+delta))+'px'); }
   function toggleHC(btn){ body.classList.toggle('hc'); btn.setAttribute('aria-pressed',body.classList.contains('hc')?'true':'false'); }
   $('#fontMinus')?.addEventListener('click',()=>adjustFont(-1));
   $('#fontPlus')?.addEventListener('click',()=>adjustFont(1));
@@ -1463,10 +1612,14 @@ function applyGuestLimitState(atLimit){
   $('#mHighContrast')?.addEventListener('click',()=>toggleHC($('#mHighContrast')));
 })();
 
-// Navbar scroll shadow
 window.addEventListener('scroll',()=>{
   const nav=document.getElementById('navbar');
   if(nav) nav.classList.toggle('scrolled',window.scrollY>10);
+  const hero=document.querySelector('.hero-section');
+  if(hero){
+    const y=Math.max(-120,Math.min(120,window.scrollY*0.18));
+    hero.style.backgroundPosition=`center calc(50% + ${y}px)`;
+  }
 },{passive:true});
 
 function showToast(text,icon,colorStyle){
@@ -1488,17 +1641,14 @@ function iconFor(name){
 
 const MAX_FILES=15;
 function addFile(file){
-  if(!file) return;
-  if(guestLimitReached) return;
+  if(!file) return; if(guestLimitReached) return;
   if(files.length>=MAX_FILES){ showToast(`Max ${MAX_FILES} files`,'fa-solid fa-triangle-exclamation','color:#b45309'); return; }
   const isDuplicate=files.some(f=>f.name===file.name&&f.size===file.size);
   if(isDuplicate){ showToast('File already added','fa-solid fa-info-circle','color:var(--sky)'); return; }
   files.push(file);
   const chipsEl=$('#fileChips');
-  chipsEl.style.removeProperty('display');
-  chipsEl.style.padding='8px 16px 0 16px';
-  const chip=document.createElement('span');
-  chip.className='file-chip';
+  chipsEl.style.removeProperty('display'); chipsEl.style.padding='8px 16px 0 16px';
+  const chip=document.createElement('span'); chip.className='file-chip';
   chip.dataset.fileName=file.name; chip.dataset.fileSize=file.size;
   chip.innerHTML=`<i class="${iconFor(file.name)}"></i><span style="max-width:10rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(file.name)}</span>`;
   const x=document.createElement('button');
@@ -1523,6 +1673,7 @@ function toggleSend(){
 }
 
 function appendBubble({message,isUser=false,timestamp=new Date()}){
+  hideHeroDemoThread();
   const chatWindow=document.getElementById('chatWindow');
   const wrap=document.createElement('div'); wrap.className='w-full flex mb-3';
   const bubble=document.createElement('div'); bubble.className=`chat-bubble ${isUser?'chat-user':'chat-ai'}`;
@@ -1537,6 +1688,7 @@ function appendBubble({message,isUser=false,timestamp=new Date()}){
 }
 
 function appendAttachmentBubble(fileList){
+  hideHeroDemoThread();
   const chatWindow=document.getElementById('chatWindow');
   const wrap=document.createElement('div'); wrap.className='w-full flex mb-3';
   const bubble=document.createElement('div'); bubble.className='chat-bubble chat-user';
@@ -1581,25 +1733,18 @@ async function sendChat(){
   const msg=($('#chatInput').value||'').trim();
   const lang=typeof __nmLang==='function'?__nmLang():(navigator.language||'en-US');
   if(!msg&&files.length===0) return;
-
   const authed=await isAuthenticated();
   if(!authed){
     if(checkCooldownExpiry()){ showGuestLimitModal(); return; }
     if(guestTurnsUsed>=GUEST_CHAT_LIMIT){ showGuestLimitModal(); return; }
   }
-
-  isSending=true;
-  setSendDisabled(true);
-
+  isSending=true; setSendDisabled(true);
   if(!firstSendAttempted){ firstSendAttempted=true; const authed=await isAuthenticated(); if(!authed) showGateAfterResponse=true; }
   if(window.innerWidth<768) document.getElementById('intro')?.classList.add('hidden');
-
   const filesToSend=[...files];
   if(msg) appendBubble({message:msg,isUser:true});
   if(filesToSend.length){ appendAttachmentBubble(filesToSend); $('#fileChips').innerHTML=''; $('#fileChips').style.display='none'; }
-
   $('#chatInput').value=''; autosize(); toggleSend();
-
   const chatWindow=$('#chatWindow');
   const typingWrap=document.createElement('div'); typingWrap.className='w-full flex mb-3';
   const col=document.createElement('div'); col.className='flex flex-col items-start mr-auto';
@@ -1608,14 +1753,12 @@ async function sendChat(){
   typing.innerHTML=`<div class="typing-dots"><span></span><span></span><span></span></div>`;
   col.appendChild(typing); typingWrap.appendChild(col); chatWindow.appendChild(typingWrap);
   chatWindow.scrollTop=chatWindow.scrollHeight;
-
   const fd=new FormData();
   if(msg) fd.append('message',msg);
   fd.append('lang',lang);
   const existingSessionId=localStorage.getItem('nm_session_id');
   if(existingSessionId) fd.append('session_id',existingSessionId);
   if(filesToSend.length) for(const f of filesToSend) fd.append('files[]',f);
-
   abortController=new AbortController();
   try{
     const res=await fetch('/webapp/api/send-chat/',{
@@ -1631,8 +1774,7 @@ async function sendChat(){
     track('result_rendered',{lang,hasFiles:filesToSend.length>0});
     const authed=await isAuthenticated();
     if(!authed){
-      guestTurnsUsed+=1;
-      localStorage.setItem('nm_guest_turns',String(guestTurnsUsed));
+      guestTurnsUsed+=1; localStorage.setItem('nm_guest_turns',String(guestTurnsUsed));
       if(guestTurnsUsed===1) $('#postResultInvite').classList.remove('hidden');
       if(guestTurnsUsed>=GUEST_CHAT_LIMIT){ startCooldown(); applyGuestLimitState(true); showGuestLimitModal(); }
     }
@@ -1658,17 +1800,11 @@ document.addEventListener('DOMContentLoaded',()=>{
   isAuthenticated().then(authed=>{
     if(authed) return;
     if(guestTurnsUsed<GUEST_CHAT_LIMIT&&guestCooldownUntil<=0) return;
-    if(guestTurnsUsed<GUEST_CHAT_LIMIT&&guestCooldownUntil>0){
-      guestCooldownUntil=0;
-      localStorage.removeItem('nm_guest_cooldown_until');
-      localStorage.removeItem('nm_guest_cooldown_count');
-      return;
-    }
+    if(guestTurnsUsed<GUEST_CHAT_LIMIT&&guestCooldownUntil>0){ guestCooldownUntil=0; localStorage.removeItem('nm_guest_cooldown_until'); localStorage.removeItem('nm_guest_cooldown_count'); return; }
     if(checkCooldownExpiry()){ applyGuestLimitState(true); return; }
     if(guestTurnsUsed>=GUEST_CHAT_LIMIT&&guestCooldownUntil<=0){ startCooldown(); applyGuestLimitState(true); }
   });
 
-  // Language
   const desktopBtn=$('#langBtn'), desktopMenu=$('#langMenu');
   const mobileBtn=$('#mLangBtn'), mobileMenu=$('#mLangMenu');
   const current=loadLang(); applyLangUI(current);
@@ -1681,10 +1817,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(mobileMenu&&!mobileMenu.contains(e.target)&&e.target!==mobileBtn) toggleMenu(mobileMenu,false);
   });
   function dismissLangInvite(){
-    $('#langInviteOverlay')?.classList.remove('show');
-    $('#langInviteOverlay')?.setAttribute('aria-hidden','true');
-    $('#langInvite')?.classList.remove('show');
-    $('#langInviteFullList')?.classList.remove('expanded');
+    $('#langInviteOverlay')?.classList.remove('show'); $('#langInviteOverlay')?.setAttribute('aria-hidden','true');
+    $('#langInvite')?.classList.remove('show'); $('#langInviteFullList')?.classList.remove('expanded');
     const sb=$('#langInviteShowAll'); if(sb) sb.innerHTML='<i class="fa-solid fa-chevron-down"></i> See all languages';
     try{ localStorage.setItem('nm_lang_invite_dismissed','1'); }catch{}
   }
@@ -1692,22 +1826,18 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ if($('#guestLimitOverlay')?.classList.contains('show')) hideGuestLimitModal(); else if($('#langInvite')?.classList.contains('show')) dismissLangInvite(); else{ toggleMenu(desktopMenu,false); toggleMenu(mobileMenu,false); } } });
   window.__nmLang=()=>loadLang();
 
-  // Suggestions
   $$('.suggestion-chip').forEach(btn=>btn.addEventListener('click',()=>{
     $('#chatInput').value=btn.querySelector('span').textContent.trim();
     autosize(); toggleSend(); $('#chatInput').focus();
   }));
 
-  // Input
   $('#chatInput').addEventListener('input',()=>{ autosize(); toggleSend(); });
   $('#chatInput').addEventListener('keydown',(e)=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendChat(); } });
   $('#sendBtn').addEventListener('click',sendChat);
 
-  // Upload
   $('#uploadBtn').addEventListener('click',()=>$('#fileInput').click());
   $('#fileInput').addEventListener('change',(e)=>{ if(e.target.files?.length){ for(const f of e.target.files) addFile(f); e.target.value=''; } });
 
-  // Drag & drop
   const dz=$('#chatInput').closest('.input-shell');
   ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,(e)=>{ e.preventDefault(); dz.style.borderColor='var(--teal)'; }));
   ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,(e)=>{
@@ -1715,18 +1845,13 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(ev==='drop'&&e.dataTransfer?.files?.length) for(const f of e.dataTransfer.files) addFile(f);
   }));
 
-  // Paste
   document.addEventListener('paste',(e)=>{ const items=e.clipboardData?.items||[]; for(const it of items) if(it.kind==='file') addFile(it.getAsFile()); });
-
-  // Mic
   $('#micBtn').addEventListener('click',startDictation);
-
   autosize(); toggleSend();
   setTimeout(()=>$('#chatInput').focus(),200);
 
   $('#guestLimitOverlay')?.addEventListener('click',e=>{ if(e.target===e.currentTarget) hideGuestLimitModal(); });
 
-  // Mobile menu
   const btn=$('#nmMenuBtn'), menu=$('#nmMobileMenu');
   const icoOpen=$('#nmIconOpen'), icoClose=$('#nmIconClose');
   function setOpen(isOpen){ menu.classList.toggle('hidden',!isOpen); btn.setAttribute('aria-expanded',String(isOpen)); icoOpen.classList.toggle('hidden',isOpen); icoClose.classList.toggle('hidden',!isOpen); }
@@ -1734,7 +1859,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.addEventListener('click',(e)=>{ if(!menu||menu.classList.contains('hidden')) return; if(!menu.contains(e.target)&&!btn.contains(e.target)) setOpen(false); });
   document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') setOpen(false); });
 
-  // Language invite popup - show after 5s if not dismissed
   const langInviteEl=$('#langInvite'), langInviteOverlay=$('#langInviteOverlay'), langInviteFullList=$('#langInviteFullList');
   function showLangInvite(){
     if(langInviteOverlay){ langInviteOverlay.classList.add('show'); langInviteOverlay.setAttribute('aria-hidden','false'); }
@@ -1756,19 +1880,11 @@ document.addEventListener('DOMContentLoaded',()=>{
     });
   });
   $('#langInviteShowAll')?.addEventListener('click',()=>{
-    const full=langInviteFullList;
-    const btn=$('#langInviteShowAll');
-    if(full?.classList.contains('expanded')){
-      full.classList.remove('expanded');
-      if(btn) btn.innerHTML='<i class="fa-solid fa-chevron-down" id="langInviteShowAllIcon"></i> See all languages';
-    } else {
-      full?.classList.add('expanded');
-      if(btn) btn.innerHTML='<i class="fa-solid fa-chevron-up" id="langInviteShowAllIcon"></i> Show less';
-    }
+    const full=langInviteFullList; const btn=$('#langInviteShowAll');
+    if(full?.classList.contains('expanded')){ full.classList.remove('expanded'); if(btn) btn.innerHTML='<i class="fa-solid fa-chevron-down" id="langInviteShowAllIcon"></i> See all languages'; }
+    else { full?.classList.add('expanded'); if(btn) btn.innerHTML='<i class="fa-solid fa-chevron-up" id="langInviteShowAllIcon"></i> Show less'; }
   });
-  if(!localStorage.getItem('nm_lang_invite_dismissed')){
-    setTimeout(()=>{ showLangInvite(); },5000);
-  }
+  if(!localStorage.getItem('nm_lang_invite_dismissed')){ setTimeout(()=>{ showLangInvite(); },5000); }
 });
 </script>
 
