@@ -5,1230 +5,1405 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>About — NeuroMed Aira™</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&family=Roboto+Serif:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
 <style>
   :root {
-    --green: #2E8B6A;
-    --green-light: #3DAA83;
-    --green-pale: #E8F5F0;
-    --blue: #2D5FA8;
-    --blue-light: #4278C8;
-    --blue-pale: #EBF1FB;
-    --navy: #1A2A4A;
-    --ink: #1C2B3A;
-    --ink-mid: #3D4F63;
-    --ink-soft: #6B7D92;
-    --border: #E2E8EF;
+    --green: #1E7A5A;
+    --green-light: #2EA87A;
+    --green-pale: #EBF7F1;
+    --green-glow: rgba(30, 122, 90, 0.12);
+    --blue: #1E4A8A;
+    --blue-light: #2D6BC4;
+    --blue-pale: #E8F0FA;
+    --navy: #0C1E35;
+    --ink: #16243A;
+    --ink-mid: #3A5068;
+    --ink-soft: #6E8298;
+    --border: #E0E8F0;
+    --border-soft: #EEF3F8;
     --white: #FFFFFF;
     --bg: #FAFCFF;
-    --bg-warm: #F7F9FC;
+    --bg-warm: #F5F8FC;
+    --bg-green: #F0F9F4;
     --gradient: linear-gradient(135deg, var(--green) 0%, var(--blue) 100%);
-    --gradient-soft: linear-gradient(135deg, #E8F5F0 0%, #EBF1FB 100%);
+    --gradient-soft: linear-gradient(135deg, #EBF7F1 0%, #E8F0FA 100%);
+    --gradient-dark: linear-gradient(135deg, #0C2A1E 0%, #0C1E35 100%);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   html { scroll-behavior: smooth; }
 
   body {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'DM Sans', sans-serif;
     background: var(--bg);
     color: var(--ink);
     line-height: 1.7;
     -webkit-font-smoothing: antialiased;
   }
 
-  /* HERO */
-  .hero {
-    padding: 48px 48px 80px;
-    max-width: 1100px;
-    margin: 0 auto;
+  /* ── NAVBAR ── */
+  .navbar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(250,252,255,0.9);
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    border-bottom: 1px solid var(--border);
+    transition: box-shadow .25s;
+  }
+  .navbar.scrolled { box-shadow: 0 2px 16px rgba(12,30,53,0.08); }
+  .navbar-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    max-width: 1200px; margin: 0 auto; padding: 12px 32px;
+  }
+  .nav-logo img { height: 44px; display: block; }
+  .navbar-right { display: flex; align-items: center; gap: 8px; }
+  .nav-link {
+    font-size: 14px; font-weight: 400; color: var(--ink-mid);
+    text-decoration: none; padding: 8px 14px; border-radius: 10px;
+    transition: background .18s, color .18s;
+  }
+  .nav-link:hover { background: var(--bg-warm); color: var(--navy); }
+  .nav-link.active { color: var(--green); font-weight: 500; }
+  .btn-nav-primary {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--navy); color: white;
+    padding: 9px 20px; border-radius: 10px;
+    font-size: 14px; font-weight: 500;
+    text-decoration: none;
+    transition: background .2s, transform .15s;
+    box-shadow: 0 2px 10px rgba(12,30,53,0.25);
+  }
+  .btn-nav-primary:hover { background: var(--green); transform: translateY(-1px); }
+  .btn-nav-ghost {
+    display: inline-flex; align-items: center; gap: 7px;
+    border: 1px solid var(--border); color: var(--navy);
+    padding: 9px 20px; border-radius: 10px;
+    font-size: 14px; font-weight: 400; text-decoration: none;
+    transition: border-color .18s, background .18s;
+  }
+  .btn-nav-ghost:hover { border-color: var(--green); background: var(--green-pale); }
+
+  /* ── HERO ── */
+  .hero-wrap {
+    position: relative;
+    overflow: hidden;
+    background: var(--gradient-dark);
+    padding: 0;
+  }
+
+  .hero-bg-texture {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 80% at 90% 50%, rgba(30,122,90,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 10% 80%, rgba(30,74,138,0.2) 0%, transparent 50%);
+  }
+
+  .hero-bg-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .hero-inner {
+    position: relative; z-index: 2;
+    max-width: 1200px; margin: 0 auto;
+    padding: 100px 32px 80px;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 420px;
     gap: 80px;
     align-items: center;
   }
 
-  .hero-eyebrow {
+  .hero-badge {
     display: inline-flex; align-items: center; gap: 8px;
-    font-family: 'Roboto Mono', monospace;
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--green);
-    margin-bottom: 24px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 1.5px;
+    text-transform: uppercase; color: rgba(255,255,255,0.55);
+    margin-bottom: 28px;
   }
 
-  .hero-eyebrow::before {
-    content: '';
-    display: block;
-    width: 24px; height: 2px;
-    background: var(--green);
-    border-radius: 2px;
+  .hero-badge::before {
+    content: ''; display: block;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green-light);
+    box-shadow: 0 0 8px var(--green-light);
   }
 
   .hero h1 {
-    font-family: 'Roboto Serif', serif;
-    font-size: clamp(38px, 5vw, 56px);
-    font-weight: 500;
-    line-height: 1.15;
-    color: var(--navy);
-    letter-spacing: -1px;
-    margin-bottom: 24px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(48px, 6vw, 78px);
+    font-weight: 500; line-height: 1.05;
+    color: white; letter-spacing: -1.5px;
+    margin-bottom: 28px;
   }
 
   .hero h1 em {
     font-style: italic;
-    background: var(--gradient);
+    background: linear-gradient(135deg, #4FD9A0 0%, #7BBFFF 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .hero-sub {
-    font-size: 17px;
-    font-weight: 300;
-    color: var(--ink-mid);
-    line-height: 1.75;
-    max-width: 480px;
-    margin-bottom: 40px;
+    font-size: 17px; font-weight: 300;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.8; max-width: 500px;
+    margin-bottom: 44px;
   }
 
-  .hero-stat-row {
-    display: flex; gap: 32px;
+  .hero-stats {
+    display: flex; gap: 0;
+    border-left: 1px solid rgba(255,255,255,0.1);
   }
 
   .hero-stat {
-    border-left: 2px solid var(--border);
-    padding-left: 16px;
+    padding: 0 32px;
+    border-right: 1px solid rgba(255,255,255,0.1);
   }
 
   .hero-stat-num {
-    font-family: 'Roboto Serif', serif;
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--navy);
-    line-height: 1;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px; font-weight: 600;
+    color: white; line-height: 1;
+    background: linear-gradient(135deg, #4FD9A0 0%, #7BBFFF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   .hero-stat-label {
-    font-size: 12px;
-    color: var(--ink-soft);
-    margin-top: 4px;
+    font-size: 12px; color: rgba(255,255,255,0.4);
+    margin-top: 6px; line-height: 1.4; max-width: 120px;
   }
 
-  .hero-visual {
+  /* Hero visual — floating card */
+  .hero-visual { position: relative; }
+
+  .hero-card-wrap {
     position: relative;
   }
 
+  .hero-card-wrap::before {
+    content: '';
+    position: absolute; inset: -1px;
+    border-radius: 25px;
+    background: linear-gradient(135deg, rgba(79,217,160,0.3) 0%, rgba(123,191,255,0.3) 100%);
+    z-index: 0;
+  }
+
   .hero-card {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 20px;
+    position: relative; z-index: 1;
+    background: rgba(15,28,48,0.9);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px;
     padding: 32px;
-    box-shadow: 0 20px 60px rgba(30, 50, 80, 0.08), 0 4px 16px rgba(30, 50, 80, 0.04);
-    animation: float 6s ease-in-out infinite;
+    animation: float 7s ease-in-out infinite;
   }
 
   @keyframes float {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
+    50% { transform: translateY(-10px); }
   }
 
-  .card-header {
+  .card-avatar-row {
     display: flex; align-items: center; gap: 12px;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
+    margin-bottom: 22px; padding-bottom: 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
   }
 
-  .aira-avatar {
-    width: 40px; height: 40px;
-    background: var(--gradient);
-    border-radius: 50%;
+  .aira-orb {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--green-light) 0%, var(--blue-light) 100%);
     display: flex; align-items: center; justify-content: center;
-    color: white;
-    font-family: 'Roboto Serif', serif;
-    font-size: 16px;
-    font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px; font-style: italic;
+    color: white; font-weight: 600;
+    box-shadow: 0 0 20px rgba(79,217,160,0.3);
   }
 
-  .card-header-text .name {
-    font-weight: 500; font-size: 14px; color: var(--navy);
+  .card-name { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.9); }
+  .card-status {
+    font-size: 11px; color: #4FD9A0;
+    display: flex; align-items: center; gap: 5px;
   }
-  .card-header-text .status {
-    font-size: 12px; color: var(--green);
-    display: flex; align-items: center; gap: 4px;
-  }
-  .card-header-text .status::before {
+  .card-status::before {
     content: '';
-    width: 6px; height: 6px;
-    background: var(--green); border-radius: 50%;
+    width: 5px; height: 5px; border-radius: 50%;
+    background: #4FD9A0;
+    box-shadow: 0 0 8px #4FD9A0;
     display: inline-block;
+    animation: pulse 2s infinite;
   }
 
-  .card-message {
-    background: var(--gradient-soft);
-    border-radius: 12px;
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .card-bubble {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
     padding: 16px 18px;
-    font-size: 13.5px;
-    color: var(--ink);
-    line-height: 1.6;
-    margin-bottom: 12px;
+    font-size: 13.5px; line-height: 1.65;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 14px;
   }
 
-  .card-message strong { color: var(--navy); }
+  .card-bubble strong { color: white; }
 
-  .card-tags {
+  .card-chips {
     display: flex; flex-wrap: wrap; gap: 6px;
   }
 
-  .card-tag {
-    font-size: 11px;
-    font-family: 'Roboto Mono', monospace;
-    padding: 4px 10px;
-    border-radius: 100px;
-    border: 1px solid var(--border);
-    color: var(--ink-soft);
+  .chip {
+    font-size: 10.5px;
+    font-family: 'DM Mono', monospace;
+    padding: 4px 10px; border-radius: 100px;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.4);
   }
 
-  .card-tag.green { border-color: var(--green); color: var(--green); background: var(--green-pale); }
-  .card-tag.blue { border-color: var(--blue); color: var(--blue); background: var(--blue-pale); }
+  .chip.g { border-color: rgba(79,217,160,0.4); color: #4FD9A0; background: rgba(79,217,160,0.06); }
+  .chip.b { border-color: rgba(123,191,255,0.4); color: #7BBFFF; background: rgba(123,191,255,0.06); }
 
-  /* DIVIDER */
-  .section-divider {
-    width: 100%;
-    height: 1px;
-    background: var(--border);
-    max-width: 1100px;
-    margin: 0 auto;
-  }
-
-  /* SECTIONS */
-  section {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 96px 48px;
-  }
-
-  .section-label {
-    font-family: 'Roboto Mono', monospace;
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 1.5px;
+  .hero-scroll-hint {
+    position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: rgba(255,255,255,0.2); font-size: 11px;
+    font-family: 'DM Mono', monospace; letter-spacing: 1px;
     text-transform: uppercase;
-    color: var(--ink-soft);
-    margin-bottom: 48px;
-    display: flex; align-items: center; gap: 12px;
+    animation: bobDown 2.5s ease-in-out infinite;
   }
 
-  .section-label::after {
+  @keyframes bobDown {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(6px); }
+  }
+
+  .hero-scroll-hint i { font-size: 14px; }
+
+  /* ── SHARED LAYOUT ── */
+  .section {
+    max-width: 1200px; margin: 0 auto;
+    padding: 100px 32px;
+  }
+
+  .section-tag {
+    display: inline-flex; align-items: center; gap: 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--ink-soft);
+    margin-bottom: 52px;
+  }
+
+  .section-tag::before {
     content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
+    width: 28px; height: 1px; background: var(--green);
   }
 
-  /* PROBLEM */
-  .problem-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 64px;
-    align-items: start;
+  .section-tag.light { color: rgba(255,255,255,0.35); }
+  .section-tag.light::before { background: rgba(255,255,255,0.3); }
+
+  .divider {
+    max-width: 1200px; margin: 0 auto;
+    height: 1px; background: var(--border-soft);
   }
 
-  .problem-left h2 {
-    font-family: 'Roboto Serif', serif;
-    font-size: clamp(28px, 3.5vw, 42px);
-    font-weight: 500;
-    line-height: 1.2;
-    color: var(--navy);
-    letter-spacing: -0.5px;
-    margin-bottom: 24px;
-  }
-
-  .problem-left p {
-    font-size: 16px;
-    color: var(--ink-mid);
-    font-weight: 300;
-    line-height: 1.8;
-    margin-bottom: 16px;
-  }
-
-  .problem-right {
-    padding-top: 8px;
-  }
-
-  .impact-item {
-    display: flex; gap: 20px;
-    padding: 24px 0;
+  /* ── FOUNDER SECTION ── */
+  .founder-wrap {
+    background: white;
+    border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
   }
 
-  .impact-item:first-child { border-top: 1px solid var(--border); }
-
-  .impact-icon {
-    width: 44px; height: 44px;
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-    flex-shrink: 0;
-    background: var(--gradient-soft);
-    color: var(--green);
-  }
-
-  .impact-item h4 {
-    font-size: 14px; font-weight: 500;
-    color: var(--navy);
-    margin-bottom: 4px;
-  }
-
-  .impact-item p {
-    font-size: 13.5px;
-    color: var(--ink-soft);
-    line-height: 1.6;
-  }
-
-  /* WHAT AIRA IS */
-  .what-grid {
+  .founder-inner {
+    max-width: 1200px; margin: 0 auto;
+    padding: 100px 32px;
     display: grid;
-    grid-template-columns: 5fr 7fr;
+    grid-template-columns: 420px 1fr;
     gap: 80px;
     align-items: start;
   }
 
-  .what-left {
-    position: sticky; top: 100px;
+  .founder-photo-col { position: sticky; top: 120px; }
+
+  .founder-photo-frame {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
   }
 
-  .what-left h2 {
-    font-family: 'Roboto Serif', serif;
-    font-size: clamp(26px, 3vw, 38px);
-    font-weight: 500;
-    line-height: 1.25;
-    color: var(--navy);
-    letter-spacing: -0.5px;
+  .founder-photo-frame::before {
+    content: '';
+    position: absolute; inset: 0; z-index: 1;
+    background: linear-gradient(to top, rgba(12,30,53,0.4) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .founder-photo-frame img {
+    width: 100%; display: block;
+    border-radius: 24px;
+    filter: brightness(1.02) contrast(1.02) saturate(0.95);
+  }
+
+  .founder-credential-pill {
+    position: absolute; bottom: 20px; left: 20px; right: 20px;
+    z-index: 2;
+    background: rgba(12,30,53,0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 14px 18px;
+    display: flex; align-items: center; gap: 14px;
+  }
+
+  .credential-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--green-light) 0%, var(--blue-light) 100%);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 15px; flex-shrink: 0;
+  }
+
+  .credential-text .title {
+    font-size: 12px; font-weight: 500; color: white; line-height: 1.3;
+  }
+
+  .credential-text .sub {
+    font-size: 10.5px; color: rgba(255,255,255,0.45);
+    font-family: 'DM Mono', monospace; margin-top: 3px;
+  }
+
+  .founder-star-badge {
+    position: absolute; top: 20px; right: 20px; z-index: 2;
+    background: rgba(79,217,160,0.15);
+    border: 1px solid rgba(79,217,160,0.3);
+    backdrop-filter: blur(10px);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 1px;
+    text-transform: uppercase; color: #4FD9A0;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  .founder-star-badge i { font-size: 10px; }
+
+  .founder-content { padding-top: 8px; }
+
+  .founder-content .section-tag { margin-bottom: 28px; }
+
+  .founder-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 4vw, 52px);
+    font-weight: 600; line-height: 1.1;
+    color: var(--navy); letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  .founder-title {
+    font-size: 14px; color: var(--green);
+    font-weight: 500; margin-bottom: 36px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .founder-title::before {
+    content: '';
+    width: 20px; height: 1.5px;
+    background: var(--green); border-radius: 2px;
+  }
+
+  .founder-bio {
+    font-size: 16px; font-weight: 300;
+    color: var(--ink-mid); line-height: 1.85;
     margin-bottom: 20px;
   }
 
+  .founder-bio strong { color: var(--navy); font-weight: 500; }
+
+  .founder-quote-block {
+    margin: 36px 0;
+    padding: 28px 32px;
+    border-left: 3px solid var(--green);
+    background: var(--bg-green);
+    border-radius: 0 16px 16px 0;
+  }
+
+  .founder-quote-block blockquote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px; font-weight: 500;
+    font-style: italic; line-height: 1.5;
+    color: var(--navy);
+  }
+
+  .founder-credentials-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px; margin-top: 36px;
+  }
+
+  .credential-card {
+    background: var(--bg-warm);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px;
+    transition: border-color .2s, box-shadow .2s;
+  }
+
+  .credential-card:hover {
+    border-color: var(--green);
+    box-shadow: 0 4px 20px var(--green-glow);
+  }
+
+  .credential-card-icon {
+    font-size: 20px; color: var(--green);
+    margin-bottom: 10px;
+  }
+
+  .credential-card h4 {
+    font-size: 13px; font-weight: 500;
+    color: var(--navy); margin-bottom: 4px;
+  }
+
+  .credential-card p {
+    font-size: 12px; color: var(--ink-soft); line-height: 1.5;
+  }
+
+  /* ── PROBLEM SECTION ── */
+  .problem-wrap {
+    background: var(--bg);
+  }
+
+  .problem-header {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 64px; margin-bottom: 64px; align-items: end;
+  }
+
+  .problem-header h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 4vw, 50px);
+    font-weight: 500; line-height: 1.15;
+    color: var(--navy); letter-spacing: -0.5px;
+  }
+
+  .problem-header p {
+    font-size: 16px; font-weight: 300;
+    color: var(--ink-mid); line-height: 1.8;
+  }
+
+  .impact-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    background: var(--border-soft);
+    border-radius: 20px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .impact-cell {
+    background: white;
+    padding: 32px 28px;
+    transition: background .25s, transform .25s;
+    position: relative; overflow: hidden;
+  }
+
+  .impact-cell::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--gradient);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform .3s;
+  }
+
+  .impact-cell:hover { background: var(--bg-green); }
+  .impact-cell:hover::after { transform: scaleX(1); }
+
+  .impact-cell-icon {
+    width: 48px; height: 48px; border-radius: 14px;
+    background: var(--gradient-soft);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: var(--green);
+    margin-bottom: 18px;
+  }
+
+  .impact-cell h4 {
+    font-size: 14px; font-weight: 500;
+    color: var(--navy); margin-bottom: 8px;
+  }
+
+  .impact-cell p {
+    font-size: 13px; color: var(--ink-soft); line-height: 1.65;
+  }
+
+  /* ── WHAT AIRA IS ── */
+  .what-section {
+    background: white;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .what-layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 80px; align-items: start;
+  }
+
+  .what-left { position: sticky; top: 120px; }
+
+  .what-left h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(28px, 3vw, 40px);
+    font-weight: 500; line-height: 1.2;
+    color: var(--navy); letter-spacing: -0.3px;
+    margin-bottom: 18px;
+  }
+
   .what-left p {
-    font-size: 15px;
-    color: var(--ink-mid);
-    font-weight: 300;
-    line-height: 1.8;
+    font-size: 15px; font-weight: 300;
+    color: var(--ink-mid); line-height: 1.8;
     margin-bottom: 12px;
   }
 
-  .distinction-box {
-    margin-top: 32px;
-    padding: 20px 24px;
+  .what-note {
+    margin-top: 28px; padding: 18px 22px;
     background: var(--bg-warm);
     border-left: 3px solid var(--green);
     border-radius: 0 12px 12px 0;
+    font-size: 13px; color: var(--ink-mid);
+    font-style: italic; line-height: 1.7;
   }
 
-  .distinction-box p {
-    font-size: 13.5px;
-    color: var(--ink-mid);
-    font-style: italic;
-    line-height: 1.7;
-    margin: 0;
-  }
-
-  .what-right {
-    display: flex; flex-direction: column; gap: 24px;
-  }
+  .diff-cards { display: flex; flex-direction: column; gap: 20px; }
 
   .diff-card {
-    background: white;
+    background: var(--bg);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 28px 32px;
-    transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
-    position: relative;
-    overflow: hidden;
+    border-radius: 18px; padding: 28px 30px;
+    transition: border-color .25s, box-shadow .25s, transform .25s;
+    position: relative; overflow: hidden;
+    cursor: default;
   }
 
   .diff-card::before {
     content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 3px;
+    position: absolute; top: 0; left: 0;
+    width: 3px; height: 100%;
     background: var(--gradient);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.3s;
+    transform: scaleY(0); transform-origin: top;
+    transition: transform .35s;
   }
 
   .diff-card:hover {
     border-color: transparent;
-    box-shadow: 0 12px 40px rgba(30, 50, 80, 0.1);
-    transform: translateY(-2px);
+    box-shadow: 0 10px 36px rgba(12,30,53,0.08);
+    transform: translateX(4px);
   }
 
-  .diff-card:hover::before { transform: scaleX(1); }
+  .diff-card:hover::before { transform: scaleY(1); }
 
-  .diff-num {
-    font-family: 'Roboto Mono', monospace;
-    font-size: 11px;
-    color: var(--ink-soft);
-    letter-spacing: 1px;
-    margin-bottom: 8px;
+  .diff-n {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; color: var(--ink-soft);
+    letter-spacing: 1px; margin-bottom: 8px;
   }
 
   .diff-card h3 {
-    font-family: 'Roboto Serif', serif;
-    font-size: 20px;
-    font-weight: 500;
-    color: var(--navy);
-    margin-bottom: 10px;
-    letter-spacing: -0.3px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 21px; font-weight: 600;
+    color: var(--navy); margin-bottom: 8px; letter-spacing: -0.2px;
   }
 
   .diff-card p {
-    font-size: 14.5px;
-    color: var(--ink-mid);
-    font-weight: 300;
-    line-height: 1.75;
+    font-size: 14px; font-weight: 300;
+    color: var(--ink-mid); line-height: 1.75;
   }
 
-  /* PRIVACY */
+  /* ── PRIVACY ── */
   .privacy-section {
-    background: var(--navy);
-    max-width: 100%;
-    padding: 96px 0;
+    background: var(--gradient-dark);
+    position: relative; overflow: hidden;
+  }
+
+  .privacy-section::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 80% 50%, rgba(30,122,90,0.12) 0%, transparent 60%);
   }
 
   .privacy-inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 48px;
-  }
-
-  .privacy-inner .section-label {
-    color: rgba(255,255,255,0.4);
-  }
-  .privacy-inner .section-label::after {
-    background: rgba(255,255,255,0.1);
+    position: relative; z-index: 1;
+    max-width: 1200px; margin: 0 auto; padding: 100px 32px;
   }
 
   .privacy-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 80px;
-    align-items: start;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 80px; align-items: start;
   }
 
   .privacy-left h2 {
-    font-family: 'Roboto Serif', serif;
-    font-size: clamp(28px, 3.5vw, 42px);
-    font-weight: 500;
-    line-height: 1.2;
-    color: white;
-    letter-spacing: -0.5px;
-    margin-bottom: 24px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 4vw, 50px);
+    font-weight: 500; line-height: 1.15;
+    color: white; letter-spacing: -0.5px; margin-bottom: 20px;
   }
 
-  .privacy-left h2 em {
-    font-style: italic;
-    color: var(--green-light);
-  }
+  .privacy-left h2 em { font-style: italic; color: #4FD9A0; }
 
   .privacy-left p {
-    font-size: 15.5px;
-    color: rgba(255,255,255,0.6);
-    font-weight: 300;
-    line-height: 1.8;
-    margin-bottom: 16px;
+    font-size: 15px; font-weight: 300;
+    color: rgba(255,255,255,0.55); line-height: 1.8; margin-bottom: 16px;
   }
 
   .honest-box {
-    margin-top: 32px;
-    padding: 20px 24px;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
-    background: rgba(255,255,255,0.04);
+    margin-top: 32px; padding: 22px 26px;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px; background: rgba(255,255,255,0.03);
   }
 
   .honest-box-label {
-    font-family: 'Roboto Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--green-light);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 1.5px;
+    text-transform: uppercase; color: #4FD9A0;
     margin-bottom: 10px;
   }
 
   .honest-box p {
-    font-size: 13.5px;
-    color: rgba(255,255,255,0.55);
-    line-height: 1.7;
-    margin: 0;
+    font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.75; margin: 0;
   }
 
-  .privacy-right {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+  .privacy-points {
+    display: grid; grid-template-columns: 1fr 1fr;
     gap: 2px;
-    background: rgba(255,255,255,0.06);
-    border-radius: 16px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.05);
+    border-radius: 18px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.07);
   }
 
-  .privacy-point {
+  .privacy-pt {
     background: rgba(255,255,255,0.02);
-    padding: 28px 24px;
-    transition: background 0.3s;
+    padding: 26px 22px; transition: background .25s;
   }
 
-  .privacy-point:hover { background: rgba(255,255,255,0.05); }
+  .privacy-pt:hover { background: rgba(255,255,255,0.05); }
 
-  .privacy-point-icon {
-    font-size: 22px; margin-bottom: 12px;
-    color: var(--green-light);
+  .privacy-pt-icon {
+    font-size: 20px; color: #4FD9A0; margin-bottom: 12px;
   }
 
-  .privacy-point h4 {
-    font-size: 13px; font-weight: 500;
-    color: white;
-    margin-bottom: 6px;
+  .privacy-pt h4 {
+    font-size: 13px; font-weight: 500; color: white; margin-bottom: 5px;
   }
 
-  .privacy-point p {
-    font-size: 12.5px;
-    color: rgba(255,255,255,0.45);
-    line-height: 1.6;
-    margin: 0;
+  .privacy-pt p {
+    font-size: 12px; color: rgba(255,255,255,0.4); line-height: 1.6; margin: 0;
   }
 
-  /* WHO WE BUILT FOR */
-  .audience-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+  /* ── AUDIENCE ── */
+  .audience-header {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 64px; margin-bottom: 56px; align-items: end;
+  }
+
+  .audience-header h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 4vw, 50px);
+    font-weight: 500; line-height: 1.15;
+    color: var(--navy); letter-spacing: -0.5px;
+  }
+
+  .audience-header p {
+    font-size: 16px; font-weight: 300;
+    color: var(--ink-mid); line-height: 1.8;
+  }
+
+  .audience-cards {
+    display: grid; grid-template-columns: repeat(3, 1fr);
     gap: 24px;
-    margin-top: 16px;
   }
 
-  .audience-card {
+  .aud-card {
     background: white;
     border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 36px 28px;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.3s, box-shadow 0.3s;
+    border-radius: 22px; padding: 36px 28px;
+    position: relative; overflow: hidden;
+    transition: transform .3s, box-shadow .3s;
   }
 
-  .audience-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 16px 48px rgba(30,50,80,0.1);
+  .aud-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 52px rgba(12,30,53,0.1);
   }
 
-  .audience-card::after {
+  .aud-card::after {
     content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 3px;
-    background: var(--gradient);
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 3px; background: var(--gradient);
   }
 
-  .audience-emoji {
-    font-size: 36px; margin-bottom: 20px;
-    display: block;
-    color: var(--green);
+  .aud-img {
+    width: 100%; height: 180px;
+    object-fit: cover; border-radius: 14px;
+    margin-bottom: 22px;
+    filter: brightness(0.97) saturate(0.9);
   }
 
-  .audience-card h3 {
-    font-family: 'Roboto Serif', serif;
-    font-size: 20px;
-    font-weight: 500;
-    color: var(--navy);
-    margin-bottom: 12px;
-    letter-spacing: -0.3px;
+  .aud-card h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px; font-weight: 600;
+    color: var(--navy); margin-bottom: 10px; letter-spacing: -0.2px;
   }
 
-  .audience-card p {
-    font-size: 14px;
-    color: var(--ink-mid);
-    font-weight: 300;
-    line-height: 1.75;
+  .aud-card p {
+    font-size: 14px; font-weight: 300;
+    color: var(--ink-mid); line-height: 1.75;
   }
 
-  .audience-intro {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 64px;
-    margin-bottom: 56px;
-    align-items: end;
-  }
-
-  .audience-intro h2 {
-    font-family: 'Roboto Serif', serif;
-    font-size: clamp(28px, 3.5vw, 42px);
-    font-weight: 500;
-    line-height: 1.2;
-    color: var(--navy);
-    letter-spacing: -0.5px;
-  }
-
-  .audience-intro p {
-    font-size: 16px;
-    color: var(--ink-mid);
-    font-weight: 300;
-    line-height: 1.8;
-  }
-
-  /* MISSION BANNER */
+  /* ── MISSION BANNER ── */
   .mission-banner {
-    max-width: 100%;
     background: var(--gradient-soft);
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
-    padding: 80px 48px;
+    padding: 88px 32px;
     text-align: center;
   }
 
   .mission-inner {
-    max-width: 720px;
-    margin: 0 auto;
+    max-width: 740px; margin: 0 auto;
   }
 
   .mission-banner blockquote {
-    font-family: 'Roboto Serif', serif;
-    font-size: clamp(22px, 3vw, 34px);
-    font-weight: 400;
-    font-style: italic;
-    line-height: 1.45;
-    color: var(--navy);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(24px, 3.5vw, 38px);
+    font-weight: 500; font-style: italic;
+    line-height: 1.4; color: var(--navy);
     margin-bottom: 24px;
   }
 
-  .mission-banner cite {
-    font-style: normal;
-    font-size: 13px;
-    font-family: 'Roboto Mono', monospace;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--ink-soft);
+  .mission-source {
+    display: inline-flex; align-items: center; gap: 12px;
   }
 
-  /* WHATS NEXT */
+  .mission-source img {
+    width: 36px; height: 36px; border-radius: 50%;
+    object-fit: cover; border: 2px solid var(--border);
+  }
+
+  .mission-source-text {
+    text-align: left;
+  }
+
+  .mission-source-name {
+    font-size: 13px; font-weight: 500; color: var(--navy);
+  }
+
+  .mission-source-role {
+    font-size: 11px; color: var(--ink-soft);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── ROADMAP / NEXT ── */
   .next-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 80px;
-    align-items: center;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 80px; align-items: start;
   }
 
   .next-left h2 {
-    font-family: 'Roboto Serif', serif;
-    font-size: clamp(28px, 3.5vw, 40px);
-    font-weight: 500;
-    color: var(--navy);
-    letter-spacing: -0.5px;
-    line-height: 1.2;
-    margin-bottom: 20px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(30px, 4vw, 44px);
+    font-weight: 500; color: var(--navy);
+    letter-spacing: -0.5px; line-height: 1.15;
+    margin-bottom: 18px;
   }
 
   .next-left p {
-    font-size: 15.5px;
-    color: var(--ink-mid);
-    font-weight: 300;
-    line-height: 1.8;
-    margin-bottom: 16px;
+    font-size: 15.5px; font-weight: 300;
+    color: var(--ink-mid); line-height: 1.8;
+    margin-bottom: 14px;
   }
 
-  .next-cta-row {
-    display: flex; gap: 12px; margin-top: 32px; flex-wrap: wrap;
-  }
+  .cta-row { display: flex; gap: 12px; margin-top: 32px; flex-wrap: wrap; }
 
   .btn-primary {
     display: inline-flex; align-items: center; gap: 8px;
-    background: var(--gradient);
-    color: white;
-    padding: 13px 28px;
-    border-radius: 100px;
-    font-size: 14px; font-weight: 500;
-    text-decoration: none;
-    transition: opacity 0.2s, transform 0.2s;
-    box-shadow: 0 4px 20px rgba(45, 95, 168, 0.3);
+    background: var(--gradient); color: white;
+    padding: 13px 28px; border-radius: 100px;
+    font-size: 14px; font-weight: 500; text-decoration: none;
+    box-shadow: 0 4px 22px rgba(30,122,90,0.3);
+    transition: opacity .2s, transform .2s;
   }
 
-  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); }
 
   .btn-secondary {
     display: inline-flex; align-items: center; gap: 8px;
-    border: 1.5px solid var(--border);
-    color: var(--navy);
-    padding: 13px 28px;
-    border-radius: 100px;
-    font-size: 14px; font-weight: 400;
-    text-decoration: none;
-    transition: border-color 0.2s, background 0.2s;
+    border: 1.5px solid var(--border); color: var(--navy);
+    padding: 13px 28px; border-radius: 100px;
+    font-size: 14px; font-weight: 400; text-decoration: none;
+    transition: border-color .2s, background .2s;
   }
 
   .btn-secondary:hover { border-color: var(--green); background: var(--green-pale); }
 
-  .next-right {
-    background: var(--bg-warm);
+  .roadmap-card {
+    background: white;
     border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 36px;
+    border-radius: 20px; padding: 32px;
+  }
+
+  .roadmap-header {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--ink-soft);
+    margin-bottom: 24px; padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
   }
 
   .roadmap-item {
-    display: flex; gap: 16px;
-    padding: 16px 0;
-    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 0; border-bottom: 1px solid var(--border-soft);
   }
 
   .roadmap-item:last-child { border-bottom: none; padding-bottom: 0; }
   .roadmap-item:first-child { padding-top: 0; }
 
-  .roadmap-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    margin-top: 6px;
-    flex-shrink: 0;
+  .rm-dot {
+    width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
+    margin-top: 2px;
   }
+  .rm-dot.done { background: var(--green); box-shadow: 0 0 8px var(--green-glow); }
+  .rm-dot.soon { background: var(--blue-light); }
+  .rm-dot.later { background: transparent; border: 2px solid var(--border); }
 
-  .roadmap-dot.done { background: var(--green); }
-  .roadmap-dot.soon { background: var(--blue-light); }
-  .roadmap-dot.later {
-    background: transparent;
-    border: 2px solid var(--border);
+  .rm-text h4 { font-size: 13.5px; font-weight: 500; color: var(--navy); margin-bottom: 2px; }
+  .rm-text p { font-size: 12px; color: var(--ink-soft); }
+  .rm-waitlist {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--green);
+    text-decoration: none;
+    letter-spacing: 0.01em;
   }
+  .rm-waitlist:hover { text-decoration: underline; color: var(--green-light); }
 
-  .roadmap-item-text h4 {
-    font-size: 13.5px; font-weight: 500;
-    color: var(--navy); margin-bottom: 2px;
-  }
-
-  .roadmap-item-text p {
-    font-size: 12.5px; color: var(--ink-soft); line-height: 1.5;
-  }
-
-  .roadmap-tag {
+  .rm-tag {
     margin-left: auto; flex-shrink: 0;
-    font-family: 'Roboto Mono', monospace;
-    font-size: 10px; letter-spacing: 0.5px;
-    text-transform: uppercase;
-    padding: 3px 9px;
-    border-radius: 100px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 100px;
   }
+  .rm-tag.done { background: var(--green-pale); color: var(--green); }
+  .rm-tag.soon { background: var(--blue-pale); color: var(--blue-light); }
+  .rm-tag.later { background: var(--bg-warm); color: var(--ink-soft); border: 1px solid var(--border); }
 
-  .roadmap-tag.done { background: var(--green-pale); color: var(--green); }
-  .roadmap-tag.soon { background: var(--blue-pale); color: var(--blue); }
-  .roadmap-tag.later { background: var(--bg-warm); color: var(--ink-soft); border: 1px solid var(--border); }
-
-  /* DISCLAIMER */
+  /* ── DISCLAIMER & FOOTER ── */
   .disclaimer {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 48px 64px;
+    max-width: 1200px; margin: 0 auto;
+    padding: 0 32px 56px;
     border-top: 1px solid var(--border);
   }
 
   .disclaimer p {
-    padding-top: 32px;
-    font-size: 12px;
-    color: var(--ink-soft);
-    line-height: 1.7;
-    font-style: italic;
+    padding-top: 28px;
+    font-size: 11.5px; color: var(--ink-soft);
+    line-height: 1.7; font-style: italic;
   }
 
-  /* FOOTER */
   footer {
-    background: var(--navy);
-    padding: 48px;
+    background: var(--navy); padding: 52px 32px;
     text-align: center;
   }
 
   .footer-logo {
-    font-family: 'Roboto Serif', serif;
-    font-size: 20px; font-weight: 500;
-    color: white; margin-bottom: 16px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px; font-weight: 500;
+    color: white; margin-bottom: 18px;
   }
 
   .footer-links {
     display: flex; justify-content: center; gap: 24px;
-    list-style: none; margin-bottom: 24px;
+    list-style: none; margin-bottom: 24px; flex-wrap: wrap;
   }
 
   .footer-links a {
-    font-size: 13px; color: rgba(255,255,255,0.4);
-    text-decoration: none; transition: color 0.2s;
+    font-size: 13px; color: rgba(255,255,255,0.35);
+    text-decoration: none; transition: color .2s;
   }
+
   .footer-links a:hover { color: white; }
 
   .footer-copy {
-    font-size: 12px;
-    color: rgba(255,255,255,0.25);
-    font-family: 'Roboto Mono', monospace;
+    font-size: 11px; color: rgba(255,255,255,0.2);
+    font-family: 'DM Mono', monospace; letter-spacing: 0.5px;
   }
 
-  /* ANIMATIONS */
+  /* ── ANIMATIONS ── */
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(24px); }
+    from { opacity: 0; transform: translateY(28px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
-  .fade-up {
-    animation: fadeUp 0.7s ease forwards;
-    opacity: 0;
-  }
+  .fade-up { animation: fadeUp 0.75s ease forwards; opacity: 0; }
+  .delay-1 { animation-delay: .12s; }
+  .delay-2 { animation-delay: .25s; }
+  .delay-3 { animation-delay: .4s; }
+  .delay-4 { animation-delay: .55s; }
 
-  .delay-1 { animation-delay: 0.1s; }
-  .delay-2 { animation-delay: 0.2s; }
-  .delay-3 { animation-delay: 0.3s; }
-  .delay-4 { animation-delay: 0.45s; }
+  /* Scroll reveal */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.in-view { opacity: 1; transform: none; }
 
-  @media (max-width: 900px) {
-    .hero, .problem-grid, .what-grid, .privacy-grid,
-    .audience-intro, .next-grid { grid-template-columns: 1fr; gap: 40px; }
-    section { padding: 64px 24px; }
-    .privacy-inner { padding: 0 24px; }
-    .audience-grid { grid-template-columns: 1fr; }
-    .privacy-right { grid-template-columns: 1fr; }
+  /* ── RESPONSIVE ── */
+  @media (max-width: 960px) {
+    .hero-inner { grid-template-columns: 1fr; gap: 48px; padding: 72px 24px 60px; }
+    .founder-inner { grid-template-columns: 1fr; gap: 48px; padding: 72px 24px; }
+    .founder-photo-col { position: static; }
+    .founder-credentials-row { grid-template-columns: 1fr; }
+    .privacy-grid { grid-template-columns: 1fr; gap: 48px; }
+    .what-layout { grid-template-columns: 1fr; gap: 40px; }
     .what-left { position: static; }
+    .problem-header { grid-template-columns: 1fr; gap: 24px; }
+    .audience-header { grid-template-columns: 1fr; gap: 24px; }
+    .audience-cards { grid-template-columns: 1fr; }
+    .impact-grid { grid-template-columns: 1fr 1fr; }
+    .next-grid { grid-template-columns: 1fr; gap: 48px; }
+    .section { padding: 72px 24px; }
+    .privacy-inner { padding: 72px 24px; }
     footer { padding: 40px 24px; }
-    .footer-links { flex-wrap: wrap; gap: 16px; }
+    .hero-stats { flex-direction: column; gap: 0; }
+    .hero-stat { padding: 12px 20px; }
   }
-
-  /* Navbar (OG look: logo left, controls grouped on right) */
-  #navbar { --navy: #0F4C81; --navy-deep: #08305A; --sky: #4FA8D8; --teal: #1E8A7A; --teal-light: #E6F6F4; --border: rgba(15,76,129,0.12); --shadow-soft: 0 2px 12px rgba(15,76,129,0.08); --slate-soft: #F4F6F9; --text-primary: #0D1B2A; --text-muted: #8896A5; }
-  .navbar { position: sticky; top: 0; z-index: 100; background: rgba(250,250,248,0.88); backdrop-filter: blur(20px) saturate(1.4); -webkit-backdrop-filter: blur(20px) saturate(1.4); border-bottom: 1px solid var(--border); transition: box-shadow .2s ease; }
-  .navbar.scrolled { box-shadow: var(--shadow-soft); }
-  .navbar .navbar-inner { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 1280px; margin: 0 auto; padding: 12px 24px; }
-  .navbar .nav-logo { display: flex !important; align-items: center; text-decoration: none; flex-shrink: 0; color: inherit; }
-  .navbar .nav-logo-img { height: 48px; width: auto; object-fit: contain; display: block; }
-  .navbar .navbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-  .navbar nav.navbar-nav { display: none; position: static; background: none; padding: 0; height: auto; border: none; }
-  .navbar #nmMenuBtn { display: flex; align-items: center; justify-content: center; }
-  @media (min-width: 768px) {
-    .navbar nav.navbar-nav { display: flex; align-items: center; gap: 8px; }
-    .navbar #nmMenuBtn { display: none !important; }
-  }
-  .navbar .btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: var(--navy); color: white; border-radius: 12px; font-weight: 600; font-size: .9rem; transition: background .2s, transform .15s; border: none; text-decoration: none; box-shadow: 0 2px 8px rgba(15,76,129,0.25); }
-  .navbar .btn-primary:hover { background: var(--navy-deep); transform: translateY(-1px); color: white; }
-  .navbar .btn-ghost { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: transparent; color: var(--text-primary); border-radius: 12px; font-weight: 500; font-size: .9rem; transition: background .18s; border: 1px solid var(--border); text-decoration: none; }
-  .navbar .btn-ghost:hover { background: var(--teal-light); border-color: var(--teal); color: var(--text-primary); }
-  .navbar .input-icon-btn { width: 36px; height: 36px; border-radius: 10px; background: var(--slate-soft); border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; color: var(--text-muted); transition: background .18s, color .18s; font-size: .9rem; }
-  .navbar .input-icon-btn:hover { background: var(--teal-light); color: var(--teal); }
-  body.hc { filter: contrast(1.5) brightness(0.95); }
 </style>
 </head>
 <body>
 
-<!-- ===== NAVBAR ===== -->
-<header id="navbar" class="navbar">
+<!-- ── NAVBAR ── -->
+<header class="navbar" id="navbar">
   <div class="navbar-inner">
-    <!-- Logo -->
     <a href="/" class="nav-logo">
-      <img src="https://res.cloudinary.com/dk52yeq9x/image/upload/v1770301408/Neuromed_Aira_Logo-09_qpgvss.png"
-           alt="NeuroMed Aira" class="nav-logo-img"/>
+      <img src="https://res.cloudinary.com/dk52yeq9x/image/upload/v1770301408/Neuromed_Aira_Logo-09_qpgvss.png" alt="NeuroMed Aira"/>
     </a>
-
-    <!-- Right side: desktop nav + mobile button -->
     <div class="navbar-right">
-      <nav class="navbar-nav">
-        <button id="fontMinus" class="input-icon-btn" title="Decrease font size" aria-label="Smaller text"><span style="font-size:.8rem;font-weight:700;">A-</span></button>
-        <button id="fontPlus" class="input-icon-btn" title="Increase font size" aria-label="Larger text"><span style="font-size:.9rem;font-weight:700;">A+</span></button>
-        <button id="highContrast" class="input-icon-btn" aria-pressed="false" title="High contrast" aria-label="Toggle high contrast"><i class="fa-solid fa-circle-half-stroke"></i></button>
-        <div class="relative">
-          <button id="langBtn" class="btn-ghost text-sm" aria-haspopup="menu" aria-expanded="false">
-            <i class="fa-solid fa-globe opacity-70"></i>
-            <span id="langBtnLabel">English</span>
-            <i class="fa-solid fa-chevron-down opacity-50" style="font-size:.7rem;"></i>
-          </button>
-          <div id="langMenu" class="hidden absolute right-0 mt-2 w-56 max-h-72 overflow-auto bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-1"></div>
-        </div>
-        <a href="/signup" class="btn-ghost text-sm">Sign up</a>
-        <a href="/login" class="btn-primary text-sm" style="padding:10px 20px;">Log in</a>
-      </nav>
-      <button id="nmMenuBtn" class="input-icon-btn" aria-label="Open menu">
-        <svg id="nmIconOpen" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-        <svg id="nmIconClose" class="h-5 w-5" style="display:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
-      </button>
-    </div>
-  </div>
-
-  <!-- Mobile Menu -->
-  <div id="nmMobileMenu" class="hidden border-t border-slate-100 bg-white/95 backdrop-blur">
-    <div style="max-width:1280px;margin:0 auto;padding:16px 24px;display:grid;gap:12px;">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <button id="mFontMinus" class="btn-ghost text-sm flex-1 justify-center">A-</button>
-        <button id="mFontPlus" class="btn-ghost text-sm flex-1 justify-center">A+</button>
-        <button id="mHighContrast" class="btn-ghost text-sm flex-1 justify-center" aria-pressed="false">
-          <i class="fa-solid fa-circle-half-stroke"></i>
-        </button>
-      </div>
-      <div class="flex gap-2">
-        <a href="/signup" class="btn-ghost text-sm flex-1 justify-center">Sign up</a>
-        <a href="/login" class="btn-primary text-sm flex-1 justify-center">Log in</a>
-      </div>
-      <div>
-        <button id="mLangBtn" class="btn-ghost text-sm w-full justify-between">
-          <span class="flex items-center gap-2"><i class="fa-solid fa-globe opacity-70"></i><span id="mLangBtnLabel">English</span></span>
-          <i class="fa-solid fa-chevron-down opacity-50" style="font-size:.7rem;"></i>
-        </button>
-        <div id="mLangMenu" class="hidden mt-2 border border-slate-200 rounded-2xl bg-white shadow-lg max-h-60 overflow-auto py-1"></div>
-      </div>
+      <a href="/" class="nav-link">Product</a>
+      <a href="/about" class="nav-link active">About</a>
+      <a href="/signup" class="btn-nav-ghost">Sign up</a>
+      <a href="/login" class="btn-nav-primary">Log in</a>
     </div>
   </div>
 </header>
 
-<!-- HERO -->
-<div class="hero">
-  <div>
-    <div class="hero-eyebrow fade-up">About NeuroMed Aira</div>
-    <h1 class="fade-up delay-1">
-      Medicine that <em>speaks</em><br>your language.
-    </h1>
-    <p class="hero-sub fade-up delay-2">
-      We built Aira because the gap between medical information and human understanding causes real harm — and it falls hardest on the people who can least afford it.
-    </p>
-    <div class="hero-stat-row fade-up delay-3">
-      <div class="hero-stat">
-        <div class="hero-stat-num">1 in 3</div>
-        <div class="hero-stat-label">patients misunderstand discharge instructions</div>
+<!-- ── HERO ── -->
+<div class="hero-wrap hero">
+  <div class="hero-bg-texture"></div>
+  <div class="hero-bg-grid"></div>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge fade-up">About NeuroMed Aira</div>
+      <h1 class="fade-up delay-1">
+        Medicine that<br><em>speaks your</em><br>language.
+      </h1>
+      <p class="hero-sub fade-up delay-2">
+        We built Aira because the gap between medical information and human understanding causes real harm — and falls hardest on the people who can least afford it.
+      </p>
+      <div class="hero-stats fade-up delay-3">
+        <div class="hero-stat">
+          <div class="hero-stat-num">1 in 3</div>
+          <div class="hero-stat-label">patients misunderstand discharge instructions</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num">72%</div>
+          <div class="hero-stat-label">of caregivers feel overwhelmed by medical documents</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num">30d</div>
+          <div class="hero-stat-label">readmission window tied to unclear discharge guidance</div>
+        </div>
       </div>
-      <div class="hero-stat">
-        <div class="hero-stat-num">72%</div>
-        <div class="hero-stat-label">of caregivers feel overwhelmed by medical documents</div>
+    </div>
+    <div class="hero-visual fade-up delay-4">
+      <div class="hero-card-wrap">
+        <div class="hero-card">
+          <div class="card-avatar-row">
+            <div class="aira-orb">A</div>
+            <div>
+              <div class="card-name">Aira — NeuroMed</div>
+              <div class="card-status">Active · Secure session</div>
+            </div>
+          </div>
+          <div class="card-bubble">
+            <strong>Your results look normal.</strong><br>
+            Everything in this panel is within healthy range for her age. Her kidney and liver function are both good. No immediate action needed — just continue with routine annual checks.
+          </div>
+          <div class="card-chips">
+            <span class="chip g"><i class="fa-solid fa-check" style="font-size:9px;"></i> Within range</span>
+            <span class="chip b">No follow-up needed</span>
+            <span class="chip">Encrypted · Private</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-  <div class="hero-visual fade-up delay-4">
-    <div class="hero-card">
-      <div class="card-header">
-        <div class="aira-avatar">A</div>
-        <div class="card-header-text">
-          <div class="name">Aira — NeuroMed</div>
-          <div class="status">Active · Secure session</div>
+  <div class="hero-scroll-hint">
+    <i class="fa-solid fa-chevron-down"></i>
+    <span>scroll</span>
+  </div>
+</div>
+
+<!-- ── FOUNDER ── -->
+<div class="founder-wrap">
+  <div class="founder-inner">
+    <div class="founder-photo-col reveal">
+      <div class="founder-photo-frame">
+        <span class="founder-star-badge"><i class="fa-solid fa-star"></i> Perfect evaluation</span>
+        <img src="https://res.cloudinary.com/dw5tnpylt/image/upload/v1774394154/WhatsApp_Image_2026-03-24_at_10.22.15_PM_ibfqyg.jpg" alt="Maria Gregory, Founder of NeuroMed Aira"/>
+        <div class="founder-credential-pill">
+          <div class="credential-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+          <div class="credential-text">
+            <div class="title">Harvard Medical School</div>
+            <div class="sub">Executive Education · AI in Healthcare</div>
+          </div>
         </div>
       </div>
-      <div class="card-message">
-        <strong>Your results look normal.</strong><br>
-        Everything in this panel is within healthy range for her age. Her kidney and liver function are both good. No immediate action needed — just continue with routine annual checks.
+    </div>
+    <div class="founder-content reveal">
+      <div class="section-tag">Meet the founder</div>
+      <div class="founder-name">Maria Gregory</div>
+      <div class="founder-title">Founder &amp; CEO, NeuroMed Aira</div>
+      <p class="founder-bio">
+        Maria built NeuroMed Aira from a deeply personal place. For years, she navigated the complexity of the healthcare system alongside her husband, Jay — learning firsthand how <strong>the gap between medical language and human understanding</strong> creates unnecessary fear, confusion, and harm.
+      </p>
+      <p class="founder-bio">
+        That experience became the foundation for a platform that doesn't just explain medical information — it brings clarity, peace of mind, and dignity to patients and the families who care for them.
+      </p>
+      <div class="founder-quote-block">
+        <blockquote>
+          "I didn't build this for the healthcare system. I built it for the people the system leaves confused at 2am, holding a document they can't understand."
+        </blockquote>
       </div>
-      <div class="card-tags">
-        <span class="card-tag green"><i class="fa-solid fa-check"></i> Within range</span>
-        <span class="card-tag blue">No follow-up needed</span>
-        <span class="card-tag">Encrypted · Private</span>
+      <p class="founder-bio">
+        NeuroMed Aira began as Maria's capstone project at <strong>Harvard Medical School's Executive Education program in AI in Healthcare</strong>, where it earned a perfect evaluation. Her mission is clear: make advanced AI feel human, accessible, and trustworthy — especially for those who need it most.
+      </p>
+      <div class="founder-credentials-row">
+        <div class="credential-card">
+          <div class="credential-card-icon"><i class="fa-solid fa-medal"></i></div>
+          <h4>Harvard Medical School</h4>
+          <p>AI in Healthcare Executive Education — perfect capstone evaluation</p>
+        </div>
+        <div class="credential-card">
+          <div class="credential-card-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+          <h4>Personal mission</h4>
+          <p>Years navigating medical complexity alongside her husband Jay shaped every product decision</p>
+        </div>
+        <div class="credential-card">
+          <div class="credential-card-icon"><i class="fa-solid fa-globe"></i></div>
+          <h4>Multilingual by design</h4>
+          <p>Built from day one to serve patients across language, culture, and background</p>
+        </div>
+        <div class="credential-card">
+          <div class="credential-card-icon"><i class="fa-solid fa-hands-praying"></i></div>
+          <h4>Whole-person care</h4>
+          <p>Optional faith-based guidance that meets patients emotionally and spiritually</p>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<div class="section-divider"></div>
-
-<!-- THE PROBLEM -->
-<section>
-  <div class="section-label">The problem we're solving</div>
-  <div class="problem-grid">
-    <div class="problem-left">
+<!-- ── THE PROBLEM ── -->
+<div class="problem-wrap">
+  <section class="section">
+    <div class="section-tag reveal">The problem we're solving</div>
+    <div class="problem-header reveal">
       <h2>Every day, people leave hospitals holding documents they don't understand.</h2>
-      <p>Lab results with reference ranges that mean nothing. Discharge papers written for other doctors. Prescriptions with no explanation of what they're actually for.</p>
-      <p>Most people do what they've always done — they guess, they worry, or they ask someone who also doesn't know. That gap causes real harm.</p>
+      <p>Lab results with reference ranges that mean nothing. Discharge papers written for other doctors. Prescriptions with no explanation. Most people guess, worry, or ask someone who also doesn't know. That gap causes real harm.</p>
     </div>
-    <div class="problem-right">
-      <div class="impact-item">
-        <div class="impact-icon"><i class="fa-solid fa-clock"></i></div>
-        <div>
-          <h4>Delayed follow-up care</h4>
-          <p>Patients who don't understand instructions miss follow-up appointments and medication schedules at significantly higher rates.</p>
-        </div>
+    <div class="impact-grid reveal">
+      <div class="impact-cell">
+        <div class="impact-cell-icon"><i class="fa-solid fa-clock"></i></div>
+        <h4>Delayed follow-up care</h4>
+        <p>Patients who don't understand instructions miss follow-up appointments and medication schedules at significantly higher rates.</p>
       </div>
-      <div class="impact-item">
-        <div class="impact-icon"><i class="fa-solid fa-face-frown"></i></div>
-        <div>
-          <h4>Unnecessary anxiety</h4>
-          <p>Without context, even normal results feel alarming. The unknown is almost always scarier than the truth.</p>
-        </div>
+      <div class="impact-cell">
+        <div class="impact-cell-icon"><i class="fa-solid fa-face-frown"></i></div>
+        <h4>Unnecessary anxiety</h4>
+        <p>Without context, even normal results feel alarming. The unknown is almost always scarier than the truth.</p>
       </div>
-      <div class="impact-item">
-        <div class="impact-icon"><i class="fa-solid fa-arrows-rotate"></i></div>
-        <div>
-          <h4>Preventable readmissions</h4>
-          <p>Misunderstood discharge instructions are one of the leading causes of hospital readmission within 30 days.</p>
-        </div>
+      <div class="impact-cell">
+        <div class="impact-cell-icon"><i class="fa-solid fa-arrows-rotate"></i></div>
+        <h4>Preventable readmissions</h4>
+        <p>Misunderstood discharge instructions are one of the leading causes of hospital readmission within 30 days.</p>
       </div>
-      <div class="impact-item">
-        <div class="impact-icon"><i class="fa-solid fa-people-roof"></i></div>
-        <div>
-          <h4>Caregiver burden</h4>
-          <p>Family members managing someone else's health carry this confusion alone — without training, without support.</p>
-        </div>
+      <div class="impact-cell">
+        <div class="impact-cell-icon"><i class="fa-solid fa-people-roof"></i></div>
+        <h4>Caregiver burden</h4>
+        <p>Family members managing someone else's health carry this confusion alone — without training, without support.</p>
       </div>
     </div>
-  </div>
-</section>
+  </section>
+</div>
 
-<div class="section-divider"></div>
-
-<!-- WHAT AIRA IS -->
-<section>
-  <div class="section-label">What Aira is — and what it isn't</div>
-  <div class="what-grid">
-    <div class="what-left">
-      <h2>A medical document assistant. Not a diagnostic tool.</h2>
-      <p>Aira reads lab reports, discharge papers, prescriptions, and clinical summaries — and explains them in plain language that patients and caregivers can actually use.</p>
-      <p>It does not tell you what's wrong with you. It does not replace your doctor.</p>
-      <div class="distinction-box">
-        <p>"What Aira does is give you the understanding you need to have a better conversation with your doctor — to know which results need attention, to follow your discharge instructions correctly, to feel less alone in a complicated moment."</p>
+<!-- ── WHAT AIRA IS ── -->
+<div class="what-section">
+  <section class="section">
+    <div class="section-tag reveal">What Aira is — and what it isn't</div>
+    <div class="what-layout">
+      <div class="what-left reveal">
+        <h2>A medical document assistant. Not a diagnostic tool.</h2>
+        <p>Aira reads lab reports, discharge papers, prescriptions, and clinical summaries — then explains them in plain language patients and caregivers can actually use.</p>
+        <p>It does not tell you what's wrong with you. It does not replace your doctor.</p>
+        <div class="what-note">
+          "Aira gives you the understanding you need to have a better conversation with your doctor — to know which results need attention, to follow your discharge instructions correctly, to feel less alone in a complicated moment."
+        </div>
+      </div>
+      <div class="diff-cards reveal">
+        <div class="diff-card">
+          <div class="diff-n">01 — Context-aware</div>
+          <h3>Aira reads who's asking, not just what they're asking</h3>
+          <p>A question about the same lab result gets a different response for a patient, an elderly parent's caregiver, or a care team. No settings. Aira adapts from the first message.</p>
+        </div>
+        <div class="diff-card">
+          <div class="diff-n">02 — Tone as a feature</div>
+          <h3>Calm, clear, and honest — even about what needs attention</h3>
+          <p>Medical anxiety is real. Aira is designed to never alarm unnecessarily — while still being direct about what matters. Human language, not clinical jargon.</p>
+        </div>
+        <div class="diff-card">
+          <div class="diff-n">03 — Clarity with direction</div>
+          <h3>Every response ends with what to do next</h3>
+          <p>Understanding without direction isn't enough. Every Aira response includes practical next steps: what to ask your doctor, what to monitor, what's routine and what isn't.</p>
+        </div>
+        <div class="diff-card">
+          <div class="diff-n">04 — Faith-inclusive by design</div>
+          <h3>Optional spiritual support alongside medical clarity</h3>
+          <p>For patients and families who find strength in faith, Aira can offer guidance that honors the whole person — medical, emotional, and spiritual — without ever imposing.</p>
+        </div>
       </div>
     </div>
-    <div class="what-right">
-      <div class="diff-card">
-        <div class="diff-num">01 — Context-aware</div>
-        <h3>Aira reads who's asking, not just what they're asking</h3>
-        <p>A question about the same lab result gets a different response depending on whether you're asking for yourself, for your elderly mother, or to share with your care team. No settings to configure. Aira adapts from the first message.</p>
-      </div>
-      <div class="diff-card">
-        <div class="diff-num">02 — Tone as a feature</div>
-        <h3>Calm, clear, and honest — even about what needs attention</h3>
-        <p>Medical anxiety is real. Aira is designed to never alarm unnecessarily — while still being direct about what matters. The language is human, not clinical. The delivery is warm, not robotic.</p>
-      </div>
-      <div class="diff-card">
-        <div class="diff-num">03 — Clarity with direction</div>
-        <h3>Every response ends with what to do next</h3>
-        <p>Understanding without direction isn't enough. Every Aira response includes practical next steps: what to ask your doctor, what to monitor, what's routine and what isn't. It's information you can actually act on.</p>
-      </div>
-      <div class="diff-card">
-        <div class="diff-num">04 — Built for everyone</div>
-        <h3>Designed for real families in real moments</h3>
-        <p>Whether you're a caregiver managing a parent's health from across the country, a patient processing a new diagnosis, or a family member trying to understand what just happened — Aira meets you where you are, in language that feels human.</p>
-      </div>
-    </div>
-  </div>
-</section>
+  </section>
+</div>
 
-<!-- PRIVACY - DARK SECTION -->
+<!-- ── PRIVACY ── -->
 <div class="privacy-section">
   <div class="privacy-inner">
-    <div class="section-label">Our approach to privacy</div>
+    <div class="section-tag light reveal">Our approach to privacy</div>
     <div class="privacy-grid">
-      <div class="privacy-left">
+      <div class="privacy-left reveal">
         <h2>Privacy isn't a feature.<br>It's <em>foundational.</em></h2>
         <p>Medical information is among the most sensitive data that exists. We treat it that way — not because regulations require it, but because the people using Aira deserve nothing less.</p>
         <p>Your documents are processed in encrypted, isolated sessions. They are never stored beyond your active conversation unless you explicitly choose to save them.</p>
         <div class="honest-box">
           <div class="honest-box-label">Our honest position</div>
-          <p>We're a team building toward full healthcare data compliance. Our infrastructure is built to privacy-first standards from day one. We're working through the operational requirements — audit controls, BAAs, access logging — that formal HIPAA certification requires. We won't claim it before we've earned it.</p>
+          <p>We're building toward full HIPAA certification. Our infrastructure follows privacy-first standards from day one. We're working through audit controls, BAAs, and access logging — formal requirements we won't claim before we've earned them.</p>
         </div>
       </div>
-      <div class="privacy-right">
-        <div class="privacy-point">
-          <div class="privacy-point-icon"><i class="fa-solid fa-lock"></i></div>
+      <div class="privacy-points reveal">
+        <div class="privacy-pt">
+          <div class="privacy-pt-icon"><i class="fa-solid fa-lock"></i></div>
           <h4>End-to-end encrypted</h4>
           <p>All documents encrypted in transit and at rest on AWS infrastructure.</p>
         </div>
-        <div class="privacy-point">
-          <div class="privacy-point-icon"><i class="fa-solid fa-ban"></i></div>
+        <div class="privacy-pt">
+          <div class="privacy-pt-icon"><i class="fa-solid fa-ban"></i></div>
           <h4>Never sold or shared</h4>
-          <p>Your data is never sold to third parties or shared with advertisers — ever.</p>
+          <p>Your data is never sold to third parties or used for advertising — ever.</p>
         </div>
-        <div class="privacy-point">
-          <div class="privacy-point-icon"><i class="fa-solid fa-brain"></i></div>
+        <div class="privacy-pt">
+          <div class="privacy-pt-icon"><i class="fa-solid fa-brain"></i></div>
           <h4>Never used for training</h4>
           <p>We do not use your conversations or documents to train AI models.</p>
         </div>
-        <div class="privacy-point">
-          <div class="privacy-point-icon"><i class="fa-solid fa-server"></i></div>
+        <div class="privacy-pt">
+          <div class="privacy-pt-icon"><i class="fa-solid fa-server"></i></div>
           <h4>AWS secure infrastructure</h4>
-          <p>Built on AWS with isolated, private processing sessions per user.</p>
+          <p>Isolated, private processing sessions per user on AWS infrastructure.</p>
         </div>
-        <div class="privacy-point">
-          <div class="privacy-point-icon"><i class="fa-solid fa-eye-slash"></i></div>
+        <div class="privacy-pt">
+          <div class="privacy-pt-icon"><i class="fa-solid fa-eye-slash"></i></div>
           <h4>Zero-retention sessions</h4>
-          <p>Documents are cleared at session end unless you explicitly save them.</p>
+          <p>Documents cleared at session end unless you explicitly choose to save.</p>
         </div>
-        <div class="privacy-point">
-          <div class="privacy-point-icon"><i class="fa-solid fa-file-contract"></i></div>
+        <div class="privacy-pt">
+          <div class="privacy-pt-icon"><i class="fa-solid fa-file-contract"></i></div>
           <h4>BAA-ready architecture</h4>
-          <p>Infrastructure built to support BAA agreements as we scale to enterprise.</p>
+          <p>Built to support BAA agreements as we scale to enterprise and clinical use.</p>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- WHO WE BUILT FOR -->
-<section>
-  <div class="section-label">Who we built this for</div>
-  <div class="audience-intro">
+<!-- ── WHO WE BUILT FOR ── -->
+<section class="section">
+  <div class="section-tag reveal">Who we built this for</div>
+  <div class="audience-header reveal">
     <h2>Three people kept us up at night.</h2>
-    <p>Every design decision in Aira traces back to one of these three people — and the moment where clear information would have changed everything for them.</p>
+    <p>Every design decision in Aira traces back to one of these people — and the moment where clear information would have changed everything for them.</p>
   </div>
-  <div class="audience-grid">
-    <div class="audience-card">
-      <span class="audience-emoji"><i class="fa-solid fa-user-nurse"></i></span>
+  <div class="audience-cards reveal">
+    <div class="aud-card">
+      <img
+        src="https://images.unsplash.com/photo-1576765608622-067973a79f53?w=600&q=80"
+        alt="Caregiver supporting elderly person"
+        class="aud-img"
+        onerror="this.style.background='#E8F5F0';this.style.display='block';"
+      />
       <h3>The caregiver</h3>
-      <p>Managing someone else's health is exhausting and often confusing — especially when the documents arrive in language designed for clinicians, not families. Aira helps you stay on top of what matters without needing a medical background.</p>
+      <p>Managing someone else's health is exhausting and confusing — especially when documents arrive in language designed for clinicians. Aira helps you stay on top of what matters without needing a medical background.</p>
     </div>
-    <div class="audience-card">
-      <span class="audience-emoji"><i class="fa-solid fa-hospital"></i></span>
+    <div class="aud-card">
+      <img
+        src="https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=600&q=80"
+        alt="Patient navigating medical paperwork"
+        class="aud-img"
+        onerror="this.style.background='#E8F0FA';this.style.display='block';"
+      />
       <h3>The patient navigating something new</h3>
       <p>A first diagnosis, an unexpected result, a discharge after something scary. Aira gives you a starting point — something to hold onto before you can talk to your doctor. Clarity in the hardest moments.</p>
     </div>
-    <div class="audience-card">
-      <span class="audience-emoji"><i class="fa-solid fa-people-roof"></i></span>
+    <div class="aud-card">
+      <img
+        src="https://res.cloudinary.com/dw5tnpylt/image/upload/v1774394969/grandpa_in_hospital_kw1vkx.png"
+        alt="Family video calling while someone is in hospital"
+        class="aud-img"
+        onerror="this.style.background='#F0F9F4';this.style.display='block';"
+      />
       <h3>The family far away</h3>
       <p>When someone you love is sick and you can't be there, Aira helps you understand what's happening and what questions to ask. So distance doesn't mean being left in the dark.</p>
     </div>
   </div>
 </section>
 
-<!-- MISSION BANNER -->
+<!-- ── MISSION BANNER ── -->
 <div class="mission-banner">
-  <div class="mission-inner">
+  <div class="mission-inner reveal">
     <blockquote>
       "The need is universal — wherever people face medical systems that feel inaccessible, we want Aira to close that gap."
     </blockquote>
-    <cite>— The NeuroMed Aira Team</cite>
+    <div class="mission-source">
+      <img src="https://res.cloudinary.com/dw5tnpylt/image/upload/v1774394154/WhatsApp_Image_2026-03-24_at_10.22.15_PM_ibfqyg.jpg" alt="Maria Gregory"/>
+      <div class="mission-source-text">
+        <div class="mission-source-name">Maria Gregory</div>
+        <div class="mission-source-role">Founder &amp; CEO, NeuroMed Aira</div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- WHAT'S NEXT -->
-<section>
-  <div class="section-label">What's next</div>
+<!-- ── WHAT'S NEXT ── -->
+<section class="section">
+  <div class="section-tag reveal">What's next</div>
   <div class="next-grid">
-    <div class="next-left">
+    <div class="next-left reveal">
       <h2>We're just getting started.</h2>
       <p>Aira is in active development. We're improving document understanding, expanding language support, and building toward deeper integration with care workflows.</p>
       <p>If you work in healthcare and want to explore what Aira could do for your patients — for your clinic, your community health organization, your hospital — we'd like to talk.</p>
-      <div class="next-cta-row">
+      <div class="cta-row">
         <a href="/signup" class="btn-primary">Try Aira free →</a>
-        <a href="/signup" class="btn-secondary">Contact us</a>
+        <a href="/contact" class="btn-secondary">Contact us</a>
       </div>
     </div>
-    <div class="next-right">
-      <div style="font-family:'Roboto Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft);margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border);">Product roadmap</div>
-      <div class="roadmap-item">
-        <div class="roadmap-dot done"></div>
-        <div class="roadmap-item-text">
-          <h4>AI document understanding</h4>
-          <p>Lab results, discharge papers, prescriptions</p>
+    <div class="reveal">
+      <div class="roadmap-card">
+        <div class="roadmap-header">Product roadmap</div>
+        <div class="roadmap-item">
+          <div class="rm-dot done"></div>
+          <div class="rm-text">
+            <h4>AI document understanding</h4>
+            <p>Lab results, discharge papers, prescriptions</p>
+          </div>
+          <span class="rm-tag done">Live</span>
         </div>
-        <span class="roadmap-tag done">Live</span>
-      </div>
-      <div class="roadmap-item">
-        <div class="roadmap-dot done"></div>
-        <div class="roadmap-item-text">
-          <h4>Secure document upload</h4>
-          <p>PDF, image, and Word doc processing</p>
+        <div class="roadmap-item">
+          <div class="rm-dot done"></div>
+          <div class="rm-text">
+            <h4>Secure document upload</h4>
+            <p>PDF, image, and Word doc processing</p>
+          </div>
+          <span class="rm-tag done">Live</span>
         </div>
-        <span class="roadmap-tag done">Live</span>
-      </div>
-      <div class="roadmap-item">
-        <div class="roadmap-dot soon"></div>
-        <div class="roadmap-item-text">
-          <h4>Voice interaction</h4>
-          <p>Speak your questions, hear Aira's answers</p>
+        <div class="roadmap-item">
+          <div class="rm-dot done"></div>
+          <div class="rm-text">
+            <h4>Multilingual support</h4>
+            <p>10+ languages with cultural context awareness</p>
+          </div>
+          <span class="rm-tag done">Live</span>
         </div>
-        <span class="roadmap-tag soon">Coming soon</span>
-      </div>
-      <div class="roadmap-item">
-        <div class="roadmap-dot soon"></div>
-        <div class="roadmap-item-text">
-          <h4>Clinic &amp; enterprise tools</h4>
-          <p>Bring Aira to your patient population</p>
+        <div class="roadmap-item">
+          <div class="rm-dot soon"></div>
+          <div class="rm-text">
+            <h4>Voice interaction</h4>
+            <p>Speak your questions, hear Aira's answers</p>
+          </div>
+          <span class="rm-tag done">Live</span>
         </div>
-        <span class="roadmap-tag soon">In progress</span>
-      </div>
-      <div class="roadmap-item">
-        <div class="roadmap-dot later"></div>
-        <div class="roadmap-item-text">
-          <h4>EHR integration</h4>
-          <p>Connect directly to hospital information systems</p>
+        <div class="roadmap-item">
+          <div class="rm-dot soon"></div>
+          <div class="rm-text">
+            <h4>Clinic &amp; enterprise tools</h4>
+            <p>Bring Aira to your patient population</p>
+            <a class="rm-waitlist" href="{% url 'contact' %}?waitlist=clinic">Join the enterprise waitlist →</a>
+          </div>
+          <span class="rm-tag soon">In progress</span>
         </div>
-        <span class="roadmap-tag later">Planned</span>
+        <div class="roadmap-item">
+          <div class="rm-dot later"></div>
+          <div class="rm-text">
+            <h4>EHR integration</h4>
+            <p>Connect directly to hospital information systems</p>
+          </div>
+          <span class="rm-tag later">Planned</span>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- DISCLAIMER -->
+<!-- ── DISCLAIMER ── -->
 <div class="disclaimer">
   <p>NeuroMed Aira is an informational tool. It does not provide medical diagnoses and is not a substitute for professional clinical judgment. All document processing is conducted on secure AWS infrastructure with end-to-end encryption. Always consult a qualified healthcare provider for medical decisions. © 2025 NeuroMed Aira. All rights reserved.</p>
 </div>
 
-<!-- FOOTER -->
+<!-- ── FOOTER ── -->
 <footer>
   <div class="footer-logo">NeuroMed Aira™</div>
   <ul class="footer-links">
     <li><a href="/">Product</a></li>
-    <li><a href="/">Pricing</a></li>
+    <li><a href="/pricing">Pricing</a></li>
     <li><a href="/about">About</a></li>
-    <li><a href="{% url 'privacy' %}">Privacy Policy</a></li>
-    <li><a href="{% url 'terms' %}">Terms of Use</a></li>
-    <li><a href="{% url 'contact' %}">Contact</a></li>
+    <li><a href="/privacy">Privacy Policy</a></li>
+    <li><a href="/terms">Terms of Use</a></li>
+    <li><a href="/contact">Contact</a></li>
   </ul>
-  <div class="footer-copy">Medical guidance, simplified. · Built with care.</div>
+  <div class="footer-copy">Medical guidance, simplified. · Built with care by Maria Gregory.</div>
 </footer>
 
 <script>
-(function(){
-  const $=s=>document.querySelector(s);
-  const LANGUAGE_CHOICES=[['en-US','English'],['es-ES','Spanish'],['fr-FR','French'],['de-DE','German'],['zh-CN','Chinese'],['ja-JP','Japanese'],['pt-BR','Portuguese'],['ko-KR','Korean'],['ar-SA','Arabic'],['vi-VN','Vietnamese']];
-  function loadLang(){return localStorage.getItem('nm_lang')||((navigator.languages&&navigator.languages[0])||navigator.language||'en-US');}
-  function saveLang(c){localStorage.setItem('nm_lang',c);}
-  function labelFor(c){const f=LANGUAGE_CHOICES.find(([x])=>x===c);return f?f[1]:c;}
-  function buildMenu(el,onPick){
-    if(!el)return;
-    el.innerHTML='';
-    LANGUAGE_CHOICES.forEach(([code,label])=>{
-      const b=document.createElement('button');
-      b.type='button';
-      b.style.cssText='width:100%;text-align:left;padding:8px 14px;font-size:.88rem;border:none;background:none;cursor:pointer;color:#0D1B2A;';
-      b.textContent=label;
-      b.onclick=()=>{onPick(code);el.classList.add('hidden');};
-      el.appendChild(b);
-    });
-  }
-  function toggleMenu(el,open){if(el)el.classList.toggle('hidden',!open);}
+// Navbar scroll shadow
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
+}, { passive: true });
 
-  document.addEventListener('DOMContentLoaded',()=>{
-    const root=document.documentElement,body=document.body;
-    function adjustFont(d){const c=parseFloat(getComputedStyle(root).getPropertyValue('font-size'))||16;root.style.setProperty('font-size',Math.min(22,Math.max(14,c+d))+'px');}
-    function toggleHC(btn){body.classList.toggle('hc');btn.setAttribute('aria-pressed',body.classList.contains('hc'));}
-    $('#fontMinus')?.addEventListener('click',()=>adjustFont(-1));
-    $('#fontPlus')?.addEventListener('click',()=>adjustFont(1));
-    $('#highContrast')?.addEventListener('click',()=>toggleHC($('#highContrast')));
-    $('#mFontMinus')?.addEventListener('click',()=>adjustFont(-1));
-    $('#mFontPlus')?.addEventListener('click',()=>adjustFont(1));
-    $('#mHighContrast')?.addEventListener('click',()=>toggleHC($('#mHighContrast')));
-
-    window.addEventListener('scroll',()=>{const n=$('#navbar');if(n)n.classList.toggle('scrolled',window.scrollY>10);},{passive:true});
-
-    const cur=loadLang();
-    const lb1=$('#langBtnLabel'),lb2=$('#mLangBtnLabel');
-    if(lb1)lb1.textContent=labelFor(cur);
-    if(lb2)lb2.textContent=labelFor(cur);
-    const dm=$('#langMenu'),mm=$('#mLangMenu');
-    function pick(c){saveLang(c);if(lb1)lb1.textContent=labelFor(c);if(lb2)lb2.textContent=labelFor(c);}
-    buildMenu(dm,pick);
-    buildMenu(mm,pick);
-    $('#langBtn')?.addEventListener('click',e=>{e.stopPropagation();toggleMenu(dm,dm.classList.contains('hidden'));});
-    $('#mLangBtn')?.addEventListener('click',e=>{e.stopPropagation();toggleMenu(mm,mm.classList.contains('hidden'));});
-    document.addEventListener('click',e=>{
-      if(dm&&!dm.contains(e.target)&&e.target.id!=='langBtn')toggleMenu(dm,false);
-      if(mm&&!mm.contains(e.target)&&e.target.id!=='mLangBtn')toggleMenu(mm,false);
-    });
-
-    const menu=$('#nmMobileMenu'),btn=$('#nmMenuBtn'),icoOpen=$('#nmIconOpen'),icoClose=$('#nmIconClose');
-    function setOpen(o){menu.classList.toggle('hidden',!o);btn?.setAttribute('aria-expanded',o);if(icoOpen)icoOpen.classList.toggle('hidden',o);if(icoClose)icoClose.classList.toggle('hidden',!o);}
-    btn?.addEventListener('click',()=>setOpen(menu.classList.contains('hidden')));
-    document.addEventListener('click',e=>{if(menu&&!menu.classList.contains('hidden')&&!menu.contains(e.target)&&!btn?.contains(e.target))setOpen(false);});
-    document.addEventListener('keydown',e=>{if(e.key==='Escape')setOpen(false);});
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('in-view');
+      observer.unobserve(e.target);
+    }
   });
-})();
-</script>
+}, { threshold: 0.12 });
 
+reveals.forEach(el => observer.observe(el));
+</script>
 </body>
 </html>

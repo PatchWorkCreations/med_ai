@@ -763,6 +763,21 @@ function selectTopic(btn) {
   document.getElementById('subjectField').value = btn.dataset.topic;
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('waitlist') !== 'clinic') return;
+    const pill = document.querySelector('.topic-pill[data-topic="Clinic or enterprise"]');
+    if (pill) selectTopic(pill);
+    const sf = document.getElementById('subjectField');
+    if (sf) sf.value = 'Clinic & enterprise waitlist';
+    const msg = document.getElementById('message');
+    if (msg && !msg.value.trim()) {
+      msg.placeholder = "Briefly describe your organization, role, and patient population. We'll add you to the waitlist and follow up.";
+    }
+  } catch (_) {}
+});
+
 (function(){
   const $=s=>document.querySelector(s);
   const LANGUAGE_CHOICES=[['en-US','English'],['es-ES','Spanish'],['fr-FR','French'],['de-DE','German'],['zh-CN','Chinese'],['ja-JP','Japanese'],['pt-BR','Portuguese'],['ko-KR','Korean'],['ar-SA','Arabic'],['vi-VN','Vietnamese']];

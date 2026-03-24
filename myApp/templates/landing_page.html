@@ -519,6 +519,43 @@ body::before {
   background: linear-gradient(to top, rgba(8,48,90,0.85) 0%, transparent 100%);
   color: white;
 }
+/* Rotating prayer / multilingual imagery — separate strip below the demo row */
+.prayer-lang-carousel {
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  min-height: 300px;
+  height: clamp(300px, 38vw, 440px);
+  max-width: min(100%, 560px);
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: var(--shadow-lift);
+  border: 1px solid var(--border);
+  background: var(--slate-soft);
+}
+.prayer-lang-carousel .prayer-lang-slides {
+  position: absolute;
+  inset: 12px;
+}
+.prayer-lang-carousel .prayer-lang-slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center center;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.7s ease;
+  pointer-events: none;
+}
+.prayer-lang-carousel .prayer-lang-slide.is-active {
+  opacity: 1;
+  z-index: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .prayer-lang-carousel .prayer-lang-slide { transition: none; }
+}
 .caregiver-card .caregiver-caption p {
   font-size: 1.1rem;
   font-style: italic;
@@ -1171,87 +1208,41 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
       </div>
 
     </div>
-  </div>
-</section>
 
-<!-- ===== PRICING ===== -->
-<section style="padding:80px 0;background:linear-gradient(160deg,var(--navy-deep) 0%,var(--navy) 50%,#0f4c81 100%);position:relative;overflow:hidden;">
-  <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--teal),var(--sky),var(--amber));"></div>
-  <div style="position:absolute;top:-100px;right:-100px;width:400px;height:400px;border-radius:50%;background:rgba(79,168,216,.06);"></div>
-  <div style="position:absolute;bottom:-80px;left:-60px;width:300px;height:300px;border-radius:50%;background:rgba(240,165,0,.05);"></div>
-  <div class="max-w-6xl mx-auto px-6" style="position:relative;z-index:2;">
-    <div class="text-center mb-14">
-      <div class="section-label" style="justify-content:center;color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2);">Pricing</div>
-      <h2 style="font-family:var(--font-serif);font-size:clamp(2rem,4vw,3rem);color:white;margin-bottom:12px;line-height:1.2;">
-        Plans for <span style="color:var(--sky);">every need</span>
-      </h2>
-      <p style="color:rgba(255,255,255,.7);font-size:1.05rem;max-width:440px;margin:0 auto;">
-        Start free. Upgrade when you're ready.
-      </p>
-    </div>
-
-    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
-      <!-- Free -->
-      <div class="pricing-card" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(12px);">
-        <div style="margin-bottom:20px;">
-          <div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:8px;">Free</div>
-          <div style="font-size:2.4rem;font-weight:800;color:white;line-height:1;">$0<span style="font-size:1rem;font-weight:400;color:rgba(255,255,255,.5);">/mo</span></div>
-          <p style="font-size:.84rem;color:rgba(255,255,255,.6);margin:8px 0 0 0;">See what AI clarity feels like</p>
-        </div>
-        <a href="/signup" style="display:block;text-align:center;padding:11px;border-radius:12px;background:rgba(255,255,255,.15);color:white;font-weight:600;font-size:.9rem;border:1px solid rgba(255,255,255,.2);text-decoration:none;margin-bottom:20px;transition:background .2s;">Get Started</a>
-        <div style="display:grid;gap:10px;flex-grow:1;">
-          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.8);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>Simple medical explanations</div>
-          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.8);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>Short chats for common questions</div>
-          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.8);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>Basic document summaries</div>
-          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.4);"><i class="fa-solid fa-xmark" style="color:rgba(255,255,255,.3);margin-top:2px;font-size:.8rem;"></i>Limited premium access</div>
-        </div>
+    <!-- Prayer / multilingual imagery: rotates below the demo; caregiver photo above stays fixed -->
+    <div class="mt-12 lg:mt-16">
+      <div class="text-center mb-5">
+        <div class="section-label" style="justify-content:center;">In every language</div>
+        <p style="color:var(--text-secondary);font-size:.95rem;max-width:540px;margin:10px auto 0;line-height:1.55;">
+          The same clear guidance for families who pray, reflect, and care across cultures — choose your language in Aira anytime.
+        </p>
       </div>
-      <!-- Monthly -->
-      <div class="pricing-card" style="background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);backdrop-filter:blur(12px);">
-        <div style="margin-bottom:20px;">
-          <div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:8px;">Monthly</div>
-          <div style="font-size:2.4rem;font-weight:800;color:white;line-height:1;">$20<span style="font-size:1rem;font-weight:400;color:rgba(255,255,255,.5);">/mo</span></div>
-          <p style="font-size:.84rem;color:rgba(255,255,255,.6);margin:8px 0 0 0;">For ongoing peace of mind</p>
-        </div>
-        <a href="/signup" style="display:block;text-align:center;padding:11px;border-radius:12px;background:white;color:var(--navy);font-weight:700;font-size:.9rem;text-decoration:none;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,.15);">Upgrade to Monthly</a>
-        <div style="display:grid;gap:10px;flex-grow:1;">
-          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>Unlimited medical summaries</div>
-          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>Longer chats & larger uploads</div>
-          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>Voice interaction</div>
-          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>30-day chat history</div>
-          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>Priority support</div>
-        </div>
-      </div>
-      <!-- Annual -->
-      <div class="pricing-card" style="background:rgba(255,255,255,.13);border:2px solid rgba(79,168,216,.5);backdrop-filter:blur(12px);position:relative;">
-        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--sky);color:white;font-size:.72rem;font-weight:700;padding:4px 14px;border-radius:999px;white-space:nowrap;">Most Popular</div>
-        <div style="margin-bottom:20px;">
-          <div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--sky);margin-bottom:8px;">Annual</div>
-          <div style="font-size:2.4rem;font-weight:800;color:white;line-height:1;">$199<span style="font-size:1rem;font-weight:400;color:rgba(255,255,255,.5);">/yr</span></div>
-          <p style="font-size:.8rem;color:var(--sky);margin:8px 0 0 0;font-weight:500;">Save 17% vs monthly</p>
-        </div>
-        <a href="/signup" style="display:block;text-align:center;padding:11px;border-radius:12px;background:var(--sky);color:white;font-weight:700;font-size:.9rem;text-decoration:none;margin-bottom:20px;box-shadow:0 2px 12px rgba(79,168,216,.3);">Get Annual</a>
-        <div style="display:grid;gap:10px;flex-grow:1;">
-          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>Everything in Monthly</div>
-          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>365-day chat history</div>
-          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>Priority support</div>
-          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>Designed for continuous use</div>
-        </div>
-      </div>
-      <!-- Enterprise -->
-      <div class="pricing-card" style="background:rgba(255,255,255,.08);border:2px solid rgba(30,138,122,.4);backdrop-filter:blur(12px);">
-        <div style="margin-bottom:20px;">
-          <div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(30,138,122,.9);margin-bottom:8px;">Enterprise</div>
-          <div style="font-size:2rem;font-weight:800;color:white;line-height:1;">Custom</div>
-          <p style="font-size:.84rem;color:rgba(255,255,255,.6);margin:8px 0 0 0;">Build your own medical AI</p>
-        </div>
-        <a href="/signup" style="display:block;text-align:center;padding:11px;border-radius:12px;background:transparent;color:rgba(30,200,180,1);font-weight:700;font-size:.9rem;text-decoration:none;margin-bottom:20px;border:2px solid rgba(30,138,122,.6);">Contact Us</a>
-        <div style="display:grid;gap:10px;flex-grow:1;">
-          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:rgba(30,200,180,1);margin-top:2px;font-size:.8rem;"></i>Everything in Annual</div>
-          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:rgba(30,200,180,1);margin-top:2px;font-size:.8rem;"></i>Unlimited chat history</div>
-          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:rgba(30,200,180,1);margin-top:2px;font-size:.8rem;"></i>Custom integrations</div>
-          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:rgba(30,200,180,1);margin-top:2px;font-size:.8rem;"></i>Team access & audit logs</div>
-          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:rgba(30,200,180,1);margin-top:2px;font-size:.8rem;"></i>Dedicated support</div>
+      <div id="prayerLangCarousel" class="prayer-lang-carousel">
+        <div class="prayer-lang-slides" aria-hidden="true">
+          <img
+            class="prayer-lang-slide is-active"
+            src="https://res.cloudinary.com/dw5tnpylt/image/upload/v1774393768/prayer_spanish_language_lzlt2t.png"
+            alt=""
+            loading="lazy"
+            width="1200"
+            height="675"
+          />
+          <img
+            class="prayer-lang-slide"
+            src="https://res.cloudinary.com/dw5tnpylt/image/upload/v1774393767/Prayer_for_the_sick_loved_one_irmzgl.png"
+            alt=""
+            loading="lazy"
+            width="1200"
+            height="675"
+          />
+          <img
+            class="prayer-lang-slide"
+            src="https://res.cloudinary.com/dw5tnpylt/image/upload/v1774393767/prayer_diff_language_tprasl.png"
+            alt=""
+            loading="lazy"
+            width="1200"
+            height="675"
+          />
         </div>
       </div>
     </div>
@@ -1341,6 +1332,90 @@ body.easy-read { font-size: 18px; line-height: 1.7; }
               Your data is never sold or shared
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PRICING ===== -->
+<section id="pricing" style="padding:80px 0;background:linear-gradient(160deg,var(--navy-deep) 0%,var(--navy) 50%,#0f4c81 100%);position:relative;overflow:hidden;">
+  <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--teal),var(--sky),var(--amber));"></div>
+  <div style="position:absolute;top:-100px;right:-100px;width:400px;height:400px;border-radius:50%;background:rgba(79,168,216,.06);"></div>
+  <div style="position:absolute;bottom:-80px;left:-60px;width:300px;height:300px;border-radius:50%;background:rgba(240,165,0,.05);"></div>
+  <div class="max-w-6xl mx-auto px-6" style="position:relative;z-index:2;">
+    <div class="text-center mb-14">
+      <div class="section-label" style="justify-content:center;color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2);">Pricing</div>
+      <h2 style="font-family:var(--font-serif);font-size:clamp(2rem,4vw,3rem);color:white;margin-bottom:12px;line-height:1.2;">
+        Plans for <span style="color:var(--sky);">every need</span>
+      </h2>
+      <p style="color:rgba(255,255,255,.7);font-size:1.05rem;max-width:440px;margin:0 auto;">
+        Start free. Upgrade when you're ready.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <!-- Free -->
+      <div class="pricing-card" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(12px);">
+        <div style="margin-bottom:20px;">
+          <div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:8px;">Free</div>
+          <div style="font-size:2.4rem;font-weight:800;color:white;line-height:1;">$0<span style="font-size:1rem;font-weight:400;color:rgba(255,255,255,.5);">/mo</span></div>
+          <p style="font-size:.84rem;color:rgba(255,255,255,.6);margin:8px 0 0 0;">See what AI clarity feels like</p>
+        </div>
+        <a href="/signup" style="display:block;text-align:center;padding:11px;border-radius:12px;background:rgba(255,255,255,.15);color:white;font-weight:600;font-size:.9rem;border:1px solid rgba(255,255,255,.2);text-decoration:none;margin-bottom:20px;transition:background .2s;">Get Started</a>
+        <div style="display:grid;gap:10px;flex-grow:1;">
+          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.8);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>Simple medical explanations</div>
+          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.8);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>Short chats for common questions</div>
+          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.8);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>Basic document summaries</div>
+          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.4);"><i class="fa-solid fa-xmark" style="color:rgba(255,255,255,.3);margin-top:2px;font-size:.8rem;"></i>Limited premium access</div>
+        </div>
+      </div>
+      <!-- Monthly -->
+      <div class="pricing-card" style="background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);backdrop-filter:blur(12px);">
+        <div style="margin-bottom:20px;">
+          <div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:8px;">Monthly</div>
+          <div style="font-size:2.4rem;font-weight:800;color:white;line-height:1;">$20<span style="font-size:1rem;font-weight:400;color:rgba(255,255,255,.5);">/mo</span></div>
+          <p style="font-size:.84rem;color:rgba(255,255,255,.6);margin:8px 0 0 0;">For ongoing peace of mind</p>
+        </div>
+        <a href="/signup" style="display:block;text-align:center;padding:11px;border-radius:12px;background:white;color:var(--navy);font-weight:700;font-size:.9rem;text-decoration:none;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,.15);">Upgrade to Monthly</a>
+        <div style="display:grid;gap:10px;flex-grow:1;">
+          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>Unlimited medical summaries</div>
+          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>Longer chats & larger uploads</div>
+          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>Voice interaction</div>
+          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>30-day chat history</div>
+          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>Priority support</div>
+        </div>
+      </div>
+      <!-- Annual -->
+      <div class="pricing-card" style="background:rgba(255,255,255,.13);border:2px solid rgba(79,168,216,.5);backdrop-filter:blur(12px);position:relative;">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--sky);color:white;font-size:.72rem;font-weight:700;padding:4px 14px;border-radius:999px;white-space:nowrap;">Most Popular</div>
+        <div style="margin-bottom:20px;">
+          <div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--sky);margin-bottom:8px;">Annual</div>
+          <div style="font-size:2.4rem;font-weight:800;color:white;line-height:1;">$199<span style="font-size:1rem;font-weight:400;color:rgba(255,255,255,.5);">/yr</span></div>
+          <p style="font-size:.8rem;color:var(--sky);margin:8px 0 0 0;font-weight:500;">Save 17% vs monthly</p>
+        </div>
+        <a href="/signup" style="display:block;text-align:center;padding:11px;border-radius:12px;background:var(--sky);color:white;font-weight:700;font-size:.9rem;text-decoration:none;margin-bottom:20px;box-shadow:0 2px 12px rgba(79,168,216,.3);">Get Annual</a>
+        <div style="display:grid;gap:10px;flex-grow:1;">
+          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>Everything in Monthly</div>
+          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>365-day chat history</div>
+          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>Priority support</div>
+          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:var(--sky);margin-top:2px;font-size:.8rem;"></i>Designed for continuous use</div>
+        </div>
+      </div>
+      <!-- Enterprise -->
+      <div class="pricing-card" style="background:rgba(255,255,255,.08);border:2px solid rgba(30,138,122,.4);backdrop-filter:blur(12px);">
+        <div style="margin-bottom:20px;">
+          <div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(30,138,122,.9);margin-bottom:8px;">Enterprise</div>
+          <div style="font-size:2rem;font-weight:800;color:white;line-height:1;">Custom</div>
+          <p style="font-size:.84rem;color:rgba(255,255,255,.6);margin:8px 0 0 0;">Build your own medical AI</p>
+        </div>
+        <a href="{% url 'contact' %}?waitlist=clinic" style="display:block;text-align:center;padding:11px;border-radius:12px;background:transparent;color:rgba(30,200,180,1);font-weight:700;font-size:.9rem;text-decoration:none;margin-bottom:20px;border:2px solid rgba(30,138,122,.6);">Contact Us</a>
+        <div style="display:grid;gap:10px;flex-grow:1;">
+          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:rgba(30,200,180,1);margin-top:2px;font-size:.8rem;"></i>Everything in Annual</div>
+          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:rgba(30,200,180,1);margin-top:2px;font-size:.8rem;"></i>Unlimited chat history</div>
+          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:rgba(30,200,180,1);margin-top:2px;font-size:.8rem;"></i>Custom integrations</div>
+          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:rgba(30,200,180,1);margin-top:2px;font-size:.8rem;"></i>Team access & audit logs</div>
+          <div style="display:flex;align-items:flex-start;gap:9px;font-size:.86rem;color:rgba(255,255,255,.85);"><i class="fa-solid fa-check" style="color:rgba(30,200,180,1);margin-top:2px;font-size:.8rem;"></i>Dedicated support</div>
         </div>
       </div>
     </div>
@@ -1885,6 +1960,30 @@ document.addEventListener('DOMContentLoaded',()=>{
     else { full?.classList.add('expanded'); if(btn) btn.innerHTML='<i class="fa-solid fa-chevron-up" id="langInviteShowAllIcon"></i> Show less'; }
   });
   if(!localStorage.getItem('nm_lang_invite_dismissed')){ setTimeout(()=>{ showLangInvite(); },5000); }
+
+  const prayerRoot=document.getElementById('prayerLangCarousel');
+  if(prayerRoot){
+    const prayerSlides=prayerRoot.querySelectorAll('.prayer-lang-slide');
+    if(prayerSlides.length>1){
+      let prayerIdx=0;
+      let prayerTimer=null;
+      const prayerReduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      function prayerShow(i){
+        prayerSlides.forEach((el,j)=>el.classList.toggle('is-active',j===i));
+        prayerIdx=i;
+      }
+      function prayerNext(){ prayerShow((prayerIdx+1)%prayerSlides.length); }
+      function prayerStart(){
+        if(prayerReduced) return;
+        prayerStop();
+        prayerTimer=window.setInterval(prayerNext,3000);
+      }
+      function prayerStop(){ if(prayerTimer){ clearInterval(prayerTimer); prayerTimer=null; } }
+      prayerRoot.addEventListener('mouseenter',prayerStop);
+      prayerRoot.addEventListener('mouseleave',prayerStart);
+      prayerStart();
+    }
+  }
 });
 </script>
 
