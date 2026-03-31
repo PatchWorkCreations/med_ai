@@ -780,7 +780,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 (function(){
   const $=s=>document.querySelector(s);
-  const LANGUAGE_CHOICES=[['en-US','English'],['es-ES','Spanish'],['fr-FR','French'],['de-DE','German'],['zh-CN','Chinese'],['ja-JP','Japanese'],['pt-BR','Portuguese'],['ko-KR','Korean'],['ar-SA','Arabic'],['vi-VN','Vietnamese']];
+  const LANGUAGE_CHOICES=[['en-US','English'],['es-ES','Spanish'],['fr-FR','French'],['de-DE','German'],['pa-IN','Punjabi'],['zh-CN','Chinese'],['ja-JP','Japanese'],['pt-BR','Portuguese'],['ko-KR','Korean'],['ar-SA','Arabic'],['vi-VN','Vietnamese']];
   function loadLang(){return localStorage.getItem('nm_lang')||((navigator.languages&&navigator.languages[0])||navigator.language||'en-US');}
   function saveLang(c){localStorage.setItem('nm_lang',c);}
   function labelFor(c){const f=LANGUAGE_CHOICES.find(([x])=>x===c);return f?f[1]:c;}
