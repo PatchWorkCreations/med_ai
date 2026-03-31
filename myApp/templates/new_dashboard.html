@@ -2859,6 +2859,11 @@ body.geriatric-zoom button {
           <option value="billing">Billing & Subscription</option>
           <option value="account">Account</option>
         </select>
+        {% if user.is_staff %}
+        <a href="/dashboard/admin/users/" class="flex items-center justify-center w-10 h-10 flex-shrink-0 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50" title="User admin — signups &amp; logins" aria-label="Open user admin dashboard">
+          <i class="fa-solid fa-users-gear text-gray-600 text-base"></i>
+        </a>
+        {% endif %}
         <!-- Close button - positioned beside dropdown -->
         <button onclick="closeSettingsModal()" class="flex items-center justify-center w-10 h-10 flex-shrink-0" aria-label="Close">
           <i class="fa-solid fa-times text-gray-500 text-base"></i>
@@ -2908,6 +2913,12 @@ body.geriatric-zoom button {
               <i class="fa-regular fa-user text-gray-600"></i>
               <span class="text-sm font-medium">Account</span>
             </button>
+            {% if user.is_staff %}
+            <a href="/dashboard/admin/users/" class="mt-2 w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left border border-emerald-200 bg-emerald-50 text-emerald-900 hover:bg-emerald-100 transition">
+              <i class="fa-solid fa-users-gear text-emerald-700"></i>
+              <span class="text-sm font-medium">User admin</span>
+            </a>
+            {% endif %}
           </nav>
         </div>
       </div>

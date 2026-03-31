@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-6_$3$%3_hxmh@la&^k7g%()ol5nwsc(ne9f#0^_f^lo^yp7-vp'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG=True
+# Effective DEBUG is set once after load_dotenv() below (search for DEBUG =).
 
 ALLOWED_HOSTS = [
     "neuromedai.org", ".neuromedai.org",
@@ -41,6 +41,10 @@ from dotenv import load_dotenv
 import sys
 
 load_dotenv()
+
+# Single source of truth for DEBUG (line 14 DEBUG=True was overwritten later — fixed).
+# Local: add DEBUG=1 or DEBUG=true to .env. Production: DEBUG=0 or omit (defaults off).
+DEBUG = os.environ.get("DEBUG", "False").lower() in ("1", "true", "yes")
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
@@ -300,8 +304,7 @@ import os
 import environ
 import os
 
-# If you still use Django's send_mail elsewhere, keep it from tripping in prod:
-DEBUG = os.environ.get("DEBUG", "False").lower() in ("1","true","yes")
+# DEBUG is defined once after load_dotenv() near the top of this file.
 
 # Not strictly required for Resend (we’ll call the HTTP API), but safe defaults:
 EMAIL_BACKEND = (

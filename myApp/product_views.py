@@ -237,6 +237,7 @@ def portal_reset_password(request):
         form = OTPSetPasswordForm(user, request.POST)
         if form.is_valid():
             form.save()
+            user.backend = settings.AUTHENTICATION_BACKENDS[0]
             login(request, user)
             for k in ("pwreset_user_id", "pwreset_email"):
                 request.session.pop(k, None)

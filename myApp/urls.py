@@ -36,6 +36,7 @@ urlpatterns = [
     path('dashboard/new/', views.new_dashboard, name='new_dashboard'),  # Premium dashboard
     path('dashboard/analytics/', views.analytics_dashboard, name='analytics'),
     path('dashboard/analytics/export/', views.analytics_export, name='analytics_export'),
+    path('dashboard/admin/users/', views.staff_users_dashboard, name='staff_users_dashboard'),
 
     # API Endpoints
     path("api/summarize/", views.summarize_medical_record, name="summarize"),

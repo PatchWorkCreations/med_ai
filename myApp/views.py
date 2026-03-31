@@ -2823,6 +2823,39 @@ def export_users_list(request, format_type='csv'):
 
 
 @login_required
+def staff_users_dashboard(request):
+    """Staff-only: HTML table of all users with signup date, last login, and activity."""
+    from django.http import HttpResponseForbidden
+    from django.contrib.auth import get_user_model
+    from django.db.models import Count, Max, Q
+
+    if not request.user.is_staff:
+        return HttpResponseForbidden("You do not have permission to view this page.")
+
+    User = get_user_model()
+    users = (
+        User.objects.select_related("profile")
+        .annotate(
+            total_summaries=Count("summaries", distinct=True),
+            total_chat_sessions=Count("chatsession", distinct=True),
+            total_signins=Count(
+                "signin_records", filter=Q(signin_records__success=True), distinct=True
+            ),
+            last_signin=Max(
+                "signin_records__created_at", filter=Q(signin_records__success=True)
+            ),
+        )
+        .order_by("-date_joined")
+    )
+
+    return render(
+        request,
+        "analytics/admin_users_dashboard.html",
+        {"users": users, "total_count": users.count()},
+    )
+
+
+@login_required
 def get_user_settings(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
     
@@ -3520,9 +3553,21 @@ OTP_ATTEMPTS_PREFIX = "pwreset_attempts:"
 OTP_RESEND_PREFIX   = "pwreset_resend:"
 DASHBOARD_URL       = "/dashboard/new/"  # or reverse('new_dashboard')
 
-def _otp_key(email):          return f"{OTP_PREFIX}{email}"
-def _otp_attempts_key(email): return f"{OTP_ATTEMPTS_PREFIX}{email}"
-def _otp_resend_key(email):   return f"{OTP_RESEND_PREFIX}{email}"
+def _normalize_otp_email(email):
+    """Must match between forgot → cache.set and verify → cache.get."""
+    return (email or "").strip().lower()
+
+
+def _otp_key(email):
+    return f"{OTP_PREFIX}{_normalize_otp_email(email)}"
+
+
+def _otp_attempts_key(email):
+    return f"{OTP_ATTEMPTS_PREFIX}{_normalize_otp_email(email)}"
+
+
+def _otp_resend_key(email):
+    return f"{OTP_RESEND_PREFIX}{_normalize_otp_email(email)}"
 def _generate_code():         return "".join(random.choices(string.digits, k=6))
 
 # ---------- Forms ----------
@@ -3604,7 +3649,7 @@ def forgot_password(request):
     if request.method == "POST":
         form = ForgotPasswordForm(request.POST)
         if form.is_valid():
-            email = form.cleaned_data["email"]
+            email = _normalize_otp_email(form.cleaned_data["email"])
             
             # Check if user exists in database
             user = User.objects.filter(email__iexact=email).first()
@@ -3619,7 +3664,7 @@ def forgot_password(request):
             cache.set(_otp_attempts_key(email), 0, OTP_TTL_SECONDS)
 
             # Session continuity (masked display for the UI)
-            request.session["pwreset_email"] = email
+            request.session["pwreset_email"] = _normalize_otp_email(email)
             request.session["pwreset_email_masked"] = mask_email(email)
             request.session.set_expiry(15 * 60)
             request.session.modified = True
@@ -3643,7 +3688,8 @@ def resend_otp(request):
         return redirect("password_otp")
 
     # Use email from session if available, otherwise from POST
-    email = request.session.get("pwreset_email") or (request.POST.get("email") or "").lower().strip()
+    email = request.session.get("pwreset_email") or (request.POST.get("email") or "")
+    email = _normalize_otp_email(email)
     if not email:
         messages.error(request, "Your session expired. Please start over.")
         return redirect("password_forgot")
@@ -3687,27 +3733,33 @@ def verify_otp(request):
     session_email_masked = request.session.get("pwreset_email_masked")
     
     if request.method == "POST":
-        # Merge POST data with session email if email not in POST
         post_data = request.POST.copy()
-        if session_email and not post_data.get("email"):
-            post_data["email"] = session_email
+        # Session email must win: it matches the cache key used when the code was sent.
+        # Otherwise a wrong/empty hidden field or typo in a visible email shows a false "expired" error.
+        if session_email:
+            post_data["email"] = _normalize_otp_email(session_email)
         form = OTPForm(post_data)
         
         if form.is_valid():
-            email = form.cleaned_data["email"]
+            email = _normalize_otp_email(form.cleaned_data["email"])
             code  = form.cleaned_data["code"]
 
             data     = cache.get(_otp_key(email))
             attempts = cache.get(_otp_attempts_key(email), 0)
 
             if data is None:
-                messages.error(request, "This code has expired. Please click 'Resend code' to get a new one, or start over.")
-                # Keep form with email pre-filled
+                messages.error(
+                    request,
+                    "We couldn't find an active verification code for this email. "
+                    "Click “Resend code” to send a fresh code, or start over from Forgot password. "
+                    "If you opened the link in another browser, use the same browser you used to request the code.",
+                )
                 if session_email:
-                    form = OTPForm(initial={"email": session_email})
+                    form = OTPForm(initial={"email": _normalize_otp_email(session_email)})
                 return render(request, "account/password_otp.html", {
                     "form": form,
-                    "email_masked": session_email_masked
+                    "email_masked": session_email_masked,
+                    "locked_email": _normalize_otp_email(session_email) if session_email else "",
                 })
 
             if attempts >= 5:
@@ -3716,7 +3768,7 @@ def verify_otp(request):
                 cache.delete(_otp_attempts_key(email))
                 return redirect("password_forgot")
 
-            if code != data.get("code"):
+            if str(code).strip() != str(data.get("code", "")).strip():
                 remaining_attempts = 5 - (attempts + 1)
                 cache.set(_otp_attempts_key(email), attempts + 1, OTP_TTL_SECONDS)
                 if remaining_attempts > 0:
@@ -3725,7 +3777,8 @@ def verify_otp(request):
                     messages.error(request, "Incorrect code. Too many attempts. Please request a new code.")
                 return render(request, "account/password_otp.html", {
                     "form": form,
-                    "email_masked": session_email_masked
+                    "email_masked": session_email_masked,
+                    "locked_email": _normalize_otp_email(session_email) if session_email else "",
                 })
 
             # OTP OK → clear and continue
@@ -3755,7 +3808,7 @@ def verify_otp(request):
     else:
         # Pre-fill email from session
         if session_email:
-            form = OTPForm(initial={"email": session_email})
+            form = OTPForm(initial={"email": _normalize_otp_email(session_email)})
         else:
             form = OTPForm()
             # If no session email, redirect to start
@@ -3764,7 +3817,8 @@ def verify_otp(request):
 
     return render(request, "account/password_otp.html", {
         "form": form,
-        "email_masked": session_email_masked
+        "email_masked": session_email_masked,
+        "locked_email": _normalize_otp_email(session_email) if session_email else "",
     })
 
 def reset_password(request):
@@ -3783,6 +3837,9 @@ def reset_password(request):
         form = OTPSetPasswordForm(user, request.POST)
         if form.is_valid():
             form.save()
+            # Multiple AUTHENTICATION_BACKENDS require backend on user before login()
+            # (otherwise Django raises ValueError → 500).
+            user.backend = settings.AUTHENTICATION_BACKENDS[0]
             login(request, user)
             # Clear all reset-related session data
             for k in ("pwreset_user_id", "pwreset_email", "pwreset_email_masked"):
